@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="BaseParamsFile" value="Test_Reroute_No_Params_Provided_BaseParams.txt"/>
+<intAttribute key="BaseResultFilesCount" value="0"/>
+<stringAttribute key="OutputParamsFile" value="Test_Reroute_No_Params_Provided_OutputParams.txt"/>
+<intAttribute key="OutputResultFilesCount" value="0"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="false"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunScript" value="SELECT  * --SENDERACTIVEDIRECTORYID, RECEIVERACTIVEDIRECTORYID&#13;&#10;FROM ROUTES WHERE ROUTINGINFORMATIONID = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609'&#13;&#10;ORDER BY ID;&#13;&#10;&#13;&#10;SELECT *&#13;&#10;FROM TASK WHERE TASKREFERENCENUMBER = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;&#13;&#10;SELECT STATUS, USERACTIVEDIRECTORYID &#13;&#10;FROM TRADESERVICE &#13;&#10;WHERE TRADESERVICEID = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BaselineDesc" value="9/14/20, 8:43 AM - Run Test: Test_Reroute_No_Params_Provided - TFSDB2C.REROUTE_TRADESERVICE(VARCHAR(50), VARCHAR(20), INTEGER, VARCHAR(2000))"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunScript" value="INSERT INTO TFSDB2C.SEC_EMPLOYEE(ID) VALUES('TEST');&#13;&#10;DELETE FROM ROUTES WHERE ID = 233427;&#13;&#10;UPDATE TRADESERVICE&#13;&#10;SET STATUS = 'CHECKED'&#13;&#10;, USERACTIVEDIRECTORYID='IBDLCM'&#13;&#10;WHERE TRADESERVICEID = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;UPDATE TASK&#13;&#10;SET TASKSTATUS = 'CHECKED'&#13;&#10;, mODIFIEDDATE = '2018-02-02 11:50:45.078'&#13;&#10;, TASKOWNER = 'IBDLCM'&#13;&#10;WHERE TASKREFERENCENUMBER='baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;&#13;&#10;&#13;&#10;SELECT  * --SENDERACTIVEDIRECTORYID, RECEIVERACTIVEDIRECTORYID&#13;&#10;FROM ROUTES WHERE ROUTINGINFORMATIONID = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609'&#13;&#10;ORDER BY ID;&#13;&#10;&#13;&#10;SELECT *&#13;&#10;FROM TASK WHERE TASKREFERENCENUMBER = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;&#13;&#10;SELECT STATUS, USERACTIVEDIRECTORYID &#13;&#10;FROM TRADESERVICE &#13;&#10;WHERE TRADESERVICEID = 'baf0c1dd-91d7-4d08-98d8-05accf8d4609';&#13;&#10;"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2C"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="true"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="REROUTE_TRADESERVICE_VARCHAR_VARCHAR_INTEGER_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="REROUTE_TRADESERVICE"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2C"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2C.REROUTE_TRADESERVICE(VARCHAR(50), VARCHAR(20), INTEGER, VARCHAR(2000))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.StoredProcedure"/>
+<booleanAttribute key="RunRoutineConfiguration.UseOutputAsBaseline" value="false"/>
+<stringAttribute key="ServiceOptions.Project" value="Reroute_TradeService"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

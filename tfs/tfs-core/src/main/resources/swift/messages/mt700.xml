@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified by: Rafael Ski Poblete
+	 Date: 8/28/18
+	 Description: Removed field 39B,
+	 			  Added field 49G,
+	 			  Added field 49H,
+	 			  Added field 58HA,
+	 			  Changed field 71B to 71D,
+	 			  Changed field 72 to 72Z, -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt700Mapper">
+        <entry value="27" key="details.get('sequenceOrder')"/>
+        <entry value="40A" key="T(com.ucpb.tfs.swift.message.constants.FormOfDocumentaryCredit).getLabel(details?.get('formOfDocumentaryCredit'))"/>
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','') ?: ''"/>
+        <!-- Convert to swift here -->
+        <entry value="31C" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatSwiftDate(details?.get('issueDate'))"/>
+        <entry value="40E" key="T(com.ucpb.tfs.swift.message.constants.ApplicableRules).getLabel(details?.get('applicableRules'))"/>
+        <entry value="31D" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details?.get('expiryDate')) + ' IN ' + T(com.ucpb.tfs.util.SwiftUtil).checkCountryName(details?.get('expiryCountryLabel'),details?.get('otherPlaceOfExpiry'))"/>
+        <entry value="50" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',details?.get('importerName'),details?.get('importerAddress'))"/>
+        <entry value="59" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',details?.get('exporterName'),details?.get('exporterAddress'))"/>
+		
+        <!-- Append amount -->
+        <entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('amount'))"/>
+        <entry value="39A" key="T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(details?.get('positiveToleranceLimit'),details?.get('negativeToleranceLimit'))"/>
+        <entry value="39C" key="details?.get('additionalAmountsCovered')"/>
+        <entry value="41A" key="details.get('availableWithFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('availableWith'),T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel(details?.get('availableBy')))  : ''"/>
+        <entry value="41D" key="details.get('availableWithFlag') == 'D' ?  T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('nameAndAddress'),T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel(details?.get('availableBy'))) : ''"/>
+<!-- 		ISSUE #2816 -->
+<!--         <entry value="42C" key="T(com.ucpb.tfs.util.SwiftUtil).formatTenorOfDraft(details?.get('usancePeriod'),details?.get('tenorOfDraftNarrative'))"/> -->
+<!--        ISSUE #2772 -->
+<!-- Begin -->
+<!-- Before -->
+<!--         <entry value="42C" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('tenor'))"/> -->
+<!-- After -->
+        <entry value="42C" key="details.get('tenor') == 'SIGHT' ? details?.get('tenor') : T(com.ucpb.tfs.util.SwiftUtil).formatTenorOfDraft(details?.get('usancePeriod'),details?.get('tenorOfDraftNarrative'))"/>	
+<!-- End-->      
+<!-- ISSUE # 3212 -->
+<!-- Before -->        
+<!--         <entry value="42A" key="(details.get('availableWithFlag') == 'A' or details.get('drawee') == 'UCPBPHMMXXX' ? (details.get('drawee') == 'UCPBPHMMXXX' ? 'UCPBPHMMXXX' : T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('availableWith')))  :  '' ) "/> -->
+<!--         <entry value="42D" key="(details.get('availableWithFlag') == 'D' and details.get('drawee') != 'UCPBPHMMXXX' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('nameAndAddress'))   :  '' ) "/> -->
+<!-- After -->
+		<entry value="42A" key="(details.get('confirmationInstructionsFlag') == 'N' or details.get('confirmationInstructionsFlag') == 'M' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('drawee'))  :  '' )"/>        
+        <entry value="42D" key="(details.get('confirmationInstructionsFlag') == 'Y' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('availableWith'))  :  '' )"/>
+<!-- End -->
+        <entry value="42M" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('mixedPaymentDetails'))"/>
+        <entry value="42P" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('deferredPaymentDetails'))"/>
+        <entry value="43P" key="details?.get('partialShipment')"/>
+        <entry value="43T" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('transShipment'))"/>
+        <entry value="44A" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('placeOfTakingDispatchOrReceipt'))"/>
+        <entry value="44E" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('portOfLoadingOrDeparture'))"/>
+        <entry value="44F" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('portOfDischargeOrDestination'))"/>
+        <entry value="44B" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('placeOfFinalDestination'))"/>
+        <entry value="44C" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details?.get('latestShipmentDate'))"/>
+        <entry value="44D" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('shipmentPeriod') ?: '')"/>
+        <entry value="45A" key="details?.get('generalDescriptionOfGoods')"/>       
+        <entry value="46A" key="details?.get('requiredDocument')"/>
+        <entry value="47A" key="details?.get('additionalCondition')"/>
+        <entry value="49G" key="T(com.ucpb.tfs.util.SwiftUtil).formatConditions(details?.get('specialPaymentConditionsForBeneficiary'))"/>
+        <entry value="49H" key="T(com.ucpb.tfs.util.SwiftUtil).formatConditions(details?.get('specialPaymentConditionsForReceivingBank'))"/>
+        <entry value="71D" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('narrative') ?: details?.get('additionalNarrative') )"/>
+        <entry value="48" key="details?.get('periodForPresentationNumber') != '' ? (details?.get('periodForPresentationNumber') + '/' + details?.get('periodForPresentation')) : ''"/>
+        <entry value="49" key="T(com.ucpb.tfs.swift.message.constants.ConfirmationInstructions).getValue(details?.get('confirmationInstructionsFlag') ?: '').getSwiftCode()"/>        
+        <entry value="58A" key="details?.get('requestedConfirmationParty')"/>
+        <!-- SHOULD BE ADDITIONAL NARRATIVE? -->
+        <entry value="53A" key="T(com.ucpb.tfs.util.SwiftUtil).startsWithDigit(details.get('reimbursingBankAccountNumber')) == true ? 
+        	T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('reimbursingBankAccountNumber'),details?.get('reimbursingBankIdentifierCode')) : ''"/>
+        <entry value="53D" key="T(com.ucpb.tfs.util.SwiftUtil).startsWithDigit(details.get('reimbursingBankAccountNumber')) != true ?
+        	T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('reimbursingBankAccountNumber'),details?.get('reimbursingBankIdentifierCode'),details?.get('reimbursingBankName')) : ''"/>
+        <entry value="78" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatInstructionsToBank(instructionToBank)"/>
+        <entry value="57A" key="details.get('adviseThroughBankOpeningFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('adviseThroughBankPartyIdentifier'),details?.get('adviseThroughBankIdentifierCode')) : ''"/>
+<!--         <entry value="57B" key="details?.get('adviseThroughBankLocation')"/> -->
+        <entry value="57D" key="details.get('adviseThroughBankOpeningFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('adviseThroughBankPartyIdentifier'),details?.get('adviseThroughBankNameAndAddress')) : ''"/>
+        <entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    </util:map>
+
+</beans>

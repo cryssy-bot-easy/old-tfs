@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.audit.CifNormalizationLog" table="CIFNORM_LOG">
+
+        <id column="id" type="java.lang.Long" name="id">
+            <generator class="increment" />
+        </id>
+
+        <component name="cifDetails" class="com.ucpb.tfs.domain.audit.CifDetails">
+            <property name="oldCifNumber" column="OLD_CIFNO" type="string" length="20"/>
+            <property name="oldCifName" column="OLD_CIFNAME" type="string" length="20"/>
+            <property name="newCifNumber" column="NEW_CIFNO" type="string" length="20"/>
+            <property name="newCifName" column="NEW_CIFNAME" type="string" length="20"/>
+        </component>
+
+        <component name="mainCifDetails" class="com.ucpb.tfs.domain.audit.MainCifDetails">
+            <property name="oldMainCifNumber" column="OLD_MCIFNO" type="string" length="20"/>
+            <property name="oldMainCifName" column="OLD_MCIFNAME" type="string" length="20"/>
+            <property name="newMainCifNumber" column="NEW_MCIFNO" type="string" length="20"/>
+            <property name="newMainCifName" column="NEW_MCIFNAME" type="string" length="20"/>
+        </component>
+
+        <property name="oldFacilityId" column="OLD_FACID" type="java.math.BigDecimal" />
+        <property name="newFacilityId" column="NEW_FACID" type="java.math.BigDecimal" />
+
+        <property name="normalizationDate" column="NORM_DATE" type="java.util.Date"/>
+
+    </class>
+
+</hibernate-mapping>

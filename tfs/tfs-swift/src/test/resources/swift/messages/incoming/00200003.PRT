@@ -1,0 +1,128 @@
+
+
+
+24/05/09-22:37:48	            MTOthers-0003-000001 	 1
+_______________________________________________________________________________
+	---------------------  Instance Type and Transmission --------------	
+       Original received from SWIFT
+       Priority          : Normal
+       Message Output Reference  : 2228 090524UCPBPHM0AXXX0267001926
+       Correspondent Input Reference     : 2228 090524UCPBPHM0AXXX0267000938
+	--------------------------- Message Header -------------------------	
+       Swift Output                  : FIN 700 Issue of a Documentary Credit
+       Sender   : UCPBPHM0XXX 
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+       Receiver : UCPBPHM0XXX 
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+	--------------------------- Message Text ---------------------------	
+        27: Sequence of Total
+            1/1
+       40A: Form of Documentary Credit
+            IRREVOCABLE
+        20: Documentary Credit Number
+            TEST202008004972
+       31C: Date of Issue
+            081104
+       40E: Applicable Rules
+            UCP LATEST VERSION
+       31D: Date and Place of Expiry
+            081204 IN INDONESIA
+        50: Applicant
+            JJED PHILIPPINES INC.
+            54 P. CRUZ ST., MANDALUYONG CITY,
+            PHILIPPINES 1501
+        59: Beneficiary - Name & Address
+            PT. THE UNIVENUS
+            JL. RAYA SERANG KM. 12, CIKUPA
+            TANGERANG, INDONESIA
+       32B: Currency Code, Amount
+            Currency       : USD (US DOLLAR)
+            Amount         :                     #1,#
+       39A: Percentage Credit Amt Tolerance
+            10/10
+       41D: Available With...By... - Name&Addr
+            ANY BANK
+            BY ACCEPTANCE
+       42C: Drafts at...
+            90 DAYS FROM B/L DATE
+       42A: Drawee - BIC
+            UCPBPHMM
+            UNITED COCONUT PLANTERS BANK
+            MANILA  PH
+       43P: Partial Shipments
+            ALLOWED
+       43T: Transhipment
+            ALLOWED
+       44E: Port of Loading/Airport of Dep.
+            ANY INDONESIAN PORT
+       44F: Port of Dischrge/Airport of Dest
+            NORTH HARBOR MANILA (MANILA INTERNATIONAL CONTAINER PORT)
+       45A: Descriptn of Goods &/or Services
+            +1X40'HC CTR STC JRT LIVI 250M 830 CTNS. AND HRT DISPENSERS
+             10 CTNS (FREE OF CHARGE)
+             PER PROFORMA INVOICE NO. PI-042/10/2008
+            +PHILIPPINE STANDARD COMMODITY CLASSIFICATION CODE :642.94-04
+            +CIF NORTH MANILA
+       46A: Documents Required
+            +SIGNED COMMERCIAL INVOICE IN  TRIPLICATE
+            +PACKING LIST
+            +ONE FULL SET OF AT LEAST THREE ORIGINAL CLEAN 'ON BOARD' OCEAN
+            BILLS OF LADING IN NEGOTIABLE AND TRANSFERABLE FORM AND ONE NON-
+            NEGOTIABLE COPY ISSUED TO THE ORDER OF UNITED COCONUT PLANTERS
+            BANK MARKED FREIGHT PREPAID NOTIFY
+            APPLICANT
+            +TRANSFERABLE MARINE INSURANCE POLICY OR CERTIFICATE. WAR RISK
+            INSURANCE POLICY OR CERTIFICATE INCLUDING STRIKES, RIOTS, CIVIL
+            COMMOTION AND MARINE EXTENSION CLAUSES
+            IN DUPLICATE FOR  110PCT.    OF FULL INVOICE, VALUE FROM POINT OF
+            ORIGIN TO WAREHOUSE AT DESTINATION.
+            +BENEF'S CERTIFICATE THAT COPIES OF COMMERCIAL INVOICE, PACKING
+             LIST AND ONE FULL SET OF NON-NEGOTIABLE SHIPPING DOCUMENTS
+             HAVE BEEN AIRMAILED DIRECTLY TO BUYER INCLUDING ORIGINAL,
+             DUPLICATE, TRIPLICATE CERTIFICATE OF ORIGIN VIA DHL.
+       47A: Additional Conditions
+            +OCEAN BILL OF LADING MUST BE DATED WITHIN THE
+             VALIDITY PERIOD OF THIS CREDIT
+            +ALL DOCUMENTS MUST INDICATE COMMODITY CLASSIFICATION
+            CODE AND LC NUMBER AS INDICATED ABOVE.
+            +BL       DATED PRIOR TO ISSUANCE OF THIS CREDIT NOT ALLOWED.
+            +A FEE OF USD  60.00 (OR EQUIVALENT) WILL BE CHARGED TO THE
+            BENEFICIARY IF DOCUMENTS CONTAINING DISCREPANCIES ARE
+            PRESENTED FOR PAYMENT/REIMBURSEMENT UNDER THIS LC.  THIS FEE
+            WILL BE CHARGED FOR EACH SET OF DISCREPANT DOCUMENTS PRESENTED
+            WHICH REQUIRE OUR OBTAINING ACCEPTANCE FROM OUR CUSTOMER.
+            ++/-10PCT TOLERANCE ON AMOUNT AND QUANTITY ALLOWED.
+            +REIMBURSEMENT CHARGES, ACCEPTANCE FEE AND STAMP DUTY (IF ANY)
+             ARE FOR APPLICANT'S ACCOUNT.
+            +ALL CHARGES INCURRED IN BENEF'S COUNTRY ARE FOR BENEF'S ACCOUNT
+             AND ALL CHARGES INCURRED IN APPLICANT'S COUNTRY ARE FOR
+             APPLICANT'S ACCOUNT.
+            +SHIPPER TO FAX SHIPPING DETAILS AFTER SHIPMENT IS EFFECTED AND
+             A CERTIFICATE TO THIS EFFECT IS REQUIRED.
+       71B: Charges
+            ALL CHARGES OUTSIDE THE PHILIPPINES
+            ARE FOR THE ACCOUNT OF BENEFICIARY
+            EXCEPT REIMBURSING CHARGES WHICH
+            ARE FOR APPLICANT'S ACCOUNT.
+        49: Confirmation Instructions
+            WITHOUT
+       53A: Reimbursing Bank - BIC
+            /2000090649754
+            PNBPUS33PHL
+            WACHOVIA BANK, NA
+            (INTERNATIONAL OPERATIONS)
+            PHILADELPHIA,PA  US
+        78: Instr to Payg/Accptg/Negotg Bank
+            +NEGOTIATING BANK MUST FORWARD ALL DOCS NEGOTIATED UNDER THIS
+            CREDIT TO UNITED COCONUT PLANTERS BANK -TRADE SERVICES DEPARTMENT
+            AT UCPB BLDG., MAKATI AVENUE, MAKATI CITY
+            IN ONE LOT VIA COURIER.+DRAFTS DRAWN UNDER THIS CREDIT MUST BE
+            MARKED DRAWN UNDER LC NO.FX56202008004972   WE UNDERTAKE TO HONOR
+            DRAFT/S DRAWN AND PRESENTED IN COMPLIANCE WITH TERMS AND
+            CONDITIONS OF THIS CREDIT +THIS IS THE OPERATIVE INSTRUMENT.
+	--------------------------- Message Trailer ------------------------	
+       {CHK:ABD7380AC840}
+       {TNG:}
+       PKI Signature: MAC-Equivalent

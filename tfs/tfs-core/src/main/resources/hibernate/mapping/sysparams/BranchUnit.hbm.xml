@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    <class name="com.ucpb.tfs.domain.sysparams.BranchUnit" table="REF_BRANCH_UNIT">
+        <id name="id" column="ID" type="java.lang.Long">
+            <generator class="increment"/>
+        </id>
+        <property name="unitCode" column="UNIT_CODE" type="string" length="3"/>
+        <property name="branchName" column="BRANCH_NAME" type="string" length="50"/>
+        <property name="branchAddress" column="BRANCH_ADDRESS" type="string" length="300"/>
+        <property name="branchType" column="BRANCH_TYPE" type="string" length="50"/>
+        <property name="swiftStatus" column="SWIFT_STATUS" type="string" length="50"/>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified by: Rafael Ski Poblete
+	 Date: 7/26/18
+	 Description: Changed field71B to field71D and field72 to field72Z
+	 
+	 Date: 8/01/18
+	 Description: Changed field71B to field71D and field72 to field72Z for MT742 
+     
+     Date: 8/28/18
+     Description: Added field49G, field49H.
+                  Changed field71B to field71D.
+     
+     Date: 9/03/18
+     Description: Changed field71B to field71D for MT740. 
+     
+     Date: 9/11/18
+     Description: Changed field71B to field71D for MT752
+                  Added field79Z. 
+     
+     Date: 9/19/18
+     Description: Added field23S in Outgoing MT707 -->
+	 
+ <!-- Modified by: Cedrick C. Nungay
+	 Date: 08/06/18
+	 Description: Changed field72 to field72Z on mt734 -->
+ <!-- Modified by: Cedrick C. Nungay
+	 Date: 08/10/18
+	 Description: Modified fields for MT707 -->
+ <!-- Modified by: Cedrick C. Nungay
+	 Date: 09/13/18
+	 Description: Removed 39B, changed 72 to 72Z on MT707 -->
+ <!-- Modified by: Cedrick C. Nungay
+	 Date: 09/18/18
+	 Description: Added MT759 -->
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/mt7series"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:mt7="http://www.ucpb.com.ph/tfs/schemas/mt7series"
+        xmlns:mt="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields" schemaLocation="swift-fields.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-message" schemaLocation="swift-message.xsd"/>
+
+    <xs:complexType name="mt700">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field27" type="swift:field27" minOccurs="1" />
+                    <xs:element name="field40A" type="swift:field40A" minOccurs="1"/>
+                    <xs:element name="field20" type="swift:field20" minOccurs="1"/>
+                    <xs:element name="field23" type="swift:field23" minOccurs="0"/>
+                    <xs:element name="field31C" type="swift:field31C" minOccurs="0"/>
+                    <xs:element name="field40E" type="swift:field40E" minOccurs="1"/>
+                    <xs:element name="field31D" type="swift:field31D" minOccurs="1"/>
+                    <xs:choice minOccurs="0">
+	                    <xs:element name="field51A" type="swift:field51A"/>
+	                    <xs:element name="field51D" type="swift:field51D"/>
+                    </xs:choice>
+                    <xs:element name="field50" type="swift:field50" minOccurs="1"/>
+                    <xs:element name="field59" type="swift:field59" minOccurs="1"/>
+                    <xs:element name="field32B" type="swift:field32B" minOccurs="1"/>
+                    <xs:element name="field39A" type="swift:field39A" minOccurs="0"/>
+                    <xs:element name="field39B" type="swift:field39B" minOccurs="0"/>
+                    <xs:element name="field39C" type="swift:field39C" minOccurs="0"/>
+                    <xs:choice minOccurs="1">
+	                    <xs:element name="field41A" type="swift:field41A"/>
+	                    <xs:element name="field41D" type="swift:field41D"/>
+                    </xs:choice>
+                    <xs:element name="field42C" type="swift:field42C" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+	                    <xs:element name="field42A" type="swift:field42A"/>
+	                    <xs:element name="field42D" type="swift:field42D"/>
+                    </xs:choice>
+                    <xs:element name="field42M" type="swift:field42M" minOccurs="0"/>
+                    <xs:element name="field42P" type="swift:field42P" minOccurs="0"/>
+                    <xs:element name="field43P" type="swift:field43P" minOccurs="0"/>
+                    <xs:element name="field43T" type="swift:field43T" minOccurs="0"/>
+                    <xs:element name="field44A" type="swift:field44A" minOccurs="0"/>
+                    <xs:element name="field44E" type="swift:field44E" minOccurs="0"/>
+                    <xs:element name="field44F" type="swift:field44F" minOccurs="0"/>
+                    <xs:element name="field44B" type="swift:field44B" minOccurs="0"/>
+                    <xs:element name="field44C" type="swift:field44C" minOccurs="0"/>
+                    <xs:element name="field44D" type="swift:field44D" minOccurs="0"/>
+                    <xs:element name="field45A" type="swift:field45A" minOccurs="0"/>
+                    <xs:element name="field46A" type="swift:field46A" minOccurs="0"/>
+                    <xs:element name="field47A" type="swift:field47A" minOccurs="0"/>
+                    <xs:element name="field49G" type="swift:field49G" minOccurs="0"/>
+                    <xs:element name="field49H" type="swift:field49H" minOccurs="0"/>
+                    <xs:element name="field71D" type="swift:field71D" minOccurs="0"/>
+                    <xs:element name="field48" type="swift:field48" minOccurs="0"/>
+                    <xs:element name="field49" type="swift:field49" minOccurs="1"/>
+                    <xs:element name="field58A" type="swift:field58A" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field53A" type="swift:field53A"/>
+                        <xs:element name="field53D" type="swift:field53D"/>
+                    </xs:choice>
+                    <xs:element name="field78" type="swift:field78" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                    	<xs:element name="field57A" type="swift:field57A"/>
+                    	<xs:element name="field57B" type="swift:field57B"/>
+                    	<xs:element name="field57D" type="swift:field57D"/>
+                    </xs:choice>
+                    <xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt701">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                    <xs:element name="field27" type="swift:field27"/>
+                    <xs:element name="field20" type="swift:field20"/>
+                    <xs:element name="field45A" type="swift:field45A" minOccurs="0"/>
+                    <xs:element name="field46A" type="swift:field46A" minOccurs="0"/>
+                    <xs:element name="field47A" type="swift:field47A" minOccurs="0"/>
+                    <xs:element name="field49G" type="swift:field49G" minOccurs="0"/>
+                    <xs:element name="field49H" type="swift:field49H" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="mt707">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field27" type="swift:field27"/>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21"/>
+                	<xs:element name="field23" type="swift:field23"/>
+                	<xs:element name="field52A" type="swift:field52A" minOccurs="0"/>
+                	<xs:element name="field31C" type="swift:field31C"/>
+                	<xs:element name="field26E" type="swift:field26E"/>
+                	<xs:element name="field30" type="swift:field30"/>
+                    <xs:element name="field22A" type="swift:field22A"/>
+                    <xs:element name="field23S" type="swift:field23S" minOccurs="0"/>
+                    <xs:element name="field40A" type="swift:field40A" minOccurs="0"/>
+                    <xs:element name="field40E" type="swift:field40E" minOccurs="0"/>
+                    <xs:element name="field31D" type="swift:field31D" minOccurs="0"/>
+                    <xs:element name="field50" type="swift:field50" minOccurs="0"/>
+                    <xs:element name="field59" type="swift:field59" minOccurs="0"/>
+                    <xs:element name="field32B" type="swift:field32B" minOccurs="0"/>
+                    <xs:element name="field33B" type="swift:field33B" minOccurs="0"/>
+                    <xs:element name="field39A" type="swift:field39A" minOccurs="0"/>
+                    <xs:element name="field39C" type="swift:field39C" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field41A" type="swift:field41A"/>
+                        <xs:element name="field41D" type="swift:field41D"/>
+                    </xs:choice>
+                    <xs:element name="field42C" type="swift:field42C" minOccurs="0"/>
+                    <xs:element name="field42A" type="swift:field42A" minOccurs="0"/>
+                    <xs:element name="field42M" type="swift:field42M" minOccurs="0"/>
+                    <xs:element name="field42P" type="swift:field42P" minOccurs="0"/>
+                    <xs:element name="field43P" type="swift:field43P" minOccurs="0"/>
+                    <xs:element name="field43T" type="swift:field43T" minOccurs="0"/>
+                    <xs:element name="field44A" type="swift:field44A" minOccurs="0"/>
+                    <xs:element name="field44E" type="swift:field44E" minOccurs="0"/>
+                    <xs:element name="field44F" type="swift:field44F" minOccurs="0"/>
+                    <xs:element name="field44B" type="swift:field44B" minOccurs="0"/>
+                    <xs:element name="field44C" type="swift:field44C" minOccurs="0"/>
+                    <xs:element name="field44D" type="swift:field44D" minOccurs="0"/>
+                    <xs:element name="field45B" type="swift:field45B" minOccurs="0"/>
+                    <xs:element name="field46B" type="swift:field46B" minOccurs="0"/>
+                    <xs:element name="field47B" type="swift:field47B" minOccurs="0"/>
+                    <xs:element name="field49M" type="swift:field49M" minOccurs="0"/>
+                    <xs:element name="field49N" type="swift:field49N" minOccurs="0"/>
+                    <xs:element name="field71D" type="swift:field71D" minOccurs="0"/>
+                    <xs:element name="field48" type="swift:field48" minOccurs="0"/>
+                    <xs:element name="field49" type="swift:field49" minOccurs="0"/>
+                    <xs:element name="field58A" type="swift:field58A" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field53A" type="swift:field53A"/>
+                        <xs:element name="field53D" type="swift:field53D"/>
+                    </xs:choice>
+                    <xs:element name="field78" type="swift:field78" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                    	<xs:element name="field57A" type="swift:field57A"/>
+                    	<xs:element name="field57B" type="swift:field57B"/>
+                    	<xs:element name="field57D" type="swift:field57D"/>
+                    </xs:choice>
+                    <xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                    
+                    
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt708">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                    <xs:element name="field27" type="swift:field27"/>
+                    <xs:element name="field20" type="swift:field20"/>
+                    <xs:element name="field23" type="swift:field23"/>
+                    <xs:element name="field26E" type="swift:field26E"/>
+                    <xs:element name="field30" type="swift:field30"/>
+                    <xs:element name="field45B" type="swift:field45B" minOccurs="0"/>
+                    <xs:element name="field46B" type="swift:field46B" minOccurs="0"/>
+                    <xs:element name="field47B" type="swift:field47B" minOccurs="0"/>
+                    <xs:element name="field49M" type="swift:field49M" minOccurs="0"/>
+                    <xs:element name="field49N" type="swift:field49N" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="mt730">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20" minOccurs="1" />
+                	<xs:element name="field21" type="swift:field21" minOccurs="1" />
+                	<xs:element name="field25" type="swift:field25" minOccurs="0" />
+                	<xs:element name="field30" type="swift:field30" minOccurs="1" />
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field32B" type="swift:field32B"/>
+                		<xs:element name="field32D" type="swift:field32D"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field57A" type="swift:field57A"/>
+                		<xs:element name="field57D" type="swift:field57D"/>
+                	</xs:choice>
+                	<xs:element name="field71D" type="swift:field71D" minOccurs="0" />
+                	<xs:element name="field72Z" type="swift:field72Z" minOccurs="0" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>	
+    
+    <xs:complexType name="mt734">
+    	<xs:complexContent>
+    		<xs:extension base="mt:SwiftMessage">
+    			<xs:sequence>
+    				<xs:element name="field20" type="swift:field20" minOccurs="1" />
+    				<xs:element name="field21" type="swift:field21" minOccurs="1" />
+    				<xs:element name="field32A" type="swift:field32A" minOccurs="1" />
+    				<xs:element name="field73" type="swift:field73" minOccurs="0" />
+    				<xs:choice minOccurs="0">
+                		<xs:element name="field33A" type="swift:field33A"/>
+                		<xs:element name="field33B" type="swift:field33B"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field57A" type="swift:field57A"/>
+                		<xs:element name="field57B" type="swift:field57B"/>
+                		<xs:element name="field57D" type="swift:field57D"/>
+                	</xs:choice>
+    				<xs:element name="field72Z" type="swift:field72Z" minOccurs="0" />
+    				<xs:element name="field77J" type="swift:field77J" minOccurs="1" />
+    				<xs:element name="field77B" type="swift:field77B" minOccurs="1" />
+    			</xs:sequence>
+    		</xs:extension>
+    	</xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="mt740">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field25" type="swift:field25" minOccurs="0"/>
+                	<xs:element name="field40F" type="swift:field40F"/>
+                	<xs:element name="field31D" type="swift:field31D" minOccurs="0"/>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field58A" type="swift:field58A"/>
+                		<xs:element name="field58D" type="swift:field58D"/>
+                	</xs:choice>
+                	<xs:element name="field59" type="swift:field59" minOccurs="0"/>
+                	<xs:element name="field32B" type="swift:field32B"/>
+                	<xs:element name="field39A" type="swift:field39A" minOccurs="0"/>
+                	<xs:element name="field39B" type="swift:field39B" minOccurs="0"/>
+                	<xs:element name="field39C" type="swift:field39C" minOccurs="0"/>
+                	<xs:choice>
+                		<xs:element name="field41A" type="swift:field41A"/>
+                		<xs:element name="field41D" type="swift:field41D"/>
+                	</xs:choice>
+                	<xs:element name="field42C" type="swift:field42C" minOccurs="0"/>
+                	<xs:choice minOccurs="0">
+	                	<xs:element name="field42A" type="swift:field42A"/>
+	                	<xs:element name="field42D" type="swift:field42D"/>
+                	</xs:choice>
+                	<xs:element name="field42M" type="swift:field42M" minOccurs="0"/>
+                	<xs:element name="field42P" type="swift:field42P" minOccurs="0"/>
+                	<xs:element name="field71A" type="swift:field71A" minOccurs="0"/>
+                	<xs:element name="field71D" type="swift:field71D" minOccurs="0"/>
+                	<xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="mt742">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21"/>
+                	<xs:element name="field31C" type="swift:field31C" minOccurs="0"/>
+                	<xs:choice>
+                		<xs:element name="field52A" type="swift:field52A"/>
+                		<xs:element name="field52D" type="swift:field52D"/>
+                	</xs:choice>
+                	<xs:element name="field32B" type="swift:field32B"/>
+                	<xs:element name="field33B" type="swift:field33B" minOccurs="0"/>
+                	<xs:element name="field71D" type="swift:field71D" minOccurs="0"/>                	
+                	<xs:choice>
+                		<xs:element name="field34A" type="swift:field34A"/>
+                		<xs:element name="field34B" type="swift:field34B"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field57A" type="swift:field57A"/>
+                		<xs:element name="field57B" type="swift:field57B"/>
+                		<xs:element name="field57D" type="swift:field57D"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field58A" type="swift:field58A"/>
+                		<xs:element name="field58D" type="swift:field58D"/>
+                	</xs:choice>
+                	<xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+	
+	<xs:complexType name="mt747">
+		<xs:complexContent>
+			<xs:extension base="mt:SwiftMessage">
+				<xs:sequence>
+					<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21" minOccurs="0"/>
+					<xs:element name="field30" type="swift:field30"/>
+                	<xs:element name="field31E" type="swift:field31E" minOccurs="0"/>
+                	<xs:element name="field32B" type="swift:field32B" minOccurs="0"/>
+                	<xs:element name="field33B" type="swift:field33B" minOccurs="0"/>
+                	<xs:element name="field34B" type="swift:field34B" minOccurs="0"/>
+                	<xs:element name="field39A" type="swift:field39A" minOccurs="0"/>
+                	<xs:element name="field39C" type="swift:field39C" minOccurs="0"/>
+                	<xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                	<xs:element name="field77" type="swift:field77" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+    
+	<xs:complexType name="mt750">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21"/>
+                	<xs:element name="field32B" type="swift:field32B"/>
+                	<xs:element name="field33B" type="swift:field33B" minOccurs="0"/>
+                	<xs:element name="field71B" type="swift:field71B" minOccurs="0"/>
+                	<xs:element name="field73" type="swift:field73" minOccurs="0"/>
+                	<xs:element name="field34B" type="swift:field34B" minOccurs="0"/>
+                	<xs:choice minOccurs="0">
+                    	<xs:element name="field57A" type="swift:field57A"/>
+                    	<xs:element name="field57B" type="swift:field57B"/>
+                    	<xs:element name="field57D" type="swift:field57D"/>
+                    </xs:choice>
+                    <xs:element name="field72" type="swift:field72" minOccurs="0"/>
+                    <xs:element name="field77J" type="swift:field77J"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="mt752">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21"/>
+                	<xs:element name="field23" type="swift:field23"/>
+                	<xs:element name="field30" type="swift:field30"/>
+                	<xs:element name="field32B" type="swift:field32B" minOccurs="0"/>
+                	<xs:element name="field71D" type="swift:field71D" minOccurs="0"/>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field33A" type="swift:field33A"/>
+                		<xs:element name="field33B" type="swift:field33B"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field53A" type="swift:field53A"/>
+                		<xs:element name="field53B" type="swift:field53B"/>
+                		<xs:element name="field53D" type="swift:field53D"/>
+                	</xs:choice>
+                	<xs:choice minOccurs="0">
+                		<xs:element name="field54A" type="swift:field54A"/>
+                		<xs:element name="field54B" type="swift:field54B"/>
+                		<xs:element name="field54D" type="swift:field54D"/>
+                	</xs:choice>
+                    <xs:element name="field72Z" type="swift:field72Z" minOccurs="0"/>
+                    <xs:element name="field79Z" type="swift:field79Z" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt759">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                    <xs:element name="field27" type="swift:field27"/>
+                    <xs:element name="field20" type="swift:field20"/>
+                    <xs:element name="field21" type="swift:field21" minOccurs="0"/>
+                    <xs:element name="field22D" type="swift:field22D"/>
+                    <xs:element name="field23" type="swift:field23" minOccurs="0"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field52A" type="swift:field52A"/>
+                        <xs:element name="field52D" type="swift:field52D"/>
+                    </xs:choice>
+                    <xs:element name="field23H" type="swift:field23H"/>
+                    <xs:element name="field45D" type="swift:field45D"/>
+                    <xs:element name="field23X" type="swift:field23X" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt760">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field27" type="swift:field27" minOccurs="1" />
+                	<xs:element name="field20" type="swift:field20" minOccurs="1" />
+                	<xs:element name="field23" type="swift:field23" minOccurs="1" />
+                	<xs:element name="field30" type="swift:field30" minOccurs="0" />
+                	<xs:element name="field40C" type="swift:field40C" minOccurs="1" />
+                	<xs:element name="field77C" type="swift:field77C" minOccurs="1" />
+                	<xs:element name="field72" type="swift:field72" minOccurs="0" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt767">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field27" type="swift:field27" minOccurs="1" />
+                	<xs:element name="field20" type="swift:field20" minOccurs="1" />
+                	<xs:element name="field21" type="swift:field21" minOccurs="1" />
+                	<xs:element name="field23" type="swift:field23" minOccurs="1" />
+                	<xs:element name="field30" type="swift:field30" minOccurs="0" />
+                	<xs:element name="field26E" type="swift:field26E" minOccurs="0" />
+                	<xs:element name="field31C" type="swift:field31C" minOccurs="1" />
+                	<xs:element name="field77C" type="swift:field77C" minOccurs="1" />
+                	<xs:element name="field72" type="swift:field72" minOccurs="0" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mt799">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20"/>
+                	<xs:element name="field21" type="swift:field21" minOccurs="0"/>
+                	<xs:element name="field79" type="swift:field79" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Place MT Message Declarations Here -->
+    <xs:element name="mt700" type="mt7:mt700"/>
+    <xs:element name="mt701" type="mt7:mt701"/>
+    <xs:element name="mt707" type="mt7:mt707"/>
+    <xs:element name="mt708" type="mt7:mt708"/>
+    <xs:element name="mt730" type="mt7:mt730"/>
+    <xs:element name="mt734" type="mt7:mt734"/>
+    <xs:element name="mt740" type="mt7:mt740"/>
+    <xs:element name="mt742" type="mt7:mt742"/>
+    <xs:element name="mt747" type="mt7:mt747"/>
+    <xs:element name="mt750" type="mt7:mt750"/>
+    <xs:element name="mt752" type="mt7:mt752"/>
+    <xs:element name="mt759" type="mt7:mt759"/>
+    <xs:element name="mt760" type="mt7:mt760"/>
+    <xs:element name="mt767" type="mt7:mt767"/>
+    <xs:element name="mt799" type="mt7:mt799"/>
+</xs:schema>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.AccountingDefaultAccountingCode" table="RefAccDefAccCode">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <component name="accountingEventId" class="com.ucpb.tfs.domain.accounting.AccountingEventId" access="field">
+            <property name="accountingEventId" column="accEvId" type="string" length="100"/>
+        </component>
+
+        <component name="accountingEventTransactionId"
+                   class="com.ucpb.tfs.domain.accounting.AccountingEventTransactionId" access="field">
+            <property name="accountingEventTransactionId" column="accEvTranId" type="string" length="100"/>
+        </component>
+
+        <property name="formulaVariable" column="formulaVariable" type="string" length="20"/>
+
+        <property name="defaultAccountingCode" column="defaultAccountingCode" type="string" length="20"/>
+
+
+    </class>
+
+</hibernate-mapping>

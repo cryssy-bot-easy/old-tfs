@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+        
+<!--PROLOGUE: 
+  	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: 
+	[Created by:] John Patrick C. Bautista
+	[Date Revised:] 07/27/2017
+	[Date Deployed:]
+	Program [Revision] Details: Added new fields.
+	PROJECT: tfs-core
+	MEMBER TYPE  : XML
+	Project Name: LCNegotiationDiscrepancy.hbm.xml
+-->
+        
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.product.LCNegotiationDiscrepancy" table="LCNegotiationDiscrepancy">
+
+        <composite-id name="icNumber" access="field">
+            <key-property name="icNumber" column="icNumber" type="string" length="21"/>
+        </composite-id>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" length="21"/>
+        </component>
+
+        <property name="lcNegotiationDiscrepancyStatus" column="lcNegotiationDiscrepancyStatus" length="6">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCNegotiationDiscrepancyStatus</param>
+            </type>
+        </property>
+
+        <property name="negotiationAmount" column="negotiationAmount" type="java.math.BigDecimal"/>
+        <property name="negotiationCurrency" column="negotiationCurrency" type="java.util.Currency" length="3"/>
+
+        <property name="negotiationBank" column="negotiationBank" type="string" length="11"/>
+        <property name="negotiationBankRefNumber" column="negotiationBankRefNumber" type="string" length="30"/>
+        <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="200"/>
+
+        <property name="expiredLc" column="expiredLc" type="java.lang.Boolean"/>
+        <property name="overdrawnFor" column="overdrawnFor" type="java.lang.Boolean"/>
+        <property name="overdrawnAmount" column="overdrawnAmount" type="java.math.BigDecimal"/>
+        <property name="descriptionOfGoodsNotPerLc" column="descriptionOfGoodsNotPerLc" type="java.lang.Boolean"/>
+        <property name="documentsNotPresented" column="documentsNotPresented" type="java.lang.Boolean"/>
+        <property name="others" column="others" type="java.lang.Boolean"/>
+        <property name="othersNarrative" column="othersNarrative" type="org.hibernate.type.MaterializedClobType" length="1000"/>
+
+        <property name="lastModifiedDate" column="lastModifiedDate" type="java.util.Date"/>
+        
+        <property name="icDate" column="icDate" type="java.util.Date"/>
+		<property name="reasonForCancellation" column="reasonForCancellation" type="string" length="100"/>
+		<property name="regularAmount" column="regularAmount" type="java.math.BigDecimal"/>
+		<property name="cashAmount" column="cashAmount" type="java.math.BigDecimal"/>
+    </class>
+
+</hibernate-mapping>

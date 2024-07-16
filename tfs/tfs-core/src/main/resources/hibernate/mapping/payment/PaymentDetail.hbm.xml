@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.payment.PaymentDetail" table="PaymentDetail">
+
+        <id name="id" column="id" type="long">
+            <generator class="identity"/>
+        </id>
+
+        <property name="paymentInstrumentType" column="PaymentInstrumentType" length="40">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.payment.PaymentInstrumentType</param>
+            </type>
+        </property>
+
+        <property name="referenceNumber" column="referenceNumber" type="string" length="36"/>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" scale="2"/>
+        <property name="amountInLcCurrency" column="amountInLcCurrency" type="java.math.BigDecimal" scale="2"/>
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+
+        <property name="status" access="field">
+            <column name="status" length="20"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.payment.enumTypes.PaymentStatus</param>
+            </type>
+        </property>
+
+        <property name="bookingCurrency" column="bookingCurrency" type="java.util.Currency" length="3"/>
+        <property name="interestRate" column="interestRate" type="java.math.BigDecimal" scale="8"/>
+        <property name="interestTerm" column="interestTerm" type="string" length="10"/>
+        <property name="interestTermCode" column="interestTermCode" type="string" length="1"/>
+        <property name="repricingTerm" column="repricingTerm" type="string" length="10"/>
+        <property name="repricingTermCode" column="repricingTermCode" type="string" length="20"/>
+        <property name="loanTerm" column="loanTerm" type="string" length="10"/>
+        <property name="loanTermCode" column="loanTermCode" type="string" length="20"/>
+        <property name="loanMaturityDate" column="loanMaturityDate" type="java.util.Date"/>
+        <property name="paymentTerm" column="paymentTerm" type="java.lang.Integer"/>
+
+
+        <property name="referenceId" column="referenceId" type="string" length="36"/>
+
+        <property name="passOnRateThirdToUsd" column="passOnRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="passOnRateThirdToPhp" column="passOnRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="passOnRateUsdToPhp" column="passOnRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateThirdToUsd" column="specialRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateThirdToPhp" column="specialRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="urr" column="urr" type="java.math.BigDecimal" scale="8"/>
+
+        <property name="thirdToUsdRateName" column="thirdToUsdRateName" type="string" length="10"/>
+        <property name="thirdToPhpRateName" column="thirdToPhpRateName" type="string" length="10"/>
+        <property name="usdToPhpRateName" column="usdToPhpRateName" type="string" length="10"/>
+        <property name="urrRateName" column="urrRateName" type="string" length="10"/>
+        <property name="thirdToUsdRateDescription" column="thirdToUsdRateDescription" type="string" length="100"/>
+        <property name="thirdToPhpRateDescription" column="thirdToPhpRateDescription" type="string" length="100"/>
+        <property name="usdToPhpRateDescription" column="usdToPhpRateDescription" type="string" length="100"/>
+        <property name="urrRateDescription" column="urrRateDescription" type="string" length="100"/>
+
+        <property name="paidDate" column="paidDate" type="java.util.Date"/>
+
+        <property name="pnNumber" column="pnNumber" type="long" length="40"/>
+
+        <property name="facilityId" column="facilityId" type="int"/>
+        <property name="facilityType" column="facilityType" type="string" length="5"/>
+        <property name="facilityReferenceNumber" column="facilityReferenceNumber" type="string" length="20"/>
+
+        <property name="paymentCode" column="paymentCode" type="int"/>
+
+        <property name="sequenceNumber" column="sequenceNumber" type="long"/>
+
+        <property name="withCramApproval" column="withCramApproval" type="java.lang.Boolean"/>
+
+        <property name="agriAgraTagging" column="agriAgraTagging" type="string" length="7"/>
+        
+        <property name="accountName" column="accountName" type="string" length="40"/>
+        
+        <property name="numberOfFreeFloatDays" column="numberOfFreeFloatDays" type="long"/>
+
+    </class>
+
+</hibernate-mapping>

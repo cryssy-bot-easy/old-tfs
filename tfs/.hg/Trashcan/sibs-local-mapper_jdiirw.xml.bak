@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    PROLOGUE:
+    (revision)
+    SCR/ER Number: SCR IBD-16-0219-01
+    SCR/ER Description: Generate CIC File
+    [Revised by:] Jesse James Joson
+    [Date Deployed:] 02/24/2016
+    Program [Revision] Details: Add the select script of extracting the rates for CIC file 
+    PROJECT: CORE
+    MEMBER TYPE  : xml
+    Project Name: sibs-mapper
+-->
+
+<!--
+    PROLOGUE:
+    (revision)
+    SCR/ER Number:  ER# 20140909-038
+    SCR/ER Description: CIF Normalization Not Working in TFS
+    [Revised by:] Jesse James Joson
+    [Date Deployed:] 08/05/2016
+    Program [Revision] Details: The CIF Normalization was redesigned, since not all tables are normalized and to make it run for adhoc.
+    PROJECT: CORE
+    MEMBER TYPE  : xml
+    Project Name: sibs-mapper
+-->
+
+<!--
+    PROLOGUE:
+    (revision)
+    Revision: SIBS Deactivation, all methods are removed from sibs-mapper.xml
+    [Revised by:] Cedrick C. Nungay
+    [Date Revised:] 02/15/2024
+    PROJECT: CORE
+    MEMBER TYPE  : xml
+    Project Name: sibs-mapper
+-->
+<mapper namespace="com.ucpb.tfs.batch.report.dw.dao.SilverlakeLocalDao">
+    <resultMap id="dwGlParametersHashMap" type="com.ucpb.tfs.batch.report.dw.GLParameterRecord">
+        <result property="parameterType" column="ACCTNO"/>
+        <result property="description" column="ACCTNAME"/>
+    </resultMap>
+
+    <resultMap id="GlBalanceMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+        <result property="acctno" column="ACCTNO"/>
+        <result property="gmctyp" column="GMCTYP"/>
+        <result property="title" column="TITLE"/>
+        <result property="bookcd" column="BOOKCD"/>
+        <result property="dayOrg01" column="DAY01"/>
+        <result property="dayPhp01" column="DAY01@"/>
+		<result property="dayOrg02" column="DAY02"/>
+        <result property="dayPhp02" column="DAY02@"/>
+		<result property="dayOrg03" column="DAY03"/>
+        <result property="dayPhp03" column="DAY03@"/>
+		<result property="dayOrg04" column="DAY04"/>
+        <result property="dayPhp04" column="DAY04@"/>
+		<result property="dayOrg05" column="DAY05"/>
+        <result property="dayPhp05" column="DAY05@"/>
+		<result property="dayOrg06" column="DAY06"/>
+        <result property="dayPhp06" column="DAY06@"/>
+		<result property="dayOrg07" column="DAY07"/>
+        <result property="dayPhp07" column="DAY07@"/>
+		<result property="dayOrg08" column="DAY08"/>
+        <result property="dayPhp08" column="DAY08@"/>
+		<result property="dayOrg09" column="DAY09"/>
+        <result property="dayPhp09" column="DAY09@"/>
+		<result property="dayOrg10" column="DAY10"/>
+        <result property="dayPhp10" column="DAY10@"/>
+        <result property="dayOrg11" column="DAY11"/>
+        <result property="dayPhp11" column="DAY11@"/>
+		<result property="dayOrg12" column="DAY12"/>
+        <result property="dayPhp12" column="DAY12@"/>
+		<result property="dayOrg13" column="DAY13"/>
+        <result property="dayPhp13" column="DAY13@"/>
+		<result property="dayOrg14" column="DAY14"/>
+        <result property="dayPhp14" column="DAY14@"/>
+		<result property="dayOrg15" column="DAY15"/>
+        <result property="dayPhp15" column="DAY15@"/>
+		<result property="dayOrg16" column="DAY16"/>
+        <result property="dayPhp16" column="DAY16@"/>
+		<result property="dayOrg17" column="DAY17"/>
+        <result property="dayPhp17" column="DAY17@"/>
+		<result property="dayOrg18" column="DAY18"/>
+        <result property="dayPhp18" column="DAY18@"/>
+		<result property="dayOrg19" column="DAY19"/>
+        <result property="dayPhp19" column="DAY19@"/>
+		<result property="dayOrg20" column="DAY20"/>
+        <result property="dayPhp20" column="DAY20@"/>
+        <result property="dayOrg21" column="DAY21"/>
+        <result property="dayPhp21" column="DAY21@"/>
+		<result property="dayOrg22" column="DAY22"/>
+        <result property="dayPhp22" column="DAY22@"/>
+		<result property="dayOrg23" column="DAY23"/>
+        <result property="dayPhp23" column="DAY23@"/>
+		<result property="dayOrg24" column="DAY24"/>
+        <result property="dayPhp24" column="DAY24@"/>
+		<result property="dayOrg25" column="DAY25"/>
+        <result property="dayPhp25" column="DAY25@"/>
+		<result property="dayOrg26" column="DAY26"/>
+        <result property="dayPhp26" column="DAY26@"/>
+		<result property="dayOrg27" column="DAY27"/>
+        <result property="dayPhp27" column="DAY27@"/>
+		<result property="dayOrg28" column="DAY28"/>
+        <result property="dayPhp28" column="DAY28@"/>
+		<result property="dayOrg29" column="DAY29"/>
+        <result property="dayPhp29" column="DAY29@"/>
+		<result property="dayOrg30" column="DAY30"/>
+        <result property="dayPhp30" column="DAY30@"/>	
+		<result property="dayOrg31" column="DAY31"/>
+        <result property="dayPhp31" column="DAY31@"/>	
+    </resultMap>
+
+    <resultMap id="allocationUnitResultMap" type="com.ucpb.tfs.batch.report.dw.AllocationUnit">
+        <!--      <id property="id" column="user_id" /> -->
+        <result property="ccbdBranchUnitCode" column="JLNLVL"/>
+        <result property="allocationUnitCode" column="JLUNIT"/>
+    </resultMap>
+
+    <resultMap id="sibsAllocationUnitCodeMap" type="com.ucpb.tfs.batch.allocationUnitCode.SibsAllocationUnitCodeRecord">
+        <result property="branchUnitCode" column="BRANCH_UNIT_CODE"/>
+        <result property="allocationUnitCode" column="ALLOCATION_UNIT_CODE"/>
+        <result property="officerCode" column="OFFICER_CODE"/>
+        <result property="officerName" column="OFFICER_NAME"/>
+        <result property="errorCode" column="ERROR_CODE"/>
+    </resultMap>
+
+    <resultMap id="appraisalResultMap" type="com.ucpb.tfs.batch.report.dw.Appraisal">
+        <result property="appraisalDate" column="APPRAISALDATE" javaType="integer"/>
+        <result property="appraisedValue" column="APPRAISEDVALUE"/>
+        <result property="securityCode" column="COLLATERALTYPE"/>
+    </resultMap>
+
+    <resultMap id="cibsMasterTableResultMap" type="com.ucpb.tfs.batch.cif.CibsMasterTable">
+        <result property="CFNCIF" column="CFNCIF"/>
+        <result property="CFNBRN" column="CFNBRN"/>
+        <result property="CFNSNM" column="CFNSNM"/>
+        <result property="CFNUID" column="CFNUID"/>
+        <result property="CFNWID" column="CFNWID"/>
+        <result property="CFNTIM" column="CFNTIM"/>
+        <result property="CFNDT7" column="CFNDT7"/>
+        <result property="CFNDT6" column="CFNDT6"/>
+        <result property="CFNCFO" column="CFNCFO"/>
+        <result property="CFNUSR" column="CFNUSR"/>
+        <result property="CFNWDA" column="CFNWDA"/>
+        <result property="CFNDA7" column="CFNDA7"/>
+        <result property="CFNDA6" column="CFNDA6"/>
+        <result property="CFNTME" column="CFNTME"/>
+        <result property="CFNAPR" column="CFNAPR"/>
+    </resultMap>
+
+    <resultMap id="facilityReferenceMap" type="com.ucpb.tfs.batch.facility.FacilityReference">
+        <result property="AFAPNO" column="AFAPNO"/>
+        <result property="AFFCDE" column="AFFCDE"/>
+        <result property="AFSEQ" column="AFSEQ"/>
+        <result property="AFBR_NO" column="AFBR#"/>
+        <result property="AFLTYP" column="AFLTYP"/>
+        <result property="AFAPLY" column="AFAPLY"/>
+        <result property="AFFAMT" column="AFFAMT"/>
+        <result property="AFEND6" column="AFEND6"/>
+        <result property="AFEND7" column="AFEND7"/>
+        <result property="AFAPD6" column="AFAPD6"/>
+        <result property="AFAPD7" column="AFAPD7"/>
+        <result property="AFINST" column="AFINST"/>
+        <result property="AFFPMT" column="AFFPMT"/>
+        <result property="AFTERM" column="AFTERM"/>
+        <result property="AFTCOD" column="AFTCOD"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+        <result property="AFPURP" column="AFPURP"/>
+        <result property="AFCCBP" column="AFCCBP"/>
+        <result property="AFOFD6" column="AFOFD6"/>
+        <result property="AFOFD7" column="AFOFD7"/>
+        <result property="AFOAD6" column="AFOAD6"/>
+        <result property="AFOAD7" column="AFOAD7"/>
+        <result property="AFARD6" column="AFARD6"/>
+        <result property="AFARD7" column="AFARD7"/>
+        <result property="AFAPPR" column="AFAPPR"/>
+        <result property="AFAPR1" column="AFAPR1"/>
+        <result property="AFAPR2" column="AFAPR2"/>
+        <result property="AFCANC" column="AFCANC"/>
+        <result property="AFCND7" column="AFCND7"/>
+        <result property="AFCND6" column="AFCND6"/>
+        <result property="AFCAR" column="AFCAR"/>
+        <result property="AFCARI" column="AFCARI"/>
+        <result property="AFCRIP" column="AFCRIP"/>
+        <result property="AFCID6" column="AFCID6"/>
+        <result property="AFCID7" column="AFCID7"/>
+        <result property="AFCPD6" column="AFCPD6"/>
+        <result property="AFCPD7" column="AFCPD7"/>
+        <result property="AFCARP" column="AFCARP"/>
+        <result property="AFCSD6" column="AFCSD6"/>
+        <result property="AFCSD7" column="AFCSD7"/>
+        <result property="AFCSP6" column="AFCSP6"/>
+        <result property="AFCSP7" column="AFCSP7"/>
+        <result property="AFFEE" column="AFFEE"/>
+        <result property="AFOFFR" column="AFOFFR"/>
+        <result property="AFLMST" column="AFLMST"/>
+        <result property="AFSTAT" column="AFSTAT"/>
+        <result property="AFBASE" column="AFBASE"/>
+        <result property="AFMODE" column="AFMODE"/>
+        <result property="AFYBSE" column="AFYBSE"/>
+        <result property="AFRATE" column="AFRATE"/>
+        <result property="AFRAT_NO" column="AFRAT#"/>
+        <result property="AFVAR" column="AFVAR"/>
+        <result property="AFVARC" column="AFVARC"/>
+        <result property="AFPFLR" column="AFPFLR"/>
+        <result property="AFPCEL" column="AFPCEL"/>
+        <result property="AFPRV6" column="AFPRV6"/>
+        <result property="AFPRV7" column="AFPRV7"/>
+        <result property="AFRVTM" column="AFRVTM"/>
+        <result property="AFRVCD" column="AFRVCD"/>
+        <result property="AFCUR" column="AFCUR"/>
+        <result property="AFTPSQ" column="AFTPSQ"/>
+        <result property="AFEXRT" column="AFEXRT"/>
+        <result property="AFEXCD" column="AFEXCD"/>
+        <result property="AFIAMT" column="AFIAMT"/>
+        <result property="AFISTS" column="AFISTS"/>
+        <result property="AFIAP6" column="AFIAP6"/>
+        <result property="AFIAP7" column="AFIAP7"/>
+        <result property="AFIAR6" column="AFIAR6"/>
+        <result property="AFIAR7" column="AFIAR7"/>
+        <result property="AFICN6" column="AFICN6"/>
+        <result property="AFICN7" column="AFICN7"/>
+        <result property="AFSVAR" column="AFSVAR"/>
+        <result property="AFSVRC" column="AFSVRC"/>
+        <result property="AFFLAT" column="AFFLAT"/>
+        <result property="AFPAR" column="AFPAR"/>
+        <result property="AFDLNO" column="AFDLNO"/>
+        <result property="AFCIF_NO" column="AFCIF#"/>
+        <result property="AFLIMT" column="AFLIMT"/>
+        <result property="AFSDC6" column="AFSDC6"/>
+        <result property="AFSDC7" column="AFSDC7"/>
+        <result property="AFRDC6" column="AFRDC6"/>
+        <result property="AFRDC7" column="AFRDC7"/>
+        <result property="AFLCOD" column="AFLCOD"/>
+        <result property="AFEMRK" column="AFEMRK"/>
+        <result property="AFCOM" column="AFCOM"/>
+        <result property="AFCOMR" column="AFCOMR"/>
+        <result property="AFCOMB" column="AFCOMB"/>
+        <result property="AFCMAX" column="AFCMAX"/>
+        <result property="AFCMIN" column="AFCMIN"/>
+        <result property="AFSBFC" column="AFSBFC"/>
+        <result property="AFSBSQ" column="AFSBSQ"/>
+        <result property="AFEXP6" column="AFEXP6"/>
+        <result property="AFEXP7" column="AFEXP7"/>
+        <result property="AFCFER" column="AFCFER"/>
+        <result property="AFCFE_NO" column="AFCFE#"/>
+        <result property="AFCFEE" column="AFCFEE"/>
+        <result property="AFMDT6" column="AFMDT6"/>
+        <result property="AFMDT7" column="AFMDT7"/>
+        <result property="AFORGM" column="AFORGM"/>
+        <result property="AFEXMT" column="AFEXMT"/>
+        <result property="AFMFAC" column="AFMFAC"/>
+        <result property="AFMAA_NO" column="AFMAA#"/>
+        <result property="AFMFCD" column="AFMFCD"/>
+        <result property="AFMSEQ" column="AFMSEQ"/>
+        <result property="AFSTBY" column="AFSTBY"/>
+        <result property="AFLEVL" column="AFLEVL"/>
+        <result property="AFAMTU" column="AFAMTU"/>
+        <result property="AFCOMP" column="AFCOMP"/>
+        <result property="AFSPRV" column="AFSPRV"/>
+        <result property="AFINSP" column="AFINSP"/>
+        <result property="AFOBAL" column="AFOBAL"/>
+        <result property="AFDVID" column="AFDVID"/>
+        <result property="LNVUSR" column="LNVUSR"/>
+        <result property="LNVDT6" column="LNVDT6"/>
+        <result property="LNVDT7" column="LNVDT7"/>
+        <result property="LNVTME" column="LNVTME"/>
+        <result property="ASELLP" column="ASELLP"/>
+        <result property="AUNREA" column="AUNREA"/>
+        <result property="ABOOKV" column="ABOOKV"/>
+        <result property="ASCRDW" column="ASCRDW"/>
+        <result property="ASCRGP" column="ASCRGP"/>
+        <result property="APPRRT" column="APPRRT"/>
+        <result property="APPRAM" column="APPRAM"/>
+        <result property="ASRVRA" column="ASRVRA"/>
+        <result property="AMAXTM" column="AMAXTM"/>
+        <result property="AMAXCD" column="AMAXCD"/>
+        <result property="AOFSTA" column="AOFSTA"/>
+        <result property="AEMPID" column="AEMPID"/>
+        <result property="ADEPTC" column="ADEPTC"/>
+        <result property="ABDFLG" column="ABDFLG"/>
+        <result property="ACASA" column="ACASA"/>
+        <result property="AVATFL" column="AVATFL"/>
+        <result property="AGLBOO" column="AGLBOO"/>
+        <result property="AORGBR" column="AORGBR"/>
+        <result property="AGROUP" column="AGROUP"/>
+        <result property="ASCRLS" column="ASCRLS"/>
+        <result property="ASCRLR" column="ASCRLR"/>
+        <result property="ASOOFU" column="ASOOFU"/>
+        <result property="AFRMST" column="AFRMST"/>
+        <result property="AFRDST" column="AFRDST"/>
+        <result property="AFRMD6" column="AFRMD6"/>
+        <result property="AFRMD7" column="AFRMD7"/>
+        <result property="AFRDD6" column="AFRDD6"/>
+        <result property="AFRDD7" column="AFRDD7"/>
+        <result property="AFRTCD" column="AFRTCD"/>
+        <result property="AFREAS" column="AFREAS"/>
+        <result property="AFRREM" column="AFRREM"/>
+        <result property="AFSLEN" column="AFSLEN"/>
+        <result property="AFSCLS" column="AFSCLS"/>
+        <result property="AFSLMT" column="AFSLMT"/>
+        <result property="AFSDT6" column="AFSDT6"/>
+        <result property="AFSDT7" column="AFSDT7"/>
+        <result property="AFCHGR" column="AFCHGR"/>
+        <result property="AFCTYP" column="AFCTYP"/>
+        <result property="AFCCOD" column="AFCCOD"/>
+        <result property="AFPROM" column="AFPROM"/>
+    </resultMap>
+
+    <resultMap id="earmarkHashMap" type="com.ucpb.tfs.batch.report.dw.Earmark">
+        <result property="SYSCOD" column="SYSCOD"/>
+        <result property="TOSBAL" column="TOSBAL"/>
+        <result property="TLOSBAL" column="TLOSBAL"/>
+        <result property="ORGLMT" column="ORGLMT"/>
+        <result property="LORGAM" column="LORGAM"/>
+        <result property="CURTYP" column="CURTYP"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+    </resultMap>
+    
+    <resultMap id="lnclstNormalization" type="com.ucpb.tfs.batch.report.dw.Earmark">
+        <result property="SYSCOD" column="SYSCOD"/>
+        <result property="CIFNO" column="CIFNO"/>
+        <result property="ACCTNO" column="ACCTNO"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+    </resultMap>
+    
+    <resultMap id="cibsDetailsTableResultMap" type="com.ucpb.tfs.batch.cif.CibsDetailsTable">
+    </resultMap>
+
+    <select id="getAngolConversionRate" resultType="java.math.BigDecimal">
+        select
+        rates.JFXDCR AS CONVERSION_RATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+        rates.JFXDBC = #{targetCurrency}
+        AND rates.JFXDCD = #{sourceCurrency}
+        AND rates.JFXDRN = #{rateNumber}
+        <!--and RATE.JHVDT6 =#{date}-->
+    </select>
+		
+	<select id="getAngolConversionRateForDailyBalance" resultType="java.math.BigDecimal">
+        select
+        rates.JFXDCR AS CONVERSION_RATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+        rates.JFXDBC = #{targetCurrency}
+        AND rates.JFXDCD = #{sourceCurrency}
+        AND rates.JFXDRN = #{rateNumber}
+        AND rates.JHVDT6 = #{date}
+    </select>
+
+    <select id="getHistoricalRevalRate" resultType="java.math.BigDecimal">
+        select
+            -- rates.JFXDCD AS CURRENCY_CODE,
+            -- rates.JFXDRN AS RATE_NUMBER,
+            -- rates.JFXDBC AS BASE_CURRENCY,
+            -- rates.JFXCD6 AS CALENDAR_DATE,
+            -- rates.JFXCD7 AS JULIAN_DATE,
+            rates.JFXDCR AS CONVERSION_RATE
+        from
+            TFSDB2S.JHYXDT rates
+        where
+            rates.JFXCD6 = #{date}
+        and
+            rates.JFXDCD = #{sourceCurrency}
+        and
+            rates.JFXDBC = #{targetCurrency}
+        and
+            rates.JFXDRN = #{rateNumber}
+    </select>
+
+    <select id="getHistoricalRevalRateForCic" resultType="java.math.BigDecimal">
+        select
+            rates.JFXDCR AS CONVERSION_RATE
+        from
+            TFSDB2S.JHYXDT rates
+        where
+            rates.JFXCD6 = #{date}
+        and
+            rates.JFXDCD = #{sourceCurrency}
+        and
+            rates.JFXDBC = #{targetCurrency}
+        and
+            rates.JFXDRN = #{rateNumber}
+    </select>
+	<!-- End: IBD-16-0219-01 -->
+    
+    <select id="getDwGlParameters" resultMap="dwGlParametersHashMap">
+        <![CDATA[
+            select
+            	distinct
+                value(char(ACCTNO),' ') as ACCTNO,
+                value(ACTYPE,' ') as ACTYPE,
+                value(VALPST,' ') as VALPST,
+                case
+                    when ACTYPE = 'A' and VALPST = '*MEMO' then 'Contingent Asset'
+                    when ACTYPE = 'L' and VALPST = '*MEMO' then 'Contingent Liability'
+                    when ACTYPE = 'I' then 'Income'
+                    when ACTYPE = 'E' then 'Expense'
+                    when ACTYPE = 'A' and VALPST <> '*MEMO' then 'Asset'
+                    when ACTYPE = 'L' and VALPST <> '*MEMO' then 'Liability'
+                    when ACTYPE = 'C' then 'Capital'
+                    else ''
+                end as ACCTNAME
+            from TFSDB2S.GLMAST
+        ]]>
+    </select>
+    
+    <select id="getCurrentRevalueRate" resultType="hashMap">
+        select
+           	rates.JFXDCD AS SOURCE_CURRENCY,
+            rates.JHVDT7 AS JULIAN_DATE,
+            rates.JFXDCR AS CONVERSION_RATE
+        from
+            TFSDB2S.JHFXDT rates
+        where
+            rates.JFXDBC = #{targetCurrency}
+        and
+            rates.JFXDRN = #{rateNumber}
+        and
+            rates.JHVDT7 = (SELECT MAX(JHVDT7)
+            FROM TFSDB2S.JHFXDT
+            WHERE JFXDCD = rates.JFXDCD
+            AND JFXDBC = rates.JFXDBC
+            AND JFXDRN = rates.JFXDRN
+            AND JHVDT7 <![CDATA[=]]> #{sibsDate})
+    </select>
+    
+    <select id="getHistoricalRevalueRate" resultType="hashMap">
+        select
+            rates.JFXDCD AS SOURCE_CURRENCY,
+            rates.JFXCD7 AS JULIAN_DATE,
+            rates.JFXDCR AS CONVERSION_RATE
+        from
+            TFSDB2S.JHYXDT rates
+        where
+            rates.JFXDBC = #{targetCurrency}
+        and
+            rates.JFXDRN = #{rateNumber}
+        and
+            rates.JFXCD7 = (SELECT MAX(JFXCD7)
+            FROM TFSDB2S.JHYXDT
+            WHERE JFXDCD = rates.JFXDCD
+            AND JFXDBC = rates.JFXDBC
+            AND JFXDRN = rates.JFXDRN
+            AND JFXCD7 <![CDATA[<=]]> #{sibsDate})
+    </select>
+	
+	<select id="getGlBalance" resultMap="GlBalanceMap">
+		SELECT ACCTNO,GMCTYP,TITLE,BOOKCD,DAY01,DAY01@,DAY02,DAY02@,DAY03,DAY03@,DAY04,DAY04@,DAY05,DAY05@,DAY06,DAY06@,DAY07,DAY07@,DAY08,DAY08@,DAY09,DAY09@,DAY10,DAY10@,
+				DAY11,DAY11@,DAY12,DAY12@,DAY13,DAY13@,DAY14,DAY14@,DAY15,DAY15@,DAY16,DAY16@,DAY17,DAY17@,DAY18,DAY18@,DAY19,DAY19@,DAY20,DAY20@,
+				DAY21,DAY21@,DAY22,DAY22@,DAY23,DAY23@,DAY24,DAY24@,DAY25,DAY25@,DAY26,DAY26@,DAY27,DAY27@,DAY28,DAY28@,DAY29,DAY29@,DAY30,DAY30@,DAY31,DAY31@
+		FROM TFSDB2S.GLMAST
+		WHERE ACCTNO IN (835110102000,835120102000,246210101000,836110201000,833110102000,834110102000,835130102000,835130212000,835110101000,835120101000,833110101000,834110101000,835130101000,835130211000,246210102000,813110102000,813110102000,813110101000,839120102000,839120102000,839120101000,244210301000)
+		AND BRANCH = 909
+		AND BOOKCD = 'RG'
+	</select>
+	
+    <!-- bago -->
+    <select id="getAllocationUnitCode" resultType="string">
+        SELECT JLRFBR FROM TFSDB2S.JHPARL BRANCHES WHERE
+            BRANCHES.JLRFBR = #{branchUnitCode} AND
+            (BRANCHES.JLTYPE = 'RM' OR BRANCHES.JLTYPE = 'BR')
+    </select>
+
+    <select id="getAllocationUnitCodeForNumericCif" resultType="string">
+        SELECT PUCOD FROM TFSDB2S.LNPAN4 BRANCHES WHERE
+            BRANCHES.POFFCD = #{branchUnitCode} AND
+            BRANCHES.PGDOBD = 'G'
+    </select>
+
+    <select id="getBranchUnitCodeForAlphanumericOfficerCode" resultMap="allocationUnitResultMap">
+        <!--SELECT JLRFBR FROM TFSDB2S.JHPARL BRANCHES WHERE-->
+        <!--BRANCHES.JLRFBR = #{branchUnitCode} AND-->
+        <!--(BRANCHES.JLTYPE = 'RM' OR BRANCHES.JLTYPE = 'BR')-->
+        SELECT
+        JLNLVL,JLUNIT
+        FROM TFSDB2S.JHPARL GROUPS
+        WHERE GROUPS.JLTYPE = 'BR'
+        AND GROUPS.JLUNIT =
+        (SELECT PUCOD FROM TFSDB2S.LNPAN4 BRANCHES WHERE
+        BRANCHES.POFFCD = #{officerCode}
+        AND BRANCHES.PGDOBD = 'G')
+    </select>
+
+    <select id="getBranchUnitCodeForAlphaOfficerCode" resultMap="allocationUnitResultMap">
+        <![CDATA[
+        SELECT
+        JLRFBR AS JLNLVL,JLUNIT
+        from TFSDB2S.JHPARL GROUPS
+        where
+            GROUPS.JLTYPE in ('BR')
+            AND JLUNIT LIKE '58%'
+        AND GROUPS.JLRFBR =
+            (SELECT JHOBR# from TFSDB2S.JHOFFR OFFICERS
+            WHERE OFFICERS.JHOOFF = #{officerCode} AND JHOBR# <> 0)
+        ]]>
+    </select>
+
+    <select id="getBranchUnitCodeForNumericOfficerCode" resultMap="allocationUnitResultMap">
+        <!--SELECT JLNLVL FROM TFSDB2S.LNPAN4 BRANCHES WHERE-->
+        <!--BRANCHES.POFFCD = #{officerCode} AND-->
+        <!--BRANCHES.PGDOBD = 'G'-->
+        <!-- the result is a 5 digit number. should i just get the last 3 digits? -->
+        SELECT JLNLVL,JLUNIT FROM TFSDB2S.JHPARL GROUPS
+        WHERE
+        GROUPS.JLRFBR = #{officerCode}
+        AND GROUPS.JLTYPE IN ('BR')
+    </select>
+    
+    <select id="getAllocationUnitCodeForAlphanumericOfficerCode" resultType="string">
+        SELECT
+              REL_MAN.PUCOD AS ALLOCATION_UNIT_CODE
+              FROM TFSDB2S.LNPAN4 REL_MAN
+              WHERE REL_MAN.PGDOBD = 'G'
+              AND REL_MAN.POFFCD = #{officerCode}
+    </select>
+    
+    <select id="getAllocationUnitCodeForAlphaOfficerCode" resultType="string">
+        SELECT
+              OFFICER.JLUNIT AS ALLOCATION_UNIT_CODE
+              FROM TFSDB2S.JHPARL OFFICER
+              JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+              WHERE OFFICER.JLUNIT LIKE '58%'
+              AND CLASS."JHOBR#" != 0
+              AND CLASS.JHOOFF = #{officerCode}
+    </select>
+    
+    <select id="getAllocationUnitCodeForNumericOfficerCode" resultType="string">
+        SELECT
+              GROUPS.JLUNIT AS ALLOCATION_UNIT_CODE
+              FROM TFSDB2S.JHPARL GROUPS
+              WHERE GROUPS.JLRFBR = #{officerCode}
+    </select>
+
+    <select id="getAccountOfficerOfCif" resultType="string">
+        select
+        CIF.CFOFFR AS OFFICER_CODE
+        from
+        TFSDB2S.CFMAST CIF
+        where CIF."CFCIF#" = #{cifNumber}
+    </select>
+
+    <select id="getSibsAllocationUnitCodeDetails" resultMap="sibsAllocationUnitCodeMap">
+        SELECT
+        A.BRANCH_UNIT_CODE AS BRANCH_UNIT_CODE,
+        B.ALLOCATION_UNIT_CODE AS ALLOCATION_UNIT_CODE,
+        CIF.CFOFFR AS OFFICER_CODE,
+        OFFICERS.JHONAM AS OFFICER_NAME,
+        C.ERROR AS ERROR_CODE
+        FROM TFSDB2S.CFMAST CIF
+        LEFT JOIN TFSDB2S.JHOFFR OFFICERS ON OFFICERS.JHOOFF = CIF.CFOFFR
+        LEFT JOIN
+        (
+           SELECT DISTINCT
+           RIGHT(OFFICER."JHOBR#", 3) AS BRANCH_UNIT_CODE,
+           OFFICER.JHOOFF
+           FROM TFSDB2S.JHOFFR OFFICER
+           INNER JOIN TFSDB2S.JHPARL ACCOUNT ON OFFICER."JHOBR#" = ACCOUNT.JLRFBR
+           AND OFFICER."JHOBR#" != 0
+           UNION
+           SELECT DISTINCT
+           RIGHT(OFFICER."JHOBR#", 3) AS BRANCH_UNIT_CODE,
+           OFFICER.JHOOFF
+           FROM TFSDB2S.JHOFFR OFFICER
+           WHERE OFFICER."JHOBR#" = 0 OR OFFICER."JHOBR#" NOT IN
+           (
+              SELECT
+              ACCOUNT.JLRFBR
+              FROM TFSDB2S.JHPARL ACCOUNT
+           )
+        )
+        A ON A.JHOOFF = CIF.CFOFFR
+        LEFT JOIN
+        (
+            SELECT
+            CHAR(ACCOUNT2.JLUNIT) AS ALLOCATION_UNIT_CODE,
+            CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE
+            FROM TFSDB2S.JHPARL ACCOUNT2
+            WHERE TRANSLATE
+         (
+            CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+         )
+         = '~~~'
+         AND ACCOUNT2.JLRFBR != 0
+         UNION
+         SELECT
+         CHAR(REL_MAN.PUCOD) AS ALLOCATION_UNIT_CODE,
+         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+         FROM TFSDB2S.LNPAN4 REL_MAN
+         WHERE REL_MAN.PGDOBD = 'G'
+         AND TRANSLATE
+         (
+            CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+         )
+         != '~~~'
+         UNION
+         SELECT
+         CHAR(OFFICER.JLUNIT) AS ALLOCATION_UNIT_CODE,
+         CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+         FROM TFSDB2S.JHPARL OFFICER
+         JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+         AND TRANSLATE
+         (
+            CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+         )
+         != '~~~'
+         AND CLASS."JHOBR#" != 0
+         WHERE CLASS.JHOOFF NOT IN
+         (
+            SELECT
+            CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+            FROM TFSDB2S.LNPAN4 REL_MAN
+            WHERE REL_MAN.PGDOBD = 'G'
+            AND TRANSLATE
+            (
+               CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+            )
+            != '~~~'
+         )
+         UNION
+         SELECT
+         CAST(NULL AS VARCHAR(5)) AS ALLOCATION_UNIT_CODE,
+         CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+         FROM TFSDB2S.JHOFFR CLASS
+         WHERE TRANSLATE
+         (
+            CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+         )
+         != '~~~'
+         AND CLASS."JHOBR#" = 0
+         AND CLASS.JHOOFF NOT IN
+         (
+            SELECT
+            CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+            FROM TFSDB2S.LNPAN4 REL_MAN
+            WHERE REL_MAN.PGDOBD = 'G'
+            AND TRANSLATE
+            (
+               CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+            )
+            != '~~~'
+         )
+        )
+        B ON B.OFFICER_CODE = CIF.CFOFFR
+        LEFT JOIN
+        (
+           SELECT
+           DISTINCT CIF2.CFOFFR AS OFFICER_CODE, 'B1' AS ERROR
+           FROM TFSDB2S.CFMAST CIF2
+           WHERE CIF2.CFOFFR NOT IN
+           (
+              SELECT
+              DISTINCT OFFICER.JHOOFF
+              FROM TFSDB2S.JHOFFR OFFICER
+           )
+           UNION
+           SELECT
+           DISTINCT CIF3.CFOFFR AS OFFICER_CODE, 'B2' AS ERROR
+           FROM TFSDB2S.CFMAST CIF3
+           WHERE CIF3.CFOFFR IN
+           (
+              SELECT
+              OFFICER.JHOOFF
+              FROM TFSDB2S.JHOFFR OFFICER
+              WHERE OFFICER."JHOBR#" = 0
+           )
+           UNION
+           SELECT
+           DISTINCT CIF4.CFOFFR AS OFFICER_CODE, B.ERROR AS ERROR
+           FROM TFSDB2S.CFMAST CIF4
+           INNER JOIN
+           (
+              SELECT
+              DISTINCT CIF5.CFOFFR AS OFFICER_CODE, 'A1' AS ERROR
+              FROM TFSDB2S.CFMAST CIF5
+              WHERE TRANSLATE
+              (
+                 CAST(CIF5.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+              )
+              = '~~~'
+              AND CIF5.CFOFFR NOT IN
+              (
+                 SELECT
+                 DISTINCT CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE
+                 FROM TFSDB2S.JHPARL ACCOUNT2
+                 WHERE TRANSLATE
+                 (
+                    CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 = '~~~'
+              )
+              UNION
+              SELECT
+              DISTINCT CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE, 'A2' AS ERROR
+              FROM TFSDB2S.JHPARL ACCOUNT2
+              WHERE TRANSLATE
+              (
+                 CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+              )
+              = '~~~'
+              AND ACCOUNT2.JLRFBR = 0
+              UNION
+              SELECT
+              DISTINCT CIF6.CFOFFR AS OFFICER_CODE, 'A3' AS ERROR
+              FROM TFSDB2S.CFMAST CIF6
+              WHERE TRANSLATE
+              (
+                 CAST(CIF6.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+              )
+              != '~~~'
+              AND CIF6.CFOFFR NOT IN
+              (
+                 SELECT
+                 DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+                 FROM TFSDB2S.JHOFFR CLASS
+                 WHERE TRANSLATE
+                 (
+                    CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 UNION
+                 SELECT
+                 CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                 FROM TFSDB2S.LNPAN4 REL_MAN
+                 WHERE REL_MAN.PGDOBD = 'G'
+                 AND TRANSLATE
+                 (
+                    CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+              )
+              UNION
+              SELECT
+              DISTINCT CIF6.CFOFFR AS OFFICER_CODE, 'A4' AS ERROR
+              FROM TFSDB2S.CFMAST CIF6
+              WHERE TRANSLATE
+              (
+                 CAST(CIF6.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+              )
+              != '~~~'
+              AND CIF6.CFOFFR IN
+              (
+                 SELECT
+                 DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+                 FROM TFSDB2S.JHOFFR CLASS
+                 WHERE TRANSLATE
+                 (
+                    CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 AND CLASS."JHOBR#" NOT IN
+                 (
+                    SELECT
+                    OFFICER.JLRFBR
+                    FROM TFSDB2S.JHPARL OFFICER
+                 )
+              )
+              AND CIF6.CFOFFR NOT IN
+              (
+                 SELECT
+                 CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                 FROM TFSDB2S.LNPAN4 REL_MAN
+                 WHERE REL_MAN.PGDOBD = 'G'
+                 AND TRANSLATE
+                 (
+                    CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+              )
+              UNION
+              SELECT
+              DISTINCT CIF2.CFOFFR AS OFFICER_CODE, 'A5' AS ERROR
+              FROM TFSDB2S.CFMAST CIF2
+              WHERE CIF2.CFOFFR IN
+              (
+                 SELECT
+                 DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+                 FROM TFSDB2S.JHPARL OFFICER
+                 JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+                 AND TRANSLATE
+                 (
+                    CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 AND CLASS."JHOBR#" != 0
+                 WHERE OFFICER.JLUNIT NOT LIKE '58%'
+              )
+              AND CIF2.CFOFFR NOT IN
+              (
+                 SELECT
+                 CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                 FROM TFSDB2S.LNPAN4 REL_MAN
+                 WHERE REL_MAN.PGDOBD = 'G'
+                 AND TRANSLATE
+                 (
+                    CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+              )
+              UNION
+              SELECT
+              DISTINCT CIF2.CFOFFR AS OFFICER_CODE, 'A6' AS ERROR
+              FROM TFSDB2S.CFMAST CIF2
+              WHERE CIF2.CFOFFR IN
+              (
+                 SELECT
+                 DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+                 FROM TFSDB2S.JHOFFR CLASS
+                 WHERE TRANSLATE
+                 (
+                    CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 AND CLASS."JHOBR#" = 0
+              )
+              AND CIF2.CFOFFR NOT IN
+              (
+                 SELECT
+                 CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                 FROM TFSDB2S.LNPAN4 REL_MAN
+                 WHERE REL_MAN.PGDOBD = 'G'
+                 AND TRANSLATE
+                 (
+                    CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+              )
+              UNION
+              SELECT
+              DISTINCT CIF2.CFOFFR AS OFFICER_CODE, '0' AS ERROR
+              FROM TFSDB2S.CFMAST CIF2
+              WHERE CIF2.CFOFFR IN
+              (
+                 SELECT
+                 CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE
+                 FROM TFSDB2S.JHPARL ACCOUNT2
+                 WHERE TRANSLATE
+                 (
+                    CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 = '~~~'
+                 AND ACCOUNT2.JLRFBR != 0
+                 UNION
+                 SELECT
+                 CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                 FROM TFSDB2S.LNPAN4 REL_MAN
+                 WHERE REL_MAN.PGDOBD = 'G'
+                 AND TRANSLATE
+                 (
+                    CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 UNION
+                 SELECT
+                 CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+                 FROM TFSDB2S.JHPARL OFFICER
+                 JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+                 AND TRANSLATE
+                 (
+                    CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                 )
+                 != '~~~'
+                 AND CLASS."JHOBR#" != 0
+                 WHERE OFFICER.JLUNIT LIKE '58%'
+                 AND CLASS.JHOOFF NOT IN
+                 (
+                    SELECT
+                    CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+                    FROM TFSDB2S.LNPAN4 REL_MAN
+                    WHERE REL_MAN.PGDOBD = 'G'
+                    AND TRANSLATE
+                    (
+                       CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+                    )
+                    != '~~~'
+                 )
+              )
+           )
+           B ON B.OFFICER_CODE = CIF4.CFOFFR
+           WHERE CIF4.CFOFFR IN
+           (
+              SELECT
+              DISTINCT OFFICER.JHOOFF
+              FROM TFSDB2S.JHOFFR OFFICER
+              WHERE OFFICER."JHOBR#" != 0
+           )
+        )
+        C ON CIF.CFOFFR = C.OFFICER_CODE
+        WHERE TRIM(CFOFFR) != ''
+        AND CIF."CFCIF#" = #{cifNumber}
+        UNION
+        SELECT
+        DISTINCT CAST(NULL AS VARCHAR(3)) AS BRANCH_UNIT_CODE,
+        CAST(NULL AS VARCHAR(5)) AS ALLOCATION_UNIT_CODE,
+        CAST(NULL AS VARCHAR(3)) AS OFFICER_CODE,
+        CAST(NULL AS VARCHAR(10)) AS OFFICER_NAME,
+        'C1' AS ERROR_CODE
+        FROM TFSDB2S.CFMAST
+        WHERE #{cifNumber} NOT IN (SELECT "CFCIF#" FROM TFSDB2S.CFMAST)
+    </select>
+
+     
+    <!-- Gets the appraisal details of the main cif with the most recent appraisal date and the most appraisal amount -->
+    <select id="getAppraisalDetails" resultMap="appraisalResultMap">
+<!--         SELECT MAX(APPRAISALDATE), COLLATERALID, COLLATERALTYPE, APPRAISEDVALUE, MAINCIFNUMBER FROM  -->
+<!--            (SELECT COLLATERALS.CCDCID COLLATERALID, COLLATERALS.CCAPNO MAINCIFNUMBER,  -->
+<!--                APPRAISALS.CCDAPV APPRAISEDVALUE, APPRAISALS.CCDAP6 APPRAISALDATE, APPRAISALS.CCDCOD COLLATERALTYPE -->
+<!--                FROM  -->
+<!--                UCDATULNS2.LNCOLX COLLATERALS            -->
+<!--            INNER JOIN  -->
+<!--                UCDATUBWC2.CFCOLD APPRAISALS ON -->
+<!--                APPRAISALS.CCDCID = COLLATERALS.CCDCID -->
+<!--            WHERE COLLATERALS.CCAPNO = #{mainCif}) AS TEMP GROUP BY APPRAISALVALUE,COLLATERALID,COLLATERALTYPE,MAINCIFNUMBER -->
+<!--         ORDER BY APPRAISALVALUE DESC FETCH FIRST 1 ROWS ONLY  -->
+         
+         SELECT COLLATERALS.CCDCID COLLATERALID, COLLATERALS.CCAPNO MAINCIFNUMBER, 
+                APPRAISALS.CCDAPV APPRAISEDVALUE, APPRAISALS.CCDAP6 APPRAISALDATE, APPRAISALS.CCDCOD COLLATERALTYPE
+                FROM 
+                TFSDB2S.LNCOLX COLLATERALS          
+            INNER JOIN
+                TFSDB2S.CFCOLD APPRAISALS ON
+                APPRAISALS.CCDCID = COLLATERALS.CCDCID
+          WHERE COLLATERALS.CCAPNO = #{mainCif}
+          ORDER BY CCDAP6 DESC, CCDAPV DESC 
+          FETCH FIRST 1 ROWS ONLY
+         
+                
+    </select>
+    
+    <select id="getIndustryCode" resultType="string">
+        <!-- refactored rest -->
+        <!-- SELECT ECOMCD FROM UCDATULNS2.LNCBCD CODES 
+            INNER JOIN
+            UCDATULNS2.LNMAST CIFS ON 
+                CIFS.ACCTNO = CODES.ACCTNO
+                AND CIFS.ACTYPE = CODES.ACTYPE
+            WHERE CIFS.CIFNO = #{cifNumber}
+            FETCH FIRST 1 ROWS ONLY -->
+        
+        <!--  original ucpb rest -->
+        SELECT ECOMCD FROM TFSDB2S.LNCBCD CODES
+            INNER JOIN 
+             (SELECT ACCTNO, ACTYPE FROM TFSDB2S.LNMAST WHERE CIFNO = #{cifNumber} FETCH FIRST 1 ROWS ONLY) CIFS
+             ON CIFS.ACCTNO = CODES.ACCTNO AND CIFS.ACTYPE = CODES.ACTYPE FETCH FIRST 1 ROWS ONLY
+    
+    </select>
+    
+    <select id="getEarmarkingAccountStatus" resultType="string">
+        SELECT STADSC FROM TFSDB2S.LNCLST
+        WHERE ACCTNO = #{documentNumber}
+    </select>
+
+    <select id="getFacilityReferenceNumber" resultType="string">
+        SELECT AFCPNO FROM TFSDB2S.LNAPPF
+        WHERE AFFCDE = #{facilityType}
+        AND AFSEQ = #{facilityId}
+        AND AFAPNO = #{mainCifNumber}
+    </select>
+
+
+    <!--   ER# 20140909-038  -->
+    <select id="getCibsMasterTable" resultMap="cibsMasterTableResultMap">
+        SELECT CFNCIF,CFNBRN,CFNSNM,CFNUID,CFNWID,CFNTIM,CFNDT7,
+        CFNDT6,CFNCFO,CFNUSR,CFNWDA,CFNDA7,CFNDA6,CFNTME,CFNAPR FROM TFSDB2S.CFNMSTA
+        WHERE CFNDA7 &gt; #{julianDate}             <!--   ER# 20140909-038  -->
+        AND CFNDA7 &lt; #{appDate}                  <!--   ER# 20140909-038  -->
+    </select>
+
+    <select id="getCibsDetailsTable" resultMap="cibsDetailsTableResultMap">
+        SELECT FACREF,OAANO,OFCODE,OFSEQ,OCFIN,OMAANO,OMFCDE,OMFSEQ,NAANO,NFCODE,
+         NFSEQ,NMAANO,NMFCDE,NMFSEQ,NCIFN,CHGDT6,CHGDT7,CHGTME FROM TFSDB2S.LNAALOG
+         WHERE CHGDT7 &gt; #{julianDate}            <!--   ER# 20140909-038  -->
+         AND CHGDT7 &lt; #{appDate}                 <!--   ER# 20140909-038  -->
+    </select>
+
+    <select id="getEarmarksTrade" resultMap="earmarkHashMap">
+        SELECT
+        SYSCOD,
+        TOSBAL,
+        TLOSBAL,
+        ORGLMT,
+        LORGAM,
+        CURTYP,
+        AFCPNO,
+        CIFNO,
+        ACCTNO
+        FROM TFSDB2S.LNCLST
+        WHERE SYSCOD='TF'
+    </select>
+
+    <update id="updateLocalOutstandingBalance">
+        UPDATE TFSDB2S.LNCLST
+            SET TLOSBAL = #{earmark.TLOSBAL}
+         WHERE ACCTNO = #{earmark.ACCTNO}
+    </update>
+
+    <update id="updateLocalOriginalAmount">
+        UPDATE TFSDB2S.LNCLST
+            SET LORGAM = #{earmark.LORGAM}
+         WHERE ACCTNO = #{earmark.ACCTNO}
+    </update>
+
+    <select id="getFacilityReferenceEntries" resultMap="facilityReferenceMap">
+        <![CDATA[
+            SELECT
+                AFFCDE,
+                "AFCIF#"
+            FROM TFSDB2S.LNAPPF
+        ]]>
+    </select>
+    
+    <update id="deleteOutstandingUnapprovedFacilityAvailment">
+        UPDATE TFSDB2S.LNCLST
+            SET
+                 TOSBAL = 0,
+                 TLOSBAL = 0,
+                 STADSC = 'CANCELLED'
+         WHERE ACCTNO IN 
+         <foreach item="documentNumber" index="index" collection="documentNumbers"
+                 open="(" separator="," close=")">
+            #{documentNumber}
+        </foreach>
+    </update>
+    
+    <select id="test" resultType="hashMap">
+        SELECT
+            ACCTNO,
+            TOSBAL,
+            TLOSBAL
+        FROM TFSDB2S.LNCLST
+        WHERE ACCTNO IN
+        <foreach item="documentNumber" index="index" collection="documentNumbers"
+                 open="(" separator="," close=")">
+            #{documentNumber}
+        </foreach>
+    </select>
+    
+    <delete id="deleteEarmarksTrade">
+        DELETE FROM TFSDB2S.LNCLST
+        WHERE SYSCOD = 'TF'
+    </delete>
+    
+    <update id="updateFacilityAvailment">
+        UPDATE TFSDB2S.LNCLST 
+            SET 
+                 CIFNO = #{availment.cifNumber},
+                 ORGLMT = #{availment.originalAmount},
+                 TOSBAL = #{availment.outstandingBalance},
+                 DATE = #{availment.transactionDate},
+                 TIME = #{availment.transactionTime},
+                 LORGAM = #{availment.phpAmount},
+                 TLOSBAL = #{availment.phpOutstandingBalance},
+                 CURTYP = #{availment.currencyCode},
+                 STADSC = UPPER(#{availment.statusDescription}),
+                 AFCPNO = #{availment.facilityReferenceNumber}
+         WHERE ACCTNO = #{availment.documentNumber}
+    </update>
+    
+    <insert id="insertFacilityAvailment">
+        INSERT INTO TFSDB2S.LNCLST (SYSCOD,CIFNO,ACCTNO,ORGLMT,TOSBAL,PRODUCT,DATE,TIME,LORGAM,TLOSBAL,CURTYP,ALFLG,STADSC,AFCPNO,NAME,CIFID,CIFCOD,
+         PRODSC,ADBBAL,ORGSBL,LOCSBL)
+            VALUES
+        ('TF',#{availment.cifNumber},#{availment.documentNumber},#{availment.originalAmount},#{availment.outstandingBalance},'F2',#{availment.transactionDate},
+        #{availment.transactionTime},
+        #{availment.phpAmount},#{availment.phpOutstandingBalance},#{availment.currencyCode},'A',UPPER(#{availment.statusDescription}),#{availment.facilityReferenceNumber},
+        ' ',' ',' ',' ',0,0,0)
+    </insert>
+
+    <select id="selectEarmarksTrade" resultType="hashMap">
+        SELECT * FROM TFSDB2S.LNCLST WHERE SYSCOD = 'TF'
+    </select>
+    
+     <select id="getlnclstCIFNO" resultMap="lnclstNormalization">
+        SELECT CIFNO, ACCTNO FROM TFSDB2S.LNCLST WHERE SYSCOD = 'TF'
+    </select>
+
+
+    <update id="updateLnclstNorm">
+        UPDATE TFSDB2S.LNCLST
+            SET CIFNO = #{newCIFNO}
+         WHERE CIFNO = #{oldCIFNO}
+         and SYSCOD = 'TF'
+    </update>
+    
+    <insert id="reinsertFacilityAvailment">
+        INSERT INTO TFSDB2S.LNCLST (SYSCOD, CIFNO, ACCTNO, NAME, CIFID,
+        CIFCOD, ORGLMT, TOSBAL, PRODUCT, PRODSC, DATE, TIME, LORGAM, TLOSBAL,
+        CURTYP, ALFLG, ADBBAL, STADSC, AFCPNO, ORGSBL, LOCSBL) VALUES
+        (#{earmarking.SYSCOD}, #{earmarking.CIFNO}, #{earmarking.ACCTNO}, #{earmarking.NAME},
+        #{earmarking.CIFID}, #{earmarking.CIFCOD}, #{earmarking.ORGLMT},
+        #{earmarking.TOSBAL}, #{earmarking.PRODUCT}, #{earmarking.PRODSC},
+        #{earmarking.DATE}, #{earmarking.TIME}, #{earmarking.LORGAM},
+        #{earmarking.TLOSBAL}, #{earmarking.CURTYP}, #{earmarking.ALFLG},
+        #{earmarking.ADBBAL}, #{earmarking.STADSC}, #{earmarking.AFCPNO},
+        #{earmarking.ORGSBL}, #{earmarking.LOCSBL})
+    </insert>
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.payment.EtsPayment" table="EtsPayment">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <property name="chargeType" column="chargeType" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.ChargeType</param>
+            </type>
+        </property>
+
+        <property name="status" column="status" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.payment.enumTypes.PaymentStatus</param>
+            </type>
+        </property>
+
+        <!-- turned off lazy loading for payment details. since the number payment details per payment won't reach more than 3,
+            i figured that this is the more optimal approach. Doing this will also save us the trouble of marking the rest services
+            with @Transactional *Robbie -->
+        <set name="details" cascade="save-update, delete-orphan" lazy="false">
+            <key>
+                <column name="paymentId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.payment.EtsPaymentDetail" />
+        </set>
+
+        <property name="paidDate" column="paidDate" type="java.util.Date" />
+
+    </class>
+
+</hibernate-mapping>

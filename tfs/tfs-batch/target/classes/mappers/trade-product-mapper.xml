@@ -1,0 +1,3947 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: SCR IBD-16-0219-01
+	SCR/ER Description: Generate CIC File
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 02/24/2016
+	Program [Revision] Details: Add some select script for extracting of the records for CIC file 
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper
+-->
+		
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: SCR IBD-16-0219-01
+	SCR/ER Description: Generate CIC File
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 03/30/2016
+	Program [Revision] Details: Modify the select script for extracting of the records for CIC file to get the correct Branch Unit Code and not fixed to 909, also fix the Credit limit.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper
+	
+	(revision)
+	SCR/ER Number: ER# 20160505-030
+	SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 – only Tenor was amended from sight to usance.
+	 						The AE are okay, debit the contingent for sight and credit to usance. But the DW Allocation reported the LC once 
+	 						and the ADB are not reported separately  for sight and usance.
+						2.  Adjustment on Standby LC tagging was not correctly reported in DW
+	[Revised by:] Lymuel Arrome Saul
+	[Date revised:] 05/05/2016
+	Program [Revision] Details: Added select script (checkIfTenorChange, getRegularSightCloseDate, getOpeningStandbyTagging, and getRefProductInfo)
+								for extraction and checking of change of tenor and adjustment of standby tagging.
+	Date deployment: 
+	Member Type: XML
+	Project: CORE
+	Project Name: trade-product-mapper.xml		
+-->
+		
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  ER# 20140909-038
+	SCR/ER Description: CIF Normalization Not Working in TFS
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/05/2016
+	Program [Revision] Details:Add Method to select TRADESERVICE and SERVICEINSTRUCTION tables.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper	
+-->
+
+
+<!--
+ * PROLOGUE
+ * SCR/ER Description: Inclusion of EBP transactions in Master file
+ *	[Revised by:] Jesse James Joson
+ *	Program [Revision] Details: Revise the existing select for EBP transactions.
+ *	Date deployment: 6/16/2016 
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper	
+-->
+
+
+<!--
+ * PROLOGUE
+ * SCR/ER Description: 
+ *	[Revised by:] Daniel Jericho B. Prochina
+ *	Program [Revision] Details: Added select, insert and delete for ITRS Interface.
+ *	Date deployment: 
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper	
+-->
+
+<!--
+ * PROLOGUE
+ * SCR/ER Description: 20181217-064 - The program that generates MT 707 during LC Amendment extracts the expiry country code in field 31D instead of the expiry country name.
+ *	[Revised by:] Jesse James Joson
+ *	Program [Revision] Details: Added select  to retrieve the Country Name based on Country Code
+ *	Date deployment: 12/18/2018
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: trade-product-mapper	
+-->
+
+<mapper namespace="com.ucpb.tfs.batch.report.dw.dao.TradeProductDao">
+
+    <resultMap id="tradeProductResultMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+        <result property="creationTradeServiceId" column="CREATIONTRADESERVICEID"/>
+        <result property="applicationAccountId" column="DOCUMENTNUMBER"/>
+        <result property="facilityId" column="FACILITYID"/>
+        <result property="facilityType" column="FACILITYTYPE"/>
+        <result property="customerId" column="CIFNUMBER"/>
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>
+        <!-- TAKEN FROM product id-->
+         <result property="accountStatusId" column="STATUS"/>
+        <!-- PROCESSING UNIT CODE -->
+        <result property="branchId" column="PROCESSINGUNITCODE"/>
+        <!-- UCPB bank Id FIXED VALUE 29 -->
+        <!--<result property="entityId" column=""/>-->
+        <!-- trade product code (trade will keep table of product codes)-->
+        <result property="productId" column="PRODUCTID"/>
+        <result property="outstandingBookCode" column="BOOK_CODE"/>
+        <result property="outstandingCurrencyId" column="CURRENCY"/>
+        <result property="openDate" column="PROCESSDATE"/>
+        <result property="closedDate" column="DATECLOSED"/>
+        <result property="cancelledDate" column="DATECANCELLED"/>
+        <!-- Should only be populated if LC is expired -->
+        <result property="maturityDate" column="EXPIRYDATE"/>
+        <result property="lastReinstatementDate" column="LASTREINSTATEMENTDATE"/>
+        <result property="outstandingContingentAssets" column="OUTSTANDINGBALANCE"/>
+        <result property="outstandingContingentLiabilities" column="OUTSTANDINGBALANCE"/>
+
+        <!-- FIXED VALUE 0-->
+        <!--<result property="phpOutstandingContingentAssets" column="DOCUMENTNUMBER"/>-->
+        <!--<result property="phpOutstandingContingentLiabilities" column="DOCUMENTNUMBER"/>-->
+        <result property="negotiationDate" column="LASTNEGOTIATIONDATE"/>
+        <result property="lastAmendmentDate" column="LASTAMENDMENTDATE"/>
+
+        <result property="billOfLadingDate" column="BILLOFLADINGDATE"/>
+        <result property="negoAmount" column="NEGOTIATIONAMOUNT"/>
+
+        <!-- fixed value of 0-->
+        <!--<result property="phpNegoAmount" column="DOCUMENTNUMBER"/>-->
+
+        <result property="transactionCode" column=""/>
+        <result property="clientCbCode" column="IMPORTERCBCODE"/>
+        <result property="countryCode" column="BSPCOUNTRYCODE"/>
+        <result property="uaMaturityDate" column="UAMATURITYDATE"/>
+<!--         <result property="importStatusCode" column="TODO:"/>
+ -->
+        <!-- is now in the MasterFileRecord -->
+        <!--<result property="appraisalDate" column="DOCUMENTNUMBER"/>-->
+
+        <!-- GET GL CODES BASED ON LCDOCUMENTTYPE (FX,DM), LCTENOR (SIGHT, USANCE), LCTYPE (REGULAR, CASH, STANDBY, DEFFERED, REVOLVING) -->
+        <result property="contingentAssetsGlNumber" column="DEBIT_CODE"/>
+        <result property="contingentLiabilitiesGlNumber" column="CREDIT_CODE"/>
+        <result property="correspondingBank" column="TODO:"/>
+        <!--<result property="modeOfPayment" column="MODEOFPAYMENT"/>-->
+        <result property="documentClass" column="DOCUMENTCLASS"/>
+        <result property="documentType" column="DOCUMENTTYPE"/>
+		<result property="documentSubType1" column="DOCUMENTSUBTYPE1"/>
+		<result property="documentSubType2" column="DOCUMENTSUBTYPE2"/>
+        <result property="externalClientTinNumber" column="EXTERNAL_CLIENT_TINNUMBER"/>
+        <result property="externalClientCifNumber" column="EXTERNAL_CLIENTCIF"/>
+        <result property="externalClientFirstName" column="EXTERNAL_CLIENT_FIRST_NAME"/>
+        <result property="externalClientMiddleName" column="EXTERNAL_CLIENT_MIDDLE_NAME"/>
+        <result property="externalClientLastName" column="EXTERNAL_CLIENT_LAST_NAME"/>
+        <result property="glAccountType" column="GL_ACCT_TYPE"/>
+        <result property="settlementBookCode" column="BOOKINGACCOUNTTYPE"/>
+        <result property="cashFlag" column="CASHFLAG"/>
+        <result property="negoNumber" column="NEGOTIATIONNUMBER"/>
+        <result property="cashAmount" column="CASHAMOUNT"/>
+		<result property="originalAmount" column="OUTSTANDINGBALANCE"/>
+		<result property="previousProductID" column="TEMP_UCPBPRODID"/>
+		<result property="previousAssetsGlNumber" column="TEMP_DEBITCODE"/>
+		<result property="previousLiabilitiesGlNumber" column="TEMP_CREDITCODE"/>
+		<result property="totalNegotiatedAmount" column="NEGOTIATED_AMOUNT"/> 
+		<result property="standbyTagging" column="STANDBYTAGGING"/>          
+    </resultMap>
+
+	<!-- MODE OF PAYMENT 
+		1 - ALL LCS 
+		3 - DA
+		4 - OA
+	 -->
+
+
+    <resultMap id="adbtradeProductResultMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+        <result property="applicationAccountId" column="DOCUMENTNUMBER"/>
+        <result property="facilityId" column="FACILITYID"/>
+        <result property="customerId" column="CIFNUMBER"/>
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>
+        <!-- TAKEN FROM product id-->
+        <!--    <result property="accountStatusId" column=""/> -->    <!-- Account status is now taken from sibs -->
+        <!-- PROCESSING UNIT CODE -->
+        <result property="branchId" column="PROCESSINGUNITCODE"/>
+        <!-- UCPB bank Id FIXED VALUE 29 -->
+        <!--<result property="entityId" column=""/>-->
+        <!-- trade product code (trade will keep table of product codes)-->
+        <!--<result property="productId" column="PRODUCTTYPE"/>-->
+        <result property="outstandingBookCode" column="BOOK_CODE"/>
+        <result property="outstandingCurrencyId" column="CURRENCY"/>
+        <result property="openDate" column="PROCESSDATE"/>
+        <result property="closedDate" column="DATECLOSED"/>
+        <!-- Should only be populated if LC is expired -->
+        <result property="maturityDate" column="EXPIRYDATE"/>
+        <result property="lastReinstatementDate" column="LASTREINSTATEMENTDATE"/>
+        <result property="outstandingContingentAssets" column="OUTSTANDINGBALANCE"/>
+        <result property="outstandingContingentLiabilities" column="OUTSTANDINGBALANCE"/>
+
+        <!-- FIXED VALUE 0-->
+        <!--<result property="phpOutstandingContingentAssets" column="DOCUMENTNUMBER"/>-->
+        <!--<result property="phpOutstandingContingentLiabilities" column="DOCUMENTNUMBER"/>-->
+        <result property="negotiationDate" column="LASTNEGOTIATIONDATE"/>
+        <result property="lastAmendmentDate" column="LASTAMENDMENTDATE"/>
+
+        <!-- NOT YET IN THE TABLE/SYSTEM-->
+        <!--<result property="billOfLadingDate" column="DOCUMENTNUMBER"/>-->
+        <result property="negoAmount" column="NEGOTIATIONAMOUNT"/>
+
+        <!-- fixed value of 0-->
+        <!--<result property="phpNegoAmount" column="DOCUMENTNUMBER"/>-->
+
+        <result property="transactionCode" column="TRANSACTIONCODE"/>
+        <result property="clientCbCode" column="EXPORTERCBCODE"/>
+        <result property="countryCode" column="BSPCOUNTRYCODE"/>
+        <!--         <result property="importStatusCode" column="TODO:"/>
+        -->
+        <!-- is now in the MasterFileRecord -->
+        <!--<result property="appraisalDate" column="DOCUMENTNUMBER"/>-->
+
+        <!-- GET GL CODES BASED ON LCDOCUMENTTYPE (FX,DM), LCTENOR (SIGHT, USANCE), LCTYPE (REGULAR, CASH, STANDBY, DEFFERED, REVOLVING) -->
+        <result property="contingentAssetsGlNumber" column="DEBIT_CODE"/>
+        <result property="contingentLiabilitiesGlNumber" column="CREDIT_CODE"/>
+        <result property="correspondingBank" column="TODO:"/>
+        <!--<result property="modeOfPayment" column="MODEOFPAYMENT"/>-->
+        <result property="documentSubType1" column="documentSubType1"/>
+        <result property="aggregateBalance" column="TOTALBALANCE"/>
+        <result property="settlementBookCode" column="BOOKINGACCOUNTTYPE"/>
+    </resultMap>
+
+	<resultMap id="tradeProductExceptionResultMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+		<result property="exceptionCode" column="EXCEPTIONCODE"/>
+		<result property="officerCode" column="OFFICERCODE"/>
+        <result property="creationTradeServiceId" column="CREATIONTRADESERVICEID"/>
+        <result property="applicationAccountId" column="DOCUMENTNUMBER"/>
+        <result property="facilityId" column="FACILITYID"/>
+        <result property="facilityType" column="FACILITYTYPE"/>
+        <result property="customerId" column="CIFNUMBER"/>
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>
+        <!-- TAKEN FROM product id-->
+         <result property="accountStatusId" column="STATUS"/>
+        <!-- PROCESSING UNIT CODE -->
+        <result property="branchId" column="PROCESSINGUNITCODE"/>
+        <!-- UCPB bank Id FIXED VALUE 29 -->
+        <!--<result property="entityId" column=""/>-->
+        <!-- trade product code (trade will keep table of product codes)-->
+        <result property="productId" column="PRODUCTID"/>
+        <result property="outstandingBookCode" column="BOOK_CODE"/>
+        <result property="outstandingCurrencyId" column="CURRENCY"/>
+        <result property="openDate" column="PROCESSDATE"/>
+        <result property="closedDate" column="DATECLOSED"/>
+        <result property="cancelledDate" column="DATECANCELLED"/>
+        <!-- Should only be populated if LC is expired -->
+        <result property="maturityDate" column="EXPIRYDATE"/>
+        <result property="lastReinstatementDate" column="LASTREINSTATEMENTDATE"/>
+        <result property="outstandingContingentAssets" column="OUTSTANDINGBALANCE"/>
+        <result property="outstandingContingentLiabilities" column="OUTSTANDINGBALANCE"/>
+
+        <!-- FIXED VALUE 0-->
+        <!--<result property="phpOutstandingContingentAssets" column="DOCUMENTNUMBER"/>-->
+        <!--<result property="phpOutstandingContingentLiabilities" column="DOCUMENTNUMBER"/>-->
+        <result property="negotiationDate" column="LASTNEGOTIATIONDATE"/>
+        <result property="lastAmendmentDate" column="LASTAMENDMENTDATE"/>
+
+        <result property="billOfLadingDate" column="BILLOFLADINGDATE"/>
+        <result property="negoAmount" column="NEGOTIATIONAMOUNT"/>
+
+        <!-- fixed value of 0-->
+        <!--<result property="phpNegoAmount" column="DOCUMENTNUMBER"/>-->
+
+        <result property="transactionCode" column=""/>
+        <result property="clientCbCode" column="IMPORTERCBCODE"/>
+        <result property="countryCode" column="BSPCOUNTRYCODE"/>
+        <result property="uaMaturityDate" column="UAMATURITYDATE"/>
+<!--         <result property="importStatusCode" column="TODO:"/>
+ -->
+        <!-- is now in the MasterFileRecord -->
+        <!--<result property="appraisalDate" column="DOCUMENTNUMBER"/>-->
+
+        <!-- GET GL CODES BASED ON LCDOCUMENTTYPE (FX,DM), LCTENOR (SIGHT, USANCE), LCTYPE (REGULAR, CASH, STANDBY, DEFFERED, REVOLVING) -->
+        <result property="contingentAssetsGlNumber" column="DEBIT_CODE"/>
+        <result property="contingentLiabilitiesGlNumber" column="CREDIT_CODE"/>
+        <result property="correspondingBank" column="TODO:"/>
+        <!--<result property="modeOfPayment" column="MODEOFPAYMENT"/>-->
+        <result property="documentClass" column="DOCUMENTCLASS"/>
+        <result property="documentType" column="DOCUMENTTYPE"/>
+		<result property="documentSubType1" column="DOCUMENTSUBTYPE1"/>
+		<result property="documentSubType2" column="DOCUMENTSUBTYPE2"/>
+        <result property="externalClientTinNumber" column="EXTERNAL_CLIENT_TINNUMBER"/>
+        <result property="externalClientCifNumber" column="EXTERNAL_CLIENTCIF"/>
+        <result property="externalClientFirstName" column="EXTERNAL_CLIENT_FIRST_NAME"/>
+        <result property="externalClientMiddleName" column="EXTERNAL_CLIENT_MIDDLE_NAME"/>
+        <result property="externalClientLastName" column="EXTERNAL_CLIENT_LAST_NAME"/>
+        <result property="glAccountType" column="GL_ACCT_TYPE"/>
+        <result property="settlementBookCode" column="BOOKINGACCOUNTTYPE"/>
+        <result property="cashFlag" column="CASHFLAG"/>
+        <result property="negoNumber" column="NEGOTIATIONNUMBER"/>
+        <result property="cashAmount" column="CASHAMOUNT"/>
+		<result property="originalAmount" column="OUTSTANDINGBALANCE"/>
+		<result property="previousProductID" column="TEMP_UCPBPRODID"/>
+		<result property="previousAssetsGlNumber" column="TEMP_DEBITCODE"/>
+		<result property="previousLiabilitiesGlNumber" column="TEMP_CREDITCODE"/>
+		<result property="totalNegotiatedAmount" column="NEGOTIATED_AMOUNT"/>            
+    </resultMap>
+
+    <resultMap id="itrsResultMap2" type="com.ucpb.tfs.batch.report.dw.ItrsRecord">
+        <result property="documentNumber" column="DOCUMENTNUMBER"/>
+        <result property="revId" column="REV_ID"/>
+        <result property="particulars" column="PARTICULARS"/>
+        <result property="transactionCode" column="TRCODE"/>
+        <result property="clientName" column="CLIENTNAME"/>
+        <result property="exporterCode" column="PARTICIPANTCODE"/>
+        <result property="tinNumber1" column="TIN1"/>
+        <result property="commodityCode" column="COMMODITYCODE"/>
+        <result property="paymentMode" column="MODPAY"/>
+        <result property="countryCode" column="COUNTRYCODE"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="amount" column="AMTORIG1"/>
+        <result property="form" column="FORM"/>
+        <result property="tradeserviceId" column="TRADESERVICEID"/>
+    </resultMap>
+    
+    <resultMap id="itrsResultMap3" type="com.ucpb.tfs.batch.report.dw.ItrsRecord">
+        <result property="documentNumber" column="DOCUMENTNUMBER"/>
+        <result property="revId" column="REV_ID"/>
+        <result property="transactionCode" column="TRCODE"/>
+        <result property="paymentMode" column="MODPAY"/>
+        <result property="importStatusCode" column="IMPSCD"/>
+        <result property="lcNumber" column="LCNO"/>
+        <result property="referenceNumber" column="BRN"/>
+        <result property="acceptanceDate" column="BILDTE"/>
+        <result property="clientName" column="CLIENTNAME"/>
+        <result property="importerCode" column="PARTICIPANTCODE"/>
+        <result property="tinNumber2" column="TIN2"/>
+        <result property="newMaturity" column="NMATDTE"/>
+        <result property="countryCode" column="CTRYCD"/>
+        <result property="currency" column="CURCDE1"/>
+        <result property="amount" column="AMTORIG1"/>
+        <result property="form" column="FORM"/>
+    </resultMap>
+    
+    <resultMap id="itrsResultMap4" type="com.ucpb.tfs.batch.report.dw.ItrsRecord">
+        <result property="form" column="FORM"/>
+        <result property="transactionCode" column="TRANSACTION"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="amount" column="AMOUNT"/>
+        <result property="countryCode" column="COUNTRY"/>
+        <result property="importerCode" column="IMPORTER"/>
+        <result property="commodityCode" column="COMMODITY"/>
+        <result property="paymentMode" column="PAYMENTMODE"/>
+        <result property="lcNumber" column="LCNUMBER"/>
+        <result property="referenceNumber" column="BRNUMBER"/>
+        <result property="acceptanceDate" column="ACCEPTANCEDATE"/>
+        <result property="originalMaturity" column="ORIGANALMATURITY"/>
+        <result property="newMaturity" column="NEWMATURITY"/>
+        <result property="clientName" column="CLIENTNAME"/>
+        <result property="tradeserviceId" column="TRADESERVICEID"/>
+        <result property="documentNumber" column="DOCUMENTNUMBER"/>
+    </resultMap>
+    
+      <resultMap id="getAllCdtBranchMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+        <result property="branchId" column="UNIT_CODE"/>
+     </resultMap>
+     
+     <resultMap id="getAllCdtProductMap" type="com.ucpb.tfs.batch.report.dw.TradeProduct">
+        <result property="productId" column="DOCUMENT_TYPE"/>
+     </resultMap>
+    
+    <select id="getAllCdtBranch" resultMap="getAllCdtBranchMap">
+        SELECT DISTINCT UNIT_CODE FROM DOC_NUM_SEQUENCE ORDER BY UNIT_CODE ASC
+    </select>
+    
+    <select id="getAllCdtProduct" resultMap="getAllCdtProductMap">
+        SELECT DISTINCT DOCUMENT_TYPE FROM DOC_NUM_SEQUENCE ORDER BY DOCUMENT_TYPE ASC
+    </select>
+    
+    <!-- LC -->
+    <select id="getActiveLettersOfCredit" resultMap="tradeProductResultMap">
+        SELECT
+                PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+                TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+                LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                TP.FACILITYREFERENCENUMBER AS FACILITYID,
+                TP.CIFNUMBER AS CIFNUMBER,
+                TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+                (CASE WHEN (DAYS(LC.EXPIRYDATE) &lt; DAYS(cast(#{cutoffDate} as timestamp)) AND MONTH(LC.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(LC.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN'))
+                    THEN 'EXPIRED'
+                    WHEN (DATE(LC.EXPIRYDATE) &lt; DATE(cast(#{cutoffDate} as timestamp)) AND LC.TYPE != 'CASH' AND (TP.STATUS != 'CLOSED'))
+                    THEN 'EXPIRED'
+                    ELSE TP.STATUS
+                END
+                ) AS STATUS,
+                TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+                'RG' as BOOK_CODE,<!-- GL.BOOK_CODE AS BOOK_CODE,-->
+                29 AS ENTITY_ID,<!-- ENTITY ID GOES HERE -->
+                TP.CURRENCY AS CURRENCY,
+                PRODUCT.UCPBPRODUCTID AS PRODUCTID, <!-- Product Id -->
+                CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+                CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+                CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+                CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+                LC.PROCESSDATE, <!-- Lc Open Date -->
+                LC.LASTNEGOTIATIONDATE,
+                LC.DATECLOSED,
+                LC.CANCELLATIONDATE AS DATECANCELLED,
+                LC.EXPIRYDATE, <!-- maturity date -->
+                LC.LASTAMENDMENTDATE,
+                LC.LASTREINSTATEMENTDATE,
+                LC.CASHFLAG AS CASHFLAG,
+                LC.TOTALNEGOTIATEDCASHAMOUNT AS NEGOTIATED_AMOUNT,
+                TP.AMOUNT AS ORIGINAL_AMOUNT,
+                -- LC.OUTSTANDINGBALANCE, <!-- OPENING AMOUNT -->
+                (CASE WHEN ((DAYS(LC.EXPIRYDATE) &lt; DAYS(cast(#{cutoffDate} as timestamp)) AND MONTH(LC.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(LC.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND (DAYS(LC.LASTNEGOTIATIONDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTNEGOTIATIONDATE IS NULL) AND (DAYS(LC.LASTAMENDMENTDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTAMENDMENTDATE IS NULL) AND (DAYS(LC.LASTREINSTATEMENTDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTREINSTATEMENTDATE IS NULL)) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN' OR TP.STATUS = 'REINSTATED'))
+                    THEN 0
+                  ELSE
+                    CASE WHEN TP.STATUS = 'CANCELLED'
+                     THEN 0
+                     ELSE
+                        CASE WHEN LC.OUTSTANDINGBALANCE &lt; 0
+                         THEN 0
+                         ELSE LC.OUTSTANDINGBALANCE
+                        END
+                    END
+                END
+                ) AS OUTSTANDINGBALANCE,
+                PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+                PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+                PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+                BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE, <!-- PUT LAST SETTLEMENT BOOK CODE HERE -->
+                'BILLOFLADINGDATE',
+                <!-- UA MATURITY DATE -->
+                <!-- Appraisal date -->
+                <!-- Credit facility code -->
+                <!-- Counterparty code (BSP Creditor Code? -->
+                <!-- Import status code -->
+                LC.EXPIRYCOUNTRYCODE AS BSPCOUNTRYCODE,
+                <!-- Client CB Code -->
+                <!-- Transaction Code: Exports:020 Import Advances:040 -->
+                <!-- 33.	Mode of Payment  -->
+                <!-- Industry Code -->
+                <!-- -->
+                TS.PROCESSINGUNITCODE,
+                NEGO.NEGOTIATIONAMOUNT,
+                TP.PRODUCTTYPE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+                TP.FACILITYTYPE AS FACILITYTYPE,
+                NEGO.UAMATURITYDATE AS UAMATURITYDATE,
+                (CASE WHEN AMOUNT.CASHAMOUNT IS NULL THEN 0 ELSE AMOUNT.CASHAMOUNT END) AS CASHAMOUNT,
+                PREV_DETAILS.TEMP_UCPBPRODID AS TEMP_UCPBPRODID,
+                PREV_DETAILS.TEMP_DEBITCODE AS TEMP_DEBITCODE,
+                PREV_DETAILS.TEMP_CREDITCODE AS TEMP_CREDITCODE
+        FROM
+            LETTEROFCREDIT_AUDIT LC
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+		
+		LEFT JOIN
+		(
+			SELECT temp000.CASHAMOUNT, temp000.REV_ID , temp000.DOCUMENTNUMBER
+			FROM LETTEROFCREDIT_AUDIT temp000
+			WHERE temp000.REV_ID =
+			(select rev_id from LETTEROFCREDIT_AUDIT x join revinfo y on x.rev_id = y.rev where x.documentNumber =temp000.DOCUMENTNUMBER   and
+	            days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+	            AND YEAR(x.LASTMODIFIEDDATE)  &lt;= YEAR(cast(#{cutoffDate} as timestamp))
+	            order by y.revtstmp desc, y.rev desc fetch first 1 rows only
+			) 
+				<!-- (SELECT MAX(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = temp000.DOCUMENTNUMBER
+					AND days(loc.LASTMODIFIEDDATE)  &lt;= days(cast(#{cutoffDate} as timestamp))
+					AND MONTH(loc.LASTMODIFIEDDATE) &lt;= MONTH(cast(#{cutoffDate} as timestamp))
+					AND YEAR(loc.LASTMODIFIEDDATE)  &lt;= YEAR(cast(#{cutoffDate} as timestamp))
+				) -->	
+		) AMOUNT
+		
+		ON AMOUNT.REV_ID =LC.REV_ID AND AMOUNT.DOCUMENTNUMBER = LC.DOCUMENTNUMBER 
+		
+        <!-- Get the last negotiation performed as of cutOffDate -->
+        LEFT JOIN
+            (
+            select
+                temp00.DOCUMENTNUMBER,
+                temp00.NEGOTIATIONVALUEDATE,
+                SUM(temp00.NEGOTIATIONAMOUNT) as NEGOTIATIONAMOUNT,
+                UAMATURITYDATE
+                from
+                (select
+                lcn.id,
+                lcn.DOCUMENTNUMBER,
+                NEGOTIATIONAMOUNT,
+                NEGOTIATIONVALUEDATE,
+                UAMATURITYDATE
+            FROM LCNEGOTIATION lcn
+            INNER JOIN
+              (select DOCUMENTNUMBER, MAX(NEGOTIATIONVALUEDATE) AS negoValDate, MAX(LOANMATURITYDATE) AS UAMATURITYDATE
+            FROM LCNEGOTIATION GROUP BY DOCUMENTNUMBER) as mlcn
+            ON lcn.DOCUMENTNUMBER = mlcn.DOCUMENTNUMBER AND lcn.NEGOTIATIONVALUEDATE = mlcn.negoValDate
+            where days(lcn.NEGOTIATIONVALUEDATE) &lt;= days(cast(#{cutoffDate} as timestamp))
+            order by lcn.NEGOTIATIONVALUEDATE desc
+            ) as temp00
+            GROUP BY temp00.DOCUMENTNUMBER, temp00.NEGOTIATIONVALUEDATE, temp00.UAMATURITYDATE
+            ) NEGO
+        ON
+          NEGO.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+
+        <!-- document details during creation -->
+        LEFT JOIN
+            (SELECT
+                TS.TRADEPRODUCTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.TRADESERVICEID
+            FROM TRADESERVICE TS
+            INNER JOIN
+                LETTEROFCREDIT_AUDIT LCA
+            ON
+                TS.TRADEPRODUCTNUMBER = LCA.DOCUMENTNUMBER  <!-- TradeProductNumber for LC -->
+            WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            AND
+                TS.DOCUMENTCLASS = 'LC'
+            AND
+                TS.SERVICETYPE = 'OPENING'  <!-- OPENING so this is unique -->
+            AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+            GROUP BY TS.TRADEPRODUCTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2
+            ) TS
+        ON
+          TS.TRADEPRODUCTNUMBER = LC.DOCUMENTNUMBER
+
+        LEFT JOIN
+          REFPRODUCT PRODUCT
+        ON
+          LC.DOCUMENTTYPE = PRODUCT.DOCUMENTTYPE
+        AND PRODUCT.DOCUMENTCLASS = 'LC'
+        AND LC.TYPE = PRODUCT.DOCUMENTSUBTYPE1
+        AND ((PRODUCT.DOCUMENTSUBTYPE2 = LC.TENOR) OR (PRODUCT.DOCUMENTSUBTYPE2 IS NULL AND LC.TENOR IS NULL))
+        AND (LC.STANDBYTAGGING = PRODUCT.DOCUMENTSUBTYPE3 or LC.STANDBYTAGGING IS NULL)
+        <!--AND PRODUCT.DOCUMENTSUBTYPE1 != 'CASH'-->
+
+        LEFT JOIN
+          REF_TFCUSTMR CUSTOMER
+        ON
+          LC.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+          BOOKINGSETTLEMENT BOOK
+        ON
+          BOOK.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+		LEFT JOIN
+	    (
+	   		SELECT 
+	   			TEMP_TABLE.DOCUMENTNUMBER,
+	   			TEMPREF.UCPBPRODUCTID AS TEMP_UCPBPRODID,
+	   			TEMPREF.CONTINGENTACCOUNTINGCODE AS TEMP_DEBITCODE,
+	   			TEMPREF.CONTRACONTINGENTACCOUNTINGCODE AS TEMP_CREDITCODE 
+	   		FROM
+	   			REFPRODUCT TEMPREF
+		   	INNER JOIN
+		   	(
+				SELECT temp000.TYPE,temp000.TENOR, temp000.REV_ID , temp000.DOCUMENTNUMBER, temp000.DOCUMENTTYPE
+				FROM LETTEROFCREDIT_AUDIT temp000
+				WHERE temp000.REV_ID = 
+					(select min(rev_id) from LETTEROFCREDIT_AUDIT x join revinfo y on x.rev_id = y.rev where x.documentNumber = temp000.DOCUMENTNUMBER  and
+	               		days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+						AND YEAR(x.LASTMODIFIEDDATE)  &lt;= YEAR(cast(#{cutoffDate} as timestamp))
+						AND TENOR = 'SIGHT' AND TYPE = 'REGULAR'					
+					)
+			) TEMP_TABLE 
+			ON 
+				TEMP_TABLE.TYPE = TEMPREF.DOCUMENTSUBTYPE1 AND
+				TEMP_TABLE.TENOR = TEMPREF.DOCUMENTSUBTYPE2 AND 
+				TEMP_TABLE.DOCUMENTTYPE = TEMPREF.DOCUMENTTYPE
+	    ) PREV_DETAILS
+	    ON
+	    PREV_DETAILS.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+	    
+        WHERE (
+        <!--LC.TYPE != 'CASH' AND-->
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                a.documentNumber = TP.documentNumber
+                and
+                b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND MONTH(c.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                OR
+                ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND DAYS(c.EXPIRYDATE) > DAYS(cast(#{cutoffDate} as TIMESTAMP)))
+                OR
+                (a.STATUS = 'CLOSED' AND MONTH(c.DATECLOSED) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.DATECLOSED) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                OR
+                (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                OR
+                ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND c.TYPE='CASH' AND c.OUTSTANDINGBALANCE > 0)
+                OR 
+                (c.CANCELLATIONDATE IS NULL AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                OR 
+                (DAYS(c.CANCELLATIONDATE) &lt;= DAYS(c.LASTREINSTATEMENTDATE) AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                OR
+                (MONTH(c.LASTNEGOTIATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.LASTNEGOTIATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                OR
+                ((MONTH(c.LASTAMENDMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.LASTAMENDMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                OR
+                ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND 
+                (	(SELECT 
+					LCNEGOTIATIONDISCREPANCYSTATUS
+					FROM LCNEGOTIATIONDISCREPANCY_AUDIT 
+					WHERE DOCUMENTNUMBER = c.DOCUMENTNUMBER
+					AND date(LASTMODIFIEDDATE) &lt;= date(cast(#{cutoffDate} as TIMESTAMP))
+					union all
+					SELECT DISTINCT 'NONE' as LCNEGOTIATIONDISCREPANCYSTATUS FROM LCNEGOTIATIONDISCREPANCY_AUDIT 
+					ORDER BY LCNEGOTIATIONDISCREPANCYSTATUS DESC
+					FETCH First 1 row only) = 'OPEN')
+					)
+                )
+            )
+        )
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+    </select>
+
+    <!-- DA -->
+    <select id="getActiveDocumentsAgainstAcceptance" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            TP.CURRENCY AS CURRENCY,
+            DA.PROCESSDATE,
+            DA.MATURITYDATE AS EXPIRYDATE,
+            DA.AMOUNT,
+            TS.PROCESSINGUNITCODE,
+            DA.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'CLOSED' THEN DA.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            DA.CANCELLEDDATE AS DATECANCELLED,
+            DA.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            DA.ORIGINALPORT AS BSPCOUNTRYCODE,
+            DA.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            -- DA.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+            (CASE WHEN DA.OUTSTANDINGAMOUNT &lt; 0
+             THEN 0
+             ELSE DA.OUTSTANDINGAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            DA.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = DA.DOCUMENTNUMBER AND TP.REV_ID = DA.REV_ID
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            DA.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = DA.DOCUMENTNUMBER
+
+        <!-- get the latest negotiation (settlement) -->
+        LEFT JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,  -- MAX(TS.CREATEDDATE) AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                DOCUMENTAGAINSTACCEPTANCE_AUDIT DAA
+             ON
+                TS.DOCUMENTNUMBER = DAA.DOCUMENTNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'DA'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             -- GROUP BY TS.CREATEDDATE, TS.AMOUNT, TS.DOCUMENTNUMBER
+             ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = DA.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.TRADEPRODUCTNUMBER = DA.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join documentAgainstAcceptance_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'ACCEPTED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'DA'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION_ACCEPTANCE'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+    </select>
+
+    <!-- DP -->
+    <select id="getActiveDocumentsAgainstPayment" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            TP.CURRENCY AS CURRENCY,
+            DP.PROCESSDATE,
+            DP.MATURITYDATE AS EXPIRYDATE,
+            DP.AMOUNT,
+            TS.PROCESSINGUNITCODE,
+            DP.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'CLOSED' THEN DP.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            DP.CANCELLEDDATE AS DATECANCELLED,
+            DP.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            DP.ORIGINALPORT AS BSPCOUNTRYCODE,
+            DP.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            -- DP.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+            (CASE WHEN DP.OUTSTANDINGAMOUNT &lt; 0
+             THEN 0
+             ELSE DP.OUTSTANDINGAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            DP.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            DOCUMENTAGAINSTPAYMENT_AUDIT DP
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = DP.DOCUMENTNUMBER AND TP.REV_ID = DP.REV_ID
+
+        <!-- get the latest negotiation (settlement) -->
+        LEFT JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,  -- MAX(TS.CREATEDDATE) AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                DOCUMENTAGAINSTPAYMENT_AUDIT DPA
+             ON
+                TS.DOCUMENTNUMBER = DPA.DOCUMENTNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'DP'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             -- GROUP BY TS.CREATEDDATE, TS.AMOUNT, TS.DOCUMENTNUMBER
+             ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            DP.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join documentAgainstPayment_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'NEGOTIATED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'DP'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+    </select>
+
+    <!-- OA -->
+    <select id="getActiveOpenAccounts" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+--            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+            '-' AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+--            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+			'-' AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            (CASE WHEN TP.CURRENCY IS NULL THEN 'PHP' ELSE TP.CURRENCY END) AS CURRENCY,
+--			'-' AS CURRENCY,
+--            OA.PROCESSDATE,
+--            OA.MATURITYDATE AS EXPIRYDATE,
+            OA.AMOUNT,
+--            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+			'-' AS PROCESSINGUNITCODE,
+--            OA.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+--            (CASE WHEN TP.STATUS = 'CLOSED' THEN OA.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            OA.CANCELLEDDATE AS DATECANCELLED,
+            OA.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            OA.ORIGINALPORT AS BSPCOUNTRYCODE,
+            OA.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            -- OA.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+--            (CASE WHEN OA.OUTSTANDINGAMOUNT &lt; 0
+--             THEN 0
+--             ELSE OA.OUTSTANDINGAMOUNT
+--             END
+--            ) AS OUTSTANDINGBALANCE,
+			0 AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            OA.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            OPENACCOUNT_AUDIT OA
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON TP.DOCUMENTNUMBER = OA.DOCUMENTNUMBER AND TP.REV_ID = OA.REV_ID
+
+        <!-- get the latest negotiation (settlement) with income -->
+        --LEFT JOIN
+        INNER JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,  -- MAX(TS.CREATEDDATE) AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                OPENACCOUNT_AUDIT OAA
+             ON
+                TS.DOCUMENTNUMBER = OAA.DOCUMENTNUMBER
+             INNER JOIN
+                INT_ACCENTRYACTUAL GL 
+             ON 
+             	GL.TRADESERVICEID = TS.TRADESERVICEID
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'OA'
+             AND
+        	  GL.ACCTYPE = 'I'
+             AND
+         	  MONTH(GL.EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP))
+   	 	 	 AND
+        	  YEAR(GL.EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+  	  		 AND
+         	  days(GL.EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP))
+         	 AND
+         	  GL.TRADESERVICEID NOT IN (SELECT GLSUB.TRADESERVICEID FROM INT_ACCENTRYACTUAL GLSUB WHERE (GLSUB.WITHERROR IS NOT NULL AND (LENGTH(TRIM(GLSUB.WITHERROR)) > 0)))            
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+            	GROUP BY TS.CREATEDDATE, TS.AMOUNT, TS.DOCUMENTNUMBER, TS.PROCESSDATE
+             	ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC
+            -- ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = OA.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            OA.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = OA.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.DOCUMENTNUMBER = OA.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join openAccount_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'NEGOTIATED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'OA'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+        AND
+        	((TP.ALLOCATIONUNITCODE IS NOT NULL AND TP.ALLOCATIONUNITCODE != '') OR ((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE NOT LIKE '9%')))
+    </select>
+
+    <!-- DR -->
+    <select id="getActiveDirectRemittances" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+--            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+			'-' AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+--            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+			'-' AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            (CASE WHEN TP.CURRENCY IS NULL THEN 'PHP' ELSE TP.CURRENCY END) AS CURRENCY,
+--			'-' AS CURRENCY,
+--            DR.PROCESSDATE,
+--            DR.MATURITYDATE AS EXPIRYDATE,
+            DR.AMOUNT,
+--            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+			'-' AS PROCESSINGUNITCODE,
+--            DR.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+--            (CASE WHEN TP.STATUS = 'CLOSED' THEN DR.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            DR.CANCELLEDDATE AS DATECANCELLED,
+            DR.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            DR.ORIGINALPORT AS BSPCOUNTRYCODE,
+            DR.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            -- DR.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+--            (CASE WHEN DR.OUTSTANDINGAMOUNT &lt; 0
+--             THEN 0
+--             ELSE DR.OUTSTANDINGAMOUNT
+--             END
+--            ) AS OUTSTANDINGBALANCE,
+			0 AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            DR.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        from
+            DIRECTREMITTANCE_AUDIT DR
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+         ON
+            TP.DOCUMENTNUMBER = DR.DOCUMENTNUMBER AND TP.REV_ID = DR.REV_ID
+
+        <!-- get the latest negotiation (settlement) with income -->
+        --LEFT JOIN
+        INNER JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,  -- MAX(TS.CREATEDDATE) AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                DIRECTREMITTANCE_AUDIT DRA
+             ON
+                TS.DOCUMENTNUMBER = DRA.DOCUMENTNUMBER
+             INNER JOIN
+                INT_ACCENTRYACTUAL GL 
+             ON 
+             	GL.TRADESERVICEID = TS.TRADESERVICEID
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'DR'
+             AND
+        	  GL.ACCTYPE = 'I'
+             AND
+         	  MONTH(GL.EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP))
+   	 	 	 AND
+        	  YEAR(GL.EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+  	  		 AND
+         	  days(GL.EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP))
+         	 AND
+         	  GL.TRADESERVICEID NOT IN (SELECT GLSUB.TRADESERVICEID FROM INT_ACCENTRYACTUAL GLSUB WHERE (GLSUB.WITHERROR IS NOT NULL AND (LENGTH(TRIM(GLSUB.WITHERROR)) > 0)))            
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+				GROUP BY TS.CREATEDDATE, TS.AMOUNT, TS.DOCUMENTNUMBER, TS.PROCESSDATE
+             	ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC
+            -- ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = DR.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            DR.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = DR.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.DOCUMENTNUMBER = DR.DOCUMENTNUMBER
+
+        LEFT JOIN
+          REFPRODUCT PRODUCT
+        ON
+          TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join directRemittance_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'NEGOTIATED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'DR'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+        AND
+        	((TP.ALLOCATIONUNITCODE IS NOT NULL AND TP.ALLOCATIONUNITCODE != '') OR ((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE NOT LIKE '9%')))
+    </select>
+
+    <!--EBC/DBC-->
+    <select id="getActiveBillsCollection" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            EB.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            (CASE WHEN TP.CURRENCY IS NULL THEN '-' ELSE TP.CURRENCY END) AS CURRENCY,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            --(CASE WHEN EB.NEGOTIATIONDATE IS NULL THEN '0' ELSE EB.NEGOTIATIONDATE END) AS PROCESSDATE,
+			EB.NEGOTIATIONDATE AS PROCESSDATE,
+            EB.SETTLEMENTDATE AS LASTNEGOTIATIONDATE,
+            --(CASE WHEN EB.SETTLEMENTDATE IS NULL THEN EB.SETTLEMENTDATE ELSE '0' END)AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'SETTLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECLOSED,
+            (CASE WHEN TP.STATUS = 'CANCELLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECANCELLED,
+            --EB.NEGOTIATIONDATE AS OPENDATE,
+            EB.DUEDATE,
+            -- EB.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+            (CASE WHEN EB.OUTSTANDINGAMOUNT &lt; 0
+            THEN 0
+            ELSE EB.OUTSTANDINGAMOUNT
+            END
+            ) AS OUTSTANDINGBALANCE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+            'BILLOFLADINGDATE',
+            EB.COUNTRYCODE AS BSPCOUNTRYCODE,
+            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+            EB.DRAFTAMOUNT,
+            TP.PRODUCTTYPE,
+            TS.DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE
+        FROM
+            EXPORTBILLS_AUDIT EB
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = EB.DOCUMENTNUMBER AND TP.REV_ID = EB.REV_ID
+
+        LEFT JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.DOCUMENTCLASS,
+                TS.TRADESERVICEID
+            FROM TRADESERVICE TS
+            INNER JOIN
+                EXPORTBILLS_AUDIT EBA ON TS.DOCUMENTNUMBER = EBA.DOCUMENTNUMBER
+            WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            AND
+                TS.DOCUMENTCLASS = 'BC'
+            AND
+                TS.SERVICETYPE = 'NEGOTIATION'
+            AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+            GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2, TS.DOCUMENTCLASS
+            ) TS
+        ON
+          TS.DOCUMENTNUMBER = EB.DOCUMENTNUMBER
+
+        LEFT JOIN
+          REFPRODUCT PRODUCT
+        ON
+          PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+        AND
+          PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+
+        LEFT JOIN
+          REF_TFCUSTMR CUSTOMER
+        ON
+          EB.EXPORTERCBCODE = CUSTOMER.CB_CD
+
+        WHERE
+        TP.REV_ID IN
+        (
+            select a.rev_id
+            from tradeproduct_audit a
+            join revinfo b on a.rev_id = b.rev
+            join exportBills_audit c on a.rev_id = c.rev_id
+            where
+            a.documentNumber = TP.documentNumber
+            and
+            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+            days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+            and
+            (
+            a.STATUS = 'NEGOTIATED'
+            OR (a.STATUS = 'SETTLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            OR (a.STATUS = 'CANCELLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            OR (a.STATUS = 'CLOSED' AND MONTH(c.PROCESSDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.PROCESSDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            )
+        )
+         AND PRODUCT.DOCUMENTTYPE IN ('FOREIGN','DOMESTIC')
+         AND PRODUCT.DOCUMENTCLASS = 'BC'
+         AND EB.EXPORTBILLTYPE IN ('EBC','DBC')
+         AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+    </select>
+    
+    <!--EBP/DBP-->
+    <select id="getActiveBillsPurchase" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            EB.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+--            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+			'-' AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+--            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+			'-' AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            (CASE WHEN TP.CURRENCY IS NULL THEN 'PHP' ELSE TP.CURRENCY END) AS CURRENCY,
+--			'-' AS CURRENCY,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+--           EB.SETTLEMENTDATE AS LASTNEGOTIATIONDATE,
+--            (CASE WHEN TP.STATUS = 'SETTLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECLOSED,
+            (CASE WHEN TP.STATUS = 'CANCELLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECANCELLED,
+            --EB.NEGOTIATIONDATE AS OPENDATE,
+--            EB.DUEDATE,
+            -- EB.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+--            (CASE WHEN EB.OUTSTANDINGAMOUNT &lt; 0
+--            THEN 0
+--            ELSE 
+--            	  EB.OUTSTANDINGAMOUNT
+--            END
+--            ) AS OUTSTANDINGBALANCE,
+			0 AS OUTSTANDINGBALANCE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+            'BILLOFLADINGDATE',
+            EB.COUNTRYCODE AS BSPCOUNTRYCODE,
+--            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+			'-' AS PROCESSINGUNITCODE,
+            EB.DRAFTAMOUNT,
+            TP.PRODUCTTYPE,
+            TS.DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            EB.NEGOTIATIONNUMBER AS NEGOTIATIONNUMBER
+        FROM
+            EXPORTBILLS_AUDIT EB
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = EB.DOCUMENTNUMBER AND TP.REV_ID = EB.REV_ID
+
+        LEFT JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.DOCUMENTCLASS,
+                TS.TRADESERVICEID
+            FROM TRADESERVICE TS
+            INNER JOIN
+                EXPORTBILLS_AUDIT EBA ON TS.DOCUMENTNUMBER = EBA.DOCUMENTNUMBER
+            INNER JOIN
+                INT_ACCENTRYACTUAL GL ON GL.TRADESERVICEID = TS.TRADESERVICEID
+            WHERE
+                date(TS.PROCESSDATE) = date(#{cutoffDate})
+            AND
+                TS.DOCUMENTCLASS ='BP'
+            AND
+                TS.SERVICETYPE = 'NEGOTIATION'
+         	AND
+         	  GL.TRADESERVICEID NOT IN (SELECT GLSUB.TRADESERVICEID FROM INT_ACCENTRYACTUAL GLSUB WHERE (GLSUB.WITHERROR IS NOT NULL AND (LENGTH(TRIM(GLSUB.WITHERROR)) > 0)))
+            AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+            GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2, TS.DOCUMENTCLASS
+            ) TS
+        ON
+          TS.DOCUMENTNUMBER = EB.DOCUMENTNUMBER
+
+        LEFT JOIN
+          REFPRODUCT PRODUCT
+        ON
+          PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+        AND
+          PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+
+        WHERE
+        TP.REV_ID IN
+        (
+            select a.rev_id
+            from tradeproduct_audit a
+            join revinfo b on a.rev_id = b.rev
+            join exportBills_audit c on a.rev_id = c.rev_id
+            where
+            a.documentNumber = TP.documentNumber
+            and
+            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+            days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+            and
+            (
+            a.STATUS = 'NEGOTIATED'
+            OR (a.STATUS = 'SETTLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            OR (a.STATUS = 'CANCELLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            )
+        )
+         AND PRODUCT.DOCUMENTTYPE IN ('FOREIGN','DOMESTIC')
+         AND PRODUCT.DOCUMENTCLASS = 'BP'
+         AND EB.EXPORTBILLTYPE IN ('EBP','DBP')
+         AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+    </select>
+    
+
+
+    <!-- IMPORT EXPORT ADVANCE -->
+    <select id="getActiveAdvancePayment" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            AP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+--            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+			'-' AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+--            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+			'-' AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            (CASE WHEN TP.CURRENCY IS NULL THEN 'PHP' ELSE TP.CURRENCY END) AS CURRENCY,
+--			'-' AS CURRENCY,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            --AP.PROCESSDATE,
+            --AP.SETTLEMENTDATE AS LASTNEGOTIATIONDATE,
+            --(CASE WHEN TP.STATUS = 'REFUNDED' THEN TS.PROCESSDATE ELSE NULL END) AS DATECANCELLED,
+            --AP.NEGOTIATIONDATE AS OPENDATE,
+            --AP.DUEDATE,
+            --AP.OUTSTANDINGAMOUNT AS OUTSTANDINGBALANCE,
+--            (CASE WHEN TP.AMOUNT &lt; 0
+--            THEN 0
+--            ELSE TP.AMOUNT
+--            END
+--            ) AS OUTSTANDINGBALANCE,
+			0 AS OUTSTANDINGBALANCE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+            'BILLOFLADINGDATE',
+            AP.COUNTRY_CODE AS BSPCOUNTRYCODE,
+--            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+			'-' AS PROCESSINGUNITCODE,
+            AP.IMPORTERCBCODE AS IMPORTERCBCODE,
+            --AP.DRAFTAMOUNT,
+            TP.PRODUCTTYPE,
+            TS.DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE
+        FROM
+          ADVANCEPAYMENT_AUDIT AP
+
+        INNER JOIN
+          TRADEPRODUCT_AUDIT TP
+        ON
+          TP.DOCUMENTNUMBER = AP.DOCUMENTNUMBER AND TP.REV_ID = AP.REV_ID
+
+        LEFT JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.DOCUMENTCLASS,
+                TS.TRADESERVICEID
+            FROM TRADESERVICE TS
+            INNER JOIN
+              ADVANCEPAYMENT_AUDIT APA ON TS.DOCUMENTNUMBER = APA.DOCUMENTNUMBER
+            INNER JOIN
+              INT_ACCENTRYACTUAL GL ON GL.TRADESERVICEID = TS.TRADESERVICEID  
+            WHERE
+              days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            AND
+              TS.DOCUMENTCLASS IN ('IMPORT_ADVANCE','EXPORT_ADVANCE')
+            AND
+              TS.SERVICETYPE = 'PAYMENT'
+            AND
+        	  GL.ACCTYPE = 'I'
+            AND
+         	  MONTH(GL.EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP))
+   	 	 	AND
+        	  YEAR(GL.EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+  	  		AND
+         	  days(GL.EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP))
+         	AND
+         	  GL.TRADESERVICEID NOT IN (SELECT GLSUB.TRADESERVICEID FROM INT_ACCENTRYACTUAL GLSUB WHERE (GLSUB.WITHERROR IS NOT NULL AND (LENGTH(TRIM(GLSUB.WITHERROR)) > 0)))
+            AND
+              (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+            GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2, TS.DOCUMENTCLASS
+            ) TS
+        ON
+          TS.DOCUMENTNUMBER = AP.DOCUMENTNUMBER
+
+        LEFT JOIN
+          REFPRODUCT PRODUCT
+        ON
+          PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+        LEFT JOIN
+          REF_TFCUSTMR CUSTOMER
+        ON
+          AP.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        WHERE
+        TP.REV_ID IN
+        (
+            select a.rev_id
+            from tradeproduct_audit a
+            join revinfo b on a.rev_id = b.rev
+            join advancepayment_audit c on a.rev_id = c.rev_id
+            where
+              a.documentNumber = TP.documentNumber
+            and
+              b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+            and
+            (
+                a.STATUS = 'OPEN'
+                OR (a.STATUS = 'REFUNDED' AND
+                MONTH(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND
+                YEAR(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+                )
+            )
+        )
+        AND
+        PRODUCT.DOCUMENTCLASS IN ('IMPORT_ADVANCE','EXPORT_ADVANCE')
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+        AND
+        	((TP.ALLOCATIONUNITCODE IS NOT NULL AND TP.ALLOCATIONUNITCODE != '') OR ((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE NOT LIKE '9%')))
+    </select>
+
+    <!-- LC Advising-->
+    <select id="getActiveExportAdvising" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            EA.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+--            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+			'-' AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+--            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+            (CASE WHEN TP.CURRENCY IS NULL THEN 'PHP' ELSE TP.CURRENCY END) AS CURRENCY,
+			'-' AS STATUS,
+--			'-' AS CURRENCY,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+--            EA.PROCESSDATE,
+--            (CASE WHEN EA.LCAMOUNT &lt; 0
+--                THEN 0
+--                ELSE EA.LCAMOUNT
+--            END
+--            ) AS OUTSTANDINGBALANCE,
+            0 AS OUTSTANDINGBALANCE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            'BILLOFLADINGDATE',
+--            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+			'-' AS PROCESSINGUNITCODE,
+            TP.PRODUCTTYPE,
+            TS.DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+--            EA.EXPIRYDATE AS EXPIRYDATE,
+            EA.CANCELLATIONDATE AS DATECANCELLED,
+            EA.LASTAMENDMENTDATE AS LASTAMENDMENTDATE
+
+        FROM
+          EXPORTADVISING_AUDIT EA
+        INNER JOIN
+          TRADEPRODUCT_AUDIT TP
+        ON
+           TP.DOCUMENTNUMBER = EA.DOCUMENTNUMBER AND TP.REV_ID = EA.REV_ID
+
+        LEFT JOIN
+         (SELECT
+                    TS.DOCUMENTNUMBER,
+                    TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                    TS.PROCESSINGUNITCODE,
+                    TS.DOCUMENTTYPE,
+                    TS.DOCUMENTSUBTYPE1,
+                    TS.DOCUMENTSUBTYPE2,
+                    TS.DOCUMENTCLASS,
+                    TS.TRADESERVICEID
+                 FROM TRADESERVICE TS
+                 INNER JOIN
+                    EXPORTADVISING_AUDIT EAA ON TS.DOCUMENTNUMBER = EAA.DOCUMENTNUMBER
+                 INNER JOIN
+                 	PAYMENT P ON TS.TRADESERVICEID=P.TRADESERVICEID
+                 INNER JOIN
+            	     INT_ACCENTRYACTUAL GL ON GL.TRADESERVICEID = TS.TRADESERVICEID  
+                 WHERE
+                    days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                 AND
+                    TS.DOCUMENTCLASS = 'EXPORT_ADVISING'
+                 AND
+                    TS.SERVICETYPE = 'OPENING_ADVISING'
+                 AND
+        	  		GL.ACCTYPE = 'I'
+                 AND
+              		MONTH(GL.EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP))
+        	 	 AND
+             		YEAR(GL.EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+       	  		 AND
+              		days(GL.EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP))
+              	 AND
+         	  		GL.TRADESERVICEID NOT IN (SELECT GLSUB.TRADESERVICEID FROM INT_ACCENTRYACTUAL GLSUB WHERE (GLSUB.WITHERROR IS NOT NULL AND (LENGTH(TRIM(GLSUB.WITHERROR)) > 0)))
+                 AND
+                    (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+                 GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2, TS.DOCUMENTCLASS
+                ) TS
+          ON
+            TS.DOCUMENTNUMBER = EA.DOCUMENTNUMBER
+          LEFT JOIN
+              REFPRODUCT PRODUCT
+          ON
+              PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+          AND
+              PRODUCT.DOCUMENTSUBTYPE1 = TS.DOCUMENTSUBTYPE1
+
+          LEFT JOIN
+              REF_TFCUSTMR CUSTOMER
+          ON
+             EA.EXPORTERCBCODE = CUSTOMER.CB_CD
+          WHERE
+              TP.REV_ID IN
+              (
+                  SELECT A.REV_ID
+                  FROM TRADEPRODUCT_AUDIT A
+                  JOIN REVINFO B on A.REV_ID = B.REV
+                  JOIN EXPORTADVISING_AUDIT C on A.REV_ID = C.REV_ID
+                  WHERE
+                      A.documentNumber = TP.documentNumber
+                  AND
+                      B.REV IN (SELECT rev_id FROM tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                                order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                  AND
+                  (
+                      A.STATUS = 'OPEN'
+                      OR (A.STATUS = 'CANCELLED' AND MONTH(C.CANCELLATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(C.CANCELLATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                  )
+              )
+            AND
+              PRODUCT.DOCUMENTCLASS = 'EXPORT_ADVISING'
+            AND
+              EA.ADVISINGBANKTYPE IN ('FIRST','SECOND')
+            AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+			AND
+        	((TP.ALLOCATIONUNITCODE IS NOT NULL AND TP.ALLOCATIONUNITCODE != '') OR ((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE NOT LIKE '9%')))
+    </select>
+
+    <!-- INDEMNITY -->
+    <select id="getActiveBankGuarantee" resultMap="tradeProductResultMap">
+        SELECT
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            IND.INDEMNITYNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            IND.SHIPMENTCURRENCY AS CURRENCY,
+            IND.PROCESSDATE,
+            -- IND.SHIPMENTAMOUNT AS OUTSTANDINGBALANCE,
+            (CASE WHEN IND.SHIPMENTAMOUNT &lt; 0
+             THEN 0
+             ELSE IND.SHIPMENTAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.PROCESSINGUNITCODE,
+            IND.CANCELLATIONDATE AS DATECLOSED,
+            IND.CANCELLATIONDATE AS DATECANCELLED,
+            LC.EXPIRYCOUNTRYCODE AS BSPCOUNTRYCODE,
+            LC.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            LC.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            --TEMP_IND.UCPBPRODUCTID AS PRODUCTID,
+            (CASE WHEN IND.INDEMNITYTYPE = 'BE' THEN 'TF119' ELSE PRODUCT.UCPBPRODUCTID END) AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            INDEMNITY_AUDIT IND
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = IND.INDEMNITYNUMBER AND TP.REV_ID = IND.REV_ID
+
+        INNER JOIN
+            LETTEROFCREDIT_AUDIT LC
+        ON
+            LC.DOCUMENTNUMBER = IND.REFERENCENUMBER
+            
+--	   LEFT JOIN
+--	   (
+--			SELECT 
+--				DISTINCT int_acc.UCPBPRODUCTID,int_acc.PRODUCTID,ind_a.REFERENCENUMBER, ind_a.INDEMNITYNUMBER
+--			FROM 
+--				INT_ACCENTRYACTUAL int_acc 
+--			LEFT JOIN
+--				INDEMNITY_AUDIT ind_a 
+--			ON
+--				ind_a.REFERENCENUMBER = int_acc.DOCUMENTNUMBER
+--	   ) TEMP_IND   
+--	   ON  ind.INDEMNITYNUMBER = TEMP_IND.INDEMNITYNUMBER 
+--	   AND ind.REFERENCENUMBER = TEMP_IND.REFERENCENUMBER 
+--	   AND TEMP_IND.PRODUCTID = 'FX-INDEMNITY'
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            LC.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = IND.INDEMNITYNUMBER
+
+		--LEFT JOIN
+        INNER JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.TRADESERVICEID
+             FROM TRADESERVICE TS
+             INNER JOIN
+                INDEMNITY_AUDIT INDA
+             ON
+                TS.DOCUMENTNUMBER = INDA.INDEMNITYNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.DOCUMENTCLASS = 'INDEMNITY'
+             AND
+                TS.SERVICETYPE = 'ISSUANCE'
+             AND
+                INDA.INDEMNITYNUMBER = (CASE WHEN INDA.INDEMNITYTYPE = 'BE' THEN (SELECT DOCUMENTNUMBER FROM INT_ACCENTRYACTUAL WHERE MONTH(EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND 
+                									YEAR(EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND days(EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP)) AND 
+                									ACCTYPE = 'I' AND DOCUMENTNUMBER=INDA.INDEMNITYNUMBER GROUP BY DOCUMENTNUMBER) 
+             							ELSE (INDA.INDEMNITYNUMBER) 
+             							END)
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2
+            ) TS
+        ON
+            TS.DOCUMENTNUMBER = IND.INDEMNITYNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            PRODUCT.DOCUMENTCLASS = 'INDEMNITY'
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join indemnity_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'OPEN'
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            LC.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = IND.referenceNumber
+                and
+                    days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                order by b.revtstmp desc fetch first 1 rows only
+            )
+        AND
+            PRODUCT.PRODUCTID = (
+                CASE WHEN LC.TYPE = 'STANDBY'
+                THEN 'FX-INDEMNITY-STANDBY-SIGHT'
+                ELSE
+                    CASE WHEN LC.TYPE = 'CASH'
+                    THEN 'FX-INDEMNITY-CASH-SIGHT'
+                    ELSE 'FX-INDEMNITY'
+                    END
+                END
+            )
+        AND
+            (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)
+        AND
+        	((TP.ALLOCATIONUNITCODE IS NOT NULL AND TP.ALLOCATIONUNITCODE != '') OR ((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE NOT LIKE '9%')))
+    </select>
+
+    <select id="getActiveLetterOfCreditsWithAdb" resultMap="adbtradeProductResultMap">
+        select
+          TS.DOCUMENTNUMBER AS DOCUMENTNUMBER, CIFNUMBER,PROCESSINGUNITCODE,
+          BOOK_CODE, TP.CURRENCY AS CURRENCY, PROCESSDATE, DATECLOSED, EXPIRYDATE, LASTREINSTATEMENTDATE, DEBIT_CODE, CREDIT_CODE,
+          '0' AS OUTSTANDINGBALANCE, VALUEDATE, NEGOTIATIONAMOUNT, TOTALBALANCE
+        from
+          LETTEROFCREDIT LC
+        LEFT JOIN
+            (SELECT MAX(VALUEDATE) VALUEDATE,NEGOTIATIONAMOUNT,DOCUMENTNUMBER FROM TFS.LCNEGOTIATION GROUP BY
+            VALUEDATE,NEGOTIATIONAMOUNT,DOCUMENTNUMBER) NEGO ON
+            NEGO.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+        INNER JOIN
+          TRADEPRODUCT TP
+          ON TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+        INNER JOIN
+            (SELECT TRADESERVICE.DOCUMENTNUMBER,
+            MAX(CREATEDDATE),PROCESSINGUNITCODE
+        FROM TRADESERVICE TRADESERVICE
+        GROUP BY DOCUMENTNUMBER,PROCESSINGUNITCODE) TS
+        ON
+          TS.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+        INNER JOIN
+            GL_CODES GL ON
+            GL.SERVICETYPE = 'OPENING' AND
+            GL.DOCUMENTTYPE = LC.DOCUMENTTYPE AND
+            GL.DOCUMENTCLASS = 'LC' AND
+            GL.DOCUMENTSUBTYPE1 = LC.TYPE AND
+            ((GL.DOCUMENTSUBTYPE2 = LC.TENOR) OR (GL.DOCUMENTSUBTYPE2 IS NULL AND LC.TENOR IS NULL))
+        INNER JOIN
+            (SELECT SUM(BALANCE) TOTALBALANCE, DOCUMENTNUMBER FROM DAILYBALANCE
+--             WHERE MONTH(BALANCE_DATE) = MONTH(#{cutoffDate}) AND YEAR(BALANCE_DATE) = YEAR(#{cutoffDate})
+            WHERE MONTH(BALANCE_DATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(BALANCE_DATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))
+            GROUP BY DOCUMENTNUMBER) BALANCES
+            ON BALANCES.DOCUMENTNUMBER = TS.DOCUMENTNUMBER
+
+    </select>
+
+    <select id="getContingentByTradeServiceIdAndType" resultType="hashMap">
+        SELECT
+            GL.ACCOUNTINGCODE AS ACCOUNTINGCODE,
+            GL.BOOKCODE AS BOOKCODE
+        FROM INT_ACCENTRYACTUAL GL
+            WHERE GL.TRADESERVICEID = #{tradeServiceId}
+                AND GL.ACCTYPE = #{type}
+<!--
+                AND GL.CONTINGENTFLAG = '*MEMO'
+-->
+    </select>
+
+    <select id="getProductIdByTradeServiceId" resultType="string">
+        SELECT UCPBPRODUCTID AS PRODUCTID
+            FROM REFPRODUCT PRODUCT, TRADESERVICE TS
+        WHERE TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+            AND TS.DOCUMENTTYPE = PRODUCT.DOCUMENTTYPE
+            AND TS.DOCUMENTSUBTYPE1 = PRODUCT.DOCUMENTSUBTYPE1
+            AND TS.DOCUMENTSUBTYPE2 = PRODUCT.DOCUMENTSUBTYPE2
+            AND TS.DOCUMENTSUBTYPE3 = PRODUCT.DOCUMENTSUBTYPE3
+            AND TRADESERVICEID = #{tradeServiceId}
+    </select>
+
+    <select id="getDocumentHistory" resultType="hashMap">
+        SELECT * FROM LETTEROFCREDIT_AUDIT
+            WHERE LASTMODIFIEDDATE =
+            (SELECT MAX(LASTMODIFIEDDATE) FROM LETTEROFCREDIT_AUDIT
+                WHERE DOCUMENTNUMBER = #{documentNumber})
+    </select>
+
+    <select id="getSettlementBookCodeByDocumentNumber" resultType="string">
+                SELECT BOOKINGACCOUNTTYPE FROM BOOKINGSETTLEMENT
+                        WHERE DOCUMENTNUMBER = #{documentNumber}
+    </select>
+    
+    <!-- LC EXCEPTION -->
+    <select id="getActiveLettersOfCreditException" resultMap="tradeProductExceptionResultMap">
+        SELECT
+              TP.EXCEPTIONCODE,
+			  TP.OFFICERCODE,
+              PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+              TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+              LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+              TP.FACILITYREFERENCENUMBER AS FACILITYID,
+              TP.CIFNUMBER AS CIFNUMBER,
+              TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+              (CASE WHEN (DAYS(LC.EXPIRYDATE) &lt; DAYS(cast(#{cutoffDate} as timestamp)) AND MONTH(LC.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(LC.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN'))
+               THEN 'EXPIRED'
+               ELSE TP.STATUS
+               END
+              ) AS STATUS,
+              TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+              'RG' as BOOK_CODE,
+              29 AS ENTITY_ID,
+              TP.CURRENCY AS CURRENCY,
+              PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+              CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+              CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+              CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+              CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+              LC.PROCESSDATE,
+              LC.LASTNEGOTIATIONDATE,
+              LC.DATECLOSED,
+              LC.CANCELLATIONDATE AS DATECANCELLED,
+              LC.EXPIRYDATE,
+              LC.LASTAMENDMENTDATE,
+              LC.LASTREINSTATEMENTDATE,
+              -- LC.OUTSTANDINGBALANCE,
+              (CASE WHEN ((DAYS(LC.EXPIRYDATE) &lt; DAYS(cast(#{cutoffDate} as timestamp)) AND MONTH(LC.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(LC.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND (DAYS(LC.LASTNEGOTIATIONDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTNEGOTIATIONDATE IS NULL) AND (DAYS(LC.LASTAMENDMENTDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTAMENDMENTDATE IS NULL) AND (DAYS(LC.LASTREINSTATEMENTDATE) != DAYS(cast(#{cutoffDate} as TIMESTAMP)) OR LC.LASTREINSTATEMENTDATE IS NULL)) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN' OR TP.STATUS = 'REINSTATED'))
+               THEN 0
+               ELSE
+                   CASE WHEN TP.STATUS = 'CANCELLED'
+                   THEN 0
+                   ELSE
+                       CASE WHEN LC.OUTSTANDINGBALANCE &lt; 0
+                       THEN 0
+                       ELSE LC.OUTSTANDINGBALANCE
+                       END
+                   END
+               END
+              ) AS OUTSTANDINGBALANCE,
+              PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+              PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+              PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+              BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE,
+              'BILLOFLADINGDATE',
+              LC.EXPIRYCOUNTRYCODE AS BSPCOUNTRYCODE,
+              TS.PROCESSINGUNITCODE,
+              NEGO.NEGOTIATIONAMOUNT,
+              TP.PRODUCTTYPE,
+              TS.DOCUMENTTYPE,
+              TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+              TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+              TP.FACILITYTYPE AS FACILITYTYPE,
+              NEGO.UAMATURITYDATE AS UAMATURITYDATE
+        FROM
+            LETTEROFCREDIT_AUDIT LC
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+        LEFT JOIN
+            (
+                select
+                    temp00.DOCUMENTNUMBER,
+                    temp00.NEGOTIATIONVALUEDATE,
+                    SUM(temp00.NEGOTIATIONAMOUNT) as NEGOTIATIONAMOUNT,
+                    UAMATURITYDATE
+                from
+                    (select
+                         lcn.id,
+                         lcn.DOCUMENTNUMBER,
+                         NEGOTIATIONAMOUNT,
+                         NEGOTIATIONVALUEDATE,
+                         UAMATURITYDATE
+                     FROM LCNEGOTIATION lcn
+                     INNER JOIN
+                         (select DOCUMENTNUMBER, MAX(NEGOTIATIONVALUEDATE) AS negoValDate, MAX(LOANMATURITYDATE) AS UAMATURITYDATE
+                         FROM LCNEGOTIATION GROUP BY DOCUMENTNUMBER) as mlcn
+                     ON lcn.DOCUMENTNUMBER = mlcn.DOCUMENTNUMBER AND lcn.NEGOTIATIONVALUEDATE = mlcn.negoValDate
+                     where days(lcn.NEGOTIATIONVALUEDATE) &lt;= days(cast(#{cutoffDate} as timestamp))
+                     order by lcn.NEGOTIATIONVALUEDATE desc
+                    ) as temp00
+                GROUP BY temp00.DOCUMENTNUMBER, temp00.NEGOTIATIONVALUEDATE, temp00.UAMATURITYDATE
+            ) NEGO
+          ON
+            NEGO.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+
+        LEFT JOIN
+            (SELECT
+                TS.TRADEPRODUCTNUMBER,
+                TS.PROCESSDATE,  -- MAX(TS.CREATEDDATE),
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.TRADESERVICEID
+             FROM TRADESERVICE TS
+             INNER JOIN
+                LETTEROFCREDIT_AUDIT LCA
+             ON
+                TS.TRADEPRODUCTNUMBER = LCA.DOCUMENTNUMBER 
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.DOCUMENTCLASS = 'LC'
+             AND
+                TS.SERVICETYPE = 'OPENING'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             GROUP BY TS.TRADEPRODUCTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2
+            ) TS
+         ON
+            TS.TRADEPRODUCTNUMBER = LC.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            LC.DOCUMENTTYPE = PRODUCT.DOCUMENTTYPE
+        AND PRODUCT.DOCUMENTCLASS = 'LC'
+        AND LC.TYPE = PRODUCT.DOCUMENTSUBTYPE1
+        AND ((PRODUCT.DOCUMENTSUBTYPE2 = LC.TENOR) OR (PRODUCT.DOCUMENTSUBTYPE2 IS NULL AND LC.TENOR IS NULL))
+        AND (LC.STANDBYTAGGING = PRODUCT.DOCUMENTSUBTYPE3 or LC.STANDBYTAGGING IS NULL)
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            LC.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+
+        WHERE (
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND MONTH(c.EXPIRYDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.EXPIRYDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR
+                    ((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND DAYS(c.EXPIRYDATE) > DAYS(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR
+                    (a.STATUS = 'CLOSED' AND MONTH(c.DATECLOSED) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.DATECLOSED) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR
+                    (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+					OR
+                	((a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED') AND c.TYPE='CASH' AND c.OUTSTANDINGBALANCE > 0)
+                	OR 
+                	(c.CANCELLATIONDATE IS NULL AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                	OR 
+                	(DAYS(c.CANCELLATIONDATE) &lt;= DAYS(c.LASTREINSTATEMENTDATE) AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                	OR
+	                (MONTH(c.LASTNEGOTIATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.LASTNEGOTIATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+	                OR
+	                ((MONTH(c.LASTAMENDMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.LASTAMENDMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                )
+            )
+        )
+        AND
+			(TP.EXCEPTIONCODE != '0' AND TP.EXCEPTIONCODE != '00' AND TP.EXCEPTIONCODE != '' AND TP.EXCEPTIONCODE IS NOT NULL)
+    </select>
+    
+    <!-- DA EXCEPTION -->
+    <select id="getActiveDocumentsAgainstAcceptanceException" resultMap="tradeProductExceptionResultMap">
+		SELECT
+            TP.EXCEPTIONCODE,
+			TP.OFFICERCODE,
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            TP.CURRENCY AS CURRENCY,
+            DA.PROCESSDATE,
+            DA.MATURITYDATE AS EXPIRYDATE,
+            DA.AMOUNT,
+            TS.PROCESSINGUNITCODE,
+            DA.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'CLOSED' THEN DA.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            DA.CANCELLEDDATE AS DATECANCELLED,
+            DA.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            DA.ORIGINALPORT AS BSPCOUNTRYCODE,
+            DA.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            (CASE WHEN DA.OUTSTANDINGAMOUNT &lt; 0
+             THEN 0
+             ELSE DA.OUTSTANDINGAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            DA.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODECREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = DA.DOCUMENTNUMBER AND TP.REV_ID = DA.REV_ID
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            DA.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = DA.DOCUMENTNUMBER
+
+        LEFT JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                DOCUMENTAGAINSTACCEPTANCE_AUDIT DAA
+             ON
+                TS.DOCUMENTNUMBER = DAA.DOCUMENTNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'DA'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = DA.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.TRADEPRODUCTNUMBER = DA.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join documentAgainstAcceptance_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'ACCEPTED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'DA'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION_ACCEPTANCE'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE != '0' AND TP.EXCEPTIONCODE != '00' AND TP.EXCEPTIONCODE != '' AND TP.EXCEPTIONCODE IS NOT NULL)
+    </select>
+
+    <!-- DP EXCEPTION -->
+    <select id="getActiveDocumentsAgainstPaymentException" resultMap="tradeProductExceptionResultMap">
+        SELECT
+            TP.EXCEPTIONCODE,
+			TP.OFFICERCODE,
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            TP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            TP.CURRENCY AS CURRENCY,
+            DP.PROCESSDATE,
+            DP.MATURITYDATE AS EXPIRYDATE,
+            DP.AMOUNT,
+            TS.PROCESSINGUNITCODE,
+            DP.SETTLEDDATE AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'CLOSED' THEN DP.SETTLEDDATE ELSE NULL END) AS DATECLOSED,
+            DP.CANCELLEDDATE AS DATECANCELLED,
+            DP.DATEOFBLAIRWAYBILL AS BILLOFLADINGDATE,
+            DP.ORIGINALPORT AS BSPCOUNTRYCODE,
+            DP.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            NEGO.NEGOTIATIONAMOUNT,
+            (CASE WHEN DP.OUTSTANDINGAMOUNT &lt; 0
+             THEN 0
+             ELSE DP.OUTSTANDINGAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            DP.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            DOCUMENTAGAINSTPAYMENT_AUDIT DP
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = DP.DOCUMENTNUMBER AND TP.REV_ID = DP.REV_ID
+
+        LEFT JOIN
+            (SELECT
+                TS.PROCESSDATE AS LASTNEGOTIATIONDATE,
+                TS.AMOUNT AS NEGOTIATIONAMOUNT,
+                TS.DOCUMENTNUMBER
+             FROM TRADESERVICE TS
+             INNER JOIN
+                DOCUMENTAGAINSTPAYMENT_AUDIT DPA
+             ON
+                TS.DOCUMENTNUMBER = DPA.DOCUMENTNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.SERVICETYPE = 'SETTLEMENT'
+             AND
+                TS.DOCUMENTCLASS = 'DP'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             ORDER BY TS.PROCESSDATE DESC, TS.CREATEDDATE DESC FETCH FIRST 1 ROWS ONLY
+            ) NEGO
+        ON
+            NEGO.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            DP.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        INNER JOIN
+            TRADESERVICE TS
+        ON
+            TS.DOCUMENTNUMBER = DP.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join documentAgainstPayment_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'NEGOTIATED'
+                    OR (a.STATUS = 'CLOSED' AND MONTH(c.SETTLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        AND
+            TS.DOCUMENTCLASS = 'DP'
+        AND
+            TS.SERVICETYPE = 'NEGOTIATION'
+        AND
+            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        AND
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+        AND
+            (TP.EXCEPTIONCODE != '0' AND TP.EXCEPTIONCODE != '00' AND TP.EXCEPTIONCODE != '' AND TP.EXCEPTIONCODE IS NOT NULL)
+    </select>
+    
+    <!--EBC/DBC EXCEPTION-->
+    <select id="getActiveBillsCollectionException" resultMap="tradeProductExceptionResultMap">
+        SELECT
+            TP.EXCEPTIONCODE,
+			TP.OFFICERCODE,
+			PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            EB.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+            (CASE WHEN TP.FACILITYREFERENCENUMBER IS NULL THEN '-' ELSE TP.FACILITYREFERENCENUMBER END) AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            (CASE WHEN TP.STATUS IS NULL THEN '-' ELSE TP.STATUS END) AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            (CASE WHEN TP.CURRENCY IS NULL THEN '-' ELSE TP.CURRENCY END) AS CURRENCY,
+            PRODUCT.UCPBPRODUCTID AS PRODUCTID,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            EB.PROCESSDATE,
+            EB.SETTLEMENTDATE AS LASTNEGOTIATIONDATE,
+            (CASE WHEN TP.STATUS = 'SETTLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECLOSED,
+            (CASE WHEN TP.STATUS = 'CANCELLED' THEN EB.SETTLEMENTDATE ELSE NULL END) AS DATECANCELLED,
+            EB.NEGOTIATIONDATE AS OPENDATE,
+            EB.DUEDATE,
+            (CASE WHEN EB.OUTSTANDINGAMOUNT &lt; 0
+             THEN 0
+             ELSE EB.OUTSTANDINGAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE AS GL_ACCT_TYPE,
+            'BILLOFLADINGDATE',
+            EB.COUNTRYCODE AS BSPCOUNTRYCODE,
+            (CASE WHEN TS.PROCESSINGUNITCODE IS NULL THEN '-' ELSE TP.PROCESSINGUNITCODE END) AS PROCESSINGUNITCODE,
+            EB.DRAFTAMOUNT,
+            TP.PRODUCTTYPE,
+            TS.DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE
+        FROM
+            EXPORTBILLS_AUDIT EB
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = EB.DOCUMENTNUMBER AND TP.REV_ID = EB.REV_ID
+
+        LEFT JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.DOCUMENTCLASS,
+                TS.TRADESERVICEID
+             FROM TRADESERVICE TS
+             INNER JOIN
+                EXPORTBILLS_AUDIT EBA ON TS.DOCUMENTNUMBER = EBA.DOCUMENTNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.DOCUMENTCLASS = 'BC'
+             AND
+                TS.SERVICETYPE = 'NEGOTIATION'
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2, TS.DOCUMENTCLASS
+            ) TS
+        ON
+            TS.DOCUMENTNUMBER = EB.DOCUMENTNUMBER
+
+        LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+        AND
+          	PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            EB.EXPORTERCBCODE = CUSTOMER.CB_CD
+
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+            from tradeproduct_audit a
+            join revinfo b on a.rev_id = b.rev
+            join exportBills_audit c on a.rev_id = c.rev_id
+            where
+            a.documentNumber = TP.documentNumber
+            and
+            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+            days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+            order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+            and
+            (
+            a.STATUS = 'NEGOTIATED'
+            OR (a.STATUS = 'SETTLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            OR (a.STATUS = 'CANCELLED' AND MONTH(c.SETTLEMENTDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.SETTLEMENTDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+            )
+        )
+         AND PRODUCT.DOCUMENTTYPE IN ('FOREIGN','DOMESTIC')
+         AND PRODUCT.DOCUMENTCLASS = 'BC'
+         AND EB.EXPORTBILLTYPE IN ('EBC','DBC')
+         AND (TP.EXCEPTIONCODE != '0' AND TP.EXCEPTIONCODE != '00' AND TP.EXCEPTIONCODE != '' AND TP.EXCEPTIONCODE IS NOT NULL)
+    </select>
+    
+    <!-- INDEMNITY EXCEPTION -->
+    <select id="getActiveBankGuaranteeException" resultMap="tradeProductExceptionResultMap">
+ 		SELECT
+            TP.EXCEPTIONCODE,
+			TP.OFFICERCODE,
+            PRODUCT.DOCUMENTCLASS AS DOCUMENTCLASS,
+            TS.TRADESERVICEID AS CREATIONTRADESERVICEID,
+            IND.INDEMNITYNUMBER AS DOCUMENTNUMBER,
+            TP.FACILITYREFERENCENUMBER AS FACILITYID,
+            TP.CIFNUMBER AS CIFNUMBER,
+            TP.MAINCIFNUMBER AS MAINCIFNUMBER,
+            TP.STATUS AS STATUS,
+            TP.CCBDBRANCHUNITCODE AS BRANCHUNITCODE,
+            PRODUCT.BOOKCODE as BOOK_CODE,
+            29 AS ENTITY_ID,
+            IND.SHIPMENTCURRENCY AS CURRENCY,
+            IND.PROCESSDATE,
+            (CASE WHEN IND.SHIPMENTAMOUNT &lt; 0
+             THEN 0
+             ELSE IND.SHIPMENTAMOUNT
+             END
+            ) AS OUTSTANDINGBALANCE,
+            TS.PROCESSINGUNITCODE,
+            IND.CANCELLATIONDATE AS DATECLOSED,
+            IND.CANCELLATIONDATE AS DATECANCELLED,
+            LC.EXPIRYCOUNTRYCODE AS BSPCOUNTRYCODE,
+            LC.IMPORTERCBCODE AS IMPORTERCBCODE,
+            '010' AS TRANSACTIONCODE,
+            TS.DOCUMENTTYPE AS DOCUMENTTYPE,
+            TS.DOCUMENTSUBTYPE1 AS DOCUMENTSUBTYPE1,
+            TS.DOCUMENTSUBTYPE2 AS DOCUMENTSUBTYPE2,
+            TP.FACILITYTYPE AS FACILITYTYPE,
+            CUSTOMER.CL_TAN AS EXTERNAL_CLIENT_TINNUMBER,
+            LC.IMPORTERCIFNUMBER AS EXTERNAL_CLIENTCIF,
+            CUSTOMER.CIF_LO_NAME AS EXTERNAL_CLIENT_FIRST_NAME,
+            CUSTOMER.CIF_LO_NAMEA AS EXTERNAL_CLIENT_MIDDLE_NAME,
+            CUSTOMER.CIF_LO_NAMEB AS EXTERNAL_CLIENT_LAST_NAME,
+            (CASE WHEN IND.INDEMNITYTYPE = 'BE' THEN 'TF119' ELSE PRODUCT.UCPBPRODUCTID END) AS PRODUCTID,
+            PRODUCT.BOOKCODE AS BOOKCODE,
+            PRODUCT.CONTINGENTACCOUNTINGCODE AS DEBIT_CODE,
+            PRODUCT.CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE,
+            PRODUCT.GL_ACCT_TYPE,
+            BOOK.BOOKINGACCOUNTTYPE AS LASTSETTLEMENTBOOKCODE
+        FROM
+            INDEMNITY_AUDIT IND
+
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = IND.INDEMNITYNUMBER AND TP.REV_ID = IND.REV_ID
+
+        INNER JOIN
+            LETTEROFCREDIT_AUDIT LC
+        ON
+            LC.DOCUMENTNUMBER = IND.REFERENCENUMBER
+
+        LEFT JOIN
+            REF_TFCUSTMR CUSTOMER
+        ON
+            LC.IMPORTERCBCODE = CUSTOMER.CB_CD
+
+        LEFT JOIN
+            BOOKINGSETTLEMENT BOOK
+        ON
+            BOOK.DOCUMENTNUMBER = IND.INDEMNITYNUMBER
+
+        INNER JOIN
+            (SELECT
+                TS.DOCUMENTNUMBER,
+                TS.PROCESSDATE,  
+                TS.PROCESSINGUNITCODE,
+                TS.DOCUMENTTYPE,
+                TS.DOCUMENTSUBTYPE1,
+                TS.DOCUMENTSUBTYPE2,
+                TS.TRADESERVICEID
+             FROM TRADESERVICE TS
+             INNER JOIN
+                INDEMNITY_AUDIT INDA
+             ON
+                TS.DOCUMENTNUMBER = INDA.INDEMNITYNUMBER
+             WHERE
+                days(TS.PROCESSDATE) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+             AND
+                TS.DOCUMENTCLASS = 'INDEMNITY'
+             AND
+                TS.SERVICETYPE = 'ISSUANCE'
+             AND
+                INDA.INDEMNITYNUMBER = (CASE WHEN INDA.INDEMNITYTYPE = 'BE' THEN (SELECT DOCUMENTNUMBER FROM INT_ACCENTRYACTUAL WHERE MONTH(EFFECTIVEDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND 
+                									YEAR(EFFECTIVEDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)) AND days(EFFECTIVEDATE) = days(cast(#{cutoffDate} as TIMESTAMP)) AND 
+                									ACCTYPE = 'I' AND DOCUMENTNUMBER=INDA.INDEMNITYNUMBER GROUP BY DOCUMENTNUMBER) 
+             							ELSE (INDA.INDEMNITYNUMBER) 
+             							END)
+             AND
+                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+             GROUP BY TS.DOCUMENTNUMBER, TS.PROCESSDATE, TS.TRADESERVICEID, TS.PROCESSINGUNITCODE, TS.DOCUMENTTYPE, TS.DOCUMENTSUBTYPE1, TS.DOCUMENTSUBTYPE2
+            ) TS
+        ON
+            TS.DOCUMENTNUMBER = IND.INDEMNITYNUMBER
+            
+		LEFT JOIN
+            REFPRODUCT PRODUCT
+        ON
+            PRODUCT.DOCUMENTCLASS = 'INDEMNITY'
+            
+        WHERE
+            TP.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join indemnity_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = TP.documentNumber
+                and
+                    b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                              days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                              order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                and
+                (
+                    a.STATUS = 'OPEN'
+                    OR (a.STATUS = 'CANCELLED' AND MONTH(c.CANCELLATIONDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(c.CANCELLATIONDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+                )
+            )
+        AND
+            LC.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                    a.documentNumber = IND.referenceNumber
+                and
+                    days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                order by b.revtstmp desc fetch first 1 rows only
+            )
+        AND
+            PRODUCT.PRODUCTID = (
+                CASE WHEN LC.TYPE = 'STANDBY'
+                THEN 'FX-INDEMNITY-STANDBY-SIGHT'
+                ELSE
+                    CASE WHEN LC.TYPE = 'CASH'
+                    THEN 'FX-INDEMNITY-CASH-SIGHT'
+                    ELSE 'FX-INDEMNITY'
+                    END
+                END
+            )
+        AND
+            ((TP.EXCEPTIONCODE != '0' AND TP.EXCEPTIONCODE != '00' AND TP.EXCEPTIONCODE != '' AND TP.EXCEPTIONCODE IS NOT NULL)
+        OR
+        	(((TP.ALLOCATIONUNITCODE IS NULL OR TP.ALLOCATIONUNITCODE = '') AND (TP.CCBDBRANCHUNITCODE LIKE '9%')) 
+        		AND (TP.EXCEPTIONCODE = '0' OR TP.EXCEPTIONCODE = '00' OR TP.EXCEPTIONCODE = '' OR TP.EXCEPTIONCODE IS NULL)))
+    </select>
+	
+	
+	<!-- method that will delete records from MASTERTABLE -->
+    <delete id="deleteMasterData">
+		DELETE FROM MASTERTABLE WHERE 
+		DAY = #{day}
+	</delete>
+   
+    <!-- method that will insert records from MASTERTABLE -->
+    <insert id="insertMasterData">
+    	INSERT INTO MASTERTABLE (DAY,DOCUMENTNUMBER,FACILITYID,CUSTOMERID,STATUS,BRANCHID,BOOKCODE,ENTITYID,CURRENCY,PRODUCTID,OPENDATE,LASTNEGODATE,CLOSEDDATE,MATURITYDATE,LASTAMENDDATE,LASTREINSTATEDATE,OUTSTANDINGASSETS_LCL,OUTSTANDINGASSETS_FCY,OUTSTANDINGLIABILITIES_LCL,OUTSTANDINGLIABILITIES_FCY,GLCODEASSETS,GLCODELIABILITIES) 
+    	VALUES(#{day},#{applicationAccountId},#{facilityId},#{customerId},#{accountStatusId},#{branchId},#{entityId},#{oBookCode},#{oCurrencyId},#{productId},#{oDate},#{nDate},#{cDate},#{mDate},#{lADate},#{lRDate},#{zero},#{oCAssets},#{zero},#{oCLiabilities},#{cAssetsGlNumber},#{cLiabilitiesGlNumber})
+    </insert>
+    
+    <!-- method that will delete records from GLBALANCE -->
+    <delete id="deleteGlBalance">
+		DELETE FROM GLBALANCE WHERE 
+		DAY = #{day}
+	</delete>
+
+    <!-- method that will insert records from GLBALANCE -->	
+	<insert id="insertGlBalance">
+		INSERT INTO GLBALANCE (DAY,ACCTNO,GMCTYP,ORIGINALBALANCE,PESOBALANCE)
+		VALUES(#{day},#{acctno},#{gmctyp},#{orgBalance},#{phpBalance})
+	</insert>
+	
+	<!-- Rev_id -->
+    <select id="getAuditRevId" resultType="java.lang.Integer">
+    	SELECT 
+    		REV_ID 
+    	FROM 
+    		LETTEROFCREDIT_AUDIT 
+    	WHERE 
+    		DOCUMENTNUMBER = #{docNum}
+    	AND 
+    		DAYS(LASTMODIFIEDDATE) &lt;= DAYS(cast(#{cutoffDate} as TIMESTAMP))
+    	ORDER BY LASTMODIFIEDDATE DESC
+    </select>
+    
+    <!-- LC Audit -->
+    <select id="getLetterOfCreditAuditByRevId" resultMap="tradeProductResultMap">
+        SELECT
+                LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                LC.CASHFLAG AS CASHFLAG,
+                LC.TOTALNEGOTIATEDCASHAMOUNT AS NEGOTIATED_AMOUNT,
+                TP.AMOUNT AS ORIGINAL_AMOUNT,
+			    LC.OUTSTANDINGBALANCE,
+                LC.TOTALNEGOTIATEDAMOUNT AS NEGOTIATIONAMOUNT,
+                TP.PRODUCTTYPE AS DOCUMENTCLASS,
+                LC.TYPE AS DOCUMENTSUBTYPE1,
+                (CASE WHEN LC.CASHAMOUNT IS NULL THEN 0 ELSE LC.CASHAMOUNT END) AS CASHAMOUNT,
+                LC.LASTMODIFIEDDATE AS DATECLOSED,
+                LC.LASTREINSTATEMENTDATE AS LASTREINSTATEMENTDATE,
+                LC.STANDBYTAGGING
+        FROM
+            LETTEROFCREDIT_AUDIT LC
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+        WHERE
+        	LC.REV_ID = #{revId}
+    </select>
+    
+    <select id="getMaxIdDocNum" resultType="java.lang.Integer">
+        SELECT MAX(ID) FROM DOC_NUM_SEQUENCE
+    </select>
+        
+    <select id="getMaxIdNego" resultType="java.lang.Integer">
+        SELECT MAX(ID) FROM NEGOTIATION_NUM_SEQUENCE
+    </select>
+            
+    <select id="getMaxIdIc" resultType="java.lang.Integer">
+        SELECT MAX(ID) FROM IC_NUM_SEQUENCE
+    </select>
+            
+    <select id="getMaxIdIndemnity" resultType="java.lang.Integer">
+        SELECT MAX(ID) FROM INDEMNITY_NUM_SEQUENCE
+    </select>
+            
+    <select id="getMaxIdNonLC" resultType="java.lang.Integer">
+        SELECT MAX(ID) FROM NON_LC_NUM_SEQUENCE
+    </select>
+    
+    <insert id="insertDocSequence">
+    	INSERT INTO DOC_NUM_SEQUENCE (ID,DOCUMENT_TYPE,SEQUENCE,UNIT_CODE,SEQUENCE_YEAR) 
+		VALUES (#{id},#{product},#{one},#{branch},#{year})
+    </insert>
+    
+    <insert id="insertNegotiationSequence">
+    	INSERT INTO NEGOTIATION_NUM_SEQUENCE (ID,DOCUMENT_TYPE,SEQUENCE,UNIT_CODE,SEQUENCE_YEAR) 
+		VALUES (#{id},#{product},#{one},#{branch},#{year})
+    </insert>
+    
+    <insert id="insertIcSequence">
+    	INSERT INTO IC_NUM_SEQUENCE (ID,DOCUMENT_TYPE,SEQUENCE,UNIT_CODE,SEQUENCE_YEAR) 
+		VALUES (#{id},#{product},#{one},#{branch},#{year})
+    </insert>
+    
+    <insert id="insertIndemnitySequence">
+    	INSERT INTO INDEMNITY_NUM_SEQUENCE (ID,DOCUMENT_TYPE,SEQUENCE,UNIT_CODE,SEQUENCE_YEAR) 
+		VALUES (#{id},#{product},#{one},#{branch},#{year})
+    </insert>
+    
+    <insert id="insertNonLcSequence">
+    	INSERT INTO NON_LC_NUM_SEQUENCE (ID,DOCUMENT_TYPE,SEQUENCE,UNIT_CODE,SEQUENCE_YEAR) 
+		VALUES (#{id},#{product},#{one},#{branch},#{year})
+    </insert>
+    
+    <!-- Start: IBD-16-0219-01 -->
+    <resultMap id="cicResultMap" type="com.ucpb.tfs.batch.report.dw.CicRecord">
+        <result property="recordType" column="RECORDTYE"/>
+        <result property="providerCode" column="PROVIDERCODE"/>
+        <result property="branchCode" column="BRANCHCODE"/>
+        <result property="reportDate" column="REPORTDATE"/>
+        <result property="cifNumber" column="CIFNUMBER"/>
+        <result property="role" column="ROLE"/>
+        <result property="docNumber" column="DOCNUMBER"/>
+        <result property="contractType" column="CONTRACTTYPE"/>
+        <result property="contractPhase" column="CONTRACTPHASE"/> 
+        <result property="contractStatus" column="CONTRACTSTATUS"/>
+        <result property="pesoCurrency" column="PESOCURRENCY"/>
+        <result property="originalCurrency" column="ORIGINALCURRENCY"/>
+        <result property="startDate" column="STARTDATE"/>
+        <result property="requestDate" column="REQUESTDATE"/>
+        <result property="expiryDate" column="EXPIRYDATE"/>
+        <result property="closeDate" column="CLOSEDATE"/>
+        <result property="lastPaymentDate" column="LASTPAYMENTDATE"/>
+        <result property="creditCode" column="CREDITCODE"/>  
+        <result property="resolutionFlag" column="RESOLUTIONFLAG"/>     
+        <result property="creditLimit" column="CREDITLIMIT"/>     
+        <result property="productType" column="PRODUCTTYPE"/>     
+        <result property="docType" column="DOCTYPE"/>     
+        <result property="lcType" column="LCTYPE"/>     
+        <result property="purposeOfCredit" column="PURPOSEOFCREDIT"/>     
+        <result property="outstandingBalance" column="OUTSTANDINGBALANCE"/>     
+        <result property="cashAmount" column="CASHAMOUNT"/>     
+        <result property="cashFlag" column="CASHFLAG"/>          
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>     
+        <result property="facilityType" column="FACILITYTYPE"/>     
+        <result property="facilityId" column="FACILITYID"/>        
+        <result property="facilityRefNumber" column="FACILITYREFERENCENUMBER"/>   
+        <result property="totalNegotiatedCashAmount" column="TOTALNEGOTIATEDCASHAMOUNT"/> 
+    </resultMap>
+    
+    <!-- Modify the select to get the outstanding balance for LC and shipment amount for BG regardless of status, 
+    		CicExtractionJob.java will handle the conditions for close and active accounts -->
+    <select id="getCicAll" resultMap="cicResultMap">
+    	select 'CN' AS RECORDTYE,
+			'UB000350' AS PROVIDERCODE,
+			'909' AS BRANCHCODE,
+			'DDMMYYYY' AS REPORTDATE,
+			tp.CIFNUMBER,
+			'' AS ROLE,
+			tp.DOCUMENTNUMBER AS DOCNUMBER,
+			'40' AS CONTRACTTYPE,
+			CASE WHEN lc.EXPIRYDATE &lt;= cast(#{appDate} as TIMESTAMP) and lc.type!='CASH' THEN 'CL'
+				WHEN tp.STATUS IN ('OPEN','REINSTATED') THEN 'AC'
+				ELSE 'CL'
+			END AS CONTRACTPHASE,
+			'' AS CONTRACTSTATUS,
+			'PHP' AS PESOCURRENCY,
+			tp.CURRENCY AS ORIGINALCURRENCY,
+			date(lc.ISSUEDATE) AS STARTDATE,
+			date(lc.ISSUEDATE) AS REQUESTDATE,
+			date(lc.EXPIRYDATE) AS EXPIRYDATE,
+			CASE 
+				WHEN tp.STATUS='EXPIRED' THEN date(lc.EXPIRYDATE)
+				WHEN tp.STATUS='CLOSED' THEN date(lc.LASTNEGOTIATIONDATE)
+				WHEN tp.STATUS='CANCELLED' THEN date(lc.CANCELLATIONDATE)
+				ELSE null
+			END AS CLOSEDATE,
+			CASE 
+				WHEN lc.LASTNEGOTIATIONDATE IS NOT NULL THEN date(lc.LASTNEGOTIATIONDATE)
+				ELSE NULL
+			END AS LASTPAYMENTDATE,
+			'' AS CREDITCODE,
+			'' AS RESOLUTIONFLAG,
+			0 AS CREDITLIMIT,
+			
+			tp.PRODUCTTYPE,
+			lc.DOCUMENTTYPE as DOCTYPE,
+			lc.TYPE as LCTYPE,
+			
+			'' AS PURPOSEOFCREDIT,
+			lc.OUTSTANDINGBALANCE as OUTSTANDINGBALANCE,
+			lc.CASHAMOUNT  as CASHAMOUNT,
+			lc.CASHFLAG as CASHFLAG,
+			tp.MAINCIFNUMBER as MAINCIFNUMBER,
+			tp.FACILITYTYPE as FACILITYTYPE,
+			tp.FACILITYID as FACILITYID,
+			tp.FACILITYREFERENCENUMBER as FACILITYREFERENCENUMBER,
+			lc.TOTALNEGOTIATEDCASHAMOUNT as TOTALNEGOTIATEDCASHAMOUNT
+		from TRADEPRODUCT_AUDIT tp
+		inner join (
+			select * from LETTEROFCREDIT_AUDIT a
+			where a.REV_ID IN (
+				select x.REV_ID from LETTEROFCREDIT_AUDIT x 
+				inner join REVINFO y
+				on x.REV_ID=y.REV 
+				and a.DOCUMENTNUMBER=x.DOCUMENTNUMBER 
+				and days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{appDate} as TIMESTAMP))
+			     order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+			
+		)lc
+		on lc.DOCUMENTNUMBER=tp.DOCUMENTNUMBER and tp.REV_ID=lc.REV_ID
+		where (tp.PRODUCTTYPE='LC')
+		
+		
+		union
+		
+		select 'CN' AS RECORDTYE,
+			'UB000350' AS PROVIDERCODE,
+			'909' AS BRANCHCODE,
+			'DDMMYYYY' AS REPORTDATE,
+			tp.CIFNUMBER,
+			'' AS ROLE,
+			bg.INDEMNITYNUMBER AS DOCNUMBER,
+			'40' AS CONTRACTTYPE,
+			CASE 
+				WHEN tp.STATUS IN ('OPEN','REINSTATED') THEN 'AC'
+				ELSE 'CL'
+			END AS CONTRACTPHASE,
+			'' AS CONTRACTSTATUS,
+			'PHP' AS PESOCURRENCY,
+			tp.CURRENCY AS ORIGINALCURRENCY,
+			date(bg.INDEMNITYISSUEDATE) AS STARTDATE,
+			date(bg.INDEMNITYISSUEDATE) AS REQUESTDATE,
+			NULL AS EXPIRYDATE,
+			CASE 
+				WHEN tp.STATUS='CANCELLED' THEN date(bg.CANCELLATIONDATE)
+				ELSE null
+			END as CLOSEDATE,
+			NULL AS LASTPAYMENTDATE,
+			'' AS CREDITCODE,
+			'' AS RESOLUTIONFLAG,
+			0 AS CREDITLIMIT,
+			
+			tp.PRODUCTTYPE,
+			bg.INDEMNITYTYPE as DOCTYPE,
+			null as LCTYPE,
+			
+			'' AS PURPOSEOFCREDIT,
+			bg.SHIPMENTAMOUNT as OUTSTANDINGBALANCE,
+			0 as CASHAMOUNT,
+			null as CASHFLAG,
+			tp.MAINCIFNUMBER as MAINCIFNUMBER,
+			tp.FACILITYTYPE as FACILITYTYPE,
+			tp.FACILITYID as FACILITYID,
+			bg.REFERENCENUMBER as FACILITYREFERENCENUMBER,
+			0 as TOTALNEGOTIATEDCASHAMOUNT
+		from TRADEPRODUCT_AUDIT tp
+		inner join (
+			select * from INDEMNITY_AUDIT a
+			where a.REV_ID IN (
+				select x.REV_ID from INDEMNITY_AUDIT x 
+				inner join REVINFO y
+				on x.REV_ID=y.REV 
+				and a.INDEMNITYNUMBER=x.INDEMNITYNUMBER 
+				and days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{appDate} as TIMESTAMP))
+			     order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+			and a.INDEMNITYTYPE='BG'
+			
+		) bg
+		on bg.INDEMNITYNUMBER=tp.DOCUMENTNUMBER and tp.REV_ID=bg.REV_ID
+		where (tp.PRODUCTTYPE='INDEMNITY')
+	       
+    </select>
+    
+    <select id="getOpeningType" resultType="string">
+		select TYPE from LETTEROFCREDIT_AUDIT
+		where DOCUMENTNUMBER=#{docNumber}
+		ORDER by REV_ID asc
+		fetch first 1 row only
+    </select>
+    
+    
+    <select id="getAdjustmentDate" resultType="java.util.Date">
+	    select lc.LASTMODIFIEDDATE from LETTEROFCREDIT_AUDIT lc
+		where lc.DOCUMENTNUMBER=#{docNumber}
+		and lc.CASHAMOUNT=lc.OUTSTANDINGBALANCE
+		order by lc.LASTMODIFIEDDATE asc
+		fetch first 1 row only
+    </select>
+    
+    <select id="getCashNegoDate" resultType="java.util.Date">
+	    select lc.LASTMODIFIEDDATE from LETTEROFCREDIT_AUDIT lc
+		where lc.DOCUMENTNUMBER=#{docNumber}
+		and lc.CASHAMOUNT &gt; 0
+		and lc.CASHAMOUNT &lt;= lc.TOTALNEGOTIATEDCASHAMOUNT
+		order by lc.LASTMODIFIEDDATE asc
+		fetch first 1 row only
+    </select>
+      
+    <select id="getFacilityInfo" resultType="hashMap">
+	   	select MAINCIFNUMBER,FACILITYTYPE,FACILITYID,FACILITYREFERENCENUMBER FROM TRADEPRODUCT
+		where DOCUMENTNUMBER=#{bgNumber}
+    </select>
+    
+    <!-- Modify this mapping to include cash amount for the Credit limit of cash LCs -->
+    <resultMap id="monthlyCicResultMap" type="com.ucpb.tfs.batch.report.dw.CicRecord">
+        <result property="recordType" column="RECORDTYE"/>
+        <result property="providerCode" column="PROVIDERCODE"/>
+        <result property="branchCode" column="BRANCHCODE"/>
+        <result property="reportDate" column="REPORTDATE"/>
+        <result property="cifNumber" column="CUSTOMERID"/>
+        <result property="role" column="ROLE"/>
+        <result property="docNumber" column="DOCUMENTNUMBER"/>
+        <result property="refNumber" column="REFNUMBER"/>
+        <result property="contractType" column="CONTRACTTYPE"/>
+        <result property="contractPhase" column="CONTRACTPHASE"/> 
+        <result property="contractStatus" column="CONTRACTSTATUS"/>
+        <result property="pesoCurrency" column="PESOCURRENCY"/>
+        <result property="originalCurrency" column="CURRENCY"/>
+        <result property="startDateStr" column="STARTDATE"/>
+        <result property="expiryDateStr" column="EXPIRYDATE"/>
+        <result property="closeDateStr" column="CLOSEDATE"/>
+        <result property="lastPaymentDateStr" column="LASTPAYMENTDATE"/>
+        <result property="creditCode" column="CREDITCODE"/>  
+        <result property="resolutionFlag" column="RESOLUTIONFLAG"/>     
+        <result property="creditLimit" column="CREDITLIMIT"/>     
+        <result property="productType" column="PRODUCTID"/>     
+        <result property="purposeOfCredit" column="PURPOSEOFCREDIT"/>     
+        <result property="outstandingBalance" column="OUTSTANDINGASSETS_FCY"/>             
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>     
+        <result property="facilityType" column="FACILITYTYPE"/>     
+        <result property="facilityId" column="FACILITYID"/>   
+        <result property="facilityRefNumber" column="FACILITYREFERENCENUMBER"/>     
+        <result property="cashAmount" column="CASHAMOUNT"/> 
+    </resultMap>
+    
+	<!-- Modify the column BRANCHCODE to get CCBDBRANCHUNITCODE and not fixed 909. Also put the right CIC Code for UCPB which is UB000350;
+		Get cash amount for the Credit limit of cash LCs -->
+    <select id="getMonthlyCic" resultMap="monthlyCicResultMap">
+		select mt.RECORDTYE,
+			mt.PROVIDERCODE,
+			tp.CCBDBRANCHUNITCODE as BRANCHCODE,
+			mt.REPORTDATE,
+			mt.CIFNUMBER,
+			mt.ROLE,
+			mt.DOCNUMBER,
+			mt.REFNUMBER,
+			mt.CONTRACTTYPE,
+			mt.CONTRACTPHASE,
+			mt.CONTRACTSTATUS,
+			mt.PESOCURRENCY,
+			mt.ORIGINALCURRENCY,
+			mt.STARTDATE,
+			mt.EXPIRYDATE,
+			mt.CLOSEDATE,
+			mt.LASTPAYMENTDATE,
+			mt.CREDITCODE,
+			mt.RESOLUTIONFLAG,
+			mt.CREDITLIMIT,
+			mt.PRODUCTID,
+			mt.PURPOSEOFCREDIT,
+			mt.OUTSTANDINGBALANCE,
+			tp.MAINCIFNUMBER as MAINCIFNUMBER,
+			tp.FACILITYTYPE as FACILITYTYPE,
+			tp.FACILITYID as FACILITYID,
+			tp.FACILITYREFERENCENUMBER as FACILITYREFERENCENUMBER,
+			lc.CASHAMOUNT
+		from (
+			select 'CN' AS RECORDTYE,
+				'UB000350' AS PROVIDERCODE,
+				'DDMMYYYY' AS REPORTDATE,
+				m.CUSTOMERID as CIFNUMBER,
+				'' AS ROLE,
+				CASE 
+					When (SUBSTR(m.DOCUMENTNUMBER,5,2)='98' and SUBSTR(m.DOCUMENTNUMBER,1,2)='90') then (SUBSTR(m.DOCUMENTNUMBER,1,4) || '01' || SUBSTR(m.DOCUMENTNUMBER,7))
+					When (SUBSTR(m.DOCUMENTNUMBER,5,2)='99' and SUBSTR(m.DOCUMENTNUMBER,1,2)='90') then (SUBSTR(m.DOCUMENTNUMBER,1,4) || '03' || SUBSTR(m.DOCUMENTNUMBER,7))
+					When (SUBSTR(m.DOCUMENTNUMBER,5,2)='98' and SUBSTR(m.DOCUMENTNUMBER,1,2)='FX') then (SUBSTR(m.DOCUMENTNUMBER,1,4) || '20' || SUBSTR(m.DOCUMENTNUMBER,7))
+					When (SUBSTR(m.DOCUMENTNUMBER,5,2)='99' and SUBSTR(m.DOCUMENTNUMBER,1,2)='DM') then (SUBSTR(m.DOCUMENTNUMBER,1,4) || '20' || SUBSTR(m.DOCUMENTNUMBER,7))
+					When m.PRODUCTID='TF114' then (Select a.REFERENCENUMBER from INDEMNITY a where a.INDEMNITYNUMBER=m.DOCUMENTNUMBER)
+					ELSE m.DOCUMENTNUMBER
+				END AS REFNUMBER,
+				m.DOCUMENTNUMBER AS DOCNUMBER,
+				'40' AS CONTRACTTYPE,
+				m.STATUS AS CONTRACTPHASE,
+				'' AS CONTRACTSTATUS,
+				'PHP' AS PESOCURRENCY,
+				m.CURRENCY AS ORIGINALCURRENCY,
+				m.OPENDATE AS STARTDATE,
+				m.OPENDATE AS REQUESTDATE,
+				m.MATURITYDATE AS EXPIRYDATE,
+				m.CLOSEDDATE as CLOSEDATE,
+				m.LASTNEGODATE AS LASTPAYMENTDATE,
+				'' AS CREDITCODE,
+				'' AS RESOLUTIONFLAG,
+				0 AS CREDITLIMIT,
+				m.PRODUCTID,
+				'' AS PURPOSEOFCREDIT,
+				m.OUTSTANDINGASSETS_FCY as OUTSTANDINGBALANCE
+			from MASTERTABLE m
+			where m.day=#{day}
+			and m.PRODUCTID IN ('TF111','TF112','TF113','TF114','TF115','TF116','TF211','TF212','TF213','TF214','TF217')
+		) mt
+		INNER JOIN TRADEPRODUCT tp
+		on tp.DOCUMENTNUMBER=mt.REFNUMBER
+		inner JOIN LETTEROFCREDIT lc
+		on mt.REFNUMBER=lc.DOCUMENTNUMBER
+
+    </select>
+	<!-- End: IBD-16-0219-01 -->	
+	
+	<!-- Change of Tenor from Regular Sight to Usance -->
+	<select id="checkIfTenorChange" resultType="string">
+   		SELECT 
+   			(CASE WHEN LC.TENOR = 'USANCE' AND LC.TENOR != TEMP_TABLE.TENOR
+         		THEN 'Y'
+         		ELSE 'N'
+            END) AS CHANGE_TENOR
+   		FROM
+   			LETTEROFCREDIT_AUDIT LC
+	   	INNER JOIN
+	   	(
+			SELECT temp000.TYPE,temp000.TENOR, temp000.REV_ID , temp000.DOCUMENTNUMBER, temp000.DOCUMENTTYPE
+			FROM LETTEROFCREDIT_AUDIT temp000
+			WHERE temp000.REV_ID = 
+				(SELECT MAX(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = temp000.DOCUMENTNUMBER
+					AND TENOR = 'SIGHT' AND TYPE = 'REGULAR'
+					AND days(loc.LASTMODIFIEDDATE)  &lt;= days(cast(#{cutoffDate} as timestamp))
+				)
+		) TEMP_TABLE 
+		ON 
+			TEMP_TABLE.TYPE = LC.TYPE AND 
+			TEMP_TABLE.DOCUMENTTYPE = LC.DOCUMENTTYPE AND
+			TEMP_TABLE.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+		WHERE
+			LC.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                a.documentNumber = LC.documentNumber
+                and
+                b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = LC.documentNumber and
+                days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{cutoffDate} as TIMESTAMP))
+                order by y.revtstmp desc, y.rev desc fetch first 1 rows only)               
+            ) 
+        AND 
+        	LC.DOCUMENTNUMBER = #{documentNumber}
+	</select>
+	
+	<!-- Date of Change of Tenor -->
+	<select id="getRegularSightCloseDate" resultType="java.util.Date">
+		SELECT 
+			LC.LASTMODIFIEDDATE
+		FROM 
+			LETTEROFCREDIT_AUDIT LC
+		WHERE 
+			LC.REV_ID = 
+				(SELECT MIN(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+					AND TENOR = 'USANCE' AND TYPE = 'REGULAR'
+					AND days(loc.LASTMODIFIEDDATE)  &lt;= days(cast(#{cutoffDate} as timestamp))
+				)
+		AND
+			LC.DOCUMENTNUMBER = #{documentNumber}
+    </select>
+	
+	<!-- Current tagging of Standby LC -->
+	<select id="getOpeningStandbyTagging" resultType="string">
+		SELECT 
+			LC.STANDBYTAGGING
+		FROM 
+			LETTEROFCREDIT_AUDIT LC
+		WHERE 
+			LC.REV_ID = 
+				(SELECT MIN(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+					AND TYPE = 'STANDBY'
+					AND REV_ID IS NOT NULL
+				)
+		AND
+			LC.DOCUMENTNUMBER = #{documentNumber}
+    </select>
+    
+    <!-- Retrieve data from REFPRODUCT Table -->
+	<select id="getRefProductInfo" resultType="hashMap">
+		SELECT
+			UCPBPRODUCTID AS PRODUCTID, 
+			CONTINGENTACCOUNTINGCODE AS DEBIT_CODE, 
+			CONTRACONTINGENTACCOUNTINGCODE AS CREDIT_CODE
+		FROM
+			REFPRODUCT 
+		WHERE
+			DOCUMENTTYPE = #{documentType} AND DOCUMENTCLASS = #{documentClass} AND
+			DOCUMENTSUBTYPE1 = #{documentSubType1} AND DOCUMENTSUBTYPE2 = #{documentSubType2} AND 
+			DOCUMENTSUBTYPE3 = #{documentSubType3}
+	</select>
+	
+	<resultMap id="tradeServiceMap" type="com.ucpb.tfs.batch.report.dw.CifNormalizationModel">
+        
+        <result property="serviceInstructionId" column="SERVICEINSTRUCTIONID"/>
+        <result property="detailsStr" column="DETAILS"/>
+        <result property="cifNumber" column="CIFNUMBER"/>
+        <result property="mainCifNumber" column="MAINCIFNUMBER"/>
+        <result property="facilityId" column="FACILITYID"/>
+        <result property="facilityType" column="FACILITYTYPE"/>
+        
+    </resultMap>
+    
+    <!--   ER# 20140909-038 : Start  -->
+	<select id="getTradeService" resultMap="tradeServiceMap">
+		SELECT  SERVICEINSTRUCTIONID, DETAILS, CIFNUMBER, MAINCIFNUMBER, FACILITYID, FACILITYTYPE FROM TRADESERVICE
+		WHERE TRADESERVICEID = #{tradeServiceId}
+	</select>
+	
+	<resultMap id="serviceInstructionMap" type="com.ucpb.tfs.batch.report.dw.CifNormalizationModel">
+        <result property="detailsStr" column="DETAILS"/>     
+    </resultMap>
+    
+	<select id="getServiceInstruction" resultMap="serviceInstructionMap">
+		SELECT DETAILS FROM SERVICEINSTRUCTION
+		WHERE SERVICEINSTRUCTIONID = #{serviceInstructionId}
+	</select>	
+	<!--   ER# 20140909-038 : End  -->
+		
+	<select id="getIcAccount" resultType="hashMap">
+		SELECT a.ICNUMBER,a.DOCUMENTNUMBER,a.LCNEGOTIATIONDISCREPANCYSTATUS,a.NEGOTIATIONAMOUNT,a.NEGOTIATIONCURRENCY,a.LASTMODIFIEDDATE
+		FROM LCNEGOTIATIONDISCREPANCY_AUDIT a
+		WHERE a.DOCUMENTNUMBER = #{documentNumber} 
+		AND (LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN' OR 
+				(LCNEGOTIATIONDISCREPANCYSTATUS = 'CLOSED' AND MONTH(LASTMODIFIEDDATE) = MONTH(cast(#{cutoffDate} as TIMESTAMP)) AND YEAR(LASTMODIFIEDDATE) = YEAR(cast(#{cutoffDate} as TIMESTAMP)))
+			)
+		AND a.REV_ID IN ( 
+			SELECT MAX(REV_ID) 
+			FROM LCNEGOTIATIONDISCREPANCY_AUDIT 
+			WHERE ICNUMBER = a.ICNUMBER 		
+			AND DATE(LASTMODIFIEDDATE) &lt;= DATE(cast(#{cutoffDate} as TIMESTAMP))
+		)
+		ORDER BY REV_ID DESC
+	</select>		
+	
+    <select id="getAdbOfIcAccount" resultType="BigDecimal">
+        SELECT 
+			SUM(BALANCE)
+		FROM DAILYBALANCE
+		WHERE DOCUMENTNUMBER = #{documentNumber}
+		AND MONTH(BALANCEDATE) = MONTH(cast(#{currentDate} as TIMESTAMP))
+		AND YEAR(BALANCEDATE) = YEAR(cast(#{currentDate} as TIMESTAMP))
+    </select>
+    
+    <select id="getIcAccountWithoutDash" resultType="hashMap">
+		SELECT ICNUMBER,DOCUMENTNUMBER,LCNEGOTIATIONDISCREPANCYSTATUS,NEGOTIATIONAMOUNT,NEGOTIATIONCURRENCY,LASTMODIFIEDDATE
+		FROM LCNEGOTIATIONDISCREPANCY_AUDIT 
+		WHERE REPLACE(DOCUMENTNUMBER, '-') = #{documentNumber} 
+		AND (LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN' OR 
+			(LCNEGOTIATIONDISCREPANCYSTATUS = 'CLOSED' AND MONTH(LASTMODIFIEDDATE) = MONTH(cast(#{currentDate} as TIMESTAMP)) AND YEAR(LASTMODIFIEDDATE) = YEAR(cast(#{currentDate} as TIMESTAMP)))
+		)
+		ORDER BY REV_ID DESC
+		FETCH FIRST 1 ROW ONLY
+	</select>
+
+    <select id="getItrsRecords" resultType="hashMap">
+
+        SELECT
+            COALESCE(BKCODE,NULL) AS BKCODE,
+            COALESCE(TRDATE,NULL) AS TRDATE,
+            COALESCE(TRIM(TRCODE),'') AS TRCODE,
+            COALESCE(BOOKCD,NULL) AS BOOKCD,
+            COALESCE(BSRATE1,NULL) AS BSRATE,
+            COALESCE(TRIM(CURCDE1),'') AS CURCDE1,
+            COALESCE(AMTORIG1,0) AS AMTORIG1,
+            COALESCE(TRIM(CURCDE2),'') AS CURCDE2,
+            COALESCE(AMTORIG2,NULL) AS AMTORIG2,
+            COALESCE(TRIM(CTRYCD),'') AS CTRYCD,
+            COALESCE(DEALDT,NULL) AS DEALDT,
+            COALESCE(DEALCD,NULL) AS DEALCD,
+            COALESCE(EXPCDE,NULL) AS EXPCDE,
+            COALESCE(DBTCDE,NULL) AS DBTCDE,
+            COALESCE(TRIM(REMNME),'') AS REMNME,
+            COALESCE(TRIM(INVRNME),'') AS INVRNME,
+            COALESCE(TRIM(TIN1),'') AS TIN1,
+            COALESCE(TRIM(SECRNO1),'') AS SECRNO1,
+            COALESCE(TRIM(DTIRNO1),'') AS DTIRNO1,
+            COALESCE(TRIM(PSIC1),'') AS PSIC1,
+            COALESCE(IMPCDE,NULL) AS IMPCDE,
+            COALESCE(CRDCDE,NULL) AS CRDCDE,
+            COALESCE(TRIM(BENENME),'') AS BENENME,
+            COALESCE(TRIM(INVSNME),'') AS INVSNME,
+            COALESCE(TRIM(TIN2),'') AS TIN2,
+            COALESCE(TRIM(SECRNO2),'') AS SECRNO2,
+            COALESCE(TRIM(DTIRNO2),'') AS DTIRNO2,
+            COALESCE(TRIM(PSIC2),'') AS PSIC2,
+            COALESCE(TRIM(COMCDE),'') AS COMCDE,
+            COALESCE(MODPAY,NULL) AS MODPAY,
+            COALESCE(TRIM(HCTRYCD),'') AS HCTRYCD,
+            COALESCE(IMPSCD,NULL) AS IMPSCD,
+            COALESCE(TRIM(LCNO),'') AS LCNO,
+            COALESCE(TRIM(BRN),'') AS BRN,
+            COALESCE(BILDTE,NULL) AS BILDTE,
+            COALESCE(OMATDTE,NULL) AS OMATDTE,
+            COALESCE(NMATDTE,NULL) AS NMATDTE,
+            COALESCE(REMCHLCDE,NULL) AS REMCHLCDE,
+            COALESCE(PRVCDE,NULL) AS PRVCDE,
+            COALESCE(OWNCDE,NULL) AS OWNCDE,
+            COALESCE(TRIM(BSRDNO),'') AS BSRDNO,
+            COALESCE(TRIM(CIRNO),'') AS CIRNO,
+            COALESCE(TRIM(TTFNO),'') AS TTFNO,
+            COALESCE(LISTCDE,NULL) AS LISTCDE,
+            COALESCE(REGTYPCDE,NULL) AS REGTYPCDE,
+            COALESCE(TRIM(ISIN),'') AS ISIN,
+            COALESCE(TRIM(SECNME),'') AS SECNME,
+            COALESCE(RESDNCE,NULL) AS RESDNCE,
+            COALESCE(CTPBCD,NULL) AS CTPBCD,
+            COALESCE(TRIM(CTPNME),'') AS CTPNME,
+            COALESCE(CTPTYPCDE,NULL) AS CTPTYPCDE,
+            COALESCE(SVLDTE,NULL) AS SVLDTE,
+            COALESCE(SFRATE,NULL) AS SFRATE,
+            COALESCE(FFXDTE,NULL) AS FFXDTE,
+            COALESCE(FVLDTE,NULL) AS FVLDTE,
+            COALESCE(FFXRATE,NULL) AS FFXRATE,
+            COALESCE(TRIM(BSPDAN),'') AS BSPDAN,
+            COALESCE(TRIM(CFCCODE),'') AS CFCCODE		
+        FROM ITRS
+        WHERE DAY = #{day}
+        AND (REMARKS IS NULL OR REMARKS = '')
+        ORDER BY TRCODE,LCNO,BRN
+    </select>
+	
+	<select id="getSchedule2" resultMap="itrsResultMap2">
+
+        SELECT * FROM (
+            SELECT EB.DOCUMENTNUMBER,
+                EB.REV_ID,
+            CASE
+                WHEN TP.STATUS = 'NEGOTIATED' AND EB.EXPORTBILLTYPE = 'EBP' AND (EB.PARTICULARS IS NULL OR TRIM(EB.PARTICULARS) = '') AND DATE(EB.NEGOTIATIONDATE) = #{reportDate}
+                THEN 'Bills purchased'
+                WHEN TP.STATUS = 'SETTLED' AND EB.EXPORTBILLTYPE = 'EBC' AND (EB.PARTICULARS IS NULL OR TRIM(EB.PARTICULARS) = '') AND DATE(EB.SETTLEMENTDATE) = #{reportDate}
+                THEN 'Bills collected'
+                WHEN TP.STATUS = 'CANCELLED' AND EB.EXPORTBILLTYPE = 'EBC' AND DATE(EB.PROCESSDATE) = #{reportDate}
+                THEN 'Cancellation of export receipts'
+                WHEN TP.STATUS = 'NEGOTIATED' AND EB.EXPORTBILLTYPE = 'EBP' AND EB.PARTICULARS IS NOT NULL AND DATE(EB.NEGOTIATIONDATE) = #{reportDate}
+                THEN (SELECT DESCRIPTION FROM REFPARTICULARS WHERE CODE = EB.PARTICULARS)
+                WHEN TP.STATUS = 'SETTLED' AND EB.EXPORTBILLTYPE = 'EBC' AND EB.PARTICULARS IS NOT NULL AND DATE(EB.SETTLEMENTDATE) = #{reportDate}
+                THEN (SELECT DESCRIPTION FROM REFPARTICULARS WHERE CODE = EB.PARTICULARS)
+                ELSE 'DONOTREPORT'
+            END AS PARTICULARS,
+            CASE
+                WHEN TP.STATUS = 'NEGOTIATED' AND EB.EXPORTBILLTYPE = 'EBP' AND (EB.PARTICULARS IS NULL OR TRIM(EB.PARTICULARS) = '') AND DATE(EB.NEGOTIATIONDATE) = #{reportDate}
+                THEN (SELECT CODE FROM REFPARTICULARS WHERE DESCRIPTION = 'EBP')
+                WHEN TP.STATUS = 'SETTLED' AND EB.EXPORTBILLTYPE = 'EBC' AND (EB.PARTICULARS IS NULL OR TRIM(EB.PARTICULARS) = '') AND DATE(EB.SETTLEMENTDATE) = #{reportDate}
+                THEN (SELECT CODE FROM REFPARTICULARS WHERE DESCRIPTION = 'EBC')
+                WHEN TP.STATUS = 'CANCELLED' AND EB.EXPORTBILLTYPE = 'EBC' AND DATE(EB.PROCESSDATE) = #{reportDate}
+                THEN (SELECT CODE FROM REFPARTICULARS WHERE DESCRIPTION = 'CANCELLATION')
+                WHEN TP.STATUS = 'NEGOTIATED' AND EB.EXPORTBILLTYPE = 'EBP' AND EB.PARTICULARS IS NOT NULL AND DATE(EB.NEGOTIATIONDATE) = #{reportDate}
+                THEN EB.PARTICULARS
+                WHEN TP.STATUS = 'SETTLED' AND EB.EXPORTBILLTYPE = 'EBC' AND EB.PARTICULARS IS NOT NULL AND DATE(EB.SETTLEMENTDATE) = #{reportDate}
+                THEN EB.PARTICULARS
+                ELSE 'DONOTREPORT'
+            END AS TRCODE,
+            TRIM(TP.LONGNAME) AS CLIENTNAME,
+            CASE
+                WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                    THEN NULL
+                    ELSE TP.PARTICIPANTCODE
+--                ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+            END AS PARTICIPANTCODE,
+            TRIM(TP.TINNUMBER) AS TIN1,
+            TRIM(TP.COMMODITYCODE) AS COMMODITYCODE,
+--            CASE
+--                WHEN TRIM(EB.PAYMENTMODE) = 'LC'
+--                THEN 1
+--                WHEN TRIM(EB.PAYMENTMODE) = 'DA'
+--                THEN 4
+--                WHEN TRIM(EB.PAYMENTMODE) = 'DP'
+--                THEN 2
+--                WHEN TRIM(EB.PAYMENTMODE) = 'OA'
+--                THEN 7
+--                ELSE NULL
+--            END AS MODPAY,
+            (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH02' AND DESCRIPTION = TRIM(EB.PAYMENTMODE)) AS MODPAY,
+          --EB.COUNTRYCODE,
+            C.NEWCODE AS COUNTRYCODE,
+            TP.CURRENCY,
+            NULL AS BOOKCD,
+            CASE            
+            	WHEN TP.STATUS = 'CANCELLED' AND EB.EXPORTBILLTYPE = 'EBC'
+				     THEN EB.OUTSTANDINGAMOUNT
+                WHEN  EB.EXPORTBILLTYPE = 'EBP' AND TP.STATUS = 'NEGOTIATED'
+                    THEN TP.AMOUNT
+				WHEN EB.EXPORTBILLTYPE = 'EBC' AND EB.BPAMOUNT IS NULL
+					THEN EB.PROCEEDSAMOUNT
+				WHEN EB.EXPORTBILLTYPE = 'EBC' AND EB.BPAMOUNT IS NOT NULL AND (EB.PROCEEDSAMOUNT-EB.BPAMOUNT)>0
+					THEN (EB.PROCEEDSAMOUNT-EB.BPAMOUNT)
+                ELSE NULL
+            END AS AMTORIG1,
+            'SCH02' AS FORM,
+            TS.TRADESERVICEID
+            FROM EXPORTBILLS_AUDIT EB
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON EB.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND EB.REV_ID = TP.REV_ID
+            LEFT JOIN (
+                SELECT TRADESERVICEID, TRADEPRODUCTNUMBER
+                FROM TRADESERVICE
+                WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+                AND DATE(MODIFIEDDATE) = #{reportDate}
+                AND ((SERVICETYPE = 'NEGOTIATION' AND DOCUMENTCLASS = 'BP')
+                OR (SERVICETYPE = 'SETTLEMENT' AND DOCUMENTCLASS = 'BC')				
+                OR (SERVICETYPE = 'CANCELLATION' AND DOCUMENTCLASS = 'BC'))
+                ) TS
+            ON TS.TRADEPRODUCTNUMBER = EB.DOCUMENTNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = EB.COUNTRYCODE
+            WHERE DATE(EB.PROCESSDATE) = #{reportDate}
+            OR DATE(EB.NEGOTIATIONDATE) = #{reportDate}
+            OR DATE(EB.SETTLEMENTDATE) = #{reportDate}
+        ) ALL
+        WHERE ALL.PARTICULARS NOT LIKE '%DONOTREPORT%'
+		AND ALL.AMTORIG1 IS NOT NULL
+    </select>
+	
+	<select id="getSchedule3" resultMap="itrsResultMap3">
+        SELECT * FROM (
+            SELECT LC.DOCUMENTNUMBER,
+                LC.REV_ID,
+                '0320000001' AS TRCODE,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH03' AND DESCRIPTION = 'LC') AS MODPAY,
+                CASE
+                    WHEN TO_CHAR(LC.LASTMODIFIEDDATE, 'YYYYMMDD HH24 MI') = TO_CHAR(LC.LASTAMENDMENTDATE, 'YYYYMMDD HH24 MI') 
+						AND LC.TYPE IN ('CASH','REGULAR') AND LC.TENOR = 'SIGHT'
+						THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'AMENDMENT' AND FORM = 'SCH03')
+                    WHEN TO_CHAR(LC.LASTMODIFIEDDATE, 'YYYYMMDD HH24 MI') = TO_CHAR(LC.CANCELLATIONDATE, 'YYYYMMDD HH24 MI') 
+						AND LC.TYPE IN ('CASH','REGULAR') AND LC.TENOR = 'SIGHT'
+						THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'CANCELLATION' AND FORM = 'SCH03')
+                    WHEN DATE(LC.ISSUEDATE) = #{reportDate} AND LC.TYPE = 'CASH' AND TP.AMOUNT = LC.OUTSTANDINGBALANCE
+						THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'CASH' AND FORM = 'SCH03')
+                    WHEN DATE(LC.ISSUEDATE) = #{reportDate} AND LC.TYPE = 'REGULAR' AND LC.TENOR = 'SIGHT' AND TP.AMOUNT = LC.OUTSTANDINGBALANCE
+						THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'SIGHT' AND FORM = 'SCH03')
+                    WHEN DATE(LC.LASTNEGOTIATIONDATE) = #{reportDate} AND LC.TENOR = 'USANCE' AND LN.NEGOTIATIONNUMBER is not null
+						THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'USANCE' AND FORM = 'SCH03')
+                    ELSE 0
+                END AS IMPSCD,
+                LC.DOCUMENTNUMBER AS LCNO,
+                '' AS BRN,
+                NULL AS BILDTE,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                        THEN NULL
+                        ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS PARTICIPANTCODE,
+                TRIM(TP.TINNUMBER) AS TIN2,
+                CASE
+                    WHEN LC.TYPE = 'REGULAR' AND LC.TENOR = 'SIGHT'
+                        THEN CAST(TO_CHAR(LC.EXPIRYDATE, 'YYYYMMDD') AS INTEGER)
+                    WHEN LC.TYPE = 'CASH'
+                        THEN CAST(TO_CHAR(LC.EXPIRYDATE, 'YYYYMMDD') AS INTEGER)
+                    WHEN DATE(LC.LASTNEGOTIATIONDATE) = #{reportDate} AND LC.TENOR = 'USANCE'
+                        THEN (SELECT CAST(TO_CHAR(LOANMATURITYDATE, 'YYYYMMDD') AS INTEGER)  FROM PAYMENTDETAIL
+                            WHERE REFERENCENUMBER = (SELECT NEGOTIATIONNUMBER FROM LCNEGOTIATION_AUDIT WHERE REV_ID = LC.REV_ID))
+                    ELSE NULL
+                END AS NMATDTE,
+              --LC.BSPCOUNTRYCODE AS CTRYCD,
+                C.NEWCODE AS CTRYCD,
+                TP.CURRENCY as CURCDE1,
+                    CASE
+                        WHEN DATE(LC.ISSUEDATE) = #{reportDate} AND LC.TYPE = 'REGULAR' AND LC.TENOR = 'SIGHT'
+                            THEN TP.AMOUNT
+                        WHEN DATE(LC.ISSUEDATE) = #{reportDate} AND LC.TYPE = 'CASH'
+                            THEN TP.AMOUNT
+                        WHEN DATE(LC.LASTAMENDMENTDATE) = #{reportDate} AND LC.TYPE IN ('CASH','REGULAR')
+                            THEN LC.OUTSTANDINGBALANCE
+                        WHEN DATE(LC.LASTNEGOTIATIONDATE) = #{reportDate} AND LC.TENOR = 'USANCE'
+                            THEN (SELECT AMOUNT FROM PAYMENTDETAIL
+                                WHERE REFERENCENUMBER = (SELECT NEGOTIATIONNUMBER FROM LCNEGOTIATION_AUDIT WHERE REV_ID = LC.REV_ID))
+                        WHEN DATE(LC.CANCELLATIONDATE) = #{reportDate} AND LC.TYPE IN ('CASH','REGULAR')
+                            THEN LC.OUTSTANDINGBALANCE
+                    ELSE 0
+                    END AS AMTORIG1,
+                    'SCH03' AS FORM
+            FROM LETTEROFCREDIT_AUDIT LC
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON LC.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND LC.REV_ID = TP.REV_ID
+            INNER JOIN TRADEPRODUCT TP2
+            ON LC.DOCUMENTNUMBER = TP2.DOCUMENTNUMBER
+            LEFT JOIN LCNEGOTIATION_AUDIT LN
+            ON LC.REV_ID = LN.REV_ID
+            LEFT JOIN CNTRYLOOKUP C
+            ON CAST(C.OLDCODE AS INTEGER) = CAST(LC.BSPCOUNTRYCODE AS INTEGER)
+            WHERE (DATE(LC.LASTMODIFIEDDATE) = #{reportDate})
+            AND LC.DOCUMENTTYPE = 'FOREIGN'
+
+            union all
+			
+			SELECT LC.DOCUMENTNUMBER,
+                LC.REV_ID,
+                '0320000001' AS TRCODE,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH03' AND DESCRIPTION = 'LC') AS MODPAY,
+                CASE
+                    WHEN TP2.STATUS = 'EXPIRED' AND LC.TENOR = 'SIGHT' AND LC.TYPE = 'REGULAR'
+                        THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'CANCELLATION' AND FORM = 'SCH03')
+                    ELSE 0
+                END AS IMPSCD,
+                LC.DOCUMENTNUMBER AS LCNO,
+                '' AS BRN,
+                NULL AS BILDTE,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+			    CASE
+				    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+					   THEN NULL
+                    ELSE TP.PARTICIPANTCODE
+--				    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+			    END AS PARTICIPANTCODE,
+			    TRIM(TP.TINNUMBER) AS TIN2,
+			    CASE
+				    WHEN LC.TYPE = 'REGULAR' AND LC.TENOR = 'SIGHT'
+					   THEN CAST(TO_CHAR(LC.EXPIRYDATE, 'YYYYMMDD') AS INTEGER)
+				    ELSE NULL
+			    END AS NMATDTE,
+			  --LC.BSPCOUNTRYCODE AS CTRYCD,
+			    C.NEWCODE AS CTRYCD,
+			    TP.CURRENCY as CURCDE1,
+			    CASE
+				    WHEN TP2.STATUS = 'EXPIRED' AND LC.TENOR = 'SIGHT' AND (LC.OUTSTANDINGBALANCE - (LC.CASHAMOUNT - LC.TOTALNEGOTIATEDCASHAMOUNT)) > 0
+					   THEN LC.OUTSTANDINGBALANCE - (LC.CASHAMOUNT - LC.TOTALNEGOTIATEDCASHAMOUNT)
+			        ELSE 0
+			    END AS AMTORIG1,
+			    'SCH03' AS FORM
+		    FROM LETTEROFCREDIT_AUDIT LC
+		    INNER JOIN (
+			    SELECT MAX(REV_ID) as REV_ID 
+				FROM LETTEROFCREDIT_AUDIT
+			    WHERE DATE(EXPIRYDATE + 1 DAY) = #{reportDate}
+			    AND DATE(LASTMODIFIEDDATE) &lt;= #{reportDate}
+			    GROUP BY DOCUMENTNUMBER
+		    ) EXP
+		    ON EXP.REV_ID = LC.REV_ID      
+		    INNER JOIN TRADEPRODUCT_AUDIT TP
+		    ON LC.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND LC.REV_ID = TP.REV_ID
+		    INNER JOIN TRADEPRODUCT TP2
+		    ON LC.DOCUMENTNUMBER = TP2.DOCUMENTNUMBER
+		    AND LC.DOCUMENTTYPE = 'FOREIGN'
+            LEFT JOIN CNTRYLOOKUP C
+            ON CAST(C.OLDCODE AS INTEGER) = CAST(LC.BSPCOUNTRYCODE AS INTEGER)
+	   
+	    union all
+
+            SELECT DA.DOCUMENTNUMBER,
+                DA.REV_ID,
+                '0320000001' AS TRCODE,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH03' AND DESCRIPTION = 'DA') AS MODPAY,
+                CASE
+                    WHEN DATE(DA.PROCESSDATE) = #{reportDate} AND UCASE(DA.LASTTRANSACTION) LIKE '%NEGOTIATION ACCEPTANCE%' 
+                THEN  (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'NEW' AND FORM = 'SCH03')
+                    WHEN TP.STATUS = 'CANCELLED'
+                THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'CANCELLATION' AND FORM = 'SCH03')
+                    ELSE 0
+                END AS IMPSCD,
+                '' AS LCNO,
+                DA.DOCUMENTNUMBER AS BRN,
+                CASE
+                    WHEN DATE(DA.PROCESSDATE) = #{reportDate} AND UCASE(DA.LASTTRANSACTION) LIKE '%NEGOTIATION ACCEPTANCE%' 
+                THEN CAST(TO_CHAR(DA.PROCESSDATE, 'YYYYMMDD') AS INTEGER)
+                    WHEN TP.STATUS = 'CANCELLED'
+                THEN CAST(TO_CHAR(DA.PROCESSDATE, 'YYYYMMDD') AS INTEGER)
+                    ELSE NULL
+                END  AS BILDTE,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                THEN NULL
+                    ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS PARTICIPANTCODE,
+                TRIM(TP.TINNUMBER) AS TIN2,
+                CAST(TO_CHAR(DA.MATURITYDATE, 'YYYYMMDD') AS INTEGER) AS NMATDTE,
+              --TRIM(SUBSTR(TRIM(DA.ORIGINALPORT),LENGTH(DA.ORIGINALPORT)-2,3)) AS CTRYCD,
+                C.NEWCODE AS CTRYCD,
+                TP.CURRENCY as CURCDE1,
+                CASE
+                    WHEN DATE(DA.PROCESSDATE) = #{reportDate} AND TP.STATUS = 'ACCEPTED'
+                        THEN DA.AMOUNT
+                    WHEN TP.STATUS = 'CANCELLED'
+                        THEN DA.OUTSTANDINGAMOUNT
+                ELSE 0
+                END AS AMTORIG1,
+                'SCH03' AS FORM
+            FROM DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON DA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND DA.REV_ID = TP.REV_ID
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(DA.ORIGINALPORT),LENGTH(DA.ORIGINALPORT)-2,3))
+            WHERE DA.DOCUMENTTYPE = 'FOREIGN'
+            AND (DATE(DA.PROCESSDATE) = #{reportDate} OR DATE(DA.CANCELLEDDATE) = #{reportDate})
+
+            union all
+
+            SELECT OA.DOCUMENTNUMBER,
+                OA.REV_ID,
+                '0320000001' AS TRCODE,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH03' AND DESCRIPTION = 'OA') AS MODPAY,
+                    CASE
+                        WHEN DATE(OA.PROCESSDATE) = #{reportDate} AND UCASE(OA.LASTTRANSACTION) LIKE '%NEGOTIATION%' 
+                            THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'NEW' AND FORM = 'SCH03')
+                        WHEN TP.STATUS = 'CANCELLED'
+                            THEN (SELECT CODE FROM REFIMPSCD WHERE DESCRIPTION = 'CANCELLATION' AND FORM = 'SCH03')
+                    ELSE 0
+                    END AS IMPSCD,
+                '' AS LCNO,
+                OA.DOCUMENTNUMBER AS BRN,
+                CAST(TO_CHAR(OA.DATEOFBLAIRWAYBILL, 'YYYYMMDD') AS INTEGER) AS BILDTE,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                    CASE
+                        WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                            THEN NULL
+                        ELSE TP.PARTICIPANTCODE
+--                        ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                    END AS PARTICIPANTCODE,
+                TRIM(TP.TINNUMBER) AS TIN2,
+                CAST(TO_CHAR(OA.MATURITYDATE, 'YYYYMMDD') AS INTEGER) AS NMATDTE,
+              --TRIM(SUBSTR(TRIM(OA.ORIGINALPORT),LENGTH(OA.ORIGINALPORT)-2,3)) AS CTRYCD,
+                C.NEWCODE AS CTRYCD,                
+                TP.CURRENCY as CURCDE1,
+                    CASE
+                        WHEN DATE(OA.PROCESSDATE) = #{reportDate} AND UCASE(OA.LASTTRANSACTION) LIKE '%NEGOTIATION%' 
+                            THEN OA.AMOUNT
+                        WHEN TP.STATUS = 'CANCELLED'
+                            THEN OA.OUTSTANDINGAMOUNT
+                        ELSE 0
+                    END AS AMTORIG1,
+                'SCH03' AS FORM
+            FROM OPENACCOUNT_AUDIT OA
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON OA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND OA.REV_ID = TP.REV_ID
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(OA.ORIGINALPORT),LENGTH(OA.ORIGINALPORT)-2,3))
+            WHERE OA.DOCUMENTTYPE = 'FOREIGN'
+            AND (DATE(OA.PROCESSDATE) = #{reportDate} OR DATE(OA.CANCELLEDDATE) = #{reportDate})
+
+        ) SCHED3
+        WHERE SCHED3.IMPSCD != 0
+	</select>
+	
+	<select id="getSchedule4" resultMap="itrsResultMap4">
+        SELECT * FROM (
+            SELECT
+				'SCH04' AS FORM,
+				'0420000001' AS TRANSACTION,
+				TP.CURRENCY as CURRENCY,
+				CASE
+					WHEN LC.TYPE = 'CASH' AND DATE(LC.LASTNEGOTIATIONDATE) = #{reportDate}
+						THEN LCN.NEGOTIATIONAMOUNT
+					WHEN LC.TYPE = 'REGULAR' AND LC.TENOR = 'SIGHT' AND DATE(LC.LASTNEGOTIATIONDATE) = #{reportDate}
+						THEN LCN.NEGOTIATIONAMOUNT
+					ELSE NULL
+				END AS AMOUNT,
+			  --LC.BSPCOUNTRYCODE AS COUNTRY,
+				C.NEWCODE AS COUNTRY,
+				CASE
+					WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+						THEN NULL
+                    ELSE TP.PARTICIPANTCODE
+--					ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+				END AS IMPORTER,
+				TRIM(TP.COMMODITYCODE) AS COMMODITY, 
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'LC') AS PAYMENTMODE,
+				LC.DOCUMENTNUMBER AS LCNUMBER,
+				NULL AS BRNUMBER,
+				NULL AS ACCEPTANCEDATE,
+				CAST(TO_CHAR(LC.LASTNEGOTIATIONDATE, 'YYYYMMDD') AS INTEGER) AS ORIGANALMATURITY,
+				NULL AS NEWMATURITY,
+				TRIM(TP.LONGNAME) AS CLIENTNAME,
+				TS2.TRADESERVICEID,
+				LC.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+			FROM LETTEROFCREDIT_AUDIT LC
+			INNER JOIN TRADEPRODUCT_AUDIT TP
+			ON LC.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND LC.REV_ID = TP.REV_ID
+			LEFT JOIN LCNEGOTIATION_AUDIT LCN
+			ON LC.REV_ID = LCN.REV_ID
+			LEFT JOIN (
+				SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER
+				FROM TRADESERVICE
+				WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+				AND DATE(MODIFIEDDATE) = #{reportDate}
+				AND ((SERVICETYPE = 'NEGOTIATION' AND DOCUMENTCLASS = 'LC'))
+			) TS2
+			ON TS2.TRADEPRODUCTNUMBER = LC.DOCUMENTNUMBER
+			AND TS2.DOCUMENTNUMBER = LCN.NEGOTIATIONNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON CAST(C.OLDCODE AS INTEGER) = CAST(LC.BSPCOUNTRYCODE AS INTEGER)
+			WHERE  LC.DOCUMENTTYPE = 'FOREIGN'
+			AND DATE(LC.LASTMODIFIEDDATE) = #{reportDate}
+			
+            union all
+			
+            SELECT DISTINCT 
+                'SCH04' AS FORM,
+				'0420000001' AS TRANSACTION,
+				TP.CURRENCY as CURRENCY,
+				TS.AMOUNT,
+		      --LC.BSPCOUNTRYCODE AS COUNTRY,
+				C.NEWCODE AS COUNTRY,
+				CASE
+					WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+						THEN NULL
+                    ELSE TP.PARTICIPANTCODE
+--					ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+				END AS IMPORTER,
+				TRIM(TP.COMMODITYCODE) AS COMMODITY,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'LC') AS PAYMENTMODE,
+				LC.DOCUMENTNUMBER AS LCNUMBER,
+				NULL AS BRNUMBER,
+				NULL AS ACCEPTANCEDATE,
+				0 as ORIGANALMATURITY,
+				NULL AS NEWMATURITY,
+				TRIM(TP.LONGNAME) AS CLIENTNAME,
+				TS.TRADESERVICEID,
+				LC.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+			FROM LETTEROFCREDIT_AUDIT LC
+			INNER JOIN TRADEPRODUCT_AUDIT TP
+			ON LC.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND LC.REV_ID = TP.REV_ID
+			INNER JOIN (
+				SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER, AMOUNT
+				FROM TRADESERVICE
+				WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+				AND DATE(MODIFIEDDATE) = #{reportDate}
+				AND ((SERVICETYPE = 'UA_LOAN_SETTLEMENT' AND DOCUMENTCLASS = 'LC'))
+			) TS 			
+			ON TS.TRADEPRODUCTNUMBER = LC.DOCUMENTNUMBER	
+            LEFT JOIN CNTRYLOOKUP C
+            ON CAST(C.OLDCODE AS INTEGER) = CAST(LC.BSPCOUNTRYCODE AS INTEGER)
+			WHERE  LC.DOCUMENTTYPE = 'FOREIGN'
+			AND DATE(LC.LASTMODIFIEDDATE) = #{reportDate}		
+			
+			union all
+
+            SELECT
+                'SCH04' AS FORM,
+                '0420000001' AS TRANSACTION,
+                TP.CURRENCY as CURRENCY,
+                0 AS AMOUNT,
+              --TRIM(SUBSTR(TRIM(DA.ORIGINALPORT),LENGTH(DA.ORIGINALPORT)-2,3)) AS COUNTRY,
+                C.NEWCODE AS COUNTRY,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                        THEN NULL
+                        ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS IMPORTER,
+                TRIM(TP.COMMODITYCODE) AS COMMODITY,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'DA') AS PAYMENTMODE,
+                null AS LCNUMBER,
+                DA.DOCUMENTNUMBER AS BRNUMBER,
+                CAST(TO_CHAR(DA.PROCESSDATE, 'YYYYMMDD') AS INTEGER) AS ACCEPTANCEDATE,
+                CAST(TO_CHAR(DA.MATURITYDATE, 'YYYYMMDD') AS INTEGER) AS ORIGANALMATURITY,
+                NULL AS NEWMATURITY,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                TS.TRADESERVICEID,
+				DA.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+            FROM DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON DA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND DA.REV_ID = TP.REV_ID
+            LEFT JOIN (
+            SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER
+            FROM TRADESERVICE
+            WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+            AND DATE(MODIFIEDDATE) = #{reportDate}
+            AND (SERVICETYPE = 'SETTLEMENT' AND DOCUMENTCLASS = 'DA')
+            ) TS
+            ON TS.TRADEPRODUCTNUMBER = DA.DOCUMENTNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(DA.ORIGINALPORT),LENGTH(DA.ORIGINALPORT)-2,3))
+            WHERE DA.DOCUMENTTYPE = 'FOREIGN'
+            AND DATE(DA.SETTLEDDATE) = #{reportDate}
+			AND UCASE(DA.LASTTRANSACTION) LIKE '%SETTLEMENT%' 
+
+            union all
+
+            SELECT
+                'SCH04' AS FORM,
+                '0420000001' AS TRANSACTION,
+                TP.CURRENCY as CURRENCY,
+                0 AS AMOUNT,
+              --TRIM(SUBSTR(TRIM(DP.ORIGINALPORT),LENGTH(DP.ORIGINALPORT)-2,3)) AS COUNTRY,
+                C.NEWCODE AS COUNTRY,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                        THEN NULL
+                     ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS IMPORTER,
+                TRIM(TP.COMMODITYCODE) AS COMMODITY,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'DP') AS PAYMENTMODE,
+                null AS LCNUMBER,
+                NULL AS BRNUMBER,
+                NULL AS ACCEPTANCEDATE,
+                CAST(TO_CHAR(DP.SETTLEDDATE, 'YYYYMMDD') AS INTEGER) AS ORIGANALMATURITY,
+                NULL AS NEWMATURITY,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                TS.TRADESERVICEID,
+				DP.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+            FROM DOCUMENTAGAINSTPAYMENT_AUDIT DP
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON DP.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND DP.REV_ID = TP.REV_ID
+            LEFT JOIN (
+            SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER
+            FROM TRADESERVICE
+            WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+            AND DATE(MODIFIEDDATE) = #{reportDate}
+            AND (SERVICETYPE = 'SETTLEMENT' AND DOCUMENTCLASS = 'DP')
+            ) TS
+            ON TS.TRADEPRODUCTNUMBER = DP.DOCUMENTNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(DP.ORIGINALPORT),LENGTH(DP.ORIGINALPORT)-2,3))
+            WHERE DP.DOCUMENTTYPE = 'FOREIGN'
+            AND DATE(DP.SETTLEDDATE) = #{reportDate}
+			AND UCASE(DP.LASTTRANSACTION) LIKE '%SETTLEMENT%' 
+
+            union all
+
+            SELECT
+                'SCH04' AS FORM,
+                '0420000001' AS TRANSACTION,
+                TP.CURRENCY as CURRENCY,
+                0 AS AMOUNT,
+              --TRIM(SUBSTR(TRIM(DR.ORIGINALPORT),LENGTH(DR.ORIGINALPORT)-2,3)) AS COUNTRY,
+                C.NEWCODE AS COUNTRY,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                        THEN NULL
+                     ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS IMPORTER,
+                TRIM(TP.COMMODITYCODE) AS COMMODITY,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'DR') AS PAYMENTMODE,
+                null AS LCNUMBER,
+                NULL AS BRNUMBER,
+                NULL AS ACCEPTANCEDATE,
+                CAST(TO_CHAR(DR.SETTLEDDATE, 'YYYYMMDD') AS INTEGER) AS ORIGANALMATURITY,
+                NULL AS NEWMATURITY,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                TS.TRADESERVICEID,
+				DR.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+            FROM DIRECTREMITTANCE_AUDIT DR
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON DR.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND DR.REV_ID = TP.REV_ID
+            LEFT JOIN (
+            SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER
+            FROM TRADESERVICE
+            WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+            AND DATE(MODIFIEDDATE) = #{reportDate}
+            AND (SERVICETYPE = 'SETTLEMENT' AND DOCUMENTCLASS = 'DR')
+            ) TS
+            ON TS.TRADEPRODUCTNUMBER = DR.DOCUMENTNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(DR.ORIGINALPORT),LENGTH(DR.ORIGINALPORT)-2,3))
+            WHERE DR.DOCUMENTTYPE = 'FOREIGN'
+            AND DATE(DR.SETTLEDDATE) = #{reportDate}
+			AND UCASE(DR.LASTTRANSACTION) LIKE '%SETTLEMENT%' 
+
+            union all
+
+            SELECT
+                'SCH04' AS FORM,
+                '0420000001' AS TRANSACTION,
+                TP.CURRENCY as CURRENCY,
+                0 AS AMOUNT,
+              --TRIM(SUBSTR(TRIM(OA.ORIGINALPORT),LENGTH(OA.ORIGINALPORT)-2,3)) AS COUNTRY,
+                C.NEWCODE AS COUNTRY,
+                CASE
+                    WHEN TP.PARTICIPANTCODE IS NULL OR TRIM(TP.PARTICIPANTCODE) = ''
+                        THEN NULL
+                        ELSE TP.PARTICIPANTCODE
+--                    ELSE CAST(TP.PARTICIPANTCODE AS BIGINT)
+                END AS IMPORTER,
+                TRIM(TP.COMMODITYCODE) AS COMMODITY,
+                (SELECT CODE FROM REFMODPAY WHERE FORM = 'SCH04' AND DESCRIPTION = 'OA') AS PAYMENTMODE,
+                null AS LCNUMBER,
+                OA.DOCUMENTNUMBER AS BRNUMBER,
+                CAST(TO_CHAR(OA.DATEOFBLAIRWAYBILL, 'YYYYMMDD') AS INTEGER) AS ACCEPTANCEDATE,
+                CAST(TO_CHAR(OA.MATURITYDATE, 'YYYYMMDD') AS INTEGER) AS ORIGANALMATURITY,
+                NULL AS NEWMATURITY,
+                TRIM(TP.LONGNAME) AS CLIENTNAME,
+                TS.TRADESERVICEID,
+				OA.DOCUMENTNUMBER AS DOCUMENTNUMBER 
+            FROM OPENACCOUNT_AUDIT OA
+            INNER JOIN TRADEPRODUCT_AUDIT TP
+            ON OA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER AND OA.REV_ID = TP.REV_ID
+            LEFT JOIN (
+            SELECT TRADESERVICEID, DOCUMENTNUMBER, TRADEPRODUCTNUMBER
+            FROM TRADESERVICE
+            WHERE STATUS IN ('APPROVED','POST_APPROVED','POSTED')
+            AND DATE(MODIFIEDDATE) = #{reportDate}
+            AND (SERVICETYPE = 'SETTLEMENT' AND DOCUMENTCLASS = 'OA')
+            ) TS
+            ON TS.TRADEPRODUCTNUMBER = OA.DOCUMENTNUMBER
+            LEFT JOIN CNTRYLOOKUP C
+            ON C.OLDCODE = TRIM(SUBSTR(RTRIM(OA.ORIGINALPORT),LENGTH(OA.ORIGINALPORT)-2,3))
+            WHERE OA.DOCUMENTTYPE = 'FOREIGN'
+            AND DATE(OA.SETTLEDDATE) = #{reportDate}
+			AND UCASE(OA.LASTTRANSACTION) LIKE '%SETTLEMENT%'  
+        ) SCH04
+        WHERE SCH04.AMOUNT is not null
+	</select>
+	
+	 <insert id="insertSched2">
+	   	INSERT INTO ITRS (BKCODE,TRDATE,FORMNO,TRCODE,BOOKCD,CURCDE1,AMTORIG1,CTRYCD,EXPCDE,TIN1,COMCDE,MODPAY,DAY,REMARKS,CLIENTNAME,DOCUMENTNUMBER,PARTICULARS)
+		VALUES (#{itrsRecord.bankCode}, 
+			#{itrsRecord.transactionDate}, 
+			#{itrsRecord.form}, 
+			#{itrsRecord.transactionCode}, 
+			#{itrsRecord.bookCode}, 
+			#{itrsRecord.currency}, 
+			#{itrsRecord.amount}, 
+			#{itrsRecord.countryCode}, 
+			#{itrsRecord.exporterCode},
+			#{itrsRecord.tinNumber1},  
+			#{itrsRecord.commodityCode}, 
+			#{itrsRecord.paymentMode}, 
+			#{day}, 
+			#{itrsRecord.remark}, 
+			#{itrsRecord.clientName}, 
+			#{itrsRecord.documentNumber}, 
+			#{itrsRecord.particulars})
+    </insert>
+    
+    <insert id="insertSched3">
+	    INSERT INTO ITRS (BKCODE,TRDATE,FORMNO,TRCODE,CURCDE1,AMTORIG1,CTRYCD,IMPCDE,TIN2,MODPAY,IMPSCD,LCNO,BRN,BILDTE,NMATDTE,DAY,REMARKS,CLIENTNAME)
+		VALUES (#{itrsRecord.bankCode}, 
+			#{itrsRecord.transactionDate}, 
+			#{itrsRecord.form}, 
+			#{itrsRecord.transactionCode}, 
+			#{itrsRecord.currency}, 
+			#{itrsRecord.amount}, 
+			#{itrsRecord.countryCode}, 
+			#{itrsRecord.importerCode}, 
+			#{itrsRecord.tinNumber2}, 
+			#{itrsRecord.paymentMode}, 
+			#{itrsRecord.importStatusCode}, 
+			#{itrsRecord.lcNumber}, 
+			#{itrsRecord.referenceNumber}, 
+			#{itrsRecord.acceptanceDate}, 
+			#{itrsRecord.newMaturity}, 
+			#{day}, 
+			#{itrsRecord.remark}, 
+			#{itrsRecord.clientName})
+    </insert>
+    
+    <insert id="insertSched4">
+	    INSERT INTO ITRS (BKCODE,TRDATE,FORMNO,TRCODE,BOOKCD,CURCDE1,AMTORIG1,CTRYCD,IMPCDE,COMCDE,MODPAY,LCNO,BRN,BILDTE,OMATDTE,NMATDTE,DAY,REMARKS,CLIENTNAME,PARTICULARS,DOCUMENTNUMBER)
+		VALUES (#{itrsRecord.bankCode}, 
+			#{itrsRecord.transactionDate}, 
+			#{itrsRecord.form}, 
+			#{itrsRecord.transactionCode}, 
+			#{itrsRecord.bookCode}, 
+			#{itrsRecord.currency}, 
+			#{itrsRecord.amount}, 
+			#{itrsRecord.countryCode}, 
+			#{itrsRecord.importerCode}, 
+			#{itrsRecord.commodityCode}, 
+			#{itrsRecord.paymentMode}, 
+			#{itrsRecord.lcNumber}, 
+			#{itrsRecord.referenceNumber}, 
+			#{itrsRecord.acceptanceDate}, 
+			#{itrsRecord.originalMaturity}, 
+			#{itrsRecord.originalMaturity}, 
+			#{day}, 
+			#{itrsRecord.remark}, 
+			#{itrsRecord.clientName},
+			'Import Payment',
+			#{itrsRecord.documentNumber})
+    </insert>
+	
+    <!-- method that will delete records from ITRS -->
+	<delete id="deleteItrsRecords">
+		DELETE FROM ITRS WHERE 
+		DAY = #{day}
+	</delete>
+	
+	<select id="getCountryName" resultType="string">
+		SELECT CNTRY_NAME FROM REF_TFCNTRY
+		WHERE CNTRY_CD = #{code}
+		FETCH FIRST 1 ROW ONLY
+	</select>
+	
+</mapper>

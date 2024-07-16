@@ -1,0 +1,19 @@
+CREATE TABLE "CASATRANSACTIONLOG"
+(
+   ID bigint PRIMARY KEY NOT NULL,
+   TRANSACTION_TIME timestamp,
+   SERVICETYPE varchar(30),
+   DOCUMENTTYPE varchar(20),
+   DOCUMENTCLASS varchar(20),
+   DOCUMENTSUBTYPE1 varchar(10),
+   DOCUMENTSUBTYPE2 varchar(10),
+   HOST_STATUS varchar(4),
+   TRANSACTION_AMOUNT DECIMAL(20,4),
+   DEBIT_ACCOUNT_NUMBER varchar(20),
+   CREDIT_ACCOUNT_NUMBER varchar(20),
+   SUPID varchar(10),
+   ACCOUNT_NAME varchar(40),
+   TELLER_ID varchar(10),
+   CURRENCY varchar(3)
+)
+;

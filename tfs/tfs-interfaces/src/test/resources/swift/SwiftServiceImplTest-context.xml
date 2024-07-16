@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:int-file="http://www.springframework.org/schema/integration/file"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/integration/file
+		http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <int:channel id="swiftChannel"/>
+    <int:channel id="outputChannel"/>
+
+    <int:chain input-channel="swiftChannel" output-channel="outputChannel">
+        <int:header-enricher>
+            <int:header name="type" expression="payload.applicationHeader.messageType"/>
+        </int:header-enricher>
+        <int:transformer expression="payload.pack()"/>
+    </int:chain>
+
+    <!--<int:payload-serializing-transformer id="payloadSerializer" input-channel="inputChannel" output-channel="swiftChannel"/>-->
+
+    <int-file:outbound-channel-adapter id="swiftMessageDirectory" directory="src/test/resources/swift/processed"
+                                       delete-source-files="false" channel="outputChannel" filename-generator="filenameGenerator"/>
+
+    <bean id="swiftService" class="com.ucpb.tfs.interfaces.services.impl.SwiftServiceImpl">
+        <property name="messageChannel" ref="swiftChannel"/>
+    </bean>
+
+    <bean id="filenameGenerator" class="com.ucpb.tfs.interfaces.generator.SwiftMessageFilenameGenerator">
+    </bean>
+
+
+</beans>

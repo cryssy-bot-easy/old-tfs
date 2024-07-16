@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <class name="com.ucpb.tfs.domain.product.BookingSettlement" table="BookingSettlement">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </component>
+
+        <property name="bookingAccountType" column="bookingAccountType" type="string" length="4"/>
+    </class>
+    
+</hibernate-mapping>

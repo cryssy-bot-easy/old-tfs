@@ -1,0 +1,95 @@
+package com.ucpb.tfs.batch.report.dw.dao;
+
+import com.ucpb.tfs.batch.report.dw.*;
+
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+	/*  PROLOGUE:
+	 *	(revision)
+		SCR/ER Number: ER# 20160505-030
+		SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 � only Tenor was amended from sight to usance.
+								The AE are okay, debit the contingent for sight and credit to usance. But the DW Allocation reported the LC once 
+								and the ADB are not reported separately  for sight and usance.
+						2.  Adjustment on Standby LC tagging was not correctly reported in DW
+		[Revised by:] Lymuel Arrome Saul
+		[Date revised:] 05/05/2016
+		Program [Revision] Details: Added functions getAuditRevId, checkIfTenorChange, getLetterOfCreditAuditByRevId, getOpeningStandbyTagging, and getRefProductInfo.
+		Date deployment: 
+		Member Type: JAVA
+		Project: CORE
+		Project Name: AllocationDao.java	
+	*/
+
+
+public interface AllocationDao {
+
+	public BigDecimal getBalance(@Param("documentNumber")String documentNumber, @Param("date") Date date);
+
+	public List<LetterOfCredit> getLcsForReporting(@Param("date") Date date);
+	
+	public List<LetterOfCreditLog> getLcHistory(@Param("documentNumber") String documentNumber, @Param("date") Date date);
+	
+	public List<AllocationFileRecord> getProductAverageDailyBalance(@Param("cutoffDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getAllocations(@Param("cutoffDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getValidLetterOfCredits(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getValidDocumentsAgainstAcceptance(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getValidDocumentsAgainstPayment(@Param("queryDate")Date cutoffDate);
+
+    // OA not included based on TestScript
+    //public List<AllocationFileRecord> getValidOpenAccounts(@Param("queryDate")Date cutoffDate);
+
+    // DR not included based on TestScript
+    //public List<AllocationFileRecord> getValidDirectRemittances(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getActiveBillsCollection(@Param("queryDate")Date cutoffDate);
+    //public List<AllocationFileRecord> getActiveBillsCollectionAndPurchase(@Param("queryDate")Date cutoffDate);
+
+    //public List<AllocationFileRecord> getActiveAdvancePayment(@Param("queryDate")Date cutoffDate);
+
+    //public List<AllocationFileRecord> getActiveExportAdvising(@Param("queryDate")Date cutoffDate);
+    
+    public BigDecimal getTotalDailyBalancePerDocument(@Param("documentNumber")String documentNumber,@Param("queryDate")Date cutoffDate);
+    
+    public Date getAdjustmentRegEndDate(@Param("documentNumber")String documentNumber);
+    
+    public Date getAdjustmentCashOpenDate(@Param("documentNumber")String documentNumber);
+
+    public List<AllocationFileRecord> getActiveBankGuarantee(@Param("queryDate")Date cutoffDate);
+
+    public List<PaymentDetail> getPaymentDetails(@Param("tradeServiceId") String tradeServiceId);
+
+    public List<ProfitLossHolder> getProfitLossHolderEntries(@Param("tradeServiceId") String tradeServiceId);
+    
+    public List<AllocationFileRecord> getAllocationsException(@Param("cutoffDate")Date cutoffDate);
+    
+    public List<AllocationFileRecord> getValidLetterOfCreditsException(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getValidDocumentsAgainstAcceptanceException(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getValidDocumentsAgainstPaymentException(@Param("queryDate")Date cutoffDate);
+
+    public List<AllocationFileRecord> getActiveBillsCollectionException(@Param("queryDate")Date cutoffDate);
+    
+    public List<AllocationFileRecord> getActiveBankGuaranteeException(@Param("queryDate")Date cutoffDate);
+    
+    public List<Integer> getAuditRevId(@Param("docNum") String docNum, @Param("cutoffDate") Date cutoffDate);
+    
+    public List<AllocationFileRecord> getLetterOfCreditAuditByRevId(@Param("revId") Integer revId);
+    
+    public String checkIfTenorChange(@Param("documentNumber")String documentNumber, @Param("queryDate")Date queryDate);
+    
+    public String getOpeningStandbyTagging(@Param("documentNumber")String documentNumber);
+    
+    public Map<String,String> getRefProductInfo(@Param("documentClass") String documentClass, @Param("documentType") String documentType, @Param("documentSubType1") String documentSubType1, @Param("documentSubType2") String documentSubType2, @Param("documentSubType3") String documentSubType3);
+
+    public List<AllocationFileRecord> getIcAccounts(@Param("queryDate")Date queryDate);
+}

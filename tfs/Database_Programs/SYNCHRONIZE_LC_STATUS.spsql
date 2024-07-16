@@ -1,0 +1,369 @@
+CREATE OR REPLACE PROCEDURE SYNCHRONIZE_LC_STATUS (IN P_DATE DATE
+                                                 , OUT P_RETVAL INTEGER
+                                                 , OUT P_MESSAGE VARCHAR(2000))
+LANGUAGE SQL
+SPECIFIC SYNCHRONIZE_LC_STATUS
+DYNAMIC RESULT SETS 1
+MODIFIES SQL DATA
+NO EXTERNAL ACTION
+
+P1: BEGIN 
+    -- ######################################################################
+    -- # Returns count there are records with "Approved" status for a given
+    -- # TradeServiceID
+    -- #
+    ---# Return Values: 0 - Success with patch.
+    -- #                1 - Fail. Unhandled Error.
+    -- #                2 - Success. With Findings.
+    -- ######################################################################
+    -- # Revised By: Raymund Mallonga 4/27/2020
+    -- # Revisions: Added handling for DP
+    -- #---------------------------------------------------------------------
+    -- # Revised By: Raymund Mallonga 7/9/2021
+    -- # Revision: Exclude Approved Returned to Branch ETS and Unacted in
+    -- #           TSD
+    -- #---------------------------------------------------------------------
+    -- # Revised By: Cedrick C. Nungay 02/08/2022
+    -- # Revision:   Added inclusion of records with BC and BP document class
+    -- ######################################################################
+    DECLARE SQLSTATE CHAR(5) DEFAULT '00000';
+    DECLARE SQLCODE INT DEFAULT 0;
+    DECLARE V_EXCEPTION_MESSAGE VARCHAR(1500);
+    DECLARE v_err_loc VARCHAR(100);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+
+    BEGIN
+        GET DIAGNOSTICS EXCEPTION 1 V_EXCEPTION_MESSAGE = MESSAGE_TEXT;
+        SET P_RETVAL = 1;
+        SET P_MESSAGE = 'FAILED EXECUTION: ' ||TRIM(SUBSTR(NVL(V_EXCEPTION_MESSAGE,''),1,1400))||v_err_loc;
+        ROLLBACK;
+    END;
+
+    DECLARE GLOBAL TEMPORARY TABLE SESSION.TMP_AUDIT
+    ( REC_NO           INTEGER not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1)
+    , TRADESERVICEID   VARCHAR(36)
+    , DOCUMENTNUMBER   VARCHAR(21)
+    , AFFECTEDTABLE    VARCHAR(50)
+    , OLDSTATUS        VARCHAR(20)
+    , SYNCHDATE        TIMESTAMP
+    , REMARKS          VARCHAR(100)
+    , LOGTYPE          CHAR(1)
+    )
+    WITH REPLACE ON COMMIT PRESERVE ROWS NOT LOGGED;
+
+    P2: BEGIN
+        DECLARE v_master_tbl_complete CHAR(1);
+        DECLARE v_task_date     TIMESTAMP;
+        DECLARE v_route_date    TIMESTAMP;
+        DECLARE v_master_date   TIMESTAMP;
+        DECLARE v_last_mod_date TIMESTAMP;
+        DECLARE v_task_status VARCHAR(20);
+        DECLARE v_ae_status   VARCHAR(20);
+        DECLARE v_log_message VARCHAR(100);
+        DECLARE v_routes_user   VARCHAR(20);
+        DECLARE v_err INTEGER DEFAULT 0;
+        DECLARE v_synched INTEGER DEFAULT 0;
+        DECLARE v_prevailing_status VARCHAR(20);
+        DECLARE v_is_post_approved CHAR(1);
+        DECLARE v_get_ae CHAR(1);
+        DECLARE v_cnt_status_with_spaces INTEGER DEFAULT 0;
+        --       
+        --      returned to br, approved by br, unacted in tsd
+        DECLARE v_unactd_but_aprvd_ets CHAR(1); 
+                
+                
+
+        DECLARE res CURSOR WITH RETURN FOR
+            SELECT 0 AS REC_NO
+                  ,'' AS TRADESERVICEID
+                  ,'' AS DOCUMENTNUMBER 
+                  ,'' AS AFFECTEDTABLE
+                  ,'' AS OLDSTATUS
+                  ,CURRENT DATE AS SYNCHDATE
+                  ,'' AS REMARKS
+                  ,'' AS LOGTYPE FROM SYSIBM.SYSDUMMY1 
+            UNION
+            SELECT REC_NO
+                  ,TRADESERVICEID
+                  ,DOCUMENTNUMBER
+                  ,AFFECTEDTABLE
+                  ,OLDSTATUS
+                  ,SYNCHDATE
+                  ,REMARKS
+                  ,LOGTYPE
+            FROM SESSION.TMP_AUDIT;
+
+        FOR REC AS C_CAL CURSOR FOR
+            SELECT TRADESERVICEID
+                  ,DOCUMENTNUMBER
+                  ,STATUS
+                  ,PAYMENTSTATUS
+                  ,MODIFIEDDATE
+                  ,SERVICETYPE
+                  ,LASTUSER
+                  ,DOCUMENTCLASS
+                  ,CASE WHEN DOCUMENTCLASS = 'DP' AND SERVICETYPE IN ('NEGOTIATION', 'SETTLEMENT') THEN 'Y'
+                        WHEN DOCUMENTCLASS = 'LC' THEN 'Y'
+                        WHEN DOCUMENTCLASS = 'INDEMNITY' AND SERVICETYPE IN ('ISSUANCE','CANCELLATION') THEN 'Y'
+                        WHEN DOCUMENTCLASS = 'MT' THEN 'Y'
+                        WHEN DOCUMENTCLASS = 'BP' AND SERVICETYPE IN ('NEGOTIATION', 'SETTLEMENT') THEN 'Y'
+                        WHEN DOCUMENTCLASS = 'BC' AND SERVICETYPE IN ('NEGOTIATION', 'SETTLEMENT','CANCELLATION') THEN 'Y'
+                   ELSE 'N' END AS SERVICETYPE_INCLUDED
+            FROM TRADESERVICE
+            WHERE TRUNC(MODIFIEDDATE) = P_DATE
+            AND DOCUMENTCLASS IN ('LC','DP','INDEMNITY','MT', 'BC', 'BP')
+            AND STATUS IN ('POSTED','POST_APPROVED','APPROVED','CHECKED','PREPARED','RETURNED','PENDING','MARV')
+
+        FOR UPDATE OF STATUS, LASTUSER
+        DO        
+            SET v_unactd_but_aprvd_ets = IS_APPROVED_BUT_UNACTED(REC.TRADESERVICEID);
+            SET v_prevailing_status = COALESCE(GET_PREVAILING_STATUS(REC.TRADESERVICEID),'APPROVED');
+            SET v_routes_user = (SELECT DISTINCT SENDERACTIVEDIRECTORYID FROM ROUTES WHERE STATUS = v_prevailing_status AND ROUTINGINFORMATIONID = REC.TRADESERVICEID);
+
+            IF REC.LASTUSER <> v_routes_user THEN
+                SET v_routes_user = v_routes_user;
+            ELSE
+                SET v_routes_user = REC.LASTUSER;
+            END IF;
+
+            IF REC.STATUS = 'MARV' THEN
+                SET v_routes_user = (SELECT SENDERACTIVEDIRECTORYID FROM ROUTES WHERE ROUTINGINFORMATIONID = REC.TRADESERVICEID ORDER BY ID DESC FETCH FIRST 1 ROWS ONLY);
+            END IF;
+
+            IF (REC.STATUS IN ('PREPARED','CHECKED','PENDING','RETURNED','MARV') AND v_unactd_but_aprvd_ets = 'N' ) THEN
+            --IF (REC.STATUS IN ('PREPARED','CHECKED','PENDING','RETURNED','MARV')) THEN
+                IF v_prevailing_status <> REC.STATUS THEN
+
+                    UPDATE TRADESERVICE
+                    SET STATUS = TRIM(COALESCE(v_prevailing_status,REC.STATUS))
+                    , LASTUSER = TRIM(v_routes_user)
+                    WHERE CURRENT OF C_CAL;
+
+                    INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                 , DOCUMENTNUMBER
+                                                 , AFFECTEDTABLE
+                                                 , OLDSTATUS
+                                                 , SYNCHDATE
+                                                 , REMARKS
+                                                 , LOGTYPE)
+                    VALUES (REC.TRADESERVICEID
+                          , REC.DOCUMENTNUMBER
+                          , 'TRADESERVICE'
+                          , REC.STATUS
+                          , CURRENT DATE
+                          , '[LN 127]'||v_prevailing_status||LENGTH(v_prevailing_status)
+                          , 'P');
+                END IF;
+
+                SET V_ERR_LOC ='v_task_status'||REC.TRADESERVICEID;
+                SET v_task_status = ( SELECT TASKSTATUS FROM TASK WHERE TASKREFERENCENUMBER= REC.TRADESERVICEID);
+
+                IF v_task_status <> v_prevailing_status THEN
+                    UPDATE TASK
+                    SET TASKSTATUS = TRIM(COALESCE(v_prevailing_status,v_task_status))
+                    WHERE TASKREFERENCENUMBER = REC.TRADESERVICEID;
+
+                    INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                 , DOCUMENTNUMBER
+                                                 , AFFECTEDTABLE
+                                                 , OLDSTATUS
+                                                 , SYNCHDATE
+                                                 , REMARKS
+                                                 , LOGTYPE) 
+                    VALUES (REC.TRADESERVICEID
+                          , REC.DOCUMENTNUMBER
+                          , 'TASK'
+                          , v_task_status
+                          , CURRENT DATE
+                          , '[LN 151]'
+                          , 'P');
+                END IF;
+
+            ELSE IF (IS_UNSYNC(REC.TRADESERVICEID) = 'Y' 
+                     AND REC.SERVICETYPE_INCLUDED  = 'Y' 
+                     AND v_unactd_but_aprvd_ets    = 'N' 
+                     AND REC.STATUS IN ('POSTED','POST_APPROVED','APPROVED','CHECKED','PREPARED')
+                    ) THEN
+---              ELSE IF IS_UNSYNC(REC.TRADESERVICEID) = 'Y' AND REC.SERVICETYPE_INCLUDED = 'Y' THEN
+
+                SET v_master_tbl_complete = CASE WHEN REC.DOCUMENTCLASS IN ('LC', 'MT')
+                                                     THEN WITH_COMPLETE_REFERENCE_TABLES(REC.TRADESERVICEID, REC.DOCUMENTNUMBER, REC.SERVICETYPE)
+                                                 WHEN REC.DOCUMENTCLASS = 'DP' 
+                                                     THEN WITH_COMPLETE_NONLC_REFERENCE_TABLES(REC.TRADESERVICEID, REC.DOCUMENTNUMBER)
+                                                 WHEN REC.DOCUMENTCLASS = 'INDEMNITY' 
+                                                     THEN WITH_COMPLETE_INDEMNITY_REFERENCE_TABLES(REC.TRADESERVICEID, REC.DOCUMENTNUMBER, REC.SERVICETYPE)
+                                                 WHEN REC.DOCUMENTCLASS IN ('BC', 'BP')
+                                                     THEN WITH_COMPLETE_EXPORTS_REFERENCE_TABLES(REC.TRADESERVICEID, REC.DOCUMENTNUMBER)
+                                                 ELSE NULL
+                                            END;
+
+                SET V_ERR_LOC ='WITH_COMPLETE_REFERENCE_TABLES'||REC.TRADESERVICEID||':'||REC.DOCUMENTNUMBER;
+                IF v_master_tbl_complete  = 'Y' THEN
+                    SET V_ERR_LOC ='MASTER_LAST_MODIFIED'||REC.DOCUMENTNUMBER;
+                    IF ((v_prevailing_status = 'POSTED') OR (v_prevailing_status = 'POST_APPROVED')) THEN
+                        SET v_is_post_approved = 'Y';
+                    ELSE
+                        SET v_is_post_approved = 'N';
+                END IF;
+
+                SET v_master_date = MASTER_LAST_MODIFIED(REC.DOCUMENTNUMBER
+                                                        ,REC.SERVICETYPE
+                                                        ,REC.DOCUMENTCLASS);
+
+                IF (REC.DOCUMENTCLASS = 'INDEMNITY') THEN
+                    IF ((v_master_date IS NOT NULL) OR (DATE(v_master_date) = DATE(REC.MODIFIEDDATE))) THEN
+                        SET v_master_date = REC.MODIFIEDDATE;
+                    END IF;
+                ELSE IF (REC.DOCUMENTCLASS = 'MT') THEN
+                    SET v_master_date = REC.MODIFIEDDATE;
+                END IF;
+                END IF;
+
+                SET v_route_date = COALESCE((SELECT MAX(DATESENT) FROM ROUTES
+                                             WHERE ROUTINGINFORMATIONID = REC.TRADESERVICEID
+                                             AND STATUS IN ('POSTED','POST_APPROVED','APPROVED')),REC.MODIFIEDDATE);
+
+                SET v_task_date = COALESCE((SELECT MAX(MODIFIEDDATE) FROM TASK
+                                            WHERE TASKREFERENCENUMBER =  REC.TRADESERVICEID
+                                            AND TASKREFERENCETYPE = 'DATA_ENTRY'
+                                            ),REC.MODIFIEDDATE);
+
+                SET v_last_mod_date = MAX(REC.MODIFIEDDATE,v_route_date,v_task_date);
+                SET V_ERR_LOC ='MODIFIEDDATE'||v_last_mod_date;
+
+                IF (((v_master_date BETWEEN v_last_mod_date - 10 MINUTES and v_last_mod_date + 10 MINUTES)
+                AND (v_master_date is not null)) OR (v_prevailing_status = 'POST_APPROVED') OR (v_prevailing_status = 'POSTED'))
+                THEN
+
+                    IF (v_is_post_approved = 'Y' AND REC.STATUS IN ('PREPARED','POSTED')) THEN
+                        IF REC.STATUS <> v_prevailing_status THEN
+                            UPDATE TRADESERVICE
+                            SET STATUS = TRIM(COALESCE(v_prevailing_status,'APPROVED'))
+                            , LASTUSER = TRIM(v_routes_user)
+                            WHERE CURRENT OF C_CAL;
+
+                            INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                         , DOCUMENTNUMBER
+                                                         , AFFECTEDTABLE
+                                                         , OLDSTATUS
+                                                         , SYNCHDATE
+                                                         , REMARKS
+                                                         , LOGTYPE) 
+                             VALUES (REC.TRADESERVICEID
+                                   , REC.DOCUMENTNUMBER
+                                   , 'TRADESERVICE'
+                                   , REC.STATUS
+                                   , CURRENT DATE
+                                   , '[LN 224]'
+                                   , 'P');
+                    END IF;
+                    END IF;
+
+                    SET V_ERR_LOC ='v_task_status'||REC.TRADESERVICEID;
+                    SET v_task_status = (SELECT TASKSTATUS FROM TASK 
+                                         WHERE TASKREFERENCENUMBER= REC.TRADESERVICEID);
+
+                    IF v_task_status NOT IN ('APPROVED','POST_APPROVED') THEN
+                        UPDATE TASK
+                        SET TASKSTATUS = TRIM(COALESCE(v_prevailing_status,'APPROVED'))
+                        WHERE TASKREFERENCENUMBER = REC.TRADESERVICEID
+                        AND TASKSTATUS IN ('CHECKED','POSTED');
+
+                        INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                     , DOCUMENTNUMBER
+                                                     , AFFECTEDTABLE
+                                                     , OLDSTATUS
+                                                     , SYNCHDATE
+                                                     , REMARKS
+                                                     , LOGTYPE) 
+                        VALUES (REC.TRADESERVICEID
+                              , REC.DOCUMENTNUMBER
+                              , 'TASK'
+                              , v_task_status
+                              , CURRENT DATE
+                              , '[LN 251]'
+                              , 'P');
+                    END IF;
+
+                    SET V_ERR_LOC ='v_ae_status'||REC.TRADESERVICEID;
+                    SET v_ae_status = (SELECT MAX(STATUS) FROM INT_ACCENTRYACTUAL WHERE TRADESERVICEID= REC.TRADESERVICEID);
+                    SET v_get_ae = GET_AE(REC.TRADESERVICEID);
+
+                    IF v_ae_status NOT IN ('APPROVED','POSTED') THEN
+                        UPDATE INT_ACCENTRYACTUAL 
+                        SET STATUS = TRIM(DECODE(v_prevailing_status, 'POST_APPROVED', 'POSTED', v_prevailing_status))
+                        , ISPOSTED = DECODE(v_get_ae,'Y',0,1)
+                        WHERE TRADESERVICEID = REC.TRADESERVICEID
+                        AND STATUS = 'PREPARED';
+
+                        INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                     , DOCUMENTNUMBER
+                                                     , AFFECTEDTABLE
+                                                     , OLDSTATUS
+                                                     , SYNCHDATE
+                                                     , LOGTYPE) 
+                        VALUES (REC.TRADESERVICEID
+                              , REC.DOCUMENTNUMBER
+                              , 'INT_ACCENTRYACTUAL'
+                              , v_ae_status
+                              , CURRENT DATE
+                              , 'P');
+                    END IF;
+
+                ELSE
+                    SET v_log_message = 'Unable to synchronize tables. Modified date exceeds threshold.';
+                    INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                                 , DOCUMENTNUMBER
+                                                 , SYNCHDATE
+                                                 , REMARKS
+                                                 , LOGTYPE) 
+                    VALUES (REC.TRADESERVICEID
+                          , REC.DOCUMENTNUMBER
+                          , CURRENT DATE
+                          , v_log_message
+                          , 'E');
+                END IF;
+
+            ELSE
+                SET v_log_message = 'Unable to synchronize tables. Incomplete Reference Tables.';
+                INSERT INTO SESSION.TMP_AUDIT (TRADESERVICEID
+                                             , DOCUMENTNUMBER
+                                             , SYNCHDATE
+                                             , REMARKS
+                                             , LOGTYPE) 
+                                   VALUES (REC.TRADESERVICEID
+                                         , REC.DOCUMENTNUMBER
+                                         , CURRENT DATE
+                                         , v_log_message
+                                         , 'E');
+            END IF;
+            END IF;
+            END IF;
+        END FOR;
+
+        SET v_cnt_status_with_spaces = (SELECT COUNT(*) FROM TRADESERVICE WHERE LENGTH(STATUS) <> LENGTH(TRIM(STATUS)));
+        IF (v_cnt_status_with_spaces <> 0) THEN
+            UPDATE TRADESERVICE SET STATUS = TRIM(STATUS) WHERE LENGTH(STATUS) <> LENGTH(TRIM(STATUS));
+            
+            SET v_log_message = 'Spaces in the status has been removed from ' || v_cnt_status_with_spaces || ' record(s).';
+            INSERT INTO SESSION.TMP_AUDIT (SYNCHDATE
+                                         , REMARKS
+                                         , LOGTYPE) 
+            VALUES (CURRENT DATE
+                  , v_log_message
+                  , 'P');
+        END IF;
+
+        SET v_err = CASE WHEN COALESCE((SELECT COUNT(*) FROM SESSION.TMP_AUDIT WHERE LOGTYPE = 'E'),0) > 0 THEN 1 ELSE 0 END;
+        SET v_synched = COALESCE((SELECT COUNT(*) FROM SESSION.TMP_AUDIT WHERE LOGTYPE = 'P'),0);
+
+        IF v_err = 1 THEN
+            SET P_RETVAL = 2; 
+            SET P_MESSAGE = 'SUCCESSFUL WITH FINDINGS. Manual checking is required. Please contact project team.';
+        ELSE
+            SET P_RETVAL = 0;
+            SET P_MESSAGE = 'SUCCESSFUL. '||v_synched||' row(s) affected.';
+        END IF;
+        OPEN res;
+    END P2;
+END P1

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt103PlusMapper">
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+        <entry value="13C" key="T(com.ucpb.tfs.util.SwiftUtil).formatTimeIndication(details?.get('timeIndication'),details.get('timeIndicationField'))"/>
+        <entry value="23B" key="details?.get('bankOperationCode')"/>
+        <entry value="23E" key="details?.get('instructionOperationCode')"/>
+        <entry value="26T" key="details?.get('transactionTypeCode')"/>
+        <entry value="32A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('processDate'),details?.get('currency'),details?.get('productAmount'))"/>
+        <entry value="33B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('productAmount'))"/>
+        <!-- //TODO: format amount -->
+        <entry value="36" key="T(com.ucpb.tfs.util.SwiftUtil).formatRate(details?.get('exchangeRate'))"/>
+        <entry value="50K" key="T(com.ucpb.tfs.util.SwiftUtil).formatToLimit(35,details?.get('importerName'),details?.get('importerAddress'))"/>    <!-- importer -->
+        <entry value="51A" key="details?.get('sendingInstitution')"/>
+        <!--     	commented out following fields, only included in mt202,400 -->
+        <!--     	<entry value="52A" key="'Ordering Institution'"/> -->
+        <entry value="53B" key="details?.get('depositoryAccountNumber')"/>
+        <!--     	<entry value="54A" key="'Receiver’s Correspondent'"/> -->
+        <entry value="55A" key="details?.get('thirdReimbursementInstitution')"/>
+        <!--     	<entry value="56A" key="'Intermediary'"/> -->
+        <entry value="57A" key="details?.get('accountWithInstitution')"/>
+        <entry value="59" key="T(com.ucpb.tfs.util.SwiftUtil).formatToLimit(35,details?.get('beneficiaryName'),details?.get('beneficiaryAddress'))"/>
+        <entry value="70" key="T(com.ucpb.tfs.util.SwiftUtil).formatRemittanceInfo(
+    	    details?.get('remittanceInformation'),
+    	    details?.get('remittanceInformationTextArea'))"/>
+        <!-- charges and currency -->
+        <entry value="71A" key="details?.get('detailsOfCharges')"/>
+        <entry value="71F" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('senderChargesCurrency'),details?.get('senderCharges'))"/>
+        <entry value="71G" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('receiverChargesCurrency'),details?.get('receiverCharges'))"/>
+        <entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatRemittanceInfo(
+	    	details?.get('senderToReceiverInformation'),
+	    	details?.get('senderToReceiverInformationTextArea'))"/>
+        <entry value="77B" key="details?.get('regulatoryReporting')"/>
+        <entry value="77T" key="T(com.ucpb.tfs.util.SwiftUtil).formatRemittanceInfo(details?.get('envelopeContents'),
+    	    details?.get('envelopeContentsTextArea'))"/>
+    </util:map>
+</beans>

@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<!-- 
+/**  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: collectingBankCode and collectingBankAddress not save in ExportBills table
+	[Created by:] Jonh Henry Alabin
+	[Date deployed:] June 16,2017 
+	Program [Revision] Details: add new properties (collectingBankCode and collectingBankAddress)
+	PROJECT: CORE
+	MEMBER TYPE  : XML
+	Project Name: ExportBills.hbm.xml
+ */
+/**  PROLOGUE:
+ *  (revision)
+    Reference Number: ITDJCH-2018-03-001
+    Task Description: Add new fields on screen of different modules to comply with the requirements of ITRS.
+    [Created by:] Jaivee Hipolito
+    [Date Revised:] 03/06/2018
+    Program [Revision] Details: Add variable particulars including getter setter, to save particulars to Export Bills.
+    PROJECT: CORE
+    MEMBER TYPE  : Java
+ */
+ -->
+
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <subclass name="com.ucpb.tfs.domain.product.ExportBills" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="EXPORT_BILLS" lazy="false">
+
+        <set name="documentsEnclosed" cascade="all-delete-orphan">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.documents.DocumentsEnclosed" />
+        </set>
+
+        <set name="enclosedInstructions" cascade="all-delete-orphan">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.condition.EnclosedInstruction" />
+        </set>
+
+        <join table="ExportBills">
+
+            <key column="documentNumber"/>
+
+            <property name="exportBillType" column="exportBillType" length="3">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.ExportBillType</param>
+                </type>
+            </property>
+
+
+            <property name="exportViaPddtsFlag" column="exportViaPddtsFlag" type="java.lang.Boolean"/>
+            <property name="cwtFlag" column="cwtFlag" type="java.lang.Boolean"/>
+
+            <!--<property name="lcIssueDate" column="lcIssueDate" type="java.util.Date"/>-->
+
+            <property name="paymentMode" column="paymentMode" type="string" length="2"/>
+            <property name="outstandingAmount" column="outstandingAmount" type="java.math.BigDecimal" />
+
+            <component name="negotiationNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+                <property name="documentNumber" column="negotiationNumber" type="string" length="21"/>
+            </component>
+
+            <!--loan details-->
+            <component name="loanDetails" class="com.ucpb.tfs.domain.product.LoanDetails">
+                <property name="facilityType" column="facilityType" type="string" length="20"/>
+                <property name="faciltiyId" column="faciltiyId" type="string" length="20"/>
+                <property name="bookingCurrency" column="bookingCurrency" type="java.util.Currency" length="3"/>
+                <property name="loanAmount" column="loanAmount" type="java.math.BigDecimal" />
+                <property name="interestRate" column="interestRate" type="java.math.BigDecimal" />
+
+                <property name="interestTermCode" column="interestTermCode" type="string" length="1"/>
+                <property name="interestTerm" column="interestTerm" type="long"/>
+
+<!--                 <property name="repricingTermCode" column="repricingTermCode" type="string" length="1"/> -->
+<!--                 <property name="repricingTerm" column="repricingTerm" type="long"/> -->
+
+                <property name="loanTermCode" column="loanTermCode" type="string" length="1"/>
+                <property name="loanTerm" column="loanTerm" type="long"/>
+
+                <property name="loanMaturityDate" column="loanMaturityDate" type="java.util.Date"/>
+                <property name="numberOfFreeFloatDays" column="numberOfFreeFloatDays" type="long"/>
+
+                <property name="agriAgraTagging" column="agriAgraTagging" type="string" length="7"/>
+                <property name="paymentCode" column="paymentCode" type="string" length="1"/>
+                <property name="pnNumber" column="pnNumber" type="string" length="20"/>
+                <property name="transactionPostingStatus" column="transactionPostingStatus" type="string" length="20"/>
+            </component>
+
+            <!--lc details-->
+            <component name="lcDetails" class="com.ucpb.tfs.domain.product.LcDetails">
+                <property name="adviseNumber" column="adviseNumber" type="string" length="21"/>
+
+                <component name="lcNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+                    <property name="documentNumber" column="lcNumber" type="string" length="21"/>
+                </component>
+
+                <property name="lcIssueDate" column="lcIssueDate" type="java.util.Date"/>
+
+                <property name="lcType" column="lcType" length="10">
+                    <type name="org.hibernate.type.EnumType">
+                        <param name="type">12</param>
+                        <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCType</param>
+                    </type>
+                </property>
+
+                <property name="lcTenor" column="lcTenor" length="8">
+                    <type name="org.hibernate.type.EnumType">
+                        <param name="type">12</param>
+                        <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCTenor</param>
+                    </type>
+                </property>
+
+                <property name="usanceTerm" column="usanceTerm" type="string"/>
+
+                <property name="lcCurrency" column="lcCurrency" type="java.util.Currency" length="3"/>
+                <property name="lcAmount" column="lcAmount" type="java.math.BigDecimal" />
+
+                <property name="lcExpiryDate" column="lcExpiryDate" type="java.util.Date"/>
+
+                <property name="issuingBankCode" column="issuingBankCode" type="string" length="20"/>
+                <property name="issuingBankAddress" column="issuingBankAddress" type="string" length="350"/>
+
+                <property name="reimbursingBankCode" column="reimbursingBankCode" type="string" length="20"/>
+
+                <property name="lcDescriptionOfGoods" column="lcDescriptionOfGoods" type="org.hibernate.type.MaterializedClobType" length="6500"/>
+            </component>
+
+            <!--non-lc details-->
+            <component name="nonLcDetails" class="com.ucpb.tfs.domain.product.NonLcDetails">
+                <property name="tenor" column="tenor" type="string" length="8"/>
+                <property name="tenorTerm" column="tenorTerm" type="long"/>
+                <property name="nonLcTenor" column="nonLcTenor" type="string" length="8"/>
+                <property name="nonLcTenorTerm" column="nonLcTenorTerm" type="string" length="50"/>
+
+                <property name="draftCurrency" column="draftCurrency" type="java.util.Currency" length="3"/>
+                <property name="draftAmount" column="draftAmount" type="java.math.BigDecimal" />
+
+                <property name="dueDate" column="dueDate" type="java.util.Date"/>
+
+               
+
+                <property name="nonLcDescriptionOfGoods" column="nonLcDescriptionOfGoods" type="org.hibernate.type.MaterializedClobType" length="6500"/>
+            </component>
+
+            <property name="invoiceNumber" column="invoiceNumber" type="string" length="20"/>
+
+            <property name="additionalAmount" column="additionalAmount" type="java.math.BigDecimal" />
+
+            <property name="chargesCode" column="chargesCode" length="8">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.ChargesCode</param>
+                </type>
+            </property>
+
+            <property name="chargeAmount" column="chargeAmount" type="java.math.BigDecimal" />
+            <property name="chargeNarrative" column="chargeNarrative" type="string" length="215" />
+
+            <property name="totalAmountClaimedFlag" column="totalAmountClaimedFlag" type="string" length="1"/>
+            <property name="totalAmountClaimedDate" column="totalAmountClaimedDate" type="java.util.Date"/>
+            <property name="totalAmountClaimed" column="totalAmountClaimed" type="java.math.BigDecimal" />
+            <property name="totalAmountClaimedCurrency" column="totalAmountClaimedCurrency" type="java.util.Currency" />
+
+            <property name="corresBankFlag" column="corresBankFlag" type="string" length="1"/>
+            <property name="corresBankCode" column="corresBankCode" type="string" length="20"/>
+            <property name="corresBankName" column="corresBankName" type="string" length="50"/>
+
+            <property name="corresBankAccountFlag" column="corresBankAccountFlag" type="string" length="1"/>
+            <property name="corresBankAccountCode" column="corresBankAccountCode" type="string" length="20"/>
+            <property name="corresBankAccountNameAndAddress" column="corresBankAccountNameAndAddress" type="string" length="350"/>
+
+            <property name="accountType" column="accountType" length="4">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AccountType</param>
+                </type>
+            </property>
+
+            <property name="depositoryAccountNumber" column="depositoryAccountNumber" type="string" length="20"/>
+            <property name="glCode" column="glCode" type="string" length="20"/>
+
+            <property name="corresBankCurrency" column="corresBankCurrency" type="java.util.Currency" length="3"/>
+
+            <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="350"/>
+
+
+            <!--<property name="lastTransaction" column="lastTransaction" type="string" length="350"/>-->
+            <property name="processDate" column="processDate" type="java.util.Date"/>
+
+            <property name="settlementDate" column="settlementDate" type="java.util.Date"/>
+            <property name="proceedsAmount" column="proceedsAmount" type="java.math.BigDecimal" />
+
+            <property name="mtFlag" column="mtFlag" type="java.lang.Boolean"/>
+            <property name="countryCode" column="countryCode" type="string" length="20"/>
+
+            <property name="sellerName" column="sellerName" type="string" length="100"/>
+            <property name="buyerName" column="buyerName" type="string" length="100"/>
+            <property name="buyerAddress" column="buyerAddress" type="string" length="300"/>
+
+            <property name="reasonForCancellation" column="reasonForCancellation" type="string" length="350"/>
+
+            <property name="partialNego" column="partialNego" type="string" length="3"/>
+            
+            <property name="bpAmount" column="bpAmount" type="java.math.BigDecimal" />
+
+        	<property name="bpCurrency" column="bpCurrency" type="java.util.Currency" length="3" />
+        	
+        	<property name="exporterCbCode" column="exporterCbCode" type="string" length="10"/>
+
+			<property name="negotiationDate" column="negotiationDate" type="java.util.Date"/>
+			<!-- henry -->
+			<property name="collectingbankcode" column="collectingbankcode" type="string" length="20"/>
+            <property name="collectingbankaddress" column="collectingbankaddress" type="string" length="350"/>
+            
+            <!-- Jaivee -->
+            <property name="particulars" column="particulars" type="string"/>
+        </join>
+
+    </subclass>
+    
+</hibernate-mapping>

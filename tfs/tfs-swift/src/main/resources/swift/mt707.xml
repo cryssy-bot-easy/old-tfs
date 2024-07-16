@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt707Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="field20" key="#this.get('documentNumber')"/>
+                <entry value="field21" key="#this.get('20') ?: 'NON-REF'"/>
+                <entry value="field23" key="#this.get('documentNumber')"/>
+                <entry value="field52A" key="#this.get('52A')"/>
+                <entry value="field31C" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('issueDate'))"/>
+                <entry value="field30C" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(new java.util.Date())"/>
+                <entry value="field26E" key="#this.get('numberOfAmendment')"/>
+                <entry value="field59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+                <entry value="field31E" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(new java.util.Date())"/>
+                <entry value="field32B"
+                       key="(new java.math.BigDecimal(#this.get('amountTo'))).subtract(new java.math.BigDecimal(#this.get('productAmount'))).compareTo(new java.math.BigDecimal('0')) > 0 ? '' : (new java.math.BigDecimal(#this.get('amountTo'))).subtract(new java.math.BigDecimal(#this.get('productAmount'))).toString()"/>
+                <entry value="field33B" key="(new java.math.BigDecimal(#this.get('productAmount'))).subtract(new java.math.BigDecimal(#this.get('amountTo'))).compareTo(new java.math.BigDecimal('0')) > 0 ? '' : (new java.math.BigDecimal(#this.get('productAmount'))).subtract(new java.math.BigDecimal(#this.get('amountTo'))).toString()"/>
+                <entry value="field34B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amountTo'))"/>
+                <entry value="field39A" key="(#this.get('positiveToleranceLimitSwitchDisplay') == 'on' ? #this.get('positiveToleranceLimitTo') : #this.get('negativeToleranceLimitFrom')) +  '/' + (#this.get('negativeToleranceLimitSwitchDisplay') == 'on' ? #this.get('negativeToleranceLimitTo') : #this.get('negativeToleranceLimitFrom'))"/>
+                <entry value="field39B" key="#this.get('maximumCreditAmountTo') != '' ? #this.get('maximumCreditAmountFrom') : #this.get('maximumCreditAmountFrom')"/>
+                <entry value="field44A" key="#this.get('placeOfTakingDispatchOrReceiptSwitchDisplay') == 'on' ? #this.get('placeOfTakingDispatchOrReceiptTo') : #this.get('placeOfTakingDispatchOrReceiptFrom')"/>
+                <entry value="field44E" key="#this.get('portOfLoadingOrDepartureSwitchDisplay') == 'on' ? #this.get('portOfLoadingOrDepartureTo') : #this.get('portOfLoadingOrDepartureFrom')"/>
+                <entry value="field44F" key="#this.get('placeOfFinalDestinationSwitchDisplay') == 'on' ? #this.get('placeOfFinalDestinationTo') : #this.get('placeOfFinalDestinationFrom')"/>
+                <entry value="field44B"
+                       key="#this.get('latestShipmentDateSwitchDisplay') == 'on' ? #this.get('latestShipmentDateTo') : #this.get('latestShipmentDateFrom')"/>
+                <entry value="field44C" key="#this.get('44C')"/>
+                <entry value="field44F" key="#this.get('44D')"/>
+                <entry value="field79" key="#this.get('additionalNarrative')"/>
+                <entry value="field72" key="#this.get('senderToReceiverInformationFrom')  "/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT707"/>
+    </bean>
+
+</beans>

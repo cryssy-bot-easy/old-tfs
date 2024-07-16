@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <import resource="classpath*:swift/swift-config.xml"/>
+
+    <context:property-placeholder location="classpath:tfs-test.properties, classpath:interface-app.properties, classpath:batch.properties" ignore-unresolvable="true" local-override="true"/>
+
+
+    <jdbc:embedded-database id="myDataSource" type="DERBY">
+        <jdbc:script location="classpath:ddl/create-mt-message-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-tradeservice-referencenumber-sequence.sql"/>
+    </jdbc:embedded-database>
+
+    <bean id="tfsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+                <value>classpath:hibernate/mapping/task</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.BitronixJtaPlatform</prop>
+                <prop key="org.hibernate.envers.audit_table_suffix">_AUDIT</prop>
+                <prop key="org.hibernate.envers.revision_field_name">REV_ID</prop>
+                <prop key="org.hibernate.envers.revision_type_field_name">REV_TYPE</prop>
+            </props>
+        </property>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+        <!--set false to prevent UnexpectedRollbackException-->
+        <property name="globalRollbackOnParticipationFailure" value="false" />
+    </bean>
+
+    <bean id="mtMessageRepository" class="com.ucpb.tfs.domain.mtmessage.infrastructure.repositories.hibernate.HibernateMtMessageRepository" />
+
+    <bean id="taskRepository" class="com.ucpb.tfs.domain.task.infrastructure.repositories.hibernate.HibernateTaskRepository"/>
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <bean id="tradeServiceReferenceNumberGenerator" class="com.ucpb.tfs.domain.service.utils.TradeServiceReferenceNumberGenerator">
+        <constructor-arg name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+
+</beans>

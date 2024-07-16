@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <!-- these two are use to initialize the event publisher and the event listener registrar -->
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.SimpleEventPublisher" />
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.EventListenerProcessor" />
+    <bean class="com.incuventure.cqrs.infrastructure.StandardCommandHandlerProvider" />
+    <!--<bean class="com.ucpb.tfs.domain.service.event.charge.ServiceChargeEventListener" />-->
+
+    <!-- this is for the new API dispatcher -->
+    <bean class="com.incuventure.cqrs.infrastructure.StandardAPICallDispatcher" />
+    <bean class="com.incuventure.cqrs.infrastructure.StandardAPIHandlerProvider"/>
+
+    <bean id="commandBusService" class="com.incuventure.cqrs.infrastructure.StandardCommandBus"/>
+    <bean id="queryBusService" class="com.incuventure.cqrs.infrastructure.StandardQueryBus"/>
+    <bean id="myQueryBus" class="com.incuventure.cqrs.infrastructure.StandardQueryBus"/>
+    <!--The bean id has to be the same name as the interface since we're just using this from within QueryBus-->
+    <bean id="TokenProvider" class="com.incuventure.cqrs.infrastructure.StandardTokenProvider"/>
+    <!--This provides the values for the select boxes-->
+    <bean id="SelectBoxDataProvider" class="com.ucpb.tfs.infrastructure.query.ReflectionSelectBoxDataProvider"/>
+
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="service" ref="commandBusService"/>
+        <property name="serviceInterface" value="com.incuventure.cqrs.command.CommandBus"/>
+        <property name="serviceName" value="commandBusService"/>
+        <property name="registryPort" value="1099"/>
+    </bean>
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="service" ref="queryBusService"/>
+        <property name="serviceInterface" value="com.incuventure.cqrs.query.QueryBus"/>
+        <property name="serviceName" value="queryBusService"/>
+        <property name="registryPort" value="1099"/>
+    </bean>
+
+    <!-- command / event component scanner -->
+    <context:component-scan base-package="com.ucpb.tfs.domain.service.event.charge"></context:component-scan>
+
+    <!-- DataSource: hsqldb file -->
+    <!--destroy-method="close"-->
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+        <property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver" />
+        <property name="url" value="jdbc:derby://localhost:1527/tfsdb;create=true;" />
+        <property name="username" value="tfs" />
+        <property name="password" value="tfs" />
+    </bean>
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/instruction</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/product</value>
+                <value>classpath:hibernate/mapping/rbac</value>
+                <value>classpath:hibernate/mapping/reference</value>
+                <value>classpath:hibernate/mapping/service</value>
+                <value>classpath:hibernate/mapping/settlementaccount</value>
+                <value>classpath:hibernate/mapping/task</value>
+                <value>classpath:hibernate/mapping/routing</value>
+                <value>classpath:hibernate/mapping/security</value>
+                <value>classpath:hibernate/mapping/audit</value>
+                <value>classpath:hibernate/mapping/swift</value>
+                <value>classpath:hibernate/mapping/accounting</value>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+                <value>classpath:hibernate/mapping/documents</value>
+                <value>classpath:hibernate/mapping/reimbursing</value>
+                <value>classpath:hibernate/mapping/condition</value>
+                <value>classpath:hibernate/mapping/corresCharges</value>
+                <value>classpath:hibernate/mapping/letter</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.import_files">true</prop>
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.BitronixJtaPlatform</prop>
+
+
+                <!-- Hibernate Envers configuration (audit logging) -->
+                <prop key="org.hibernate.envers.audit_table_suffix">_AUDIT</prop>
+                <prop key="org.hibernate.envers.revision_field_name">REV_ID</prop>
+                <prop key="org.hibernate.envers.revision_type_field_name">REV_TYPE</prop>
+            </props>
+        </property>
+    </bean>
+    <tx:annotation-driven/>
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+        <!--set false to prevent UnexpectedRollbackException-->
+        <property name="globalRollbackOnParticipationFailure" value="false" />
+    </bean>
+
+    <!--this one is for CQRS query with MyBatis-Spring -->
+    <bean id="dataSourceMyBatis" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="org.apache.derby.jdbc.ClientDriver"/>
+        <property name="url" value="jdbc:derby://localhost:1527/tfsdb;create=true;"/>
+        <property name="username" value="tfs"/>
+        <property name="password" value="tfs"/>
+    </bean>
+
+    <bean id="sqlSessionFactoryAlt" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceMyBatis"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mybatis/mapping/**/*.xml</value>
+                <value>classpath*:/mappers/batch-process-mapper.xml</value>
+                <value>classpath*:/mappers/sequence-mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="finderComponentScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryAlt"/>
+        <property name="basePackage" value="com.ipc.rbac.application.query,
+                                            com.ucpb.tfs.application.query.instruction,
+                                            com.ucpb.tfs.application.query.settlementaccount,
+                                            com.ucpb.tfs.application.query.task,
+                                            com.ucpb.tfs.application.query.service,
+                                            com.ucpb.tfs.application.query.reference,
+                                            com.ucpb.tfs.application.query.routing,
+                                            com.ucpb.tfs.application.query.payment,
+                                            com.ucpb.tfs.application.query.mtmessage,
+                                            com.ucpb.tfs.application.query.documents,
+                                            com.ucpb.tfs.application.query.reimbursing,
+                                            com.ucpb.tfs.application.query.condition,
+                                            com.ucpb.tfs.application.query.letter,
+                                            com.ucpb.tfs.application.query.swift,
+                                            com.ucpb.tfs.application.query2"/>
+
+        <property name="processPropertyPlaceHolders" value="true"/>
+    </bean>
+
+    <bean id="batchProcessDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.dao.BatchProcessDao"/>
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt" />
+    </bean>
+
+    <bean id="productReferenceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateProductReferenceRepository"/>
+    <bean id="tradeServiceChargeReferenceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateTradeServiceChargeReferenceRepository"/>
+    <bean id="taskRepository" class="com.ucpb.tfs.domain.task.infrastructure.repositories.hibernate.HibernateTaskRepository"/>
+    <bean id="userRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateUserRepository"/>
+    <bean id="objectRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateObjectRepository"/>
+    <bean id="permissionRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernatePermissionRepository"/>
+    <bean id="roleRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateRoleRepository"/>
+    <bean id="employeeRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateEmployeeRepository"/>
+    <bean id="chargeRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateChargeRepository"/>
+    <bean id="accountingEventsRepository" class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEventRepository"/>
+    <bean id="accountingEntryRepository" class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEntryRepository"/>
+    <bean id="accountingEntryActualRepository" class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEntryActualRepository"/>
+    <bean id="productServiceAccountingEventTransactionReferenceRepository" class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateProductServiceAccountingEventTransactionReferenceRepository"/>
+    <bean id="tradeServiceRepository" class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+
+    <!-- this is used when we connect to the database during Spring Context initialization -->
+    <bean id="sharedTransactionTemplate"
+          class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!-- This will scan our bootstrap application context listeners-->
+    <context:component-scan base-package="com.ucpb.tfs.application.bootstrap"></context:component-scan>
+
+    <!-- Services -->
+    <bean id="chargesService" class="com.ucpb.tfs.application.service.ChargesService"/>
+    <bean id="chargeLookup" class="com.ucpb.tfs.application.bootstrap.ChargesLookup"/>
+    <!--<bean id="accountingLookup" class="com.ucpb.tfs.application.bootstrap.AccountingLookup"/>-->
+    <!--<bean id="accountingService" class="com.ucpb.tfs.application.service.AccountingService"/>-->
+
+    <bean id="mapper" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>dozer/routing.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="interfaceDataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+        <property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver" />
+        <property name="url" value="jdbc:derby://localhost:1527/silverlakedb;create=true;" />
+        <property name="username" value="tfs" />
+        <property name="password" value="tfs" />
+    </bean>
+
+    <context:annotation-config/>
+
+</beans>

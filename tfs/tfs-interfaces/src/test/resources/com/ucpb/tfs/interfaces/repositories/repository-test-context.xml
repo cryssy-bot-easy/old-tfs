@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<import resource="classpath*:interface-app-context.xml"/>
+	
+<!--     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> -->
+<!--         <property name="dataSource" ref="dataSource"/> -->
+<!--         <property name="mapperLocations" value="classpath*:/mappers/*.xml"/> -->
+<!--     </bean> -->
+
+    <jdbc:embedded-database id="myDataSource" type="HSQL">
+        <jdbc:script location="classpath:ddl/amla/create-transaction-log-table.sql"/>
+        <jdbc:script location="classpath:ddl/amla/create-customer-account-table.sql"/>
+        <jdbc:script location="classpath:ddl/amla/create-account-log-table.sql"/>
+        <jdbc:script location="classpath:ddl/amla/insert_audit_log_test_data.sql"/>
+        <jdbc:script location="classpath:ddl/sequence/create-loan-sequence-table.sql"/>
+    </jdbc:embedded-database>
+    
+    <jdbc:embedded-database id="interfaceDataSource" type="DERBY">
+        <!-- FUNCTIONS -->
+        <jdbc:script location="classpath:ddl/functions/create-to-date-function.sql"/>
+        <jdbc:script location="classpath:ddl/functions/create-getCurrentDate-function.sql"/>
+
+    	<!-- UCDATPBWC (CIF INFORMATION) -->
+       	<jdbc:script location="classpath:ddl/ucdatpbwc/create-ucdatpbwc-schema.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatpbwc/create-ucdatubwc1-schema.sql"/>
+     	<jdbc:script location="classpath:ddl/ucdatpbwc/create-cifmast-table.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatpbwc/create-cfacct-table.sql"/>
+        <jdbc:script location="classpath:ddl/ucdatpbwc/create-cif-addr-table.sql"/>
+        <jdbc:script location="classpath:ddl/functions/create-digits-function.sql"/>
+        <!-- UCDATPLNS (FACILITIES)-->
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-ucdatplns-schema.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-ucdatulns1-schema.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-facility-accounts-table.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-facility-table.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-facility-availment-table.sql"/>
+        <jdbc:script location="classpath:ddl/ucdatplns/create-facility-balance-inquiry-table-lntfcon.sql"/>
+
+        <!-- UCPARPCMN (RATES)-->
+       	<jdbc:script location="classpath:ddl/ucparpcmn/create-ucparucmn1-schema.sql"/>
+       	<jdbc:script location="classpath:ddl/ucparpcmn/create-daily-rates-table-jhfxdt.sql"/>
+       	<jdbc:script location="classpath:ddl/ucparpcmn/create-rates-definition-table-jhfxpr.sql"/>
+       	
+       	<!--  UCPARUCMN (Officers) -->
+       	<jdbc:script location="classpath:ddl/ucparpcmn/create-officers-table.sql"/>
+      	<jdbc:script location="classpath:ddl/ucparpcmn/insert-officers-data.sql"/>
+      	
+       	<!-- UCDATPLNS (LOANS) -->
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-loan-table-lntfint.sql"/>
+       	<jdbc:script location="classpath:ddl/ucdatplns/create-loan-exception-table.sql"/>
+
+        <jdbc:script location="classpath*:ddl/ucparpcmn/create-jhparl-table.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparpcmn/create-officers-lnpan4-table.sql"/>
+
+        <jdbc:script location="classpath*:ddl/ucdatugld/create-ucdatugld-stuff.sql"/>
+
+        <!-- cif accounts -->
+        <jdbc:script location="classpath*:ddl/ucdatprbk/create-ucdatprbk-schema.sql"/>
+        <jdbc:script location="classpath*:ddl/ucdatprbk/create-cifaccount-details.sql"/>
+        <jdbc:script location="classpath*:ddl/ucdatprbk/insert-cif-account-details-data.sql"/>
+
+        <!-- holiday table -->
+        <jdbc:script location="classpath*:ddl/ucparpcmn/create-holiday-table.sql"/>
+    </jdbc:embedded-database>
+    
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg name="dataSource" ref="interfaceDataSource"/>
+    </bean>
+
+    <bean id="tfsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <bean id="sequenceSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+    </bean>
+
+    <bean id="sequenceRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.SequenceRepository" />
+        <property name="sqlSessionFactory" ref="sequenceSqlSessionFactory" />
+    </bean>
+
+    <bean id="sequenceService" class="com.ucpb.tfs.interfaces.services.impl.SequenceServiceImpl">
+        <property name="sequenceRepository" ref="sequenceRepository"/>
+    </bean>
+
+    <bean id="applicationProperties" class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
+        <description>
+            This property configuration bean is given an ID, so that service contexts
+            can use it for any property values that need to be defined.
+        </description>
+        <property name="location" value="classpath:interface-application.properties" />
+    </bean>
+
+    <bean id="loanService" class="com.ucpb.tfs.interfaces.services.impl.LoanServiceImpl">
+        <property name="loanRepository" ref="loanRepository"/>
+        <property name="sequenceService" ref="sequenceService"/>
+    </bean>
+
+    <bean id="glMastRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.GlMastRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+</beans>

@@ -1,0 +1,7 @@
+#Wed Feb 12 11:35:34 SGT 2020
+generateSchema=false
+ConnectionName=TFS2212
+useridCurrentSchema=false
+currentPath=SYSIBM,SYSFUN,SYSPROC,SYSIBMADM,TFSDB2C,TFSDB2P
+currentSchema=TFSDB2P
+ProjectAnnotation=TFS2212\:jdbc\:db2\://172.22.0.92\:50000/TFS2212\:retrieveMessagesFromServerOnGetMessage\=true;

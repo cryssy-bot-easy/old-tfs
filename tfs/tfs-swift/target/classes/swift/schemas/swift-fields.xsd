@@ -1,0 +1,1179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified by: Rafael Ski Poblete
+	 Date: 7/26/18
+	 Description: Added field71D and field72Z
+     
+     Date: 8/28/18
+     Description: Corrected character escaping in Z character set.
+                  Change field45A, field46A, field47A pattern to z-character-set.
+                  Added field49G and field49H.
+     
+     Date: 9/11/18
+     Description: Added field79Z.
+     
+     Date: 9/19/18
+     Description: Added field23S. -->
+	 
+<!-- Modified by: Cedrick C. Nungay
+	 Date: 08/06/18
+	 Description: Removed restriction pattern for field 77J -->
+<!-- Modified by: Cedrick C. Nungay
+	 Date: 08/22/18
+	 Description: Added one-hundred-lines-65-characters-z, modified pattern for field46B, field42A,
+	 	added pattern for 49M and 49N-->
+<!-- Modified by: Cedrick C. Nungay
+	 Date: 09/18/18
+	 Description: Added 23H, 23X, 45D and 22D for MT759-->
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        elementFormDefault="qualified">
+
+<!--<xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*" /> -->
+
+    <xs:simpleType name="x-character-set">
+        <xs:restriction base="xs:string">
+<!--             <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*"/> -->
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="c-character-set">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z0-9]*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="a-character-set">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="z-character-set">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+=!*>;{@#_&amp;&quot;&lt;%\s]*"/> 
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="four-lines-35-characters">
+        <xs:annotation>
+            <xs:documentation>
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}){1,4}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="three-lines-35-characters">
+        <xs:annotation>
+            <xs:documentation>
+                3*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="six-lines-65-characters">
+        <xs:annotation>
+            <xs:documentation>
+                6*65x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,65}){1,6}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="six-lines-35-z-characters">
+        <xs:annotation>
+            <xs:documentation>
+                6*35z
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+			<xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+=!*>;{@#_&amp;&quot;&lt;%\s]{1,35}){1,6}"/> 
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="one-hundred-lines-65-characters">
+        <xs:annotation>
+            <xs:documentation>
+                100*65x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="one-hundred-lines-65-characters-z">
+        <xs:annotation>
+            <xs:documentation>
+                100*65z
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="account-identifier-code">
+        <xs:annotation>
+            <xs:documentation>
+                [/34x]
+                4!a2!a2!c[3!c]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?([A-Z]{4}[A-Z]{2}[A-Z0-9]{2})([A-Z0-9]{3})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <xs:simpleType name="account-identifier-location">
+        <xs:annotation>
+            <xs:documentation>
+                35x
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern
+                    value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35})(([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}){1,4})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!--<xs:simpleType name="account-identifier-name-address">-->
+        <!--<xs:annotation>-->
+            <!--<xs:documentation>-->
+                <!--[/34x]-->
+                <!--4*35x-->
+            <!--</xs:documentation>-->
+        <!--</xs:annotation>-->
+        <!--<xs:restriction base="xs:string">-->
+            <!--<xs:pattern value="(/[a-zA-Z0-9/\-?:().,'+{}\p{Zs}]{1,34})?((([a-zA-Z0-9/\-?:().,'+{}\p{Zs}\t][\s]?){1,35}){1,4})"/>-->
+        <!--</xs:restriction>-->
+    <!--</xs:simpleType>-->
+
+    <xs:simpleType name="account-identifier-name-address">
+        <xs:annotation>
+            <xs:documentation>
+                [/34x]
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}\s)?([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]){1,146}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="mandatory-party-identifier-name-address">
+        <xs:annotation>
+            <xs:documentation>
+                35x
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}\s)(([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,140}\s?))"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="party-identifier-identifier-code">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                4!a2!a2!c[3!c]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[A-Z])?(/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})\s)?[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="party-identifier-location">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[A-Z])?(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34}\s)?([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="party-identifier-name-address">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[A-Z])?(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34}\s)?(([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,140}\s?))"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="rate">
+        <xs:annotation>
+            <xs:documentation>
+                12d
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([0-9,]{1,12})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="amount">
+        <xs:annotation>
+            <xs:documentation>
+                15d
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([0-9]{1,15},|[0-9]{1,13},[0-9]{2})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="currency-amount">
+        <xs:annotation>
+            <xs:documentation>
+            	3!a15d
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{3}([0-9]{1,15},|[0-9]{1,13},[0-9]{2})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="date-currency-amount">
+        <xs:annotation>
+            <xs:documentation>
+                6!n3!a15d
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{6}[A-Z]{3}([0-9]{1,15},|[0-9]{1,13},[0-9]{2})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field40A">
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="24"/>
+        </xs:restriction>
+    </xs:simpleType>
+	
+	<xs:simpleType name="field40C">
+        <xs:annotation>
+            <xs:documentation>
+            	4!a[/35x]
+            </xs:documentation>
+        </xs:annotation>	
+        <xs:restriction base="xs:string">
+        	<xs:pattern value="[A-Z]{4}(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35})?"/>
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field27">
+        <xs:annotation>
+            <xs:documentation>
+                1!n/1!n
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d/\d"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field20">
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="16"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field21">
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="16"/>
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field23">
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="16"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field23B">
+        <xs:annotation>
+            <xs:documentation>
+            	4!c
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:c-character-set">
+            <xs:maxLength value="4"/>
+            <xs:minLength value="4"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field23S">
+        <xs:annotation>
+            <xs:documentation>
+                6!c
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="6"/>
+            <xs:minLength value="6"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field23E">
+        <xs:annotation>
+            <xs:documentation>
+            	4!c[/30x]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z0-9]{4}(/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]){1,30})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field23H">
+        <xs:restriction base="xs:string">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field23X">
+        <xs:annotation>
+            <xs:documentation>
+            	4!c[/65x]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z0-9]{4}(/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]){1,65})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field31C">
+        <xs:annotation>
+            <xs:documentation>
+                6!n
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{6}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field40E">
+        <xs:annotation>
+            <xs:documentation>
+                30x[/35x]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,30}(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field31D">
+        <xs:annotation>
+            <xs:documentation>
+                6!n29x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{6}[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field51A">
+		<xs:annotation>
+			<xs:documentation>
+				[/1!a][/34x]
+				4!a2!a2!c[3!c]
+			</xs:documentation>
+		</xs:annotation>
+        <xs:restriction base="swift:party-identifier-identifier-code">
+        </xs:restriction>
+    </xs:simpleType>
+    
+	<xs:simpleType name="field51D">
+		<xs:annotation>
+			<xs:documentation>
+				[/1!a][/34x]
+				4*35x
+			</xs:documentation>
+		</xs:annotation>
+        <xs:restriction base="swift:party-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field50">
+   		<xs:annotation>
+			<xs:documentation>
+				4*35x
+			</xs:documentation>
+		</xs:annotation>
+        <xs:restriction base="swift:four-lines-35-characters">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field50A">
+     	<xs:annotation>
+			<xs:documentation>
+				[/34x]
+				4!a2!a2!c[3!c]
+			</xs:documentation>
+		</xs:annotation>
+        <xs:restriction base="swift:account-identifier-code">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field50F">
+        <xs:annotation>
+            <xs:documentation>
+                35x
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:mandatory-party-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field50K">
+        <xs:annotation>
+            <xs:documentation>
+               [/34x]
+               4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:account-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field59">
+        <xs:annotation>
+            <xs:documentation>
+               [/34x]
+               4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:account-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field59A">
+        <xs:annotation>
+            <xs:documentation>
+                [/34x]
+                4!a2!a2!c[3!c]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:account-identifier-code">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field32B">
+    	<xs:annotation>
+            <xs:documentation> 3!a15d </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field32D">
+        <xs:restriction base="xs:string">
+           <xs:pattern value="[0-9]{6}[A-Z]{3}([0-9]{1,15},|[0-9]{1,13},[0-9]{2})"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field32K">
+    	<xs:annotation>
+            <xs:documentation> 1!a3!n2!a3!a15d </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+           <xs:pattern value="[A-Z]{1}\d{3}[A-Z]{2}[A-Z]{3}([0-9]{1,15},|[0-9]{1,13},[0-9]{2})"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field33A">
+        <xs:restriction base="swift:date-currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field33B">
+        <xs:annotation>
+            <xs:documentation>3!a15d</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field34A">
+        <xs:restriction base="swift:date-currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field34B">
+        <xs:restriction base="swift:currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field39A">
+        <xs:restriction base="xs:string">
+           <xs:pattern value="\d{1,2}/\d{1,2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+   
+    <xs:simpleType name="field39B">
+        <xs:restriction base="swift:x-character-set">
+           <xs:maxLength value="13"/>
+        </xs:restriction>
+    </xs:simpleType>
+	
+	<xs:simpleType name="field39C">
+        <xs:restriction base="swift:four-lines-35-characters"/>
+    </xs:simpleType>
+	
+	<xs:simpleType name="field41A">
+	<xs:annotation>
+		<xs:documentation>
+		4!a2!a2!c[3!c]
+			14x
+		</xs:documentation>
+	</xs:annotation>
+        <xs:restriction base="xs:string">
+           <xs:pattern value="[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,15}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field41D">
+	<xs:annotation>
+		<xs:documentation>
+			4*35x
+			14x
+		</xs:documentation>
+	</xs:annotation>
+        <xs:restriction base="xs:string">
+           <xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}){1,4}\s[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,14}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field42C">
+        <xs:restriction base="xs:string">
+           <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,105}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field42A">
+        <xs:restriction base="xs:string">
+           <xs:pattern value="(/[A-Z])?([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field42D">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:party-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field42M">
+        <xs:restriction base="swift:four-lines-35-characters"/>
+    </xs:simpleType>
+
+	<xs:simpleType name="field42P">
+        <xs:restriction base="swift:four-lines-35-characters"/>
+    </xs:simpleType>
+	
+	<xs:simpleType name="field43P">
+        <xs:restriction base="swift:x-character-set">
+           <xs:maxLength value="35"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field43T">
+        <xs:restriction base="swift:x-character-set">
+           <xs:maxLength value="35"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field44A">
+        <xs:restriction base="swift:x-character-set">
+           <xs:maxLength value="65"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field44E">
+		<xs:restriction base="swift:x-character-set">
+        	<xs:maxLength value="65"/>
+        	<xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field44F">
+        <xs:restriction base="swift:x-character-set">
+          	<xs:maxLength value="65"/>
+        	<xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field44B">
+        <xs:restriction base="swift:x-character-set">
+          	<xs:maxLength value="65"/>
+        	<xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field44C">
+        <xs:restriction base="xs:string">
+			<xs:pattern value="\d{6}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field44D">
+    	<xs:annotation>
+    		<xs:documentation>
+    			6*65x
+    		</xs:documentation>
+    	</xs:annotation>
+        <xs:restriction base="swift:six-lines-65-characters">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field45A">
+    	<xs:annotation>
+    		<xs:documentation>
+    			100*65x
+    		</xs:documentation>
+    	</xs:annotation>
+        <xs:restriction base="swift:z-character-set">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field45D">
+        <xs:restriction base="xs:string">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="structured-narrative">
+        <xs:annotation>
+            <xs:documentation>
+                Line 1 /8c/[additional information] (Code)(Narrative)
+                Lines 2-6 [//continuation of additional information]
+                    or
+                [/8c/[additional information]]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}|(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29})\n(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33})|(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}\n)(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,32}\n)(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33})|(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}\n)((//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,32}\n){2})(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33})|(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}\n)((//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,32}\n){3})(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33})|(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,8}/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,29}\n)((//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,32}\n){4})(//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33})"/>
+            <!--<xs:pattern value="(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33}/)((//[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,33}\s){1,5})?"/>-->
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field45B">
+		<xs:restriction base="swift:one-hundred-lines-65-characters-z">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field46A">
+        <xs:restriction base="swift:z-character-set">
+		</xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="field46B">
+		<xs:restriction base="swift:one-hundred-lines-65-characters-z">
+		</xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field47A">
+		<xs:restriction base="swift:z-character-set">
+		</xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field49G">
+		<xs:restriction base="swift:z-character-set">
+		</xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field49H">
+		<xs:restriction base="swift:z-character-set">
+		</xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="field47B">
+		<xs:restriction base="swift:one-hundred-lines-65-characters-z">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field71B">
+       <xs:restriction base="swift:six-lines-65-characters">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field48">
+       <xs:restriction base="swift:four-lines-35-characters">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field49">
+        <xs:restriction base="swift:x-character-set">
+<!-- 			<xs:maxLength value="7"/> -->
+<!-- 			<xs:minLength value="7"/> -->
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field52A">
+    	<xs:annotation>
+    		<xs:documentation>
+    			[/1!a][/34x]
+    			4!a2!a2!c[3!c]
+    		</xs:documentation>
+    	</xs:annotation>
+        <xs:restriction base="xs:string">
+			<xs:pattern value="(/[A-Z])?(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?([A-Z]{4}[A-Z]{2}[A-Z0-9]{2})([A-Z0-9]{3})?"/>
+		</xs:restriction>
+    </xs:simpleType>
+       
+    <xs:simpleType name="field52D">
+        <xs:restriction base="swift:party-identifier-name-address">
+		</xs:restriction>
+    </xs:simpleType>
+
+	<!-- ? -->
+    <xs:simpleType name="field53A">
+        <xs:restriction base="swift:x-character-set">
+            <xs:pattern value="(\w)?(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?\w{4}\w{2}\w{2}\w{0,3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field53B">
+         <xs:restriction base="swift:party-identifier-location">
+        </xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="field53D">
+         <xs:restriction base="swift:party-identifier-name-address">
+		</xs:restriction>
+    </xs:simpleType>
+    
+	<!-- ?  -->
+    <xs:simpleType name="field54A">
+        <xs:restriction base="swift:x-character-set">
+            <xs:pattern value="(\w)?(/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,34})?\w{4}\w{2}\w{2}\w{0,3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field54B">
+         <xs:restriction base="swift:party-identifier-location">
+		</xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="field54D">
+         <xs:restriction base="swift:party-identifier-name-address">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field78">
+       <xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*"/>
+		</xs:restriction>
+    </xs:simpleType>
+
+	<xs:simpleType name="field57A">
+        <xs:restriction base="swift:party-identifier-identifier-code">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field57B">
+         <xs:restriction base="swift:party-identifier-location">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field57C">
+        <xs:annotation>
+            <xs:documentation>
+                Max length is declared as 35 to take "/" into account.
+                /34x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="35"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field57D">
+        <xs:restriction base="swift:party-identifier-name-address">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <!--TODO: refactor this pattern -->
+    <xs:simpleType name="field72">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="field72Z">
+        <xs:restriction base="swift:z-character-set">
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="field71D">
+        <xs:restriction base="swift:six-lines-35-z-characters">
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="field79Z">
+        <xs:restriction base="swift:z-character-set">
+        <xs:maxLength value="2000"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field25">
+    	<xs:restriction base="swift:x-character-set">
+    		<xs:maxLength value="35"/>
+    		<xs:minLength value="1"/>
+    	</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field40F">
+    	<xs:restriction base="swift:x-character-set">
+    		<xs:maxLength value="30"/>
+    		<xs:minLength value="1"/>
+    	</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field58A">
+        <xs:restriction base="swift:party-identifier-identifier-code">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field58B">
+        <xs:restriction base="swift:party-identifier-location">
+        </xs:restriction>
+    </xs:simpleType>
+        
+    <xs:simpleType name="field58D">
+        <xs:restriction base="swift:party-identifier-name-address">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field71A">
+       <xs:restriction base="xs:string">
+			<xs:pattern value="[A-Z]{3}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+	<xs:simpleType name="field30">
+        <xs:restriction base="xs:string">
+        	<xs:pattern value="[0-9]{6}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field22A">
+       <xs:restriction base="xs:string">
+       </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field22D">
+       <xs:restriction base="xs:string">
+       </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field31E">
+       <xs:restriction base="xs:string">
+			<xs:pattern value="\d{6}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field77A">
+        <xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field77">
+        <xs:restriction base="xs:string">
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field26E">
+        <xs:restriction base="xs:integer">
+           <xs:minInclusive value="0"/>
+           <xs:maxInclusive value="99"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field26T">
+        <xs:annotation>
+            <xs:documentation>3!c</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:c-character-set">
+            <xs:minLength value="3"/>
+            <xs:maxLength value="3"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field79">
+        <xs:restriction base="swift:x-character-set">
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field73">
+        <xs:restriction base="xs:string">
+			<xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}){1,6}"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field77C">
+        <xs:restriction base="xs:string">
+<!--         	<xs:pattern value="(([/\?\+\.a-zA-Z\d:,\p{Z}\s]|[\p{P}-[\p{Po}]]){1,65}){1,150}"/> -->
+        	<!--<xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,9750})"/>-->
+            <xs:pattern value="([0-9a-zA-Z/\-\?:;\(\)\.,'\+\s]{1,9750})"/>
+		</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="field77J">
+    	<xs:annotation>
+            <xs:documentation>70*50x</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+		</xs:restriction>
+    </xs:simpleType>
+
+    <!--/8c/4!n1!x4!n-->
+    <xs:simpleType name="field13C">
+        <xs:annotation>
+            <xs:documentation> /8c/4!n1!x4!n </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(/[A-Z0-9]{1,8})/(\d{4})([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1})(\d{4})"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field32A">
+        <xs:annotation>
+            <xs:documentation> 6!n3!a15d </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:date-currency-amount">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field56A">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                4!a2!a2!c[3!c]
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:party-identifier-identifier-code">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field56C">
+        <xs:annotation>
+            <xs:documentation>
+                /34x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:x-character-set">
+            <xs:maxLength value="34"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field56D">
+        <xs:annotation>
+            <xs:documentation>
+                [/1!a][/34x]
+                4*35x
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:party-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field36">
+        <xs:annotation>
+            <xs:documentation>12d</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="swift:rate"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="field55A">
+        <xs:restriction base="swift:party-identifier-identifier-code">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field55B">
+        <xs:restriction base="swift:party-identifier-location">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field55D">
+        <xs:restriction base="swift:party-identifier-name-address">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field70">
+        <xs:restriction base="swift:four-lines-35-characters">
+        </xs:restriction>
+        <!--<xs:restriction base="xs:string">-->
+            <!--<xs:pattern value="([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]^(/INV/|/IPI/|/RFB/|/ROC/|/TSU/){1,35}){1,4}|/INV/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}\s?){1,4}|/IPI/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,20})|/RFB/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,16})|/ROC/([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,30})([0-9a-zA-Z/\-\?:\(\)\.,'\+\s]{1,35}\s?){1,4}|/TSU/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]+/[0-9a-zA-Z/\-\?:\(\)\.,'\+\s]+/[0-9,]{1,15}"/>-->
+        <!--</xs:restriction>-->
+    </xs:simpleType>
+    
+    <xs:simpleType name="field71F">
+        <xs:restriction base="swift:currency-amount"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="field71G">
+        <xs:restriction base="swift:currency-amount"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="field77B">
+        <xs:restriction base="swift:three-lines-35-characters"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="field77T">
+        <xs:restriction base="swift:z-character-set">
+            <xs:maxLength value="9000"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field49M">
+        <xs:annotation>
+            <xs:documentation>
+                100*65z
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="field49N">
+        <xs:annotation>
+            <xs:documentation>
+                100*65z
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="field40A" type="swift:field40A"/>
+    <xs:element name="field40C" type="swift:field40C"/>
+    <xs:element name="field27" type="swift:field27"/>
+    <xs:element name="field20" type="swift:field20"/>
+    <xs:element name="field21" type="swift:field21"/>
+    <xs:element name="field23" type="swift:field23"/>
+    <xs:element name="field31C" type="swift:field31C"/>
+    <xs:element name="field36" type="swift:field36"/>
+    <xs:element name="field40E" type="swift:field40E"/>
+    <xs:element name="field31D" type="swift:field31D"/>    
+    <xs:element name="field51A" type="swift:field51A"/>
+    <xs:element name="field51D" type="swift:field51D"/>
+    <xs:element name="field52A" type="swift:field52A"/>
+    <xs:element name="field52D" type="swift:field52D"/>
+    <xs:element name="field50" type="swift:field50"/>
+    <xs:element name="field59" type="swift:field59"/>
+    <xs:element name="field32A" type="swift:field32A"/>
+    <xs:element name="field32B" type="swift:field32B"/>
+    <xs:element name="field32K" type="swift:field32K"/>
+    <xs:element name="field33A" type="swift:field33A"/>
+    <xs:element name="field33B" type="swift:field33B"/>
+    <xs:element name="field34A" type="swift:field34A"/>
+    <xs:element name="field34B" type="swift:field34B"/>
+    <xs:element name="field39A" type="swift:field39A"/>
+    <xs:element name="field39B" type="swift:field39B"/>
+    <xs:element name="field39C" type="swift:field39C"/>
+    <xs:element name="field41A" type="swift:field41A"/>
+    <xs:element name="field41D" type="swift:field41D"/>
+    <xs:element name="field42C" type="swift:field42C"/>
+    <xs:element name="field42A" type="swift:field42A"/>
+    <xs:element name="field42D" type="swift:field42D"/>
+    <xs:element name="field42M" type="swift:field42M"/>
+    <xs:element name="field42P" type="swift:field42P"/>
+    <xs:element name="field43P" type="swift:field43P"/>
+    <xs:element name="field43T" type="swift:field43T"/>
+    <xs:element name="field44A" type="swift:field44A"/>
+    <xs:element name="field44E" type="swift:field44E"/>
+    <xs:element name="field44F" type="swift:field44F"/>
+    <xs:element name="field44B" type="swift:field44B"/>
+    <xs:element name="field44C" type="swift:field44C"/>
+    <xs:element name="field44D" type="swift:field44D"/>
+    <xs:element name="field45A" type="swift:field45A"/>
+    <xs:element name="field45B" type="swift:field45B"/>
+    <xs:element name="field46A" type="swift:field46A"/>
+    <xs:element name="field46B" type="swift:field46B"/>
+    <xs:element name="field47A" type="swift:field47A"/>
+    <xs:element name="field49G" type="swift:field49G"/>
+    <xs:element name="field49H" type="swift:field49H"/>
+    <xs:element name="field47B" type="swift:field47B"/>
+    <xs:element name="field48" type="swift:field48"/>
+    <xs:element name="field49" type="swift:field49"/>
+    <xs:element name="field53A" type="swift:field53A"/>
+    <xs:element name="field53B" type="swift:field53B"/>
+    <xs:element name="field53D" type="swift:field53D"/>
+    <xs:element name="field54A" type="swift:field54A"/>
+    <xs:element name="field54B" type="swift:field54B"/>
+    <xs:element name="field54D" type="swift:field54D"/>
+    <xs:element name="field78" type="swift:field78"/>
+    <xs:element name="field57A" type="swift:field57A"/>
+    <xs:element name="field57B" type="swift:field57B"/>
+    <xs:element name="field57D" type="swift:field57D"/>
+    <xs:element name="field72" type="swift:field72"/>
+    <xs:element name="field72Z" type="swift:field72Z"/>
+    <xs:element name="field79Z" type="swift:field79Z"/>
+    <xs:element name="field25" type="swift:field25"/>
+    <xs:element name="field40F" type="swift:field40F"/>
+    <xs:element name="field58A" type="swift:field58A"/>
+    <xs:element name="field58D" type="swift:field58D"/>
+    <xs:element name="field71A" type="swift:field71A"/>
+    <xs:element name="field71B" type="swift:field71B"/>
+    <xs:element name="field71D" type="swift:field71D"/>
+    <xs:element name="field30" type="swift:field30"/>
+    <xs:element name="field31E" type="swift:field31E"/>
+    <xs:element name="field77A" type="swift:field77A"/>
+    <xs:element name="field26E" type="swift:field26E"/>
+    <xs:element name="field26T" type="swift:field26T"/>
+    <xs:element name="field79" type="swift:field79"/>
+    <xs:element name="field73" type="swift:field73"/>
+    <xs:element name="field77J" type="swift:field77J"/>
+    <xs:element name="field77C" type="swift:field77C"/>
+    <xs:element name="field56A" type="swift:field56A"/>
+    <xs:element name="field56D" type="swift:field56D"/>
+    <xs:element name="field32D" type="swift:field32D"/>
+    <xs:element name="field13C" type="swift:field13C"/>
+    <xs:element name="field23B" type="swift:field23B"/>
+    <xs:element name="field23E" type="swift:field23E"/>
+    <xs:element name="field23S" type="swift:field23S"/>
+    <xs:element name="field50A" type="swift:field50A"/>
+    <xs:element name="field50F" type="swift:field50F"/>
+    <xs:element name="field50K" type="swift:field50K"/>
+    <xs:element name="field55A" type="swift:field55A"/>
+    <xs:element name="field55B" type="swift:field55B"/>
+    <xs:element name="field55D" type="swift:field55D"/>
+    <xs:element name="field56C" type="swift:field56C"/>
+    <xs:element name="field57C" type="swift:field57C"/>
+    <xs:element name="field58B" type="swift:field58B"/>
+    <xs:element name="field59A" type="swift:field59A"/>
+    <xs:element name="field70" type="swift:field70"/>
+    <xs:element name="field77B" type="swift:field77B"/>
+    <xs:element name="field77T" type="swift:field77T"/>
+    <xs:element name="field71G" type="swift:field71G"/>
+    <xs:element name="field71F" type="swift:field71F"/>
+    <xs:element name="field49M" type="swift:field49M"/>
+    <xs:element name="field49N" type="swift:field49N"/>
+    <xs:element name="structured-narrative" type="swift:structured-narrative"/>
+</xs:schema>

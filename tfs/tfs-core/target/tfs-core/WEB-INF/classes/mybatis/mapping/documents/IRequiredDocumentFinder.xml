@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--  Description:   Added findAllOriginalDocuments and findAllDocuments for MT707 -->
+<!--  Modified by:   Cedrick C. Nungay -->
+<!--  Date Modified: 08/24/2018 -->
+
+<mapper namespace="com.ucpb.tfs.application.query.documents.IRequiredDocumentFinder">
+    
+    <resultMap id="findAllRequiredDocumentResultMap" type="hashmap">
+        <result property="DESCRIPTION" column="description" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllRequiredDocument" resultMap="findAllRequiredDocumentResultMap">
+        SELECT  
+        description 
+        FROM REQUIREDDOCUMENT where tradeServiceId = #{tradeServiceId} 
+        ORDER BY SEQUENCENUMBER ASC
+    </select>
+    
+    <select id="findAllRequiredDocuments" resultType="hashMap">
+        select
+         id,
+         documentCode,
+         cast(description as varchar(6500)) as description,
+         documentType
+        from RefRequiredDocuments where documentType = #{documentType}
+        order by id
+    </select>
+
+    <select id="findAllSavedRequiredDocuments" resultType="hashMap">
+        select documentCode,
+        cast(description as varchar(6500)) as description
+        from RequiredDocument where tradeServiceId = #{tradeServiceId} and requiredDocumentType = 'DEFAULT'
+        order by sequenceNumber asc
+    </select>
+
+    <select id="findAllDefaultDocuments" resultType="hashMap">
+        select
+          rd.documentCode,
+          cast(rd.description as varchar(6500)) as description
+        from
+          RequiredDocument rd
+        where
+          tradeServiceId = #{tradeServiceId}
+        and
+          requiredDocumentType = 'DEFAULT'
+
+        union
+
+        select
+          rdr.documentCode,
+          cast(rdr.description as varchar(6500)) as description
+        from
+          RefRequiredDocuments rdr
+        where
+          rdr.documentCode not in(select
+                                    documentCode
+                                  from
+                                    RequiredDocument
+                                  where
+                                    tradeServiceId = #{tradeServiceId}
+                                  and
+                                    requiredDocumentType = 'DEFAULT')
+        and
+          rdr.documentType = #{documentType}
+    </select>
+
+    <select id="findAllNewDocuments" resultType="hashMap">
+        select
+          id,
+          cast(description as varchar(6500)) as description
+        from
+          RequiredDocument
+        where
+          tradeServiceId = #{tradeServiceId}
+        and
+          requiredDocumentType = 'NEW'
+          order by sequenceNumber asc
+    </select>
+
+    <select id="findAllOriginalDocuments" resultType="hashMap">
+        select
+	      id,
+	      documentCode,
+	      cast(description as varchar(6500)) as description
+	    from LcRequiredDocument where documentNumber = #{documentNumber}
+	    order by documentCode
+    </select>
+
+    <select id="findAllDocuments" resultType="hashMap">
+        SELECT DOCUMENTCODE, DESCRIPTION, AMENDCODE, CASE WHEN AMENDCODE = 'DELETE' AND ISFORMODIFY = 'Y' THEN 'Y' ELSE ISCHECKED END AS ISCHECKED, ISLCSAVED, ISNEW, ISFORMODIFY
+        FROM (
+            SELECT A.DOCUMENTCODE, CAST(COALESCE(B.DESCRIPTION, A.DESCRIPTION) AS VARCHAR(6500)) DESCRIPTION, CASE WHEN b.id is null then 'DELETE' else B.AMENDCODE end as AMENDCODE, 
+                CASE WHEN b.id is null or b.amendcode = 'DELETE' then 'N' else 'Y' end as isChecked,
+                'Y' isLcSaved, 'N' isNew, CASE WHEN (SELECT COUNT(*) FROM REQUIREDDOCUMENT WHERE DOCUMENTCODE = A.DOCUMENTCODE AND TRADESERVICEID = #{tradeServiceId}) > 1 THEN 'Y' ELSE 'N' END AS isForModify
+            FROM (SELECT COALESCE(DOCUMENTCODE, 'RDN-' || ROWNUM) DOCUMENTCODE, DESCRIPTION, REQUIREDDOCUMENTTYPE, DOCUMENTNUMBER FROM LCREQUIREDDOCUMENT
+                WHERE DOCUMENTNUMBER = #{documentNumber} ORDER BY DOCUMENTCODE, CAST(DESCRIPTION AS VARCHAR(1000))) A 
+            LEFT JOIN REQUIREDDOCUMENT B ON (A.DOCUMENTCODE = B.DOCUMENTCODE OR UCASE(A.DESCRIPTION) = UCASE(B.DESCRIPTION)) AND B.TRADESERVICEID = #{tradeServiceId}
+            UNION 
+            SELECT C.documentCode,
+                cast(coalesce(D.description, C.description) as varchar(6500)) as description,
+                D.amendCode,
+                case when D.id is null then 'N' else 'Y' end as isChecked,
+                'N', 'N', CASE WHEN (SELECT COUNT(*) FROM REQUIREDDOCUMENT WHERE DOCUMENTCODE = C.DOCUMENTCODE AND TRADESERVICEID = #{tradeServiceId}) > 1 THEN 'Y' ELSE 'N' END
+            FROM REFREQUIREDDOCUMENTS C
+            LEFT JOIN REQUIREDDOCUMENT D ON C.DOCUMENTCODE = D.DOCUMENTCODE AND D.TRADESERVICEID = #{tradeServiceId}
+            WHERE C.DOCUMENTTYPE = #{documentType} AND C.DOCUMENTCODE NOT IN (SELECT DOCUMENTCODE FROM LCREQUIREDDOCUMENT WHERE DOCUMENTNUMBER = #{documentNumber} AND DOCUMENTCODE IS NOT NULL)
+            UNION
+            select
+                DOCUMENTCODE, 
+                cast(description as varchar(6500)) as description,
+                amendCode,
+                'Y',
+                'N', 'Y', 'N'
+            from REQUIREDDOCUMENT where TRADESERVICEID = #{tradeServiceId} and DOCUMENTCODE IS NULL
+            and UCASE(description) not in (SELECT UCASE(DESCRIPTION) FROM LCREQUIREDDOCUMENT WHERE DOCUMENTNUMBER = #{documentNumber}))
+        order by DOCUMENTCODE, AMENDCODE
+    </select>
+
+    <select id="findDefaultDocuments" resultType="hashMap">
+        SELECT * FROM (
+            SELECT COALESCE(DOCUMENTCODE, 'RDN-' || ROWNUM) DOCUMENTCODE, CAST(DESCRIPTION AS VARCHAR(6500)) DESCRIPTION
+            FROM LCREQUIREDDOCUMENT
+            WHERE DOCUMENTNUMBER = #{documentNumber}
+            ORDER BY DOCUMENTCODE, CAST(DESCRIPTION AS VARCHAR(750)))
+        UNION ALL
+        SELECT DOCUMENTCODE, CAST(DESCRIPTION AS VARCHAR(6500)) DESCRIPTION
+        FROM REFREQUIREDDOCUMENTS
+        WHERE DOCUMENTTYPE = #{documentType}
+        AND DOCUMENTCODE NOT IN (SELECT COALESCE(DOCUMENTCODE, 'RDN-' || ROWNUM) DOCUMENTCODE FROM LCREQUIREDDOCUMENT
+            WHERE DOCUMENTNUMBER = #{documentNumber} ORDER BY DOCUMENTCODE, CAST(DESCRIPTION AS VARCHAR(750)))
+        ORDER BY DOCUMENTCODE
+    </select>
+    
+</mapper>

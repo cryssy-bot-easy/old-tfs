@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:mt="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields" schemaLocation="swift-fields.xsd"/>
+
+    <xs:complexType name="SwiftAddress">
+        <xs:sequence>
+            <xs:element name="bank_identifier_code" type="xs:string"/>
+            <xs:element name="branch_code" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="BasicHeader">
+        <xs:sequence>
+            
+            <xs:element name="application_identifier">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[AFL]"/>
+                    </xs:restriction>
+                </xs:simpleType>    
+            </xs:element>
+            
+            <xs:element name="service_identifier">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{2}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+                    
+            <xs:element name="lt_identifier">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[A-Z0-9]{12}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="session_number">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{4}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            
+            <xs:element name="sequence_number">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{6}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+                    
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ApplicationHeader">
+        <xs:choice>
+            <xs:group ref="mt:IncomingApplicationHeaderFields"/>
+            <xs:group ref="mt:OutgoingApplicationHeaderFields"/>
+        </xs:choice>
+        <!--<xs:sequence>-->
+            <!--<xs:element name="io_identifier">-->
+                <!--<xs:simpleType>-->
+                    <!--<xs:restriction base="xs:string">-->
+                        <!--<xs:pattern value="I"/>-->
+                    <!--</xs:restriction>-->
+                <!--</xs:simpleType>-->
+            <!--</xs:element>-->
+            <!--<xs:element name="message_type">-->
+                <!--<xs:simpleType>-->
+                    <!--<xs:restriction base="xs:string">-->
+                        <!--<xs:pattern value="\d{3}"/>-->
+                    <!--</xs:restriction>-->
+                <!--</xs:simpleType>-->
+            <!--</xs:element>-->
+            <!--<xs:element name="receiver_address" type="mt:SwiftAddress"/>-->
+            <!--<xs:element name="message_priority">-->
+                <!--<xs:simpleType>-->
+                    <!--<xs:restriction base="xs:string">-->
+                        <!--<xs:pattern value="[NSU]"/>-->
+                    <!--</xs:restriction>-->
+                <!--</xs:simpleType>-->
+            <!--</xs:element>-->
+            <!--<xs:element name="delivery_monitoring" minOccurs="0" type="xs:string"/>-->
+            <!--<xs:element name="obsolescence_period" minOccurs="0" type="xs:string"/>-->
+            <!--&lt;!&ndash; temporarily commenting out validation rules for delivery_monitoring and obsolescence_period.-->
+                <!--This is because it clashes with the current model and writer for swift messages.-->
+                <!--Will reenable this once the the proper fixes have been made &ndash;&gt;-->
+            <!--&lt;!&ndash;<xs:element name="delivery_monitoring" minOccurs="0">&ndash;&gt;-->
+                <!--&lt;!&ndash;<xs:simpleType>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<xs:restriction base="xs:string">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<xs:pattern value="[123]"/>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</xs:restriction>&ndash;&gt;-->
+                <!--&lt;!&ndash;</xs:simpleType>&ndash;&gt;-->
+            <!--&lt;!&ndash;</xs:element>&ndash;&gt;-->
+            <!--&lt;!&ndash;<xs:element name="obsolescence_period" minOccurs="0">&ndash;&gt;-->
+                <!--&lt;!&ndash;<xs:simpleType>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<xs:restriction base="xs:string">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<xs:pattern value="003|020"/>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</xs:restriction>&ndash;&gt;-->
+                <!--&lt;!&ndash;</xs:simpleType>&ndash;&gt;-->
+            <!--&lt;!&ndash;</xs:element>&ndash;&gt;-->
+        <!--</xs:sequence>-->
+    </xs:complexType>
+
+    <xs:group name="IncomingApplicationHeaderFields">
+        <xs:sequence>
+            <xs:element name="io_identifier">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="I"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="message_type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{3}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="receiver_address" type="mt:SwiftAddress"/>
+            <xs:element name="message_priority">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[NSU]"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="delivery_monitoring" minOccurs="0" type="xs:string"/>
+            <xs:element name="obsolescence_period" minOccurs="0" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:group name="OutgoingApplicationHeaderFields">
+        <xs:sequence>
+            <xs:element name="input_date">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="input_time">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="output_date" type="xs:string"/>
+            <xs:element name="output_time">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="session_number" minOccurs="0" type="xs:string"/>
+            <xs:element name="message_input_reference" minOccurs="0" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="UserHeader">
+        <xs:sequence>
+            <xs:element name="user_tag" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="tag_name" type="xs:string"/>
+                        <xs:element name="tag_value" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Trailer">
+        <xs:sequence>
+            <xs:element name="trailer_field" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="field_name" type="xs:string"/>
+                        <xs:element name="field_value" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SwiftMessage">
+        <xs:sequence>
+            <xs:element name="basic_header" type="mt:BasicHeader"/>
+            <xs:element name="application_header" type="mt:ApplicationHeader"/>
+            <xs:element name="user_header" type="mt:UserHeader" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="xs:string" use="optional"/>
+    </xs:complexType>
+	
+	<xs:complexType name="FreeFormatSwiftMessage">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20" minOccurs="1"/>
+                	<xs:element name="field21" type="swift:field21" minOccurs="0"/>
+                	<xs:element name="field79" type="swift:field79" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+	
+    <xs:element name="SwiftBasicHeader" type="mt:BasicHeader"/>
+    <xs:element name="SwiftApplicationHeader" type="mt:ApplicationHeader"/>
+    <xs:element name="SwiftMessage" type="mt:SwiftMessage"/>
+ 
+</xs:schema>

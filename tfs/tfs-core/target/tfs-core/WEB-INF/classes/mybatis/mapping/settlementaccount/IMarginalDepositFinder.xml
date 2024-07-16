@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.settlementaccount.IMarginalDepositFinder">
+
+    <select id="mdCollectionInquiry" resultType="hashMap">
+        select distinct tp.documentNumber, tp.currency, tp.amount,
+        ts.tradeServiceId, ts.serviceType, ts.documentClass, ts.documentType, ts.documentSubType1, ts.documentSubType2,
+        ts.cifName, tp.ccbdBranchUnitCode
+        ,sum(mda.amount) as totalmdcollected,
+        md.modifieddate
+
+        from TradeProduct tp
+
+        left join TradeService ts
+          on tp.documentNumber = ts.documentNumber
+        left join letterofcredit lc
+          on lc.documentnumber = tp.documentnumber
+        left join documentagainstacceptance da
+          on da.documentnumber = tp.documentnumber
+        left join documentagainstpayment dp
+          on dp.documentnumber = tp.documentnumber
+        left join directremittance dr
+          on dr.documentnumber = tp.documentnumber
+        left join openaccount oa
+          on oa.documentnumber = tp.documentnumber
+        left join marginaldeposit md
+          on md.settlementaccountnumber = tp.documentnumber
+        left join marginaldepositactivity mda
+          on mda.marginaldepositid = md.id
+          
+        where ts.serviceType in ('OPENING','NEGOTIATION','NEGOTIATION_ACKNOWLEDGEMENT')
+<!--         where ts.serviceType = 'OPENING' -->
+
+        <if test="documentNumber != ''">
+            and tp.documentNumber = #{documentNumber}
+        </if>
+        <if test="cifName != ''">
+            and ts.cifName LIKE #{cifName}
+        </if>
+        <choose>
+	        <when test="unitCode != ''">
+	            and tp.ccbdBranchUnitCode = #{unitCode}
+	        </when>
+	        <when test="unitcode != '' and unitcode != '909'">
+	            and tp.ccbdBranchUnitCode = #{unitcode}
+	        </when>
+        </choose>
+
+        group by
+
+        tp.documentNumber, tp.currency, tp.amount,
+        ts.tradeServiceId, ts.serviceType, ts.documentClass, ts.documentType, ts.documentSubType1, ts.documentSubType2,
+        ts.cifName, tp.ccbdBranchUnitCode
+        ,md.modifieddate
+		ORDER BY md.modifiedDate DESC, tp.documentNumber ASC
+    </select>
+
+    <!-- TODO -->
+    <select id="mdApplicationInquiry" resultType="hashMap">
+        select a.*, b.modifieddate from 
+(select
+          distinct
+          debitcredit.settlementaccountnumber,
+          debitcredit.marginaldepositpnsupport,
+          debitcredit.camt,
+          debitcredit.cccy,
+          debitcredit.ctype,
+          debitcredit.damt,
+          debitcredit.dccy,
+          debitcredit.dtype,
+          lc.expirydate,
+          ts.cifName,
+          ts.ccbdBranchUnitCode
+        from (
+          select
+            credit.*
+          from (
+            select
+              md1.settlementaccountnumber,
+              md1.marginaldepositpnsupport,
+              fullcredit.*
+            from (
+              select
+                allcredits1.*,
+                alldebits1.*
+              from (
+                select
+                  mdc1.id as mdc1id,
+                  mdc1.settlementaccountnumber as mdc1docnum,
+                  sum(ac1.amount) as camt,
+                  ac1.currency as cccy,
+                  ac1.activitytype as ctype
+                from
+                  marginaldepositactivity ac1
+                inner join
+                  marginaldeposit mdc1
+                on
+                  mdc1.id = ac1.marginaldepositid
+                where
+                  ac1.activitytype = 'CREDIT'
+                group by
+                  mdc1.id,
+                  mdc1.settlementaccountnumber,
+                  ac1.currency,
+                  ac1.activitytype
+              ) allcredits1
+
+              left join (
+                select
+                  mdd1.id as mdd1id,
+                  mdd1.settlementaccountnumber as mdd1docnum,
+                  sum(ad1.amount) as damt,
+                  ad1.currency as dccy,
+                  ad1.activitytype as dtype
+                from
+                  marginaldepositactivity ad1
+                inner join
+                  marginaldeposit mdd1
+                on
+                  mdd1.id = ad1.marginaldepositid
+                where
+                  ad1.activitytype = 'DEBIT'
+                group by
+                  mdd1.id,
+                  mdd1.settlementaccountnumber,
+                  ad1.currency,
+                  ad1.activitytype
+              ) alldebits1
+              on
+                allcredits1.mdc1id = alldebits1.mdd1id
+              and
+                allcredits1.cccy = alldebits1.dccy
+              and
+                allcredits1.mdc1docnum = alldebits1.mdd1docnum
+            ) fullcredit
+
+            inner join
+              marginaldeposit md1
+            on
+              md1.id = fullcredit.mdc1id
+          ) credit
+
+          union
+
+          select
+            debit.*
+          from (
+              select
+                md2.settlementaccountnumber,
+                md2.marginaldepositpnsupport,
+                fulldebit.*
+              from (
+                select
+                  allcredits2.*,
+                  alldebits2.*
+                from (
+                  select
+                    mdc2.id as mdc2id,
+                    mdc2.settlementaccountnumber as mdc2docnum,
+                    sum(ac2.amount) as camt,
+                    ac2.currency as cccy,
+                    ac2.activitytype as ctype
+                  from
+                    marginaldepositactivity ac2
+                  inner join
+                    marginaldeposit mdc2
+                  on
+                    mdc2.id = ac2.marginaldepositid
+                  where
+                    ac2.activitytype = 'CREDIT'
+                  group by
+                    mdc2.id,
+                    mdc2.settlementaccountnumber,
+                    ac2.currency,
+                    ac2.activitytype
+                ) allcredits2
+                right join (
+                  select
+        mdd2.id as mdd2id,
+        mdd2.settlementaccountnumber as mdd2docnum,
+        sum(ad2.amount) as damt,
+        ad2.currency as dccy,
+        ad2.activitytype as dtype
+        from
+
+        marginaldepositactivity ad2
+        inner join
+
+        marginaldeposit mdd2
+        on
+        mdd2.id = ad2.marginaldepositid
+        where
+        ad2.activitytype = 'DEBIT'
+        group by
+        mdd2.id,
+        mdd2.settlementaccountnumber,
+        ad2.currency,
+        ad2.activitytype
+        ) alldebits2
+        on
+        allcredits2.mdc2id = alldebits2.mdd2id
+        and
+        allcredits2.cccy = alldebits2.dccy
+        and
+        allcredits2.mdc2docnum = alldebits2.mdd2docnum
+        ) fulldebit
+        inner join
+
+        marginaldeposit md2
+        on
+
+        md2.id = fulldebit.mdd2id
+        ) debit
+        ) debitcredit
+
+        left join
+        letterofcredit lc
+        on
+        lc.documentnumber = debitcredit.settlementaccountnumber
+
+        left join
+        documentagainstacceptance da
+        on
+        da.documentnumber = debitcredit.settlementaccountnumber
+
+        left join
+        documentagainstpayment dp
+        on
+        dp.documentnumber = debitcredit.settlementaccountnumber
+
+        left join
+        directremittance dr
+        on
+        dr.documentnumber = debitcredit.settlementaccountnumber
+
+        left join
+        openaccount oa
+        on
+        oa.documentnumber = debitcredit.settlementaccountnumber
+
+        left join
+        tradeservice ts
+        on
+        ts.documentnumber = debitcredit.settlementaccountnumber
+        and
+        ts.servicetype = 'COLLECTION'
+        and
+        ts.documentclass = 'MD'
+
+        where
+        debitcredit.settlementaccountnumber is not null
+      	
+      <if test="documentNumber != ''">
+        and
+          debitcredit.settlementaccountnumber = #{documentNumber}
+      </if>
+
+      <if test="cifName != ''">
+        and
+          ts.cifName like #{cifName}
+      </if>
+
+      <if test="expiryDate != ''">
+        and
+          date(lc.expirydate) = #{expiryDate}
+      </if>
+
+       <choose>
+	       <when test="unitCode != ''">
+	            and ts.ccbdBranchUnitCode = #{unitCode}
+	       </when>
+	       <when test="unitcode != '' and unitcode != '909'">
+	            and ts.ccbdBranchUnitCode = #{unitcode}
+	       </when>
+       </choose>
+          ) a
+
+          inner join
+
+          marginaldeposit b
+          on 
+          b.settlementaccountnumber = a.settlementaccountnumber
+    </select>
+
+
+    <!-- ========================================================================================================== -->
+
+
+    <select id="findMarginalDeposit" resultType="hashMap">
+      select
+        settlementAccountNumber, settlementAccountType
+      from
+        MarginalDeposit
+      where
+        settlementAccountNumber = #{settlementAccountNumber}
+    </select>
+
+    <!--<select id="getAllActivity" resultType="hashMap">-->
+<!--         select-->
+<!--             a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+<!--         from-->
+<!--             Activity a-->
+<!--         join-->
+<!--             SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+<!--         where-->
+<!--             b.settlementAccountType='MD' and-->
+<!--             b.settlementAccountNumber = #{settlementAccountNumber}-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--MarginalDepositActivity a-->
+        <!--join-->
+            <!--MarginalDeposit b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+<!--             b.settlementAccountType='MD' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getAllCredits" resultType="hashMap">-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getAllDebits" resultType="hashMap">-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getCreditsTotalAmountByCurrency" resultType="hashMap">-->
+        <!--select-->
+            <!--b.settlementAccountNumber, a.currency, sum(a.amount) as total-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber} and-->
+            <!--a.currency = #{currency}-->
+        <!--group by b.settlementAccountNumber, a.currency-->
+    <!--</select>-->
+
+    <!--<select id="getDebitsTotalAmountByCurrency" resultType="hashMap">-->
+        <!--select-->
+            <!--b.settlementAccountNumber, a.currency, sum(a.amount) as total-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber} and-->
+            <!--a.currency = #{currency}-->
+        <!--group by b.settlementAccountNumber, a.currency-->
+    <!--</select>-->
+
+    <!--<select id="getCreditsAllDistinctCurrencies" resultType="hashMap">-->
+        <!--select-->
+            <!--distinct a.currency-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getDebitsAllDistinctCurrencies" resultType="hashMap">-->
+        <!--select-->
+            <!--distinct a.currency-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='MD' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <select id="getTotalMd" resultType="hashMap">
+  SELECT
+    A.TOTALCREDIT, B.TOTALDEBIT,
+    A.CURRENCY
+  FROM
+      (SELECT
+         sum(mda.amount) AS TOTALCREDIT,
+         mda.currency
+       FROM
+           marginaldepositactivity mda
+           INNER JOIN
+           marginaldeposit md
+             ON md.id = mda.marginaldepositid
+
+       WHERE md.settlementaccountnumber = #{documentNumber}
+             AND mda.currency = #{currency}
+             AND mda.activitytype = 'CREDIT'
+       GROUP BY mda.currency) A
+
+        left join
+
+      (SELECT
+         sum(mda.amount) AS TOTALDEBIT,
+         mda.currency
+       FROM
+           marginaldepositactivity mda
+           INNER JOIN
+           marginaldeposit md
+             ON md.id = mda.marginaldepositid
+
+       WHERE md.settlementaccountnumber =  #{documentNumber}
+             AND mda.currency = #{currency}
+             AND mda.activitytype = 'DEBIT'
+       GROUP BY mda.currency) B
+
+      on a.currency = b.currency
+    </select>
+</mapper>

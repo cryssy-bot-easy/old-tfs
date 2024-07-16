@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.batch.report.dw.dao.CiclsDao">
+
+    <resultMap id="ciclsRecordsHashMap" type="com.ucpb.tfs.batch.report.dw.CiclsHandoffRecord">
+
+        <result property="tinNumber" column="TIN_NUMBER"/>
+        <result property="clientName" column="CLIENT_NAME"/>
+        <result property="tranType" column="TRAN_TYPE"/>
+        <result property="processDate" column="PROCESS_DATE"/>
+        <result property="ciclsProductCode" column="CICLS_PRODUCT_CODE"/>
+        <result property="approvedAmount" column="APPROVED_AMOUNT"/>
+        <result property="outstandingCurrent" column="OUTSTANDING_CURRENT"/>
+        <result property="outstandingPastDue" column="OUTSTANDING_PAST_DUE"/>
+
+    </resultMap>
+
+    <update id="processCiclsRecords" >
+      CALL TFSDB2S.PROCESS_CICLS(CAST(#{runDate} as TIMESTAMP))
+    </update>
+
+    <select id="getCiclsRecords" resultMap="ciclsRecordsHashMap">
+      CALL TFSDB2S.GET_CICLS(CAST(#{runDate} as TIMESTAMP))
+    </select>
+    
+</mapper>

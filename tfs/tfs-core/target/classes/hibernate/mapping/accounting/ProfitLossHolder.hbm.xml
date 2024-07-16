@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.ProfitLossHolder" table="PLHOLDER">
+
+        <id column="id" name="id" type="long">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        <property name="paymentDetailId" column="paymentDetailId" type="string" length="5"/>
+        <property name="paymentAmount" column="paymentAmount" type="java.math.BigDecimal"/>
+        <property name="paymentAmountOrig" column="paymentAmountOrig" type="java.math.BigDecimal"/>
+        <property name="profitLossTotal" column="profitLossTotal" type="java.math.BigDecimal"/>
+        <property name="profitUrrToPassOn" column="profitUrrToPassOn" type="java.math.BigDecimal"/>
+        <property name="profitPassOnToSpecial" column="profitPassOnToSpecial" type="java.math.BigDecimal"/>
+        <property name="profitLossOneCent" column="profitLossOneCent" type="java.math.BigDecimal"/>
+        <property name="profitLossOtherCent" column="profitLossOtherCent" type="java.math.BigDecimal"/>
+
+        <!--<property name="urr" column="urr" type="java.math.BigDecimal"/>-->
+        <!--<property name="passOnRateThirdToUsd" column="passOnRateThirdToUsd" type="java.math.BigDecimal"/>-->
+        <!--<property name="passOnRateUsdToPhp" column="passOnRateUsdToPhp" type="java.math.BigDecimal"/>-->
+        <!--<property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal"/>-->
+
+    </class>
+
+</hibernate-mapping>

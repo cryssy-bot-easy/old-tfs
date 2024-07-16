@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: SCR IBD-16-0219-01
+	SCR/ER Description: Generate CIC File
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 02/24/2016
+	Program [Revision] Details: Add the select script of extracting the rates for CIC file 
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: sibs-mapper
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  ER# 20140909-038
+	SCR/ER Description: CIF Normalization Not Working in TFS
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/05/2016
+	Program [Revision] Details: The CIF Normalization was redesigned, since not all tables are normalized and to make it run for adhoc.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: sibs-mapper
+-->
+
+<mapper namespace="com.ucpb.tfs.batch.report.dw.dao.SilverlakeDao">
+
+    <resultMap id="appraisalResultMap" type="com.ucpb.tfs.batch.report.dw.Appraisal">
+        <result property="appraisalDate" column="APPRAISALDATE" javaType="integer"/>
+        <result property="appraisedValue" column="APPRAISEDVALUE"/>
+        <result property="securityCode" column="COLLATERALTYPE"/>
+    </resultMap>
+
+	<resultMap id="cibsMasterTableResultMap" type="com.ucpb.tfs.batch.cif.CibsMasterTable">
+		<result property="CFNCIF" column="CFNCIF"/>
+		<result property="CFNBRN" column="CFNBRN"/>
+		<result property="CFNSNM" column="CFNSNM"/>
+		<result property="CFNUID" column="CFNUID"/>
+		<result property="CFNWID" column="CFNWID"/>
+		<result property="CFNTIM" column="CFNTIM"/>
+		<result property="CFNDT7" column="CFNDT7"/>
+		<result property="CFNDT6" column="CFNDT6"/>
+		<result property="CFNCFO" column="CFNCFO"/>
+		<result property="CFNUSR" column="CFNUSR"/>
+		<result property="CFNWDA" column="CFNWDA"/>
+		<result property="CFNDA7" column="CFNDA7"/>
+		<result property="CFNDA6" column="CFNDA6"/>
+		<result property="CFNTME" column="CFNTME"/>
+		<result property="CFNAPR" column="CFNAPR"/>
+	</resultMap>
+
+	<resultMap id="facilityReferenceMap" type="com.ucpb.tfs.batch.facility.FacilityReference">
+        <result property="AFAPNO" column="AFAPNO"/>
+        <result property="AFFCDE" column="AFFCDE"/>
+        <result property="AFSEQ" column="AFSEQ"/>
+        <result property="AFBR_NO" column="AFBR#"/>
+        <result property="AFLTYP" column="AFLTYP"/>
+        <result property="AFAPLY" column="AFAPLY"/>
+        <result property="AFFAMT" column="AFFAMT"/>
+        <result property="AFEND6" column="AFEND6"/>
+        <result property="AFEND7" column="AFEND7"/>
+        <result property="AFAPD6" column="AFAPD6"/>
+        <result property="AFAPD7" column="AFAPD7"/>
+        <result property="AFINST" column="AFINST"/>
+        <result property="AFFPMT" column="AFFPMT"/>
+        <result property="AFTERM" column="AFTERM"/>
+        <result property="AFTCOD" column="AFTCOD"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+        <result property="AFPURP" column="AFPURP"/>
+        <result property="AFCCBP" column="AFCCBP"/>
+        <result property="AFOFD6" column="AFOFD6"/>
+        <result property="AFOFD7" column="AFOFD7"/>
+        <result property="AFOAD6" column="AFOAD6"/>
+        <result property="AFOAD7" column="AFOAD7"/>
+        <result property="AFARD6" column="AFARD6"/>
+        <result property="AFARD7" column="AFARD7"/>
+        <result property="AFAPPR" column="AFAPPR"/>
+        <result property="AFAPR1" column="AFAPR1"/>
+        <result property="AFAPR2" column="AFAPR2"/>
+        <result property="AFCANC" column="AFCANC"/>
+        <result property="AFCND7" column="AFCND7"/>
+        <result property="AFCND6" column="AFCND6"/>
+        <result property="AFCAR" column="AFCAR"/>
+        <result property="AFCARI" column="AFCARI"/>
+        <result property="AFCRIP" column="AFCRIP"/>
+        <result property="AFCID6" column="AFCID6"/>
+        <result property="AFCID7" column="AFCID7"/>
+        <result property="AFCPD6" column="AFCPD6"/>
+        <result property="AFCPD7" column="AFCPD7"/>
+        <result property="AFCARP" column="AFCARP"/>
+        <result property="AFCSD6" column="AFCSD6"/>
+        <result property="AFCSD7" column="AFCSD7"/>
+        <result property="AFCSP6" column="AFCSP6"/>
+        <result property="AFCSP7" column="AFCSP7"/>
+        <result property="AFFEE" column="AFFEE"/>
+        <result property="AFOFFR" column="AFOFFR"/>
+        <result property="AFLMST" column="AFLMST"/>
+        <result property="AFSTAT" column="AFSTAT"/>
+        <result property="AFBASE" column="AFBASE"/>
+        <result property="AFMODE" column="AFMODE"/>
+        <result property="AFYBSE" column="AFYBSE"/>
+        <result property="AFRATE" column="AFRATE"/>
+        <result property="AFRAT_NO" column="AFRAT#"/>
+        <result property="AFVAR" column="AFVAR"/>
+        <result property="AFVARC" column="AFVARC"/>
+        <result property="AFPFLR" column="AFPFLR"/>
+        <result property="AFPCEL" column="AFPCEL"/>
+        <result property="AFPRV6" column="AFPRV6"/>
+        <result property="AFPRV7" column="AFPRV7"/>
+        <result property="AFRVTM" column="AFRVTM"/>
+        <result property="AFRVCD" column="AFRVCD"/>
+        <result property="AFCUR" column="AFCUR"/>
+        <result property="AFTPSQ" column="AFTPSQ"/>
+        <result property="AFEXRT" column="AFEXRT"/>
+        <result property="AFEXCD" column="AFEXCD"/>
+        <result property="AFIAMT" column="AFIAMT"/>
+        <result property="AFISTS" column="AFISTS"/>
+        <result property="AFIAP6" column="AFIAP6"/>
+        <result property="AFIAP7" column="AFIAP7"/>
+        <result property="AFIAR6" column="AFIAR6"/>
+        <result property="AFIAR7" column="AFIAR7"/>
+        <result property="AFICN6" column="AFICN6"/>
+        <result property="AFICN7" column="AFICN7"/>
+        <result property="AFSVAR" column="AFSVAR"/>
+        <result property="AFSVRC" column="AFSVRC"/>
+        <result property="AFFLAT" column="AFFLAT"/>
+        <result property="AFPAR" column="AFPAR"/>
+        <result property="AFDLNO" column="AFDLNO"/>
+        <result property="AFCIF_NO" column="AFCIF#"/>
+        <result property="AFLIMT" column="AFLIMT"/>
+        <result property="AFSDC6" column="AFSDC6"/>
+        <result property="AFSDC7" column="AFSDC7"/>
+        <result property="AFRDC6" column="AFRDC6"/>
+        <result property="AFRDC7" column="AFRDC7"/>
+        <result property="AFLCOD" column="AFLCOD"/>
+        <result property="AFEMRK" column="AFEMRK"/>
+        <result property="AFCOM" column="AFCOM"/>
+        <result property="AFCOMR" column="AFCOMR"/>
+        <result property="AFCOMB" column="AFCOMB"/>
+        <result property="AFCMAX" column="AFCMAX"/>
+        <result property="AFCMIN" column="AFCMIN"/>
+        <result property="AFSBFC" column="AFSBFC"/>
+        <result property="AFSBSQ" column="AFSBSQ"/>
+        <result property="AFEXP6" column="AFEXP6"/>
+        <result property="AFEXP7" column="AFEXP7"/>
+        <result property="AFCFER" column="AFCFER"/>
+        <result property="AFCFE_NO" column="AFCFE#"/>
+        <result property="AFCFEE" column="AFCFEE"/>
+        <result property="AFMDT6" column="AFMDT6"/>
+        <result property="AFMDT7" column="AFMDT7"/>
+        <result property="AFORGM" column="AFORGM"/>
+        <result property="AFEXMT" column="AFEXMT"/>
+        <result property="AFMFAC" column="AFMFAC"/>
+        <result property="AFMAA_NO" column="AFMAA#"/>
+        <result property="AFMFCD" column="AFMFCD"/>
+        <result property="AFMSEQ" column="AFMSEQ"/>
+        <result property="AFSTBY" column="AFSTBY"/>
+        <result property="AFLEVL" column="AFLEVL"/>
+        <result property="AFAMTU" column="AFAMTU"/>
+        <result property="AFCOMP" column="AFCOMP"/>
+        <result property="AFSPRV" column="AFSPRV"/>
+        <result property="AFINSP" column="AFINSP"/>
+        <result property="AFOBAL" column="AFOBAL"/>
+        <result property="AFDVID" column="AFDVID"/>
+        <result property="LNVUSR" column="LNVUSR"/>
+        <result property="LNVDT6" column="LNVDT6"/>
+        <result property="LNVDT7" column="LNVDT7"/>
+        <result property="LNVTME" column="LNVTME"/>
+        <result property="ASELLP" column="ASELLP"/>
+        <result property="AUNREA" column="AUNREA"/>
+        <result property="ABOOKV" column="ABOOKV"/>
+        <result property="ASCRDW" column="ASCRDW"/>
+        <result property="ASCRGP" column="ASCRGP"/>
+        <result property="APPRRT" column="APPRRT"/>
+        <result property="APPRAM" column="APPRAM"/>
+        <result property="ASRVRA" column="ASRVRA"/>
+        <result property="AMAXTM" column="AMAXTM"/>
+        <result property="AMAXCD" column="AMAXCD"/>
+        <result property="AOFSTA" column="AOFSTA"/>
+        <result property="AEMPID" column="AEMPID"/>
+        <result property="ADEPTC" column="ADEPTC"/>
+        <result property="ABDFLG" column="ABDFLG"/>
+        <result property="ACASA" column="ACASA"/>
+        <result property="AVATFL" column="AVATFL"/>
+        <result property="AGLBOO" column="AGLBOO"/>
+        <result property="AORGBR" column="AORGBR"/>
+        <result property="AGROUP" column="AGROUP"/>
+        <result property="ASCRLS" column="ASCRLS"/>
+        <result property="ASCRLR" column="ASCRLR"/>
+        <result property="ASOOFU" column="ASOOFU"/>
+        <result property="AFRMST" column="AFRMST"/>
+        <result property="AFRDST" column="AFRDST"/>
+        <result property="AFRMD6" column="AFRMD6"/>
+        <result property="AFRMD7" column="AFRMD7"/>
+        <result property="AFRDD6" column="AFRDD6"/>
+        <result property="AFRDD7" column="AFRDD7"/>
+        <result property="AFRTCD" column="AFRTCD"/>
+        <result property="AFREAS" column="AFREAS"/>
+        <result property="AFRREM" column="AFRREM"/>
+        <result property="AFSLEN" column="AFSLEN"/>
+        <result property="AFSCLS" column="AFSCLS"/>
+        <result property="AFSLMT" column="AFSLMT"/>
+        <result property="AFSDT6" column="AFSDT6"/>
+        <result property="AFSDT7" column="AFSDT7"/>
+        <result property="AFCHGR" column="AFCHGR"/>
+        <result property="AFCTYP" column="AFCTYP"/>
+        <result property="AFCCOD" column="AFCCOD"/>
+        <result property="AFPROM" column="AFPROM"/>
+    </resultMap>
+
+    <resultMap id="earmarkHashMap" type="com.ucpb.tfs.batch.report.dw.Earmark">
+        <result property="SYSCOD" column="SYSCOD"/>
+        <result property="TOSBAL" column="TOSBAL"/>
+        <result property="TLOSBAL" column="TLOSBAL"/>
+        <result property="ORGLMT" column="ORGLMT"/>
+        <result property="LORGAM" column="LORGAM"/>
+        <result property="CURTYP" column="CURTYP"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+    </resultMap>
+    
+    <resultMap id="lnclstNormalization" type="com.ucpb.tfs.batch.report.dw.Earmark">
+        <result property="SYSCOD" column="SYSCOD"/>
+        <result property="CIFNO" column="CIFNO"/>
+        <result property="ACCTNO" column="ACCTNO"/>
+        <result property="AFCPNO" column="AFCPNO"/>
+    </resultMap>
+    
+    <resultMap id="cibsDetailsTableResultMap" type="com.ucpb.tfs.batch.cif.CibsDetailsTable">
+    </resultMap>
+     
+    <!-- Gets the appraisal details of the main cif with the most recent appraisal date and the most appraisal amount -->
+    <select id="getAppraisalDetails" resultMap="appraisalResultMap">
+<!-- 	     SELECT MAX(APPRAISALDATE), COLLATERALID, COLLATERALTYPE, APPRAISEDVALUE, MAINCIFNUMBER FROM  -->
+<!-- 			(SELECT COLLATERALS.CCDCID COLLATERALID, COLLATERALS.CCAPNO MAINCIFNUMBER,  -->
+<!-- 				APPRAISALS.CCDAPV APPRAISEDVALUE, APPRAISALS.CCDAP6 APPRAISALDATE, APPRAISALS.CCDCOD COLLATERALTYPE -->
+<!-- 				FROM  -->
+<!-- 				UCDATULNS2.LNCOLX COLLATERALS			 -->
+<!-- 			INNER JOIN  -->
+<!-- 				UCDATUBWC2.CFCOLD APPRAISALS ON -->
+<!-- 				APPRAISALS.CCDCID = COLLATERALS.CCDCID -->
+<!-- 			WHERE COLLATERALS.CCAPNO = #{mainCif}) AS TEMP GROUP BY APPRAISALVALUE,COLLATERALID,COLLATERALTYPE,MAINCIFNUMBER -->
+<!-- 		 ORDER BY APPRAISALVALUE DESC FETCH FIRST 1 ROWS ONLY  -->
+		 
+	 	 SELECT COLLATERALS.CCDCID COLLATERALID, COLLATERALS.CCAPNO MAINCIFNUMBER, 
+				APPRAISALS.CCDAPV APPRAISEDVALUE, APPRAISALS.CCDAP6 APPRAISALDATE, APPRAISALS.CCDCOD COLLATERALTYPE
+				FROM 
+				@facility@.LNCOLX COLLATERALS			
+			INNER JOIN
+				@cfmast@.CFCOLD APPRAISALS ON
+				APPRAISALS.CCDCID = COLLATERALS.CCDCID
+		  WHERE COLLATERALS.CCAPNO = #{mainCif}
+		  ORDER BY CCDAP6 DESC, CCDAPV DESC 
+		  FETCH FIRST 1 ROWS ONLY
+		 
+		 		
+    </select>
+    
+    <select id="getIndustryCode" resultType="string">
+    	<!-- refactored rest -->
+   		<!-- SELECT ECOMCD FROM UCDATULNS2.LNCBCD CODES 
+   			INNER JOIN
+   			UCDATULNS2.LNMAST CIFS ON 
+   				CIFS.ACCTNO = CODES.ACCTNO
+   				AND CIFS.ACTYPE = CODES.ACTYPE
+   			WHERE CIFS.CIFNO = #{cifNumber}
+   			FETCH FIRST 1 ROWS ONLY -->
+   		
+   		<!--  original ucpb rest -->
+		SELECT ECOMCD FROM @facility@.LNCBCD CODES
+			INNER JOIN 
+			 (SELECT ACCTNO, ACTYPE FROM @facility@.LNMAST WHERE CIFNO = #{cifNumber} FETCH FIRST 1 ROWS ONLY) CIFS
+			 ON CIFS.ACCTNO = CODES.ACCTNO AND CIFS.ACTYPE = CODES.ACTYPE FETCH FIRST 1 ROWS ONLY
+    
+    </select>
+    
+    <select id="getEarmarkingAccountStatus" resultType="string">
+    	SELECT STADSC FROM @facility@.LNCLST
+    	WHERE ACCTNO = #{documentNumber}
+    </select>
+
+    <select id="getFacilityReferenceNumber" resultType="string">
+        SELECT AFCPNO FROM @facility@.LNAPPF
+        WHERE AFFCDE = #{facilityType}
+        AND AFSEQ = #{facilityId}
+        AND AFAPNO = #{mainCifNumber}
+    </select>
+
+
+	<!--   ER# 20140909-038  -->
+	<select id="getCibsMasterTable" resultMap="cibsMasterTableResultMap">
+		SELECT CFNCIF,CFNBRN,CFNSNM,CFNUID,CFNWID,CFNTIM,CFNDT7,
+		CFNDT6,CFNCFO,CFNUSR,CFNWDA,CFNDA7,CFNDA6,CFNTME,CFNAPR FROM @cfmast@.CFNMSTA
+		WHERE CFNDA7 &gt; #{julianDate}				<!--   ER# 20140909-038  -->
+		AND CFNDA7 &lt; #{appDate}					<!--   ER# 20140909-038  -->
+	</select>
+
+	<select id="getCibsDetailsTable" resultMap="cibsDetailsTableResultMap">
+		SELECT FACREF,OAANO,OFCODE,OFSEQ,OCFIN,OMAANO,OMFCDE,OMFSEQ,NAANO,NFCODE,
+		 NFSEQ,NMAANO,NMFCDE,NMFSEQ,NCIFN,CHGDT6,CHGDT7,CHGTME FROM @facility@.LNAALOG
+		 WHERE CHGDT7 &gt; #{julianDate}			<!--   ER# 20140909-038  -->
+		 AND CHGDT7 &lt; #{appDate}					<!--   ER# 20140909-038  -->
+    </select>
+
+    <select id="getEarmarksTrade" resultMap="earmarkHashMap">
+    	SELECT
+    	SYSCOD,
+    	TOSBAL,
+    	TLOSBAL,
+    	ORGLMT,
+    	LORGAM,
+    	CURTYP,
+    	AFCPNO,
+    	CIFNO,
+    	ACCTNO
+    	FROM @facility@.LNCLST
+    	WHERE SYSCOD='TF'
+    </select>
+
+    <update id="updateLocalOutstandingBalance">
+		UPDATE @facility@.LNCLST
+			SET TLOSBAL = #{earmark.TLOSBAL}
+		 WHERE ACCTNO = #{earmark.ACCTNO}
+	</update>
+
+    <update id="updateLocalOriginalAmount">
+		UPDATE @facility@.LNCLST
+			SET LORGAM = #{earmark.LORGAM}
+		 WHERE ACCTNO = #{earmark.ACCTNO}
+	</update>
+
+    <select id="getFacilityReferenceEntries" resultMap="facilityReferenceMap">
+        <![CDATA[
+            SELECT
+                AFFCDE,
+                "AFCIF#"
+            FROM @facility@.LNAPPF
+        ]]>
+    </select>
+    
+    <update id="deleteOutstandingUnapprovedFacilityAvailment">
+		UPDATE @facility@.LNCLST
+			SET
+                 TOSBAL = 0,
+				 TLOSBAL = 0,
+				 STADSC = 'CANCELLED'
+		 WHERE ACCTNO IN 
+		 <foreach item="documentNumber" index="index" collection="documentNumbers"
+                 open="(" separator="," close=")">
+            #{documentNumber}
+        </foreach>
+	</update>
+   
+	
+	<select id="test" resultType="hashMap">
+        SELECT
+            ACCTNO,
+            TOSBAL,
+            TLOSBAL
+        FROM @facility@.LNCLST
+        WHERE ACCTNO IN
+        <foreach item="documentNumber" index="index" collection="documentNumbers"
+	             open="(" separator="," close=")">
+	        #{documentNumber}
+    	</foreach>
+    </select>
+    
+    <delete id="deleteEarmarksTrade">
+    	DELETE FROM @facility@.LNCLST
+    	WHERE SYSCOD = 'TF'
+    </delete>
+    
+    <update id="updateFacilityAvailment">
+		UPDATE @facility@.LNCLST 
+			SET 
+				 CIFNO = #{availment.cifNumber},
+				 ORGLMT = #{availment.originalAmount},
+				 TOSBAL = #{availment.outstandingBalance},
+				 DATE = #{availment.transactionDate},
+				 TIME = #{availment.transactionTime},
+				 LORGAM = #{availment.phpAmount},
+				 TLOSBAL = #{availment.phpOutstandingBalance},
+				 CURTYP = #{availment.currencyCode},
+				 STADSC = UPPER(#{availment.statusDescription}),
+				 AFCPNO = #{availment.facilityReferenceNumber}
+		 WHERE ACCTNO = #{availment.documentNumber}
+	</update>
+	
+	<insert id="insertFacilityAvailment">
+		INSERT INTO @facility@.LNCLST (SYSCOD,CIFNO,ACCTNO,ORGLMT,TOSBAL,PRODUCT,DATE,TIME,LORGAM,TLOSBAL,CURTYP,ALFLG,STADSC,AFCPNO,NAME,CIFID,CIFCOD,
+		 PRODSC,ADBBAL,ORGSBL,LOCSBL)
+			VALUES
+		('TF',#{availment.cifNumber},#{availment.documentNumber},#{availment.originalAmount},#{availment.outstandingBalance},'F2',#{availment.transactionDate},
+		#{availment.transactionTime},
+		#{availment.phpAmount},#{availment.phpOutstandingBalance},#{availment.currencyCode},'A',UPPER(#{availment.statusDescription}),#{availment.facilityReferenceNumber},
+		' ',' ',' ',' ',0,0,0)
+	</insert>
+
+    <select id="selectEarmarksTrade" resultType="hashMap">
+    	SELECT * FROM @facility@.LNCLST WHERE SYSCOD = 'TF'
+    </select>
+    
+     <select id="getlnclstCIFNO" resultMap="lnclstNormalization">
+    	SELECT CIFNO, ACCTNO FROM @facility@.LNCLST WHERE SYSCOD = 'TF'
+    </select>
+
+
+    <update id="updateLnclstNorm">
+		UPDATE @facility@.LNCLST
+			SET CIFNO = #{newCIFNO}
+		 WHERE CIFNO = #{oldCIFNO}
+		 and SYSCOD = 'TF'
+	</update>
+    
+    <insert id="reinsertFacilityAvailment">
+	INSERT INTO @facility@.LNCLST (SYSCOD, CIFNO, ACCTNO, NAME, CIFID,
+	CIFCOD, ORGLMT, TOSBAL, PRODUCT, PRODSC, DATE, TIME, LORGAM, TLOSBAL,
+	CURTYP, ALFLG, ADBBAL, STADSC, AFCPNO, ORGSBL, LOCSBL) VALUES
+	(#{earmarking.SYSCOD}, #{earmarking.CIFNO}, #{earmarking.ACCTNO}, #{earmarking.NAME},
+	#{earmarking.CIFID}, #{earmarking.CIFCOD}, #{earmarking.ORGLMT},
+	#{earmarking.TOSBAL}, #{earmarking.PRODUCT}, #{earmarking.PRODSC},
+	#{earmarking.DATE}, #{earmarking.TIME}, #{earmarking.LORGAM},
+	#{earmarking.TLOSBAL}, #{earmarking.CURTYP}, #{earmarking.ALFLG},
+	#{earmarking.ADBBAL}, #{earmarking.STADSC}, #{earmarking.AFCPNO},
+	#{earmarking.ORGSBL}, #{earmarking.LOCSBL})
+	</insert>
+	
+</mapper>

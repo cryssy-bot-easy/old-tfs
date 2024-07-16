@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.DailyBalance" table="DailyBalance">
+
+        <id column="id" name="id" type="long">
+            <generator class="identity"/>
+        </id>
+
+        <property name="documentNumber" column="documentNumber" length="30"/>
+        <property name="balance" column="balance" type="java.math.BigDecimal" precision="31" scale="15"/>
+        <property name="balanceDate" column="balanceDate" type="java.util.Date"/>
+        <property name="originalBalance" column="originalBalance" type="java.math.BigDecimal" precision="31" scale="15"/>
+        <property name="revalRate" column="revalRate" type="java.math.BigDecimal" precision="31" scale="15"/>
+        <property name="currency" column="currency" type="java.lang.String" length="3"/>
+        <property name="productId" column="productId" type="java.lang.String" length="7"/>
+    </class>
+
+</hibernate-mapping>

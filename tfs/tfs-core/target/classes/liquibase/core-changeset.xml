@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!-- this is the parent changeset. for cleanliness and consistency sake, please DO NOT
+        put single changesets here. Put them in chronologically named changesets instead.
+
+        E.g. "03-2013-changeset.xml" will contain all ddls made during the month of 3/2013.
+         Then core-changeset.xml will import this file via this line:  "include file="03-2013-changeset.xml" -->
+
+    <!--
+       REMINDERS:
+       *DO NOT DELETE/ALTER any declared changesets (including their corresponding SQL files).
+       If you want to correct any wrong changesets committed, MAKE A NEW CHANGESET to correct
+       your previous one.
+       *Liquibase cannot process comments found in sql files. They are read and run as well.
+    -->
+
+    <include file="src/main/resources/liquibase/03-2013-changeset.xml"/>
+
+
+</databaseChangeLog>

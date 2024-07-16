@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="swift/mt103.xml"/>
+    <import resource="swift/mt202.xml"/>
+    <import resource="swift/mt400.xml"/>
+    <import resource="swift/mt412.xml"/>
+    <import resource="swift/mt700.xml"/>
+    <import resource="swift/mt707.xml"/>
+    <import resource="swift/mt701.xml"/>
+    <import resource="swift/mt708.xml"/>
+    <import resource="swift/mt740.xml"/>
+    <import resource="swift/mt747.xml"/>
+    <import resource="swift/mt752.xml"/>
+    <import resource="swift/mt760.xml"/>
+    <import resource="swift/mt767.xml"/>
+    <import resource="swift/mt799.xml"/>
+
+
+    <bean id="swiftMessageBuilder" class="com.ucpb.tfs.swift.SpelEvaluatingSwiftMessageBuilder">
+        <constructor-arg name="propertyMapping">
+            <util:map>
+                <entry key="basicHeader.applicationIdentifier" value="'${swift.app.identifier}'"/>
+                <entry key="basicHeader.serviceIndentifier" value="'${swift.service.identifier}'"/>
+                <entry key="basicHeader.ltIdentifier" value="'${swift.lt.identifier}'"/>
+                <entry key="basicHeader.sessionNumber" value="'${swift.session.number}'"/>
+                <entry key="basicHeader.sequenceNumber" value="'${swift.sequence.number}'"/>
+
+                <entry key="applicationHeader.ioIdentifier" value="'${swift.io.identifier}'"/>
+                <!--<entry key="applicationHeader.messageType" value="#this.get('messageType')"/>-->
+                <!--<entry key="applicationHeader.receiverAddress" value="'XXXX'"/>-->
+                <entry key="applicationHeader.messagePriority" value="'${swift.message.priority}'"/>
+                <entry key="applicationHeader.deliveryMonitoring" value="'${swift.delivery.monitoring}'"/>
+                <entry key="applicationHeader.obsolescencePeriod" value="'${swift.obsolence.period}'"/>
+            </util:map>
+        </constructor-arg>
+        <property name="beanMappers">
+            <util:map>
+                <entry key="103" value-ref="mt103Mapper"/>
+                <entry key="202" value-ref="mt202Mapper"/>
+                <entry key="400" value-ref="mt400Mapper"/>
+                <entry key="412" value-ref="mt412Mapper"/>
+                <entry key="700" value-ref="mt700Mapper"/>
+                <entry key="707" value-ref="mt707Mapper"/>
+                <entry key="740" value-ref="mt740Mapper"/>
+                <entry key="747" value-ref="mt747Mapper"/>
+                <entry key="752" value-ref="mt752Mapper"/>
+                <entry key="760" value-ref="mt760Mapper"/>
+                <entry key="767" value-ref="mt767Mapper"/>
+                <entry key="799" value-ref="mt799Mapper"/>
+            </util:map>
+        </property>
+    </bean>
+
+    <bean id="swiftMessageParser" class="com.ucpb.tfs.swift.SwiftMessageParser">
+        <property name="messageBuilder">
+            <bean class="com.ucpb.tfs.swift.DefaultSwiftMessageBuilder">
+                <constructor-arg name="mtTypeRegistry">
+                    <util:map>
+                        <entry key="103" value="com.ucpb.tfs.swift.message.MT103"/>
+                        <entry key="202" value="com.ucpb.tfs.swift.message.MT202"/>
+                        <entry key="400" value="com.ucpb.tfs.swift.message.MT400"/>
+                        <entry key="412" value="com.ucpb.tfs.swift.message.MT412"/>
+                        <entry key="700" value="com.ucpb.tfs.swift.message.MT700"/>
+                        <entry key="707" value="com.ucpb.tfs.swift.message.MT707"/>
+                        <entry key="701" value="com.ucpb.tfs.swift.message.MT701"/>
+                        <entry key="708" value="com.ucpb.tfs.swift.message.MT708"/>
+                        <entry key="740" value="com.ucpb.tfs.swift.message.MT740"/>
+                        <entry key="747" value="com.ucpb.tfs.swift.message.MT747"/>
+                        <entry key="752" value="com.ucpb.tfs.swift.message.MT752"/>
+                        <entry key="760" value="com.ucpb.tfs.swift.message.MT760"/>
+                        <entry key="767" value="com.ucpb.tfs.swift.message.MT767"/>
+                        <entry key="799" value="com.ucpb.tfs.swift.message.MT799"/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+</beans>

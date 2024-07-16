@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.instruction.ServiceInstruction" table="ServiceInstruction">
+
+        <composite-id name="serviceInstructionId" access="field">
+            <key-property name="serviceInstructionId" column="serviceInstructionId" type="string" length="12"/>
+        </composite-id>
+
+        <property name="type" column="type" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.instruction.enumTypes.ServiceInstructionType</param>
+            </type>
+        </property>
+
+        <property name="status" column="status" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.instruction.enumTypes.ServiceInstructionStatus</param>
+            </type>
+        </property>
+
+        <!--evaluate other options for this, may be better as binary blob or something-->
+        <property name="instructionDetails" column="details" type="org.hibernate.type.MaterializedClobType" length="20000" access="property"/>
+
+        <property name="approvers" column="approvers" type="java.lang.String" length="30" />
+
+        <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="userActiveDirectoryId" length="20"/>
+        </component>
+
+        <component name="createdBy" class="com.ucpb.tfs.domain.security.UserId">
+            <property name="id" column="createdBy" length="20"/>
+        </component>
+
+        <component name="approvedBy" class="com.ucpb.tfs.domain.security.UserId">
+            <property name="id" column="approvedBy" length="20"/>
+        </component>
+
+        <property name="dateApproved" column="dateApproved" type="java.util.Date"/>
+
+        <property name="createdDate" column="createdDate" type="java.util.Date" />
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date" />
+
+        <property name="approvalCount" column="approvalCount" type="int"/>
+
+        <component name="lastUser" class="com.ucpb.tfs.domain.security.UserId">
+            <property name="id" column="lastUser" length="20"/>
+        </component>
+
+	</class>		
+</hibernate-mapping>

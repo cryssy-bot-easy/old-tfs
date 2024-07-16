@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<!-- 
+ * PROLOGUE:
+ * (revision)
+ * SCR/ER Number:
+ * SCR/ER Description: (Redmine #4134) Exporter CB Code field should be disabled and extracted from sibs LNSCOD base on CIF Number.
+ * [Revised by:] Ludovico Anton Apilado
+ * [Date revised:] 5/25/2017
+ * Program [Revision] Details: added LN.BIMPOR AS CBCODE from @loancif@.LNSCOD in select script of select id="getCifsByNameAndOrNumber"
+ * Date deployment: 6/16/2017
+ * Member Type: xml
+ * Project: Core
+ * Project Name: cif-mapper.xml
+-->
+
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.CustomerInformationFileRepository">
+
+	<resultMap id="cifResultMap" type="com.ucpb.tfs.interfaces.domain.CustomerInformationFile">
+<!-- 	  <id property="id" column="user_id" /> -->
+	  <result property="cifName" column="CFSNME"/>
+	  <result property="lastName" column="CFNA1"/>
+	  <result property="branchUnitCode" column="CFBRNN"/>
+	  <result property="dorsiCode" column="CFOFFR"/>
+	  <result property="cifNumber" column="CFCIF#"/>
+	  <result property="firstName" column="CFNA1A"/>
+	  <result property="middleName" column="CFNA1B"/>
+	  <result property="tinNumber" column="CFTINN"/>
+	  <result property="residentCode" column="CFRESD"/>
+	  <result property="incorporationDate" column="CFBIRD"/>
+	  <result property="individual" column="CFINDI"/>
+	  <result property="cbCode" column="BIMPOR"/>
+	</resultMap>
+
+    <resultMap id="allocationUnitResultMap" type="com.ucpb.tfs.interfaces.domain.AllocationUnit">
+        <!-- 	  <id property="id" column="user_id" /> -->
+        <result property="ccbdBranchUnitCode" column="JLNLVL"/>
+        <result property="allocationUnitCode" column="JLUNIT"/>
+    </resultMap>
+
+    <resultMap id="allocationUnitMap" type="com.ucpb.tfs.interfaces.domain.AllocationUnit">
+        <!-- 	  <id property="id" column="user_id" /> -->
+        <result property="ccbdBranchUnitCode" column="CCBD_BRANCH_UNIT_CODE"/>
+        <result property="allocationUnitCode" column="ALLOCATION_UNIT_CODE"/>
+    </resultMap>
+
+
+    <select id="getCifDetailsByCifNumber" resultMap="cifResultMap">
+        select
+            *
+        from
+            TFSDB2S.CFMAST CIF
+        WHERE CIF."CFCIF#" = #{cifNumber}
+    </select>
+
+
+	<select id="getCifByCifInCDT" resultType="hashMap">
+		SELECT 
+			"CFCIF#" AS CIFNUMBER
+		FROM
+			TFSDB2S.CFMAST 
+		WHERE 
+			"CFCIF#" = #{cifNumber}
+	</select>
+
+    <select id="getCifByCifNumber" resultType="hashMap">
+        select
+           	CIF.CFSNME AS CIF_NAME,
+           	CIF.CFNA1 AS LASTNAME,
+           	<!--CIF.CFBRNN AS BRANCH_UNIT_CODE,-->
+           	CIF.CFOFFR AS OFFICER_CODE,
+           	CFUIC2 AS DORSI_CODE,
+           	CIF."CFCIF#" AS CIF_NUMBER,
+           	CFNA1A AS FIRSTNAME,
+           	CFNA1B AS MIDDLENAME,
+           	CFTINN AS TIN_NUMBER,
+            CFRESD AS RESIDENT_CODE,
+            CFBIR6 AS CREATION_DATE,
+            ADDRESS.CFNA2 AS ADDRESS_LINE1,
+            ADDRESS.CFNA3 AS ADDRESS_LINE2,
+            ADDRESS.CFNA4 AS ADDRESS_LINE3,
+            CIF.CFINDI
+        from
+       	  TFSDB2S.CFMAST CIF
+<!--         INNER JOIN -->
+<!--           (SELECT * FROM TFSDB2S.CFADDR ADDRESS -->
+<!--             WHERE ADDRESS."CFCIF#" = #{cifNumber} FETCH FIRST 1 ROWS ONLY) ADDRESS -->
+<!--         ON CIF."CFCIF#" =  ADDRESS."CFCIF#" -->
+		LEFT JOIN
+		  TFSDB2S.CFADDR ADDRESS
+			ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+			AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+			  WHERE "CFCIF#" = CIF."CFCIF#"
+			  ORDER BY CFASEQ
+			  FETCH FIRST 1 ROWS ONLY)
+        WHERE CIF."CFCIF#" = #{cifNumber}
+<!--         FETCH FIRST 1 ROWS ONLY -->
+    </select>
+
+    <select id="getBranchUnitCodeForAlphanumericOfficerCode" resultMap="allocationUnitResultMap">
+		<!--SELECT JLRFBR FROM TFSDB2S.JHPARL BRANCHES WHERE-->
+			<!--BRANCHES.JLRFBR = #{branchUnitCode} AND-->
+			<!--(BRANCHES.JLTYPE = 'RM' OR BRANCHES.JLTYPE = 'BR')-->
+        SELECT
+            JLNLVL,JLUNIT
+        FROM TFSDB2S.JHPARL ALLOCATION_UNITS
+        WHERE ALLOCATION_UNITS.JLTYPE = 'RM'
+            AND ALLOCATION_UNITS.JLUNIT =
+            (SELECT PUCOD FROM TFSDB2S.LNPAN4 RELATIONSHIP_MANAGERS WHERE
+        RELATIONSHIP_MANAGERS.POFFCD = #{officerCode}
+            AND RELATIONSHIP_MANAGERS.PGDOBD = 'G'
+            FETCH FIRST 1 ROWS ONLY)
+	</select>
+
+    <select id="getBranchUnitCodeForAlphaOfficerCode" resultMap="allocationUnitResultMap">
+        <!-- for derby mock database --> 
+<!--         SELECT -->
+<!-- 	        JLRFBR AS JLNLVL,JLUNIT -->
+<!-- 	        from TFSDB2S.JHPARL GROUPS -->
+<!-- 	        where -->
+<!-- 	            GROUPS.JLTYPE in ('BR','RM') -->
+<!-- 	        AND GROUPS.JLRFBR = -->
+<!-- 			(SELECT "JHOBR#" from TFSDB2S.JHOFFR OFFICERS -->
+<!-- 	        WHERE OFFICERS.JHOOFF = #{officerCode} AND "JHOBR#" <> 0) -->
+        <![CDATA[
+        SELECT (CASE WHEN VARCHAR(GROUPS.JLRFBR) LIKE '9%' THEN
+			 (SELECT GROUPS2.JLRFBR AS JLNLVL FROM TFSDB2S.JHPARL GROUPS2
+			 WHERE GROUPS2.JLTYPE = 'DP'
+			 AND GROUPS2.JLRFBR = GROUPS.JLRFBR)
+			 ELSE 
+			 (SELECT GROUPS3.JLRFBR AS JLNLVL FROM TFSDB2S.JHPARL GROUPS3
+        		 WHERE GROUPS3.JLTYPE in ('BR','RM')
+        		 AND GROUPS3.JLRFBR = GROUPS.JLRFBR) END) AS JLNLVL,
+       		 (CASE WHEN VARCHAR(GROUPS.JLRFBR) LIKE '9%' THEN
+			 (SELECT GROUPS2.JLUNIT FROM TFSDB2S.JHPARL GROUPS2
+			 WHERE GROUPS2.JLTYPE = 'DP'
+			 AND GROUPS2.JLRFBR = GROUPS.JLRFBR)
+			 ELSE 
+			 (SELECT GROUPS3.JLUNIT FROM TFSDB2S.JHPARL GROUPS3
+        		 WHERE GROUPS3.JLTYPE in ('BR','RM')
+        		 AND GROUPS3.JLRFBR = GROUPS.JLRFBR) END) AS JLUNIT
+        		 FROM TFSDB2S.JHPARL GROUPS
+        		 WHERE GROUPS.JLRFBR =
+            (SELECT "JHOBR#" from TFSDB2S.JHOFFR OFFICERS
+            WHERE OFFICERS.JHOOFF = #{officerCode} AND "JHOBR#" <> 0)
+            ]]>
+    </select>
+
+    <select id="getBranchUnitCodeForNumericOfficerCode" resultMap="allocationUnitResultMap">
+        SELECT JLNLVL,JLUNIT FROM TFSDB2S.JHPARL GROUPS
+            WHERE
+            GROUPS.JLRFBR = #{officerCode}
+            AND GROUPS.JLTYPE IN ('RM','BR')
+	</select>
+
+    <select id="getAllocationUnitCodeForAlphanumericOfficerCode" resultType="string">
+       SELECT PUCOD AS ALLOCATION_UNIT FROM TFSDB2S.LNPAN4 RELATIONSHIP_MANAGERS
+        WHERE
+          RELATIONSHIP_MANAGERS.POFFCD = #{officerCode}
+          AND RELATIONSHIP_MANAGERS.PGDOBD = 'G'
+    </select>
+
+    <select id="getCasaAccounts" resultType="hashMap">
+        select
+           	"CFCIF#" AS CIF_NUMBER, "CFACC#" AS ACCOUNT_NUMBER, CFSNME AS CIF_NAME, CFATYP AS ACCOUNT_TYPE
+        from
+       	  TFSDB2S.CFACCT ACCOUNT where ACCOUNT."CFCIF#" = #{cifNumber} AND (CFATYP = 'D' OR CFATYP = 'S')
+    </select>
+
+    <select id="getCasaAccountsByCifNumberAndCurrency" resultType="hashMap">
+        select
+           	ACCOUNT."CFCIF#" AS CIF_NUMBER,
+           	"CFACC#" AS ACCOUNT_NUMBER,
+           	(CASE WHEN CFINDI = 'Y' THEN (TRIM(CFNA1A) || ' ' || TRIM(CFNA1B) || ' ' || TRIM(CFNA1)) ELSE (CFNA1 || CFNA1A || CFNA1B) END) AS CIF_NAME,
+           	CFATYP AS ACCOUNT_TYPE,
+           	DDCTYP AS CURRENCY
+        from
+       	  TFSDB2S.CFACCT ACCOUNT
+       	LEFT JOIN
+       	TFSDB2S.CFMAST CIF
+       	ON CIF."CFCIF#" = ACCOUNT."CFCIF#"
+       	LEFT JOIN
+       	  TFSDB2S.DDMAST CIFDETAILS
+       	ON CIFDETAILS.ACCTNO = ACCOUNT."CFACC#"
+       	where 
+			(CFATYP = 'D' OR CFATYP = 'S')
+	<if test="cifNumber != ''">       	
+		AND ACCOUNT."CFCIF#" = #{cifNumber}
+	</if>  
+	<if test="currency != ''">
+		AND CIFDETAILS.DDCTYP = #{currency}
+	</if>
+    </select>
+
+	 <select id="getMainCifsByClientCifNumber" resultType="hashMap">
+        SELECT 
+             CFSNME AS CIF_NAME,
+             CFNA1 AS LASTNAME,
+             CFOFFR AS OFFICER_CODE,
+             CFUIC2 AS DORSI_CODE,
+             CIF."CFCIF#" AS CIF_NUMBER,
+             CFNA1A AS FIRSTNAME,
+             CFNA1B AS MIDDLENAME,
+             CFTINN AS TIN_NUMBER,
+             CFRESD AS RESIDENT_CODE,
+             CFBIR6 AS CREATION_DATE,
+			 ADDRESS.CFNA2 AS ADDRESS_LINE1,
+             ADDRESS.CFNA3 AS ADDRESS_LINE2,
+             ADDRESS.CFNA4 AS ADDRESS_LINE3,
+           	 CIF.CFINDI
+         from 
+        	  TFSDB2S.CFMAST CIF
+		LEFT JOIN
+		  TFSDB2S.CFADDR ADDRESS
+			ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+			AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+			  WHERE "CFCIF#" = CIF."CFCIF#"
+			  ORDER BY CFASEQ
+			  FETCH FIRST 1 ROWS ONLY)
+        	   where CIF."CFCIF#" IN
+        	  (SELECT DISTINCT(FACILITY."AFAPNO") FROM TFSDB2S.LNAPPF FACILITY WHERE FACILITY."AFCIF#" = #{clientCifNumber} UNION
+        	  SELECT DISTINCT(CIF."CFCIF#") FROM TFSDB2S.CFMAST CIF WHERE CIF."CFCIF#" = #{clientCifNumber})
+ 	  </select> 
+    
+    <select id="getCifsByCifName" resultType="hashMap">
+        select
+           	CIF.CFSNME AS CIF_NAME,
+           	CIF.CFNA1 AS LASTNAME,
+           	<!--CIF.CFBRNN AS BRANCH_UNIT_CODE,-->
+           	CFOFFR AS OFFICER_CODE,
+           	CFUIC2 AS DORSI_CODE,
+           	CIF."CFCIF#" AS CIF_NUMBER,
+           	CFNA1A AS FIRSTNAME,
+           	CFNA1B AS MIDDLENAME,
+           	CFTINN AS TIN_NUMBER,
+            CFRESD AS RESIDENT_CODE,
+            CFBIR6 AS CREATION_DATE,
+            ADDRESS.CFNA2 AS ADDRESS_LINE1,
+            ADDRESS.CFNA3 AS ADDRESS_LINE2,
+            ADDRESS.CFNA4 AS ADDRESS_LINE3,
+            CIF.CFINDI
+        from
+       	  TFSDB2S.CFMAST CIF
+<!--       INNER JOIN TFSDB2S.CFADDR ADDRESS ON -->
+<!--        		 ADDRESS."CFCIF#" = CIF."CFCIF#" -->
+		LEFT JOIN
+		  TFSDB2S.CFADDR ADDRESS
+			ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+			AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+			  WHERE "CFCIF#" = CIF."CFCIF#"
+			  ORDER BY CFASEQ
+			  FETCH FIRST 1 ROWS ONLY)
+      where CIF."CFSNME" LIKE #{cifName}
+<!--       FETCH FIRST 1 ROWS ONLY -->
+    </select>
+
+    <select id="getCifsByNameAndNumber" resultType="hashMap">
+        select
+           	CIF.CFSNME AS CIF_NAME,
+           	CIF.CFNA1 AS LASTNAME,
+           	<!--CIF.CFBRNN AS BRANCH_UNIT_CODE,-->
+           	CIF.CFOFFR AS OFFICER_CODE,
+        	OFFICERS.JHONAM AS OFFICER_NAME,
+           	CFUIC2 AS DORSI_CODE,
+           	CIF."CFCIF#" AS CIF_NUMBER,
+           	CFNA1A AS FIRSTNAME,
+           	CFNA1B AS MIDDLENAME,
+           	CFTINN AS TIN_NUMBER,
+            CFRESD AS RESIDENT_CODE,
+            CFBIR6 AS CREATION_DATE,
+            ADDRESS.CFNA2 AS ADDRESS_LINE1,
+            ADDRESS.CFNA3 AS ADDRESS_LINE2,
+            ADDRESS.CFNA4 AS ADDRESS_LINE3,
+            CIF.CFINDI AS INDIVIDUAL
+        from
+       	  TFSDB2S.CFMAST CIF
+<!--         INNER JOIN TFSDB2S.CFADDR ADDRESS -->
+<!--           ON CIF."CFCIF#" =  ADDRESS."CFCIF#" -->
+		LEFT JOIN
+		  TFSDB2S.CFADDR ADDRESS
+			ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+			AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+			  WHERE "CFCIF#" = CIF."CFCIF#"
+			  ORDER BY CFASEQ
+			  FETCH FIRST 1 ROWS ONLY)
+       	LEFT JOIN TFSDB2S.JHOFFR OFFICERS ON
+       		OFFICERS.JHOOFF = CIF.CFOFFR
+       	where CIF."CFSNME" = #{cifName} AND CIF."CFCIF#" = #{cifNumber}
+        <!--<if test="_databaseId != 'db2'">-->
+            <!--AND CIF.CFBRNN = #{branchUnitCode}-->
+        <!--</if>-->
+<!--         FETCH FIRST 1 ROWS ONLY -->
+    </select>
+
+    <select id="getCifsByNameOrNumber" resultType="hashMap">
+        select
+           	CIF.CFSNME AS CIF_NAME,
+           	CIF.CFNA1 AS LASTNAME,
+           	<!--CIF.CFBRNN AS BRANCH_UNIT_CODE,-->
+           	CIF.CFOFFR AS OFFICER_CODE,
+           	OFFICERS.JHONAM AS OFFICER_NAME,
+           	CFUIC2 AS DORSI_CODE,
+           	CIF."CFCIF#" AS CIF_NUMBER,
+           	CFNA1A AS FIRSTNAME,
+           	CFNA1B AS MIDDLENAME,
+           	CFTINN AS TIN_NUMBER,
+            CFRESD AS RESIDENT_CODE,
+            CFBIR6 AS CREATION_DATE,
+            ADDRESS.CFNA2 AS ADDRESS_LINE1,
+            ADDRESS.CFNA3 AS ADDRESS_LINE2,
+            ADDRESS.CFNA4 AS ADDRESS_LINE3,
+            CIF.CFINDI AS INDIVIDUAL
+        from
+       	  TFSDB2S.CFMAST CIF
+<!--        	INNER JOIN TFSDB2S.CFADDR ADDRESS ON -->
+<!--        		 ADDRESS."CFCIF#" = CIF."CFCIF#" -->
+		LEFT JOIN
+		  TFSDB2S.CFADDR ADDRESS
+			ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+			AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+			  WHERE "CFCIF#" = CIF."CFCIF#"
+			  ORDER BY CFASEQ
+			  FETCH FIRST 1 ROWS ONLY)
+       	LEFT JOIN TFSDB2S.JHOFFR OFFICERS ON
+       		OFFICERS.JHOOFF = CIF.CFOFFR       		
+       	where (CIF."CFSNME" LIKE #{cifName} OR CIF."CFCIF#" LIKE #{cifNumber})
+   <!--     <if test="_databaseId == 'db2'">
+            AND CIF.CFBRNN = #{branchUnitCode}
+        </if>-->
+
+<!--        	AND CIF.CFBRNN = #{branchUnitCode} -->
+<!-- 		FETCH FIRST 1 ROWS ONLY -->
+    </select>
+
+
+    <select id="getChildCifsByMainCifNumber" resultType="hashMap">
+        SELECT
+             CFSNME AS CIF_NAME,
+             CFNA1 AS LASTNAME,
+             <!--CFBRNN AS BRANCH_UNIT_CODE,-->
+             CFOFFR AS OFFICER_CODE,
+             CFUIC2 AS DORSI_CODE,
+             "CFCIF#" AS CIF_NUMBER,
+             CFNA1A AS FIRSTNAME,
+             CFNA1B AS MIDDLENAME,
+             CFTINN AS TIN_NUMBER,
+             CFRESD AS RESIDENT_CODE,
+             CFBIR6 AS CREATION_DATE,
+           	 CIF.CFINDI
+         from
+        	  TFSDB2S.CFMAST CIF where "CFCIF#" IN
+        	  (SELECT DISTINCT(FACILITY."AFCIF#") FROM TFSDB2S.LNAPPF FACILITY
+        	  WHERE FACILITY.AFAPNO = #{mainCifNumber})
+<!--         	  AND to_date(digits(FACILITY.AFEXP6),'mmddyy') >  CURRENT_TIMESTAMP ) -->
+ 	  </select>
+
+	<select id="getCasaAccountsByNumberAndCurrency" resultType="hashMap">
+        select
+           	(CASE WHEN CFINDI = 'Y' THEN (TRIM(CFNA1A) || ' ' || TRIM(CFNA1B) || ' ' || TRIM(CFNA1)) ELSE (CFNA1 || CFNA1A || CFNA1B) END) AS ACCOUNT_FULL_NAME,
+           	ACCOUNT.CFSNME AS ACCOUNT_NAME
+        from
+       	  TFSDB2S.CFACCT ACCOUNT
+       	LEFT JOIN
+       	TFSDB2S.CFMAST CIF
+       	ON CIF."CFCIF#" = ACCOUNT."CFCIF#"
+       	LEFT JOIN
+       	  TFSDB2S.DDMAST CIFDETAILS
+       	ON CIFDETAILS.ACCTNO = ACCOUNT."CFACC#"
+       	where 
+			(CFATYP = 'D' OR CFATYP = 'S')
+		<!-- <if test="accountName != ''">
+		AND (ACCOUNT.CFSNME LIKE ('%' || TRIM(#{accountName}) || '%') OR #{accountName} LIKE ('%' || TRIM(ACCOUNT.CFSNME) || '%'))
+		</if> -->
+		<if test="accountNumber != 0">
+		AND ACCOUNT."CFACC#" = #{accountNumber}
+		</if>
+		<if test="currency != ''">
+		AND CIFDETAILS.DDCTYP = #{currency}
+		</if>
+    </select>
+    
+    <select id="getCifFullNameByCifName" resultType="hashMap">
+    	select
+           	(CASE WHEN CIF.CFINDI = 'Y' THEN (TRIM(CIF.CFNA1A) || ' ' || TRIM(CIF.CFNA1B) || ' ' || TRIM(CIF.CFNA1)) ELSE (CIF.CFNA1 || CIF.CFNA1A || CIF.CFNA1B) END) AS ACCOUNT_FULL_NAME
+        from
+        TFSDB2S.CFMAST CIF
+        WHERE CIF.CFSNME LIKE #{cifName}
+    </select>
+    
+    <select id="getCifsByNameAndOrNumber" resultType="hashMap">
+        SELECT
+		A.BRANCH_UNIT_CODE AS BRANCH_UNIT_CODE,
+		B.ALLOCATION_UNIT_CODE AS ALLOCATION_UNIT_CODE,
+		C.ERROR,
+		CIF.CFSNME AS CIF_NAME,
+		CIF.CFNA1 AS LASTNAME,
+		CIF.CFOFFR AS OFFICER_CODE,
+		OFFICERS.JHONAM AS OFFICER_NAME,
+		CFUIC2 AS DORSI_CODE,
+		CIF."CFCIF#" AS CIF_NUMBER,
+		CFNA1A AS FIRSTNAME,
+		CFNA1B AS MIDDLENAME,
+		CFTINN AS TIN_NUMBER,
+		CFRESD AS RESIDENT_CODE,
+		CFBIR6 AS CREATION_DATE,
+		ADDRESS.CFNA2 AS ADDRESS_LINE1,
+		ADDRESS.CFNA3 AS ADDRESS_LINE2,
+		ADDRESS.CFNA4 AS ADDRESS_LINE3,
+		CIF.CFINDI AS INDIVIDUAL,
+		LN.BIMPOR AS CBCODE
+		FROM TFSDB2S.CFMAST CIF
+		LEFT JOIN TFSDB2S.CFADDR ADDRESS ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+		AND ADDRESS.CFASEQ =
+		(
+		   SELECT
+		   CFASEQ
+		   FROM TFSDB2S.CFADDR
+		   WHERE "CFCIF#" = CIF."CFCIF#"
+		   ORDER BY CFASEQ FETCH FIRST 1 ROWS ONLY
+		)
+		LEFT JOIN TFSDB2S.JHOFFR OFFICERS ON OFFICERS.JHOOFF = CIF.CFOFFR
+		LEFT JOIN
+		(
+		   SELECT
+		   RIGHT(OFFICER.JHOBR#, 3) AS BRANCH_UNIT_CODE,
+		   (ACCOUNT.JLUNIT) AD_UNIT_CODE,
+		   OFFICER.JHOOFF
+		   FROM TFSDB2S.JHOFFR OFFICER
+		   INNER JOIN TFSDB2S.JHPARL ACCOUNT ON OFFICER.JHOBR# = ACCOUNT.JLRFBR
+		   AND OFFICER.JHOBR# != 0
+		   UNION
+		   SELECT
+		   RIGHT(OFFICER.JHOBR#, 3) AS BRANCH_UNIT_CODE,
+		   CAST(NULL AS VARCHAR(5)) AD_UNIT_CODE,
+		   OFFICER.JHOOFF
+		   FROM TFSDB2S.JHOFFR OFFICER
+		   WHERE OFFICER.JHOBR# = 0 OR OFFICER.JHOBR# NOT IN
+		   (
+		      SELECT
+		      ACCOUNT.JLRFBR
+		      FROM TFSDB2S.JHPARL ACCOUNT
+		   )
+		)
+		A ON A.JHOOFF = CIF.CFOFFR
+		LEFT JOIN
+		(
+		   (
+		      SELECT
+		      CHAR(ACCOUNT2.JLUNIT) AS ALLOCATION_UNIT_CODE,
+		      CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE
+		      FROM TFSDB2S.JHPARL ACCOUNT2
+		      WHERE TRANSLATE(CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789') = '~~~'
+		      AND ACCOUNT2.JLRFBR != 0
+		      UNION
+		      SELECT
+		      CHAR(REL_MAN.PUCOD) AS ALLOCATION_UNIT_CODE,
+		      CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		      FROM TFSDB2S.LNPAN4 REL_MAN
+		      WHERE REL_MAN.PGDOBD = 'G'
+		      AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      UNION
+		      SELECT
+		      CHAR(OFFICER.JLUNIT) AS ALLOCATION_UNIT_CODE,
+		      CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+		      FROM TFSDB2S.JHPARL OFFICER
+		      JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+		      AND TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" != 0
+		      WHERE OFFICER.JLUNIT LIKE '58%'
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      CAST(NULL AS VARCHAR(5)) AS ALLOCATION_UNIT_CODE,
+		      CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+		      FROM TFSDB2S.JHPARL OFFICER
+		      JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+		      AND TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" != 0
+		      WHERE OFFICER.JLUNIT NOT LIKE '58%'
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      CAST(NULL AS VARCHAR(5)) AS ALLOCATION_UNIT_CODE,
+		      CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+		      FROM TFSDB2S.JHOFFR CLASS
+		      WHERE TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" = 0
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		   )
+		)
+		B ON B.OFFICER_CODE = CIF.CFOFFR
+		LEFT JOIN
+		(
+		   SELECT
+		   DISTINCT CIF2.CFOFFR AS OFFICER_CODE, 'B1' AS ERROR
+		   FROM TFSDB2S.CFMAST CIF2
+		   WHERE CIF2.CFOFFR NOT IN
+		   (
+		      SELECT
+		      DISTINCT OFFICER.JHOOFF
+		      FROM TFSDB2S.JHOFFR OFFICER
+		   )
+		   UNION
+		   SELECT
+		   DISTINCT CIF3.CFOFFR AS OFFICER_CODE, 'B2' AS ERROR
+		   FROM TFSDB2S.CFMAST CIF3
+		   WHERE CIF3.CFOFFR IN
+		   (
+		      SELECT
+		      OFFICER.JHOOFF
+		      FROM TFSDB2S.JHOFFR OFFICER
+		      WHERE OFFICER."JHOBR#" = 0
+		   )
+		   UNION
+		   SELECT
+		   DISTINCT CIF4.CFOFFR AS OFFICER_CODE, B.ERROR AS ERROR
+		   FROM TFSDB2S.CFMAST CIF4
+		   INNER JOIN
+		   (
+		      SELECT
+		      DISTINCT CIF5.CFOFFR AS OFFICER_CODE, 'A1' AS ERROR
+		      FROM TFSDB2S.CFMAST CIF5
+		      WHERE TRANSLATE(CAST(CIF5.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789') = '~~~'
+		      AND CIF5.CFOFFR NOT IN
+		      (
+		         SELECT
+		         DISTINCT CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE
+		         FROM TFSDB2S.JHPARL ACCOUNT2
+		         WHERE TRANSLATE(CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789') = '~~~'
+		      )
+		      UNION
+		      SELECT
+		      DISTINCT CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE, 'A2' AS ERROR
+		      FROM TFSDB2S.JHPARL ACCOUNT2
+		      WHERE TRANSLATE(CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789') = '~~~'
+		      AND ACCOUNT2.JLRFBR = 0
+		      UNION
+		      SELECT
+		      DISTINCT CIF6.CFOFFR AS OFFICER_CODE, 'A3' AS ERROR
+		      FROM TFSDB2S.CFMAST CIF6
+		      WHERE TRANSLATE(CAST(CIF6.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CIF6.CFOFFR NOT IN
+		      (
+		         SELECT
+		         DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+		         FROM TFSDB2S.JHOFFR CLASS
+		         WHERE TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		         UNION
+	             SELECT
+	             CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+	             FROM TFSDB2S.LNPAN4 REL_MAN
+	             WHERE REL_MAN.PGDOBD = 'G'
+	             AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      DISTINCT CIF6.CFOFFR AS OFFICER_CODE, 'A4' AS ERROR
+		      FROM TFSDB2S.CFMAST CIF6
+		      WHERE TRANSLATE
+		      (
+		         CAST(CIF6.CFOFFR as CHAR(3)), '~~~~~~~~~~', '0123456789'
+		      )
+		      != '~~~'
+		      AND CIF6.CFOFFR IN
+		      (
+		         SELECT
+		         DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE
+		         FROM TFSDB2S.JHOFFR CLASS
+		         WHERE TRANSLATE
+		         (
+		            CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789'
+		         )
+		         != '~~~'
+		         AND CLASS."JHOBR#" NOT IN
+		         (
+		            SELECT
+		            OFFICER.JLRFBR
+		            FROM TFSDB2S.JHPARL OFFICER
+		         )
+		      )
+		      AND CIF6.CFOFFR NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE
+		         (
+		            CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789'
+		         )
+		         != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE, 'A5' AS ERROR
+		      FROM TFSDB2S.JHPARL OFFICER
+		      JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+		      AND TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" != 0
+		      WHERE OFFICER.JLUNIT NOT LIKE '58%'
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      DISTINCT CHAR(CLASS.JHOOFF) AS OFFICER_CODE, 'A6' AS ERROR
+		      FROM TFSDB2S.JHOFFR CLASS
+		      WHERE TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" = 0
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		      UNION
+		      SELECT
+		      CHAR(ACCOUNT2.JLRFBR) AS OFFICER_CODE, '00' AS ERROR
+		      FROM TFSDB2S.JHPARL ACCOUNT2
+		      WHERE TRANSLATE(CAST(ACCOUNT2.JLRFBR as CHAR(3)), '~~~~~~~~~~', '0123456789') = '~~~'
+		      AND ACCOUNT2.JLRFBR != 0
+		      UNION
+		      SELECT
+		      CHAR(REL_MAN.POFFCD) AS OFFICER_CODE, '00' AS ERROR
+		      FROM TFSDB2S.LNPAN4 REL_MAN
+		      WHERE REL_MAN.PGDOBD = 'G'
+		      AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      UNION
+		      SELECT
+		      CHAR(CLASS.JHOOFF) AS OFFICER_CODE, '00' AS ERROR
+		      FROM TFSDB2S.JHPARL OFFICER
+		      JOIN TFSDB2S.JHOFFR CLASS ON OFFICER.JLRFBR = CLASS."JHOBR#"
+		      AND TRANSLATE(CAST(CLASS.JHOOFF as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      AND CLASS."JHOBR#" != 0
+		      WHERE OFFICER.JLUNIT LIKE '58%'
+		      AND CLASS.JHOOFF NOT IN
+		      (
+		         SELECT
+		         CHAR(REL_MAN.POFFCD) AS OFFICER_CODE
+		         FROM TFSDB2S.LNPAN4 REL_MAN
+		         WHERE REL_MAN.PGDOBD = 'G'
+		         AND TRANSLATE(CAST(REL_MAN.POFFCD as CHAR(3)), '~~~~~~~~~~', '0123456789') != '~~~'
+		      )
+		   )
+		   B ON B.OFFICER_CODE = CIF4.CFOFFR
+		   WHERE CIF4.CFOFFR IN
+		   (
+		      SELECT
+		      DISTINCT OFFICER.JHOOFF
+		      FROM TFSDB2S.JHOFFR OFFICER
+		      WHERE OFFICER."JHOBR#" != 0
+		   )
+		)
+		C ON CIF.CFOFFR = C.OFFICER_CODE
+		LEFT JOIN TFSDB2S.LNSCOD LN
+		ON LN."BCIF#" = CIF."CFCIF#"
+		WHERE TRIM(CIF.CFOFFR) != '' AND CIF.CFOFFR IS NOT NULL
+  		<choose>
+  			<when test="cifName != '' and cifNumber != ''">
+  				AND (CIF."CFSNME" LIKE #{cifName} AND CIF."CFCIF#" LIKE #{cifNumber})
+  			</when>
+  			<otherwise>
+  				AND (CIF."CFSNME" LIKE #{cifName} OR CIF."CFCIF#" LIKE #{cifNumber})
+  			</otherwise>
+  		</choose>
+		<if test="branchUnitCode != '909'">
+				AND (A.BRANCH_UNIT_CODE = CAST(#{branchUnitCode} AS DECIMAL) OR A.AD_UNIT_CODE = CAST(#{branchUnitCode} AS DECIMAL))
+		</if>
+    </select>
+
+    <select id="getCifByTinNumber" resultType="hashMap">
+        select
+        CIF.CFSNME AS CIF_NAME,
+        CIF.CFNA1 AS LASTNAME,
+        CIF.CFOFFR AS OFFICER_CODE,
+        OFFICERS.JHONAM AS OFFICER_NAME,
+        CFUIC2 AS DORSI_CODE,
+        CIF."CFCIF#" AS CIF_NUMBER,
+        CFNA1A AS FIRSTNAME,
+        CFNA1B AS MIDDLENAME,
+        CFTINN AS TIN_NUMBER,
+        CFRESD AS RESIDENT_CODE,
+        CFBIR6 AS CREATION_DATE,
+        ADDRESS.CFNA2 AS ADDRESS_LINE1,
+        ADDRESS.CFNA3 AS ADDRESS_LINE2,
+        ADDRESS.CFNA4 AS ADDRESS_LINE3,
+        CIF.CFINDI AS INDIVIDUAL
+        from
+        TFSDB2S.CFMAST CIF
+        LEFT JOIN
+        TFSDB2S.CFADDR ADDRESS
+        ON ADDRESS."CFCIF#" = CIF."CFCIF#"
+        AND ADDRESS.CFASEQ = (SELECT CFASEQ FROM TFSDB2S.CFADDR
+        WHERE "CFCIF#" = CIF."CFCIF#"
+        ORDER BY CFASEQ
+        FETCH FIRST 1 ROWS ONLY)
+        LEFT JOIN TFSDB2S.JHOFFR OFFICERS ON
+        OFFICERS.JHOOFF = CIF.CFOFFR
+        where CIF.CFTINN = #{tinNumber}
+    </select>
+</mapper>

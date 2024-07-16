@@ -1,0 +1,11 @@
+--- uat-schemas.properties
++++ uat-schemas.properties
+@@ -17,7 +17,7 @@
+ officers=UCPARUCMN1
+ ccbd=UCPARUCMN1
+ holiday=UCPARUCMN1
+-gl=UCDATUGLD1
++gl=TFSDB2S
+ 
+ 
+ dailyrates=JHFXDTTF

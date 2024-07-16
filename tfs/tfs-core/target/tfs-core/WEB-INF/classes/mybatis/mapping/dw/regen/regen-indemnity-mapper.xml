@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.report.dw.regen.dao.IndemnityAuditDao">
+
+    <resultMap id="indemnityAuditResultMap" type="com.ucpb.tfs.report.dw.regen.IndemnityAudit" >
+        <id column="REV_ID" property="revId" jdbcType="INTEGER" />
+        <result column="INDEMNITYNUMBER" property="indemnityNumber" jdbcType="VARCHAR" />
+        <result column="INDEMNITYTYPE" property="indemnityType" jdbcType="VARCHAR" />
+        <result column="REFERENCENUMBER" property="referenceNumber" jdbcType="VARCHAR" />
+        <result column="TRANSPORTMEDIUM" property="transportMedium" jdbcType="VARCHAR" />
+        <result column="SHIPMENTSEQUENCENUMBER" property="shipmentSequenceNumber" jdbcType="INTEGER" />
+        <result column="SHIPMENTCURRENCY" property="shipmentCurrency" jdbcType="VARCHAR" />
+        <result column="SHIPMENTAMOUNT" property="shipmentAmount" jdbcType="DECIMAL" />
+        <result column="INDEMNITYISSUEDATE" property="indemnityIssueDate" jdbcType="TIMESTAMP" />
+        <result column="CWTFLAG" property="cwtFlag" jdbcType="SMALLINT" />
+        <result column="BLAIRWAYBILLNUMBER" property="blAirwayBillNumber" jdbcType="VARCHAR" />
+        <result column="PROCESSDATE" property="processDate" jdbcType="TIMESTAMP" />
+        <result column="BLPRESENTED" property="blPresented" jdbcType="VARCHAR" />
+        <result column="FACILITYID" property="facilityId" jdbcType="VARCHAR" />
+        <result column="CANCELLATIONDATE" property="cancellationDate" jdbcType="TIMESTAMP" />
+        <result column="DOCUMENTRELEASEDATE" property="documentReleaseDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        REV_ID, INDEMNITYNUMBER, INDEMNITYTYPE, REFERENCENUMBER, TRANSPORTMEDIUM, SHIPMENTSEQUENCENUMBER,
+        SHIPMENTCURRENCY, SHIPMENTAMOUNT, INDEMNITYISSUEDATE, CWTFLAG, BLAIRWAYBILLNUMBER,
+        PROCESSDATE, BLPRESENTED, FACILITYID, CANCELLATIONDATE, DOCUMENTRELEASEDATE
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpb.tfs.report.dw.regen.IndemnityAudit" >
+        insert into INDEMNITY_AUDIT (
+            REV_ID, INDEMNITYNUMBER, INDEMNITYTYPE,
+            REFERENCENUMBER, TRANSPORTMEDIUM, SHIPMENTSEQUENCENUMBER,
+            SHIPMENTCURRENCY, SHIPMENTAMOUNT, INDEMNITYISSUEDATE,
+            CWTFLAG, BLAIRWAYBILLNUMBER, PROCESSDATE,
+            BLPRESENTED, FACILITYID, CANCELLATIONDATE,
+            DOCUMENTRELEASEDATE
+        )
+        values (#{revId,jdbcType=INTEGER}, #{indemnityNumber,jdbcType=VARCHAR}, #{indemnityType,jdbcType=VARCHAR},
+        #{referenceNumber,jdbcType=VARCHAR}, #{transportMedium,jdbcType=VARCHAR}, #{shipmentSequenceNumber,jdbcType=INTEGER},
+        #{shipmentCurrency,jdbcType=VARCHAR}, #{shipmentAmount,jdbcType=DECIMAL}, #{indemnityIssueDate,jdbcType=TIMESTAMP},
+        #{cwtFlag,jdbcType=SMALLINT}, #{blAirwayBillNumber,jdbcType=VARCHAR}, #{processDate,jdbcType=TIMESTAMP},
+        #{blPresented,jdbcType=VARCHAR}, #{facilityId,jdbcType=VARCHAR}, #{cancellationDate,jdbcType=TIMESTAMP},
+        #{documentReleaseDate,jdbcType=TIMESTAMP})
+    </insert>
+
+</mapper>

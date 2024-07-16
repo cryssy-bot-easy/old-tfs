@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt759Mapper">
+        <entry value="27" key="'1/1'"/>
+        <entry value="20" key="details.get('lcNumber') ?: ''"/>
+        <entry value="21" key="details.get('relatedReference') ?: ''"/>
+        <entry value="22D" key="details.get('formOfUndertaking') ?: ''"/>
+        <entry value="23" key="details.get('undertakingNumber') ?: ''"/>
+        <entry value="52A" key="details.get('issuer') == 'A' ? details.get('issuerIdentifierCode') : ''"/>
+        <entry value="52D" key="details.get('issuer') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, details.get('issuerNameAndAddress')) : ''"/>
+        <entry value="23H" key="details.get('functionOfMessage') ?: ''"/>
+        <entry value="45D" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('narrative')) ?: ''"/>
+        <entry value="23X" key="T(com.ucpb.tfs.util.SwiftUtil).formatFileIdentification(details?.get('fileIdentification'),details?.get('fileIdentificationDescription'))"/>
+    </util:map>
+</beans>

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.ProductReference" table="RefProduct">
+
+        <composite-id name="productId" access="field">
+            <key-property name="productId" column="productId" type="string" length="50"/>
+        </composite-id>
+
+        <property name="ucpbProductId" column="ucpbProductId" type="string" length="7"/>
+
+        <property name="documentType" column="documentType" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentType</param>
+            </type>
+        </property>
+
+        <property name="documentClass" column="documentClass" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentClass</param>
+            </type>
+        </property>
+
+        <property name="documentSubType1" column="documentSubType1" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType1</param>
+            </type>
+        </property>
+
+        <property name="documentSubType2" column="documentSubType2" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType2</param>
+            </type>
+        </property>
+
+        <property name="name" column="name" length="30" type="java.lang.String"/>
+
+        <property name="contingentAccountingCode" length="50" type="java.lang.String"/>
+        <property name="contraContingentAccountingCode" length="50" type="java.lang.String"/>
+
+        <property name="discrepancyContingentAccountingCode" column="discContAccCode" length="50" type="java.lang.String"/>
+        <property name="discrepancyContraContingentAccountingCode" column="discContraContAccCode" length="50" type="java.lang.String"/>
+
+        <property name="bookCode" length="2" type="java.lang.String"/>
+        <property name="documentCode" length="5" type="java.lang.String"/>
+        <property name="documentSubType3" length="30" type="java.lang.String"/>
+        <property name="shortName" column="SHORT_NAME" length="8" type="java.lang.String"/>
+        <property name="glAccountType" column="GL_ACCT_TYPE" length="1" type="java.lang.String"/>
+
+    </class>
+
+</hibernate-mapping>

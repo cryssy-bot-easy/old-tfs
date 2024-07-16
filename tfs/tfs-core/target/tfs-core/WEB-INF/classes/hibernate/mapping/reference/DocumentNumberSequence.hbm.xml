@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.DocumentNumberSequence" table="DOC_NUM_SEQUENCE">
+        <id name="id" column="id">
+            <generator class="increment"/>
+        </id>
+        <property name="documentType" column="document_type" type="string" length="5"/>
+        <property name="sequence" column="sequence" type="integer"/>
+        <property name="unitCode" column="unit_code" type="string" length="5"/>
+        <property name="year" column="sequence_year" type="int"/>
+   </class>
+
+</hibernate-mapping>

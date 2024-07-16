@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ipc.rbac.domain.User" table="RBAC_User">
+
+        <composite-id name="userActiveDirectoryId" access="field">
+            <key-property name="userActiveDirectoryId" column="userActiveDirectoryId" type="string" length="20"/>
+        </composite-id>
+
+<!--
+        <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="id" column="id"/>
+        </component>
+-->
+
+		<property name="firstName" type="string" length="40"/>
+
+		<property name="lastName" type="string" length="40"/>
+
+        <property name="tellerId" type="string" length="20"/>
+		
+	</class>
+
+</hibernate-mapping>

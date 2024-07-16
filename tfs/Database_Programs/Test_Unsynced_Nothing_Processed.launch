@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="BaseParamsFile" value="Test_Unsynced_Trade_Service_Nothing_Processed_BaseParams.txt"/>
+<stringAttribute key="BaseResultFiles" value="Test_Unsynced_Trade_Service_Nothing_Processed_BaseResult"/>
+<intAttribute key="BaseResultFilesCount" value="1"/>
+<stringAttribute key="OutputParamsFile" value="Test_Unsynced_Nothing_Processed_OutputParams.txt"/>
+<stringAttribute key="OutputResultFiles" value="Test_Unsynced_Nothing_Processed_OutputResult"/>
+<intAttribute key="OutputResultFilesCount" value="1"/>
+<stringAttribute key="RoutineParameter.P_DATE" value="2020-02-15"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="false"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BaselineDesc" value="13/02/2020, 3:35 PM - Run Test: Test_Unsynced_Trade_Service_Nothing_Processed - TFSDB2P.SYNCHRONIZE_LC_STATUS(DATE, INTEGER, VARCHAR(2000))"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS2212"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2P"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="true"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="SYNCHRONIZE_LC_STATUS_DATE_INTEGER_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="SYNCHRONIZE_LC_STATUS"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2P"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2P.SYNCHRONIZE_LC_STATUS(DATE, INTEGER, VARCHAR(2000))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.StoredProcedure"/>
+<booleanAttribute key="RunRoutineConfiguration.UseOutputAsBaseline" value="false"/>
+<stringAttribute key="ServiceOptions.Project" value="Trade Finance System"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

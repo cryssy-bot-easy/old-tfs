@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="BaseResultFiles" value="Test_With_Complete_Reference_Tables_No_TP_BaseResult"/>
+<intAttribute key="BaseResultFilesCount" value="1"/>
+<stringAttribute key="OutputResultFiles" value="Test_With_Complete_Reference_Tables_No_TP_OutputResult"/>
+<intAttribute key="OutputResultFilesCount" value="1"/>
+<stringAttribute key="RoutineParameter.P_DOCUMENTNUMBER" value="909-03-960-19-00334-6"/>
+<stringAttribute key="RoutineParameter.P_SERVICETYPE" value="OPENING"/>
+<stringAttribute key="RoutineParameter.P_TRADESERVICEID" value="e3d40a86-f4dd-485e-8416-3dca92eaac4e"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="false"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BaselineDesc" value="13/02/2020, 2:32 PM - Run Test: Test_With_Complete_Reference_Tables_No_TP - TFSDB2P.WITH_COMPLETE_REFERENCE_TABLES:(VARCHAR(36), VARCHAR(30), VARCHAR(30))"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunScript" value="-- SIMULATE MISSING MASTER TABLE&#13;&#10;&#13;&#10;DELETE FROM LCNEGOTIATION&#13;&#10;WHERE DOCUMENTNUMBER = '909-03-960-19-00334-6';&#13;&#10;&#13;&#10;&#13;&#10;DELETE FROM &#13;&#10;LCREQUIREDDOCUMENT&#13;&#10;WHERE DOCUMENTNUMBER = '909-03-960-19-00334-6';&#13;&#10;&#13;&#10;DELETE FROM &#13;&#10;LETTEROFCREDIT&#13;&#10;WHERE DOCUMENTNUMBER = '909-03-960-19-00334-6';&#13;&#10;&#13;&#10;DELETE FROM TRADEPRODUCT&#13;&#10;WHERE DOCUMENTNUMBER = '909-03-960-19-00334-6';&#13;&#10;"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS2212"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2P"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="true"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="WITH_COMPLETE_REFERENCE_TABLES_VARCHAR_VARCHAR_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="WITH_COMPLETE_REFERENCE_TABLES"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2P"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2P.WITH_COMPLETE_REFERENCE_TABLES:(VARCHAR(36), VARCHAR(30), VARCHAR(30))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.UserDefinedFunction"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineVersion" value=""/>
+<booleanAttribute key="RunRoutineConfiguration.UseOutputAsBaseline" value="false"/>
+<stringAttribute key="ServiceOptions.Project" value="Trade Finance System"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

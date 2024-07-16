@@ -1,0 +1,34 @@
+CREATE TABLE "GL_CODES"
+(
+   ID bigint PRIMARY KEY,
+   UNIT_CODE varchar(255),
+   SERVICETYPE varchar(255),
+   DOCUMENTTYPE varchar(255),
+   DOCUMENTCLASS varchar(255),
+   DOCUMENTSUBTYPE1 varchar(255),
+   DOCUMENTSUBTYPE2 varchar(255),
+   PRODUCT_CODE varchar(255),
+   BOOK_CODE varchar(255),
+   CREDIT_CODE varchar(255),
+   DEBIT_CODE varchar(255)
+)
+;
+CREATE UNIQUE INDEX SQL121026125234950 ON "GL_CODES"(ID)
+;
+
+
+CREATE TABLE "TFS"."GL_CODES"
+(
+   ID bigint PRIMARY KEY,
+   UNIT_CODE varchar(255),
+   SERVICETYPE varchar(255),
+   DOCUMENTTYPE varchar(255),
+   DOCUMENTCLASS varchar(255),
+   DOCUMENTSUBTYPE1 varchar(255),
+   DOCUMENTSUBTYPE2 varchar(255),
+   PRODUCT_CODE varchar(255),
+   BOOK_CODE varchar(255),
+   CREDIT_CODE varchar(255),
+   DEBIT_CODE varchar(255)
+)
+;

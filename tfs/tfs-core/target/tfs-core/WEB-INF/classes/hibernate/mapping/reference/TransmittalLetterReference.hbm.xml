@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.TransmittalLetterReference" table="RefTransmittalLetter">
+
+        <id column="id" name="id">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="transmittalLetterCode" class="com.ucpb.tfs.domain.letter.TransmittalLetterCode" access="field">
+            <property name="transmittalLetterCode" column="transmittalLetterCode" type="string" length="10"/>
+        </component>
+
+        <property name="letterDescription" column="letterDescription" type="org.hibernate.type.MaterializedClobType" length="3000"/>
+
+    </class>
+
+</hibernate-mapping>

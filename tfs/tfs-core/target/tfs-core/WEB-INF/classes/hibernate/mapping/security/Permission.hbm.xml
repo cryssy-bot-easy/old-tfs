@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Permission" table="Sec_Permission">
+
+        <composite-id name="permissionId" class="com.ucpb.tfs.domain.security.PermissionId" access="field">
+            <key-property name="permissionId" column="permissionId" type="string" length="30"/>
+        </composite-id>
+
+        <property name="operation">
+            <column name="operation" length="8"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.security.Operation</param>
+            </type>
+        </property>
+
+        <many-to-one name="object" class="com.ucpb.tfs.domain.security.Object" column="object_code"/>
+
+	</class>
+
+</hibernate-mapping>

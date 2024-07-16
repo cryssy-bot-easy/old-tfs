@@ -1,0 +1,41 @@
+CREATE OR REPLACE FUNCTION WITH_COMPLETE_NONLC_REFERENCE_TABLES (IN P_TRADESERVICEID VARCHAR(36)
+                                                          ,IN P_DOCUMENTNUMBER VARCHAR(30))
+    RETURNS CHAR(1)
+    NO EXTERNAL ACTION
+F1: BEGIN
+    -- ######################################################################
+    -- # Returns count there are records with "Approved" status for a given
+    -- # TradeServiceID.
+    -- #
+    -- # Raymund Mallonga 4/27/2020
+    -- #
+    -- # Limitation: User for DP Transactions only.
+    -- ######################################################################
+    DECLARE cnt_route INTEGER DEFAULT 0;
+    DECLARE cnt_ae    INTEGER DEFAULT 0;
+    DECLARE cnt_tp    INTEGER DEFAULT 0;
+    DECLARE cnt_master INTEGER DEFAULT 0;
+    DECLARE v_out CHAR(1) DEFAULT 'N';
+    DECLARE v_get_ae CHAR(1);    
+    
+    SET v_get_ae = GET_AE(P_TRADESERVICEID);
+   
+    ---need to have a record where status is approved --
+    SET cnt_route = COALESCE(( SELECT COUNT(*)
+                      FROM ROUTES WHERE ROUTINGINFORMATIONID = P_TRADESERVICEID
+                      AND  STATUS IN ('APPROVED','POSTED','POST_APPROVED')),0);
+                         
+ 
+    SET cnt_master =  COALESCE((SELECT COUNT(*)
+                                FROM DOCUMENTAGAINSTPAYMENT A
+                                WHERE DOCUMENTNUMBER = P_DOCUMENTNUMBER),0);
+   
+   
+    SET cnt_ae = DECODE(v_get_ae,'Y',1,0);
+       
+    IF cnt_route > 0  and cnt_ae > 0  and cnt_master > 0 then
+        SET v_out = 'Y';
+    END IF;
+   
+    RETURN v_out;
+END

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+     Revisions
+     Modified by: Cedrick C. Nungay
+     Date: 09/13/18
+     Description: Removed 39B, changed 72 to 72Z
+
+     Modified by: Cedrick C. Nungay
+     Date: 01/16/2019
+     Description: Adjusted fields for outgoing  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt747Mapper">
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+        <entry value="21" key="details.get('out747flag') == 'Y' ? details.get('reimbursingBankAccountNumber') : (details.get('reimbursingBankAccountNumberTo') ?: details.get('reimbursingBankAccountNumberFrom'))"/>
+        <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details?.get('amendmentDate') ?: details?.get('processDate'))"/>
+        <entry value="31E" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details?.get('expiryDateTo') ?: details?.get('expiryDate'))"/>
+        <!-- TODO: perform computations here new amount - previous -->
+        <entry value="32B" key="details.get('out747flag') == 'Y' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details.get('currency'), details.get('increaseAmount')) : (details.get('amountSwitchDisplay') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountIncrease(details.get('currency'),(details.get('amountFrom') != '0' or details.get('amountFrom') != null ? details.get('amountFrom') : details.get('outstandingBalance')),details.get('amountTo')) : '')"/>
+        <entry value="33B" key="details.get('out747flag') == 'Y' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details.get('currency'), details.get('decreaseAmount')) : (details.get('amountSwitchDisplay') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountDecrease(details.get('currency'),(details.get('amountFrom') != '0' or details.get('amountFrom') != null ? details.get('amountFrom') : details.get('outstandingBalance')),details.get('amountTo')) : '')"/>
+        <entry value="34B" key="details.get('out747flag') == 'Y' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details.get('newCurrency'), details.get('newAmount')) : (details.get('amountSwitchDisplay') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('amountTo')) : '' )"/>
+        <entry value="39A" key="details.get('out747flag') == 'Y' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(details.get('positiveToleranceLimit'), details.get('negativeToleranceLimit')) : (details.get('positiveToleranceLimitSwitchDisplay') == 'on' or details.get('negativeToleranceLimitSwitchDisplay') == 'on' ?
+            T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(details.get('positiveToleranceLimitTo') ?: details.get('positiveToleranceLimitFrom'), details.get('negativeToleranceLimitTo') ?: details.get('negativeToleranceLimitFrom')) : '')"/>
+        <entry value="39C" key="details.get('out747flag') == 'Y' ? details.get('additionalAmountsCovered') : (details.get('additionalAmountsCoveredTo') ?: details.get('additionalAmountsCoveredFrom'))"/>
+        <entry value="72Z" key="details.get('out747flag') == 'Y' ? details.get('senderToReceiverInformation') : (details.get('senderToReceiverTo') != null and details.get('senderToReceiverTo') != '' ? T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details.get('senderToReceiverTo'),details.get('senderToReceiverInformationTo')) : '')"/>
+        <entry value="77" key="details.get('out747flag') == 'Y' ? details.get('narrative') : (T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('narrativeFor747')) ?: '')"/>
+<!-- Sabi ni alex comment out daw field77A #1782-->
+<!--         <entry value="77A" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatNarrative(35,details.get('narrative'))"/> -->
+        <!--<entry value="21" key="'reimbursingBankReference'"/>-->
+        <!--<entry value="30" key="'date of original authorization to reimburse'"/>-->
+        <!--<entry value="31E" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatSwiftDate(details.get('expiryDate'))"/>-->
+        <!--<entry value="32B" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatAmount(details.get('currency'),details.get('currentAmount') != null ? details.get('currentAmount').subtract(details.get('refundAmount')?:new BigDecimal('0')) : '')"/>-->
+        <!--<entry value="33B" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatAmount(originalLc.currency,originalLc.refundAmount)"/>-->
+        <!--<entry value="39B" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatAmount(originalLc.currency,originalLc.currentAmount)"/>-->
+        <!--<entry value="39C" key="originalLc.additionalAmountsCovered"/>-->
+        <!--<entry value="72" key="originalLc.senderToReceiverInformation"/>-->
+        <!--<entry value="77A" key="originalLc.narrative"/>-->
+    </util:map>
+</beans>

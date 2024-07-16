@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ipc.rbac.application.query.authorization.IAuthorizationFinder">
+
+	<select id="findAuthorization" resultType="hashMap">
+      select * from RBAC_Authorization where id = #{authorizationId}
+    </select> 
+    
+	<select id="findAllActivePermissionsByUser" resultType="hashMap">
+		select
+	      	RBAC_User.FirstName,
+	      	RBAC_User.LastName,
+	      	RBAC_AuthorityType.id,
+			RBAC_AuthorityType.name,
+	      	RBAC_Authority.effectiveFrom,
+	      	RBAC_Authority.effectiveTo
+      	from 
+	      	RBAC_Authority authority,
+	      	RBAC_Authorization rbacAuthorization,
+	      	RBAC_AuthorityType authorityType,
+	      	RBAC_User rbacUser
+      	where
+	      	(authority.AuthorizationId = rbacAuthorization.Id and
+	      	 authority.AuthorityTypeId = authorityType.Id and
+	      	 rbacAuthorization.userActiveDirectoryId = rbacUser.Id and
+			 rbacAuthorization.userActiveDirectoryId = #{userActiveDirectoryId} and
+			 authorityType.type = 'PERMISSION') or
+			(authorityType.roleId = authority.AuthorityTypeId)
+    </select>     
+
+</mapper>

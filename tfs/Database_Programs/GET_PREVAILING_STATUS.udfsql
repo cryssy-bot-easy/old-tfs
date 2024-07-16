@@ -1,0 +1,42 @@
+CREATE OR REPLACE FUNCTION GET_PREVAILING_STATUS (IN P_TRADESERVICEID VARCHAR(36))
+	RETURNS CHAR(20)
+    NO EXTERNAL ACTION
+F1: BEGIN 
+    -- ######################################################################
+    -- # Gets all statuses and return the prevailing status from its 
+    -- # related tables (TRADESERVICE, ROUTES, TASK)
+    -- # 
+    -- # Mark Leonard Partoza 7/24/2020
+    -- #
+    -- ######################################################################
+    
+    DECLARE ret_status CHAR(20);
+   
+    SET ret_status = (SELECT STATUS FROM (
+						 	SELECT STATUS, COUNT(*) STATUS_COUNT
+							FROM (
+	                     		SELECT STATUS FROM TRADESERVICE WHERE TRADESERVICEID = P_TRADESERVICEID 
+	                     		UNION ALL
+	                     		-- get the unique status from AE table
+								SELECT MAX(STATUS) STATUS 
+									FROM INT_ACCENTRYACTUAL  WHERE TRADESERVICEID = P_TRADESERVICEID
+								UNION ALL
+								-- get the last status based from the last record ID
+								SELECT STATUS FROM (
+									SELECT STATUS 
+										FROM ROUTES WHERE ROUTINGINFORMATIONID = P_TRADESERVICEID
+										ORDER BY ID DESC 
+										FETCH FIRST 1 ROWS ONLY
+								)
+								UNION ALL
+								SELECT TASKSTATUS
+									FROM TASK WHERE TASKREFERENCENUMBER = P_TRADESERVICEID
+							) GROUP BY STATUS
+							ORDER BY STATUS_COUNT DESC 
+							FETCH FIRST 1 ROWS ONLY
+						));
+					
+       
+    RETURN ret_status;
+    
+END

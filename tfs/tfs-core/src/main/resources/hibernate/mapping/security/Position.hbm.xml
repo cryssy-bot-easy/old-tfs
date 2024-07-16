@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Position" table="SEC_POSITION">
+
+        <composite-id name="code" access="field">
+            <key-property name="code" column="code" type="string" length="20"/>
+        </composite-id>
+
+        <property name="positionName" column="positionName" type="string" length="100"/>
+        <property name="signingLimit" column="limit" type="java.math.BigDecimal"/>
+    </class>
+
+</hibernate-mapping>

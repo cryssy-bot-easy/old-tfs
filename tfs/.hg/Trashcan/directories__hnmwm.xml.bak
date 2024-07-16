@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:file="http://www.springframework.org/schema/integration/file"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration/file	http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd">
+
+    <file:outbound-channel-adapter id="csvReportDirectory"
+            directory="outputReports"
+            channel="outputChannel"
+            filename-generator-expression="'OUT' + new java.util.Date().getTime() + '.csv'"
+            delete-source-files="true"/>
+
+    <file:outbound-channel-adapter id="testReportDirectory"
+                                   directory="outputReports"
+                                   channel="textReportOutputChannel"
+                                   filename-generator-expression="'TXT' + new java.util.Date().getTime() + '.txt'"
+                                   delete-source-files="true"/>
+                                   
+</beans>

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.service.ServiceCharge" table="ServiceCharge">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <!-- todo: determine strategy to put a composite id in here instead of it's own -->
+        <!--<composite-id>-->
+            <!--<key-many-to-one name="tradeServiceId" column="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeService"/>-->
+            <!--<key-property name="chargeId" column="chargeId" type="java.lang.String"/>-->
+        <!--</composite-id>-->
+
+        <component name="chargeId" class="com.ucpb.tfs.domain.reference.ChargeId">
+            <property name="chargeId" column="chargeId" type="string" length="20"/>
+        </component>
+
+        <!-- amount is assumed as PESO -->
+        <property name="amount" column="amount" type="java.math.BigDecimal" />
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal" />
+
+        <property name="defaultAmount" column="defaultAmount" type="java.math.BigDecimal" />
+        <property name="defaultPesoAmount" column="defaultPesoAmount" type="java.math.BigDecimal" />
+        <property name="nocwtAmount" column="nocwtAmount" type="java.math.BigDecimal" />
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+        <property name="originalCurrency" column="originalCurrency" type="java.util.Currency" length="3"/>
+        <property name="overridenFlag" column="overridenFlag" type="string" length="1"/>
+
+        <!-- Shared by Refund and Collectible (a.k.a. Payment of Other Import Charges) -->
+        <property name="transactionType" column="transactionType" length="50" />
+        <property name="newSpecialRateThirdToUsd" column="newSpecialRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="newSpecialRateThirdToPhp" column="newSpecialRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="newSpecialRateUsdToPhp" column="newSpecialRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="newUrr" column="newUrr" type="java.math.BigDecimal" scale="8"/>
+
+        <component name="serviceChargeRefundDetail" class="com.ucpb.tfs.domain.service.ServiceChargeRefundDetail">
+            <property name="refundAmountInDefaultCurrency" column="refundAmountInDefaultCurrency" type="java.math.BigDecimal" />
+            <property name="refundAmountInOriginalCurrency" column="refundAmountInOriginalCurrency" type="java.math.BigDecimal" />
+            <property name="newRefundAmountInOriginalCurrency" column="newRefundAmountInOriginalCurrency" type="java.math.BigDecimal" />
+        </component>
+
+        <component name="serviceChargeCollectibleDetail" class="com.ucpb.tfs.domain.service.ServiceChargeCollectibleDetail">
+            <property name="collectibleAmountInDefaultCurrency" column="collectibleAmountInDefaultCurrency" type="java.math.BigDecimal" />
+            <property name="collectibleAmountInOriginalCurrency" column="collectibleAmountInOriginalCurrency" type="java.math.BigDecimal" />
+            <property name="newCollectibleAmountInOriginalCurrency" column="newCollectibleAmountInOriginalCurrency" type="java.math.BigDecimal" />
+        </component>
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.mtmessage.MtMessage" table="MtMessage">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <component name="tradeServiceReferenceNumber" class="com.ucpb.tfs.domain.service.TradeServiceReferenceNumber">
+            <property name="tradeServiceReferenceNumber" column="tradeServiceReferenceNumber" type="string" length="20"/>
+        </component>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <!--<property name="documentNumber" column="documentNumber" type="string" />-->
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </component>
+
+        <property name="mtStatus" column="mtStatus" length="12">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.mtmessage.enumTypes.MtStatus</param>
+            </type>
+        </property>
+
+        <property name="dateReceived" column="dateReceived" type="java.util.Date" />
+
+		<property name="mtType" column="mtType" type="string" length="5" />
+
+        <property name="message" column="message" type="org.hibernate.type.MaterializedClobType" length="10000"/>
+
+        <property name="instruction" column="instruction" type="string" length="200"/>
+
+        <component name="userRoutedTo" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="userActiveDirectoryId" type="string" length="20"/>
+        </component>
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date" />
+
+        <property name="messageClass" column="messageClass" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.mtmessage.enumTypes.MessageClass</param>
+            </type>
+        </property>
+
+        <property name="mtDirection" column="mtDirection" length="8">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.audit.Direction</param>
+            </type>
+        </property>
+
+
+        <property name="filename" column="filename" type="string" length="30"/>
+
+
+        <property name="sequenceNumber" column="sequenceNumber" type="integer"/>
+        <property name="sequenceTotal" column="sequenceTotal" type="integer"/>
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:SwiftBasicHeader xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/swift-message">
+    <ns2:application_identifier>F</ns2:application_identifier>
+    <ns2:service_identifier>01</ns2:service_identifier>
+    <ns2:lt_identifier>UCPBPHMAXXXX</ns2:lt_identifier>
+    <ns2:session_number>0000</ns2:session_number>
+    <ns2:sequence_number>000000</ns2:sequence_number>
+</ns2:SwiftBasicHeader>

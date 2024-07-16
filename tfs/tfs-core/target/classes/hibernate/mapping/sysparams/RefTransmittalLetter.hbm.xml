@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    <class name="com.ucpb.tfs.domain.sysparams.RefTransmittalLetter" table="REFTRANSMITTALLETTER">
+        <id name="id" column="ID" type="java.lang.Long">
+            <generator class="increment"/>
+        </id>
+        <property name="transmittalLetterCode" column="TRANSMITTALLETTERCODE" type="string" length="10"/>
+        <property name="letterDescription" column="LETTERDESCRIPTION" type="string" length="3000"/>
+    </class>
+</hibernate-mapping>

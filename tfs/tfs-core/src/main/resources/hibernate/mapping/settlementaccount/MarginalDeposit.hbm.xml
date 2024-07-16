@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.settlementaccount.MarginalDeposit" table="MarginalDeposit">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+            <!--<generator class="increment"/>-->
+        </id>
+
+        <!--start from settlement account-->
+
+        <component name="settlementAccountNumber" class="com.ucpb.tfs.domain.settlementaccount.SettlementAccountNumber">
+            <property name="settlementAccountNumber" column="settlementAccountNumber" length="30"/>
+        </component>
+
+        <property name="settlementAccountType" column="settlementAccountType" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.SettlementAccountType</param>
+            </type>
+        </property>
+
+        <property name="status" column="status" length="8">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.SettlementAccountStatus</param>
+            </type>
+        </property>
+
+        <property name="cifNumber" column="cifNumber" type="string" length="10"/>
+        <property name="cifName" column="cifName" type="string" length="100"/>
+        <property name="accountOfficer" column="accountOfficer" type="string" length="100"/>
+        <property name="ccbdBranchUnitCode" column="ccbdBranchUnitCode" type="string" length="10"/>
+
+        <property name="longName" column="longName" type="string" length="150"/>
+        <property name="address1" column="address1" type="string" length="150"/>
+        <property name="address2" column="address2" type="string" length="150"/>
+
+        <!--<set name="activities" cascade="all">-->
+            <!--<key>-->
+                <!--<column name="settlementAccountNumber"/>-->
+            <!--</key>-->
+            <!--<one-to-many class="com.ucpb.tfs.domain.settlementaccount.activity.Activity" />-->
+        <!--</set>-->
+
+        <property name="mdOutstandingBalance" column="mdOutstandingBalance" type="java.math.BigDecimal" access="property"/>
+
+        <set name="activities" cascade="all">
+            <key>
+                <column name="marginalDepositId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.settlementaccount.activity.MdActivity" />
+        </set>
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date"/>
+
+        <!--end from settlementaccount-->
+
+        <property name="pnSupport" column="marginalDepositPnSupport" length="3">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.MdPnSupport</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

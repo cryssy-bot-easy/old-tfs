@@ -1,0 +1,13 @@
+diff --git a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/BatchFacilityReearmarkServiceImpl.java b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/BatchFacilityReearmarkServiceImpl.java
+--- a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/BatchFacilityReearmarkServiceImpl.java
++++ b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/BatchFacilityReearmarkServiceImpl.java
+@@ -41,7 +41,8 @@
+ 			silverlakeLocalDao.deleteEarmarksTrade();
+ 			for(Availment availment : availments){
+ 				if(silverlakeLocalDao.updateFacilityAvailment(availment) == 0){
+-					returnVal = silverlakeLocalDao.insertFacilityAvailment(availment) == 1;
++					silverlakeLocalDao.insertFacilityAvailment(availment);
++					returnVal = true;
+ 				}
+ 			}
+ 		}catch (Exception e){

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozer.sourceforge.net
+          http://dozer.sourceforge.net/schema/beanmapping.xsd">
+          
+<!--   <mapping>  -->
+<!--     <class-a>java.util.Map</class-a> -->
+<!--     <class-b>com.prowidesoftware.swift.model.SwiftMessage</class-b>    -->
+<!--     <field> -->
+<!--       <a>one</a> -->
+<!--       <b>onePrime</b> -->
+<!--     </field> -->
+<!--   </mapping>   -->
+
+	<mapping>
+	  <class-a>java.util.Map</class-a>
+	  <class-b>java.util.Map</class-b>
+	  <field>
+	  	<a key="1">this</a>
+	  	<b key="1">this</b>
+	  </field>
+	  <field>
+	  	<a key="2">this</a>
+	  	<b key="2">this</b>
+	  </field>
+	</mapping>
+	
+	
+	<mapping>
+	  <class-a>java.util.Map</class-a>
+	  <class-b>org.dozer.Wrapper</class-b>
+	   <field>
+	  	<a key="1">this</a>
+	  	<b>mockObject1.value</b>
+	  </field>
+	  <field>
+	  	<a key="2">this</a>
+	  	<b>mockObject2.value</b>
+	  </field>
+	</mapping>
+	
+	<mapping>
+	  <class-a>java.util.Map</class-a>
+	  <class-b >com.prowidesoftware.swift.model.SwiftMessage</class-b>
+	   <field>
+	  	<a key="1">this</a>
+	  	<b>swiftBlock4</b>
+	  </field>
+	  <field>
+	  	<a key="2">this</a>
+	  	<b>mockObject2.value</b>
+	  </field>
+	</mapping>
+
+</mappings>

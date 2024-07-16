@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.settlementaccount.AccountsPayable" table="AccountsPayable">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <!--start from settlement account-->
+
+        <component name="settlementAccountNumber" class="com.ucpb.tfs.domain.settlementaccount.SettlementAccountNumber">
+            <property name="settlementAccountNumber" column="settlementAccountNumber" length="30"/>
+        </component>
+
+        <property name="settlementAccountType" column="settlementAccountType" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.SettlementAccountType</param>
+            </type>
+        </property>
+
+        <property name="status" column="status" length="11">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.SettlementAccountStatus</param>
+            </type>
+        </property>
+
+        <property name="cifNumber" column="cifNumber" type="string" length="10"/>
+
+        <property name="cifName" column="cifName" type="string" length="255"/>
+
+        <property name="accountOfficer" column="accountOfficer" type="string" length="100"/>
+        <property name="ccbdBranchUnitCode" column="ccbdBranchUnitCode" type="string" length="10"/>
+
+        <set name="activities" cascade="all">
+            <key>
+                <column name="accountsPayableId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.settlementaccount.activity.ApActivity" />
+        </set>
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date"/>
+
+        <!--end from settlementaccount-->
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3" />
+        <property name="apOutstandingBalance" column="apOutstandingBalance" type="java.math.BigDecimal" access="property"/>
+
+        <property name="natureOfTransaction" column="natureOfTransaction" type="string" length="100"/>
+
+        <property name="bookingDate" column="bookingDate" type="java.util.Date"/>
+
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal" />
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+    </class>
+
+</hibernate-mapping>

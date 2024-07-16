@@ -1,0 +1,979 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	PROLOGUE:
+	(revision)
+	SCR/ER Number: ER# 20160505-030
+	SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 – only Tenor was amended from sight to usance.
+	 						The AE are okay, debit the contingent for sight and credit to usance. But the DW Allocation reported the LC once 
+	 						and the ADB are not reported separately  for sight and usance.
+						2.  Adjustment on Standby LC tagging was not correctly reported in DW
+	[Revised by:] Lymuel Arrome Saul
+	[Date revised:] 05/05/2016
+	Program [Revision] Details: Added select script (getAuditRevId, checkIfTenorChange, getLetterOfCreditAuditByRevId and getOpeningStandbyTagging)
+								for extraction and checking of change of tenor and adjustment of standby tagging.
+	Date deployment: 
+	Member Type: XML
+	Project: CORE
+	Project Name: batch-process-mapper.xml		
+-->
+
+<mapper namespace="com.ucpb.tfs.batch.dao.BatchProcessDao">
+
+<resultMap id="dailyBalanceFileMap" type="com.ucpb.tfs.batch.report.dw.DailyBalanceRecord">
+        <result property="documentNumber" column="DOCUMENTNUMBER"/>
+        <result property="originalBalance" column="ORIGINALBALANCE" jdbcType="DECIMAL"/>
+        <result property="balanceDate" column="BALANCEDATE"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="documentType" column="DOCUMENTTYPE"/>
+        <result property="lcType" column="LCTYPE"/>
+        <result property="cashFlag" column="CASHFLAG"/>
+        <result property="cashAmount" column="CASHAMOUNT"/>
+        <result property="totalNegotiatedCashAmount" column="TOTALNEGOTIATEDCASHAMOUNT"/>
+        <result property="productType" column="PRODUCTTYPE"/>
+        <result property="balance" column="BALANCE" jdbcType="DECIMAL"/>
+        <result property="revalRate" column="REVALRATE" jdbcType="DECIMAL"/>
+        <result property="productId" column="PRODUCTID"/>
+        <result property="standbyTagging" column="STANDBYTAGGING"/>   
+</resultMap>
+
+    <update id="purgeUnactedEts">
+        <![CDATA[
+            UPDATE SERVICEINSTRUCTION SI
+                  SET STATUS = 'PURGED'
+                WHERE SI.SERVICEINSTRUCTIONID IN
+                  (SELECT SERVICEINSTRUCTIONID FROM SERVICEINSTRUCTION SI
+                    INNER JOIN
+                    (SELECT MAX(DATESENT) LASTROUTE,ROUTINGINFORMATIONID FROM ROUTES GROUP BY ROUTINGINFORMATIONID) MOVEMENT
+                    ON MOVEMENT.ROUTINGINFORMATIONID  = SI.SERVICEINSTRUCTIONID
+                  WHERE DAYS(cast(#{queryDate} as TIMESTAMP)) - DAYS(LASTROUTE) > 29 AND SI.STATUS IN ('PENDING', 'PREPARED', 'CHECKED'))
+      ]]>
+    </update>
+
+    <update id="cancelExpiredLettersOfCredit">
+        <![CDATA[ UPDATE TRADEPRODUCT  SET STATUS = 'EXPIRED' WHERE DOCUMENTNUMBER IN (SELECT DOCUMENTNUMBER FROM LETTEROFCREDIT  WHERE cast(#{queryDate} as TIMESTAMP) > EXPIRYDATE) ]]>
+    </update>
+
+    <delete id="deleteDailyBalance" >
+        <![CDATA[ DELETE FROM DAILYBALANCE WHERE cast(#{queryDate} as TIMESTAMP) = BALANCEDATE ]]>
+    </delete>
+
+    <update id="insertToDailyBalance">
+        <![CDATA[
+           INSERT INTO DAILYBALANCE (DOCUMENTNUMBER, BALANCE, BALANCEDATE)
+           (
+                SELECT
+                    LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    -- LC.OUTSTANDINGBALANCE AS BALANCE,
+                    (CASE WHEN ((DAYS(LC.EXPIRYDATE) < DAYS(cast(#{queryDate} as timestamp))) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN' OR TP.STATUS = 'REINSTATED'))
+                     THEN 0
+                     ELSE
+                        CASE WHEN TP.STATUS = 'CANCELLED'
+                        THEN 0
+                        ELSE
+                            CASE WHEN LC.OUTSTANDINGBALANCE < 0
+                            THEN 0
+                            ELSE LC.OUTSTANDINGBALANCE
+                            END
+                        END
+                     END
+                    ) AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    LETTEROFCREDIT_AUDIT LC
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join letterOfCredit_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            (
+                             (c.TYPE = 'CASH' AND a.STATUS = 'OPEN')
+                             OR ((DAYS(c.EXPIRYDATE) >= DAYS(cast(#{queryDate} as timestamp))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                            )
+                    )
+
+            UNION ALL
+
+                SELECT
+                    DA.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DA.OUTSTANDINGAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DA.DOCUMENTNUMBER AND TP.REV_ID = DA.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join documentAgainstAcceptance_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'ACCEPTED'
+                    )
+                AND
+                    (CASE WHEN DA.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DA.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+
+            UNION ALL
+
+                SELECT
+                    DP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DP.OUTSTANDINGAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    DOCUMENTAGAINSTPAYMENT_AUDIT DP
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DP.DOCUMENTNUMBER AND TP.REV_ID = DP.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join documentAgainstPayment_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN DP.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DP.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+
+            UNION ALL
+
+                SELECT
+                    OA.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    OA.OUTSTANDINGAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    OPENACCOUNT_AUDIT OA
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = OA.DOCUMENTNUMBER AND TP.REV_ID = OA.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join openAccount_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN OA.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE OA.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+
+            UNION ALL
+
+                SELECT
+                    DR.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DR.OUTSTANDINGAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    DIRECTREMITTANCE_AUDIT DR
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DR.DOCUMENTNUMBER AND TP.REV_ID = DR.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join directRemittance_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN DR.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DR.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+
+            UNION ALL
+
+                SELECT
+                    EB.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    EB.OUTSTANDINGAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    EXPORTBILLS_AUDIT EB
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = EB.DOCUMENTNUMBER AND TP.REV_ID = EB.REV_ID
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join exportBills_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN EB.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE EB.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+
+            UNION ALL
+
+                SELECT
+                    IND.INDEMNITYNUMBER AS DOCUMENTNUMBER,
+                    IND.SHIPMENTAMOUNT AS BALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE
+                FROM
+                    INDEMNITY_AUDIT IND
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = IND.INDEMNITYNUMBER AND TP.REV_ID = IND.REV_ID
+	            INNER JOIN
+	               LETTEROFCREDIT_AUDIT LC
+	            ON
+	               LC.DOCUMENTNUMBER = IND.REFERENCENUMBER
+                LEFT JOIN
+                	REFPRODUCT PRODUCT
+                ON
+                	PRODUCT.DOCUMENTCLASS = 'INDEMNITY'
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join indemnity_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'OPEN'
+                    )
+ 		        AND
+		            LC.REV_ID IN
+		            (
+		                select a.rev_id
+		                from tradeproduct_audit a
+		                join revinfo b on a.rev_id = b.rev
+		                join letterOfCredit_audit c on a.rev_id = c.rev_id
+		                where
+		                    a.documentNumber = IND.referenceNumber
+		                and
+		                    days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+		                order by b.revtstmp desc fetch first 1 rows only
+		            )
+		        AND
+		            PRODUCT.PRODUCTID = (
+                        CASE WHEN LC.TYPE = 'STANDBY'
+                        THEN 'FX-INDEMNITY-STANDBY-SIGHT'
+                        ELSE
+                            CASE WHEN LC.TYPE = 'CASH'
+                            THEN 'FX-INDEMNITY-CASH-SIGHT'
+                            ELSE 'FX-INDEMNITY'
+                            END
+                        END
+                    )
+                AND
+                    (CASE WHEN IND.SHIPMENTAMOUNT < 0
+                     THEN 0
+                     ELSE IND.SHIPMENTAMOUNT
+                     END
+                    ) <> 0
+           )
+        ]]>
+    </update>
+
+	<select id="getOriginalDailyBalance" resultMap="dailyBalanceFileMap">
+        <![CDATA[
+           SELECT DOCUMENTNUMBER, ORIGINALBALANCE, BALANCEDATE, CURRENCY, DOCUMENTTYPE, LCTYPE, CASHFLAG, CASHAMOUNT, TOTALNEGOTIATEDCASHAMOUNT, PRODUCTTYPE, PRODUCTID FROM
+           (
+          		SELECT
+                    LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    -- LC.OUTSTANDINGBALANCE AS BALANCE,
+                    (CASE WHEN ((DAYS(LC.EXPIRYDATE) < DAYS(cast(#{queryDate} as TIMESTAMP)) AND (DAYS(LC.LASTNEGOTIATIONDATE) != DAYS(cast(#{queryDate} as TIMESTAMP)) OR LC.LASTNEGOTIATIONDATE IS NULL) AND (DAYS(LC.LASTAMENDMENTDATE) != DAYS(cast(#{queryDate} as TIMESTAMP)) OR LC.LASTAMENDMENTDATE IS NULL) AND (DAYS(LC.LASTREINSTATEMENTDATE) != DAYS(cast(#{queryDate} as TIMESTAMP)) OR LC.LASTREINSTATEMENTDATE IS NULL)) AND LC.TYPE != 'CASH' AND (TP.STATUS = 'OPEN' OR TP.STATUS = 'REINSTATED')) 
+                     THEN 0
+                     ELSE
+                        CASE WHEN TP.STATUS = 'CANCELLED'
+                        THEN 0
+                        ELSE
+                            CASE WHEN LC.OUTSTANDINGBALANCE < 0
+                            THEN 0
+                            ELSE LC.OUTSTANDINGBALANCE
+                            END
+                        END
+                     END
+                    ) AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    TP.CURRENCY AS CURRENCY,
+                    LC.DOCUMENTTYPE AS DOCUMENTTYPE,
+                    LC.TYPE AS LCTYPE,
+                    LC.CASHFLAG AS CASHFLAG,
+                    LC.CASHAMOUNT AS CASHAMOUNT,
+                    LC.TOTALNEGOTIATEDCASHAMOUNT AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    LETTEROFCREDIT_AUDIT LC
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+                LEFT JOIN
+          			REFPRODUCT PRODUCT
+        		ON
+          			LC.DOCUMENTTYPE = PRODUCT.DOCUMENTTYPE
+        			AND PRODUCT.DOCUMENTCLASS = 'LC'
+       				AND LC.TYPE = PRODUCT.DOCUMENTSUBTYPE1
+        			AND ((PRODUCT.DOCUMENTSUBTYPE2 = LC.TENOR) OR (PRODUCT.DOCUMENTSUBTYPE2 IS NULL AND LC.TENOR IS NULL))
+        			AND (LC.STANDBYTAGGING = PRODUCT.DOCUMENTSUBTYPE3 or LC.STANDBYTAGGING IS NULL)
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join letterOfCredit_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            (
+                             (c.TYPE = 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR ((DAYS(c.EXPIRYDATE) >= DAYS(cast(#{queryDate} as TIMESTAMP))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR (c.CANCELLATIONDATE IS NULL AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR ((DAYS(c.LASTNEGOTIATIONDATE) = DAYS(cast(#{queryDate} as TIMESTAMP)) OR DAYS(c.LASTAMENDMENTDATE) = DAYS(cast(#{queryDate} as TIMESTAMP))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR (DAYS(c.CANCELLATIONDATE) <= DAYS(c.LASTREINSTATEMENTDATE) AND c.TYPE = 'REGULAR' AND c.TENOR='SIGHT'  AND c.CASHFLAG = '1' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR (MONTH(c.LASTNEGOTIATIONDATE) = MONTH(cast(#{queryDate} as TIMESTAMP)) AND YEAR(c.LASTNEGOTIATIONDATE) = YEAR(cast(#{queryDate} as TIMESTAMP)) AND DAYS(c.LASTNEGOTIATIONDATE) = DAYS(cast(#{queryDate} as TIMESTAMP)) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                             OR ((MONTH(c.LASTAMENDMENTDATE) = MONTH(cast(#{queryDate} as TIMESTAMP)) AND YEAR(c.LASTAMENDMENTDATE) = YEAR(cast(#{queryDate} as TIMESTAMP)) AND DAYS(c.LASTAMENDMENTDATE) = DAYS(cast(#{queryDate} as TIMESTAMP))) AND c.TYPE != 'CASH' AND (a.STATUS = 'OPEN' OR a.STATUS = 'REINSTATED'))
+                            )
+                    )
+
+            UNION ALL
+
+                SELECT
+                    DA.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DA.OUTSTANDINGAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    DA.CURRENCY AS CURRENCY,
+                    'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    DOCUMENTAGAINSTACCEPTANCE_AUDIT DA
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DA.DOCUMENTNUMBER AND TP.REV_ID = DA.REV_ID
+                LEFT JOIN
+            		TRADESERVICE TS
+        		ON
+            		TS.TRADEPRODUCTNUMBER = DA.DOCUMENTNUMBER
+        		LEFT JOIN
+           			REFPRODUCT PRODUCT
+        		ON
+            		TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join documentAgainstAcceptance_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'ACCEPTED'
+                    )
+                AND
+                    (CASE WHEN DA.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DA.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+                AND
+            		(TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+                AND
+            		TS.DOCUMENTCLASS = 'DA'
+        		AND
+            		TS.SERVICETYPE = 'NEGOTIATION_ACCEPTANCE'
+        		AND
+            		PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+        		AND
+           			PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+            UNION ALL
+
+                SELECT
+                    DP.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DP.OUTSTANDINGAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    DP.CURRENCY AS CURRENCY,
+                    'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    DOCUMENTAGAINSTPAYMENT_AUDIT DP
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DP.DOCUMENTNUMBER AND TP.REV_ID = DP.REV_ID
+                LEFT JOIN
+            		TRADESERVICE TS
+        		ON
+            		TS.TRADEPRODUCTNUMBER = DP.DOCUMENTNUMBER
+        		LEFT JOIN
+           			REFPRODUCT PRODUCT
+        		ON
+            		TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join documentAgainstPayment_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN DP.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DP.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+                AND
+            		(TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+                AND
+            		TS.DOCUMENTCLASS = 'DP'
+        		AND
+            		TS.SERVICETYPE = 'NEGOTIATION'
+        		AND
+            		PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+       			AND
+            		PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+            UNION ALL
+
+                SELECT
+                    OA.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    OA.OUTSTANDINGAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    OA.CURRENCY AS CURRENCY,
+                    'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    OPENACCOUNT_AUDIT OA
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = OA.DOCUMENTNUMBER AND TP.REV_ID = OA.REV_ID
+                LEFT JOIN
+            		TRADESERVICE TS
+        		ON
+            		TS.TRADEPRODUCTNUMBER = OA.DOCUMENTNUMBER
+        		LEFT JOIN
+           			REFPRODUCT PRODUCT
+        		ON
+            		TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join openAccount_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN OA.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE OA.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+				AND
+            		(TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        		AND
+            		TS.DOCUMENTCLASS = 'OA'
+        		AND
+            		TS.SERVICETYPE = 'NEGOTIATION'
+        		AND
+            		PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+       			 AND
+            		PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+            		
+            UNION ALL
+
+                SELECT
+                    DR.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    DR.OUTSTANDINGAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    DR.CURRENCY AS CURRENCY,
+                    'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    DIRECTREMITTANCE_AUDIT DR
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = DR.DOCUMENTNUMBER AND TP.REV_ID = DR.REV_ID
+                LEFT JOIN
+            		TRADESERVICE TS
+        		ON
+            		TS.TRADEPRODUCTNUMBER = DR.DOCUMENTNUMBER
+        		LEFT JOIN
+           			REFPRODUCT PRODUCT
+        		ON
+            		TS.DOCUMENTCLASS = PRODUCT.DOCUMENTCLASS
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join directRemittance_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN DR.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE DR.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+                AND
+            		(TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+        		AND
+            		TS.DOCUMENTCLASS = 'DR'
+        		AND
+            		TS.SERVICETYPE = 'NEGOTIATION'
+        		AND
+		            PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+		        AND
+		            PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS
+
+            UNION ALL
+
+                SELECT
+                    EB.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                    EB.OUTSTANDINGAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    TP.CURRENCY AS CURRENCY,
+                    'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    PRODUCT.UCPBPRODUCTID AS PRODUCTID
+                FROM
+                    EXPORTBILLS_AUDIT EB
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = EB.DOCUMENTNUMBER AND TP.REV_ID = EB.REV_ID
+                LEFT JOIN
+		            (SELECT
+		                TS.DOCUMENTNUMBER,
+		                TS.DOCUMENTTYPE,
+		                TS.DOCUMENTCLASS
+		            FROM TRADESERVICE TS
+		            INNER JOIN
+		                EXPORTBILLS_AUDIT EBA ON TS.DOCUMENTNUMBER = EBA.DOCUMENTNUMBER
+		            WHERE
+		                days(TS.PROCESSDATE) <= days(cast(#{queryDate} as TIMESTAMP))
+		            AND
+		                TS.DOCUMENTCLASS = 'BC'
+		            AND
+		                TS.SERVICETYPE = 'NEGOTIATION'
+		            AND
+		                (TS.STATUS = 'APPROVED' OR TS.STATUS = 'POST_APPROVED' OR TS.STATUS = 'POSTED' OR TS.STATUS IS NULL)
+		            GROUP BY TS.DOCUMENTNUMBER, TS.DOCUMENTTYPE, TS.DOCUMENTCLASS
+		            ) TS
+		        ON
+		          	TS.DOCUMENTNUMBER = EB.DOCUMENTNUMBER	
+		        LEFT JOIN
+		          	REFPRODUCT PRODUCT
+		        ON
+		          	PRODUCT.DOCUMENTCLASS = TS.DOCUMENTCLASS	
+		        AND
+          			PRODUCT.DOCUMENTTYPE = TS.DOCUMENTTYPE
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join exportBills_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'NEGOTIATED'
+                    )
+                AND
+                    (CASE WHEN EB.OUTSTANDINGAMOUNT < 0
+                     THEN 0
+                     ELSE EB.OUTSTANDINGAMOUNT
+                     END
+                    ) <> 0
+                AND 
+                	PRODUCT.DOCUMENTTYPE IN ('FOREIGN','DOMESTIC')
+         		AND 
+         			PRODUCT.DOCUMENTCLASS = 'BC'
+         		AND 
+         			EB.EXPORTBILLTYPE IN ('EBC','DBC')
+         			
+         	UNION ALL
+			
+                SELECT
+                    IND.INDEMNITYNUMBER AS DOCUMENTNUMBER,
+                    IND.SHIPMENTAMOUNT AS ORIGINALBALANCE,
+                    cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+                    IND.SHIPMENTCURRENCY AS CURRENCY,
+					'NONE' AS DOCUMENTTYPE,
+                    'NONE' AS LCTYPE,
+                    0 AS CASHFLAG,
+                    0.00 AS CASHAMOUNT,
+                    0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+                    TP.PRODUCTTYPE AS PRODUCTTYPE,
+                    (CASE WHEN IND.INDEMNITYTYPE = 'BE' THEN 'TF119' ELSE PRODUCT.UCPBPRODUCTID END) AS PRODUCTID
+                FROM
+                    INDEMNITY_AUDIT IND
+                INNER JOIN
+                    TRADEPRODUCT_AUDIT TP
+                ON
+                    TP.DOCUMENTNUMBER = IND.INDEMNITYNUMBER AND TP.REV_ID = IND.REV_ID
+	            INNER JOIN
+	               LETTEROFCREDIT_AUDIT LC
+	            ON
+	               LC.DOCUMENTNUMBER = IND.REFERENCENUMBER
+                LEFT JOIN
+                	REFPRODUCT PRODUCT
+                ON
+                	PRODUCT.DOCUMENTCLASS = 'INDEMNITY'
+                WHERE
+                    TP.REV_ID IN
+                    (
+                        select a.rev_id
+                        from tradeproduct_audit a
+                        join revinfo b on a.rev_id = b.rev
+                        join indemnity_audit c on a.rev_id = c.rev_id
+                        where
+                            a.documentNumber = TP.documentNumber
+                        and
+                            b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = TP.documentNumber and
+                                      days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+                                      order by y.revtstmp desc, y.rev desc fetch first 1 rows only)
+                        and
+                            TP.status = 'OPEN'
+                    )
+ 		        AND
+		            LC.REV_ID IN
+		            (
+		               select a.rev_id
+		                from tradeproduct_audit a
+		                join revinfo b on a.rev_id = b.rev
+		                join letterOfCredit_audit c on a.rev_id = c.rev_id
+		                where
+		                    a.documentNumber = IND.referenceNumber
+		               and
+		                   days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (b.revtstmp/1000) SECONDS) <= days(cast(#{queryDate} as TIMESTAMP))
+		                order by b.revtstmp desc fetch first 1 rows only
+		            )
+		        AND
+		            PRODUCT.PRODUCTID = (
+                        CASE WHEN LC.TYPE = 'STANDBY'
+                        THEN 'FX-INDEMNITY-STANDBY-SIGHT'
+                        ELSE
+                            CASE WHEN LC.TYPE = 'CASH'
+                           THEN 'FX-INDEMNITY-CASH-SIGHT'
+                            ELSE 'FX-INDEMNITY'
+                            END
+                        END
+                    )
+                AND
+                    (CASE WHEN IND.SHIPMENTAMOUNT < 0
+                     THEN 0
+                     ELSE IND.SHIPMENTAMOUNT
+                     END
+                    ) <> 0
+			
+			 UNION ALL
+
+				SELECT
+					IC.ICNUMBER AS DOCUMENTNUMBER,
+					IC.NEGOTIATIONAMOUNT  AS ORIGINALBALANCE,
+					cast(#{queryDate} as TIMESTAMP) AS BALANCEDATE,
+					IC.NEGOTIATIONCURRENCY AS CURRENCY,
+					'NONE' AS DOCUMENTTYPE,
+					'NONE' AS LCTYPE,
+					0 AS CASHFLAG,
+					0.00 AS CASHAMOUNT,
+					0.00 AS TOTALNEGOTIATEDCASHAMOUNT,
+					TP.PRODUCTTYPE AS PRODUCTTYPE,
+					PRODUCT.UCPBPRODUCTID AS PRODUCTID
+				FROM LCNEGOTIATIONDISCREPANCY_AUDIT IC
+				INNER JOIN LETTEROFCREDIT_AUDIT LC
+				ON LC.DOCUMENTNUMBER = IC.DOCUMENTNUMBER 
+				AND LC.REV_ID = IC.REV_ID
+				INNER JOIN TRADEPRODUCT_AUDIT TP
+				ON TP.DOCUMENTNUMBER = IC.DOCUMENTNUMBER 
+				AND TP.REV_ID = IC.REV_ID
+				LEFT JOIN REFPRODUCT PRODUCT
+				ON PRODUCT.DOCUMENTSUBTYPE1 = 'NEGOTIATION'
+				AND PRODUCT.DOCUMENTSUBTYPE2 = 'DISCREPANCY'
+				AND PRODUCT.DOCUMENTTYPE = LC.DOCUMENTTYPE
+				WHERE IC.REV_ID = (
+					SELECT MAX(REV_ID) FROM LCNEGOTIATIONDISCREPANCY_AUDIT
+					WHERE DATE(LASTMODIFIEDDATE) <= cast(#{queryDate} as TIMESTAMP)
+					AND ICNUMBER = IC.ICNUMBER
+				)				
+				AND IC.LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN' 
+				
+			)
+        ]]>
+    </select>
+    
+    <insert id="insertToDailyBalanceNew">
+		INSERT INTO DAILYBALANCE (DOCUMENTNUMBER, BALANCE, BALANCEDATE, ORIGINALBALANCE, REVALRATE, CURRENCY, PRODUCTID)
+		VALUES (#{dailyBalance.documentNumber},#{dailyBalance.balance},#{dailyBalance.balanceDate},#{dailyBalance.originalBalance},#{dailyBalance.revalRate},#{dailyBalance.currency},#{dailyBalance.productId})
+	</insert>
+
+
+    <select id="countCancelExpiredLettersOfCredit"  resultType="int">
+              SELECT COUNT(*)
+              FROM
+                TRADEPRODUCT TP
+              WHERE
+                DOCUMENTNUMBER IN
+                  (SELECT DOCUMENTNUMBER FROM LETTEROFCREDIT WHERE cast(#{queryDate} as TIMESTAMP) > EXPIRYDATE)
+    </select>
+	
+	<delete id="deleteRouting">
+		DELETE FROM SEC_ROUTING
+	</delete>
+	
+	<insert id="insertRouting">
+		INSERT INTO SEC_ROUTING (USERID, GROUPNAME, UNITDESIGNATION, ROLE)
+		VALUES (#{userId},#{groupName},#{unitDesignation},#{role})
+	</insert>
+	
+	<select id="checkIfExistingUser" resultType="int">
+        SELECT COUNT(*) FROM SEC_EMPLOYEE WHERE UPPER(ID) = UPPER(#{userId})
+    </select>
+    
+    <select id="checkIfValidRole" resultType="int">
+    	SELECT COUNT(*) FROM SEC_ROUTING_BRANCH_ROLE WHERE ROLE = #{role}
+    </select>
+
+	<select id="getCashFlags" resultType="hashMap">
+        SELECT CASHFLAG AS CASHFLAG FROM LETTEROFCREDIT_AUDIT WHERE DOCUMENTNUMBER = #{documentNumber}
+    </select>
+    
+    <select id="checkIfTenorChange" resultType="string">
+   		SELECT 
+   			(CASE WHEN LC.TENOR = 'USANCE' AND LC.TENOR != TEMP_TABLE.TENOR
+         		THEN 'Y'
+         		ELSE 'N'
+            END) AS CHANGE_TENOR
+   		FROM
+   			LETTEROFCREDIT_AUDIT LC
+	   	INNER JOIN
+	   	(
+			SELECT temp000.TYPE,temp000.TENOR, temp000.REV_ID , temp000.DOCUMENTNUMBER, temp000.DOCUMENTTYPE
+			FROM LETTEROFCREDIT_AUDIT temp000
+			WHERE temp000.REV_ID = 
+				(SELECT MAX(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = temp000.DOCUMENTNUMBER
+					AND TENOR = 'SIGHT' AND TYPE = 'REGULAR'
+					AND days(loc.LASTMODIFIEDDATE)  &lt;= days(cast(#{queryDate} as timestamp))
+				)
+		) TEMP_TABLE 
+		ON 
+			TEMP_TABLE.TYPE = LC.TYPE AND 
+			TEMP_TABLE.DOCUMENTTYPE = LC.DOCUMENTTYPE AND
+			TEMP_TABLE.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+		WHERE
+			LC.REV_ID IN
+            (
+                select a.rev_id
+                from tradeproduct_audit a
+                join revinfo b on a.rev_id = b.rev
+                join letterOfCredit_audit c on a.rev_id = c.rev_id
+                where
+                a.documentNumber = LC.documentNumber
+                and
+                b.rev in (select rev_id from tradeproduct_audit x join revinfo y on x.rev_id = y.rev where x.documentNumber = LC.documentNumber and
+                days(TIMESTAMP(DATE('1970-01-01'), TIME('00:00:00')) + (INT(CURRENT TIMEZONE/10000)) HOURS + (y.revtstmp/1000) SECONDS) &lt;= days(cast(#{queryDate} as TIMESTAMP))
+                order by y.revtstmp desc, y.rev desc fetch first 1 rows only)               
+            ) 
+        AND 
+        	LC.DOCUMENTNUMBER = #{documentNumber}
+	</select>
+	
+	<!-- Rev_id -->
+    <select id="getAuditRevId" resultType="java.lang.Integer">
+    	SELECT 
+    		REV_ID 
+    	FROM 
+    		LETTEROFCREDIT_AUDIT 
+    	WHERE 
+    		DOCUMENTNUMBER = #{docNum}
+    	AND 
+    		DAYS(LASTMODIFIEDDATE) &lt;= DAYS(cast(#{cutoffDate} as TIMESTAMP))
+    	ORDER BY LASTMODIFIEDDATE DESC
+    </select>
+    
+    <!-- LC Audit -->
+    <select id="getLetterOfCreditAuditByRevId" resultMap="dailyBalanceFileMap">
+        SELECT
+                LC.DOCUMENTNUMBER AS DOCUMENTNUMBER,
+                LC.TYPE AS LCTYPE,
+                LC.LASTMODIFIEDDATE AS BALANCEDATE,
+                LC.STANDBYTAGGING
+        FROM
+            LETTEROFCREDIT_AUDIT LC
+        INNER JOIN
+            TRADEPRODUCT_AUDIT TP
+        ON
+            TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER AND TP.REV_ID = LC.REV_ID
+        WHERE
+        	LC.REV_ID = #{revId}
+    </select>
+    
+    <!-- Current tagging of Standby LC -->
+	<select id="getOpeningStandbyTagging" resultType="string">
+		SELECT 
+			LC.STANDBYTAGGING
+		FROM 
+			LETTEROFCREDIT_AUDIT LC
+		WHERE 
+			LC.REV_ID = 
+				(SELECT MIN(REV_ID) 
+					FROM LETTEROFCREDIT_AUDIT loc 
+					WHERE loc.DOCUMENTNUMBER = LC.DOCUMENTNUMBER
+					AND TYPE = 'STANDBY'
+					AND REV_ID IS NOT NULL
+				)
+		AND
+			LC.DOCUMENTNUMBER = #{documentNumber}
+    </select>
+
+</mapper>

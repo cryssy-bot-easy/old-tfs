@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+<!DOCTYPE web-app
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
+-->
+
+<web-app>
+
+    <display-name>TFS Core Server</display-name>
+
+    <!-- Auto scan REST service -->
+    <!--<context-param>-->
+        <!--<param-name>resteasy.scan</param-name>-->
+        <!--<param-value>true</param-value>-->
+    <!--</context-param>-->
+
+    <context-param>
+        <param-name>resteasy.resources</param-name>
+        <param-value>
+            com.jett.rest.MessageRestService,
+            com.ucpb.tfs.infrastructure.rest.RestCommandService,
+            com.ucpb.tfs2.infrastructure.rest.CDTRestServices,
+            com.ucpb.tfs2.infrastructure.rest.TradeServiceRestServices,
+            com.ucpb.tfs2.infrastructure.rest.ServiceInstructionRestServices,
+            com.ucpb.tfs2.infrastructure.rest.PaymentRestServices,
+            com.ucpb.tfs2.infrastructure.rest.OutgoingMTServices,
+            com.ucpb.tfs2.infrastructure.rest.DebugRestServices,
+            com.ucpb.tfs2.infrastructure.rest.ProductsRestServices,
+            com.ucpb.tfs2.infrastructure.rest.SwiftMessageServices,
+            com.ucpb.tfs2.infrastructure.rest.RefCustomerRestServices,
+            com.ucpb.tfs2.infrastructure.rest.RefBankRestServices,
+            com.ucpb.tfs2.infrastructure.rest.BatchRestServices,
+            com.ucpb.tfs2.infrastructure.rest.RefProductServiceRestServices,
+            com.ucpb.tfs2.infrastructure.rest.FacilityRestServices,
+            com.ucpb.tfs2.infrastructure.rest.RefundRestServices,
+            com.ucpb.tfs2.infrastructure.rest.CollectibleRestServices,
+            com.ucpb.tfs2.infrastructure.rest.OtherChargesRestServices,
+            com.ucpb.tfs2.infrastructure.rest.DuplicateBaseTransactionRestServices,
+            com.ucpb.tfs2.infrastructure.rest.RefCountryRestServices,
+            com.ucpb.tfs2.infrastructure.rest.RegenerateAuditRestServices,
+            com.ucpb.tfs2.infrastructure.rest.AttachmentRestServices
+        </param-value>
+    </context-param>
+
+    <!-- this need same with resteasy servlet url-pattern -->
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/api</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>
+            org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
+        </listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.jboss.resteasy.plugins.spring.SpringContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- experimental -->
+    <!--
+    <filter>
+        <filter-name>monitoring</filter-name>
+        <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>monitoring</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <listener>
+        <listener-class>net.bull.javamelody.SessionListener</listener-class>
+    </listener>
+    -->
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/webContext.xml</param-value>
+    </context-param>
+
+    <servlet>
+        <servlet-name>resteasy-servlet</servlet-name>
+        <servlet-class>
+            org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>resteasy-servlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

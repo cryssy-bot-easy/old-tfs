@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.condition.LcAdditionalCondition" table="LcAdditionalCondition" abstract="true">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="conditionCode" class="com.ucpb.tfs.domain.condition.ConditionCode" access="field">
+            <property name="conditionCode" column="conditionCode" type="string" length="10"/>
+        </component>
+
+        <property name="condition" column="condition" type="org.hibernate.type.MaterializedClobType" length="3000"/>
+
+        <property name="conditionType">
+            <column name="conditionType" length="7"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.condition.enumTypes.ConditionType</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

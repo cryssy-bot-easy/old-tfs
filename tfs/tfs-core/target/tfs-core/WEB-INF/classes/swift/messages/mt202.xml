@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt202Mapper">
+        <entry value="20" key="details?.get('lcNumber') != null ? details?.get('lcNumber')?.replaceAll('-','') : documentNumber?.toString()?.replaceAll('-','')"/>
+        <entry value="21" key="details.get('remittingBankReferenceNumber') != null ? details.get('remittingBankReferenceNumber') : (details.get('negotiatingBanksReferenceNumberMt202') ?: (details.get('depositoryAccountNumber') ?: details.get('negotiatingBanksReferenceNumber')))"/>
+        <entry value="13C" key="T(com.ucpb.tfs.util.SwiftUtil).formatTimeIndication(details?.get('timeIndicationMt202'),details.get('timeIndicationFieldMt202'))"/>
+        <entry value="32A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('valueDateMt202'),details?.get('lcCurrencyMt202'),details?.get('netAmountMt202'))"/>
+        <entry value="52A" key="details?.get('orderingBankFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingBankPartyIdentifierMt202'),details?.get('bankIdentifierCodeMt202')) : ''"/>
+        <entry value="52D" key="details?.get('orderingBankFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingBankPartyIdentifierMt202'),details?.get('bankNameAndAddressMt202')) : ''"/>
+        <entry value="53A" key="details?.get('sendersCorrespondentFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('senderPartyIdentifierMt202'),details?.get('senderIdentifierCodeMt202')) : ''"/>
+        <entry value="53B" key="details?.get('sendersCorrespondentFlagMt202') == 'B' ? (details?.get('senderLocationMt202') != null ? T(com.ucpb.tfs.util.SwiftUtil).appendSwiftStartingPrefix(details?.get('senderLocationMt202')) :
+        				T(com.ucpb.tfs.util.SwiftUtil).appendSwiftStartingPrefix((details?.get('senderPartyIdentifierMt202') ?: details?.get('depositoryAccountNumber')))) : ''"/>
+        <entry value="53D" key="details?.get('sendersCorrespondentFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('senderPartyIdentifierMt202'),details?.get('senderNameAndAddressMt202')) : ''"/>
+        <entry value="54A" key="details?.get('receiversCorrespondentFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifierMt202'),details?.get('receiverIdentifierCodeMt202')) : ''"/>
+        <entry value="54B" key="details?.get('receiversCorrespondentFlagMt202') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifierMt202'),details?.get('receiverLocationMt202')) : ''"/>
+        <entry value="54D" key="details?.get('receiversCorrespondentFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifierMt202'),details?.get('receiverNameAndAddressMt202')) : ''"/>
+        <entry value="56A" key="details?.get('intermediaryFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('intermediaryPartyIdentifierMt202'),details?.get('intermediaryIdentifierCodeMt202')) : ''"/>
+        <entry value="56D" key="details?.get('intermediaryFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('intermediaryPartyIdentifierMt202'),details?.get('intermediaryNameAndAddressMt202')) : ''"/>
+        <entry value="57A" key="details?.get('accountWithBankFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('accountPartyIdentifierMt202'),details?.get('accountIdentifierCodeMt202')) : ''"/>
+        <entry value="57B" key="details?.get('accountWithBankFlagMt202') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('accountPartyIdentifierMt202'),details?.get('accountWithBankLocationMt202')) : ''"/>
+        <entry value="57D" key="details?.get('accountWithBankFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('accountPartyIdentifierMt202'),details?.get('accountNameAndAddressMt202')) : ''"/>
+        <entry value="58A" key="details?.get('beneficiaryBankFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('beneficiaryPartyIdentifierMt202'),details?.get('beneficiaryIdentifierCodeMt202')) : ''"/>
+        <entry value="58D" key="details?.get('beneficiaryBankFlagMt202') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('beneficiaryPartyIdentifierMt202'),details?.get('beneficiaryNameAndAddressMt202')) : ''"/>
+<!--         <entry value="58A" key="details?.get('beneficiaryBankFlagMt202') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatPartyIdentifier(details?.get('beneficiaryBankPartyIDASelectDMt202'), -->
+<!--         details?.get('beneficiaryBankPartyIDATextMt202'), -->
+<!--         details?.get('beneficiaryIdentifierCodeMt202')) : ''"/> -->
+<!--         <entry value="58D" key="details?.get('beneficiaryBankFlagMt202') == 'D' ?  T(com.ucpb.tfs.util.SwiftUtil).formatPartyIdentifierAddress(details?.get('beneficiaryBankPartyIDDSelectDMt202'), -->
+<!--         details?.get('beneficiaryBankPartyIDDTextMt202'),details?.get('beneficiaryNameAndAddressMt202')) : ''"/> -->
+		<entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiverMt202'),details?.get('senderToReceiverInformationMt202'))"/>
+    </util:map>
+</beans>

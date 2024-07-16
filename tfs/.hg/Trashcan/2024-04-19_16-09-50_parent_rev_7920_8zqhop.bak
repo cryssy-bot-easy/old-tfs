@@ -1,0 +1,167 @@
+diff --git a/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml b/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
+--- a/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
++++ b/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
+@@ -44,7 +44,7 @@
+ 	        AND facility.AFFCDE = B.LKFCOD
+ 	        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+-			AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
++			<!-- AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00') -->
+ 			<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+             ORDER BY facility.AFSEQ DESC
+ 	</select>
+@@ -52,5 +52,5 @@
+ 	<select id="getFacilitiesByCifNumberAndType" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++			facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+ 		FROM TFSDB2S.LNAPPF facility, TFSDB2S.LNPARK B
+@@ -56,5 +56,5 @@
+ 		FROM TFSDB2S.LNAPPF facility, TFSDB2S.LNPARK B
+-			WHERE facility."AFCIF#" = #{cifNumber}
++			<!-- WHERE facility."AFCIF#" = #{cifNumber} -->
+ 	        AND facility.AFFCDE = B.LKFCOD
+ 	        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+@@ -83,8 +83,8 @@
+     <select id="getFacilitiesByType" resultType="hashMap">
+         SELECT
+             A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID, A.AFEXP6 AS EXPIRY_DATE,
+-            A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++            A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+     	AND A."AFCIF#" = #{cifNumber}
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+@@ -87,6 +87,6 @@
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+     	AND A."AFCIF#" = #{cifNumber}
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+-        <if test="seqNo != ''">
++        <!-- <if test="seqNo != ''">
+             AND A.AFSEQ = #{seqNo}
+@@ -92,8 +92,8 @@
+             AND A.AFSEQ = #{seqNo}
+-        </if>
++        </if> -->
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeSearch" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+@@ -94,11 +94,12 @@
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeSearch" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+-        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++        <!-- A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER -->
++		A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+     	AND A."AFCIF#" = #{cifNumber}
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+@@ -101,6 +102,6 @@
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+     	AND A."AFCIF#" = #{cifNumber}
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+-        <if test="seqNo != ''">
++        <!-- <if test="seqNo != ''">
+             AND (COALESCE(#{seqNo}, '') = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%' OR A.AFCUR LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%')
+@@ -106,8 +107,8 @@
+             AND (COALESCE(#{seqNo}, '') = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%' OR A.AFCUR LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%')
+-        </if>
++        </if> -->
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeAndCurrency" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+@@ -108,10 +109,10 @@
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeAndCurrency" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+-        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++        A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+@@ -204,7 +205,7 @@
+ 	<select id="getFacilitiesByChildAndMainCifNumber" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#",facility.AFFCDE,facility.AFSEQ,facility.AFEXP6,facility.AFCUR,
+-			facility.AFFAMT
++			'1,000.00' AS "AFFAMT"
+ 		FROM TFSDB2S.LNAPPF facility 
+ 			WHERE facility."AFCIF#" = #{cifNumber}
+ <!--			AND to_date(digits(facility.AFEXP6), 'mmddyy') > CURRENT_DATE    -->
+@@ -220,7 +221,6 @@
+ 		)
+ 	</insert>
+ 
+-
+     <select id="getFacilityBalance" resultType="hashMap">
+ 		SELECT
+ 	      AANO AS CIF_NUMBER,
+@@ -232,9 +232,9 @@
+ 		  TRERR AS ERROR_MESSAGE,
+           TOCUR AS CURRENCY
+ 		FROM TFSDB2S.LNTFCON FACILITY_BALANCE
+-			WHERE FACILITY_BALANCE.TRSEQ = #{transactionSequenceNo}
++			WHERE FACILITY_BALANCE.TRSEQ = '38'
+ 	</select>
+ 	
+ 	<select id="getFacilitiesByCifAndFacility" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+@@ -236,7 +236,7 @@
+ 	</select>
+ 	
+ 	<select id="getFacilitiesByCifAndFacility" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++			facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+ 		FROM TFSDB2S.LNAPPF facility 
+@@ -242,5 +242,5 @@
+ 		FROM TFSDB2S.LNAPPF facility 
+-			WHERE facility."AFCIF#" = #{cifNumber}
++			<!-- WHERE facility."AFCIF#" = #{cifNumber} -->
+ 			AND facility."AFCPNO" = #{facilityRefNo}
+ 			AND facility."AFFCDE" = #{facilityType}
+ 			AND facility."AFSEQ" = #{facilityId}
+diff --git a/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java b/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
+--- a/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
++++ b/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
+@@ -189,10 +189,6 @@
+ 				throw new IllegalArgumentException("UNABLE TO CONNECT TO SIBS");
+ 
+ 			}
+-      
+-			
+-			
+-       
+ 			if (sibsAllocationUnitCodeRecord != null) {
+         
+ 				String branchUnitCode = (sibsAllocationUnitCodeRecord.getBranchUnitCode() != null) ? sibsAllocationUnitCodeRecord.getBranchUnitCode().trim() : null;
+diff --git a/tfs-core/src/main/resources/batch/amla-jobs.xml b/tfs-core/src/main/resources/batch/amla-jobs.xml
+--- a/tfs-core/src/main/resources/batch/amla-jobs.xml
++++ b/tfs-core/src/main/resources/batch/amla-jobs.xml
+@@ -112,6 +112,7 @@
+         <constructor-arg name="query" value="
+             select * from ACCOUNTLOG WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)  or BATCHFLAG = 1
+         "/>
++        
+         <property name="mapper">
+             <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                 <constructor-arg name="rowMapping">

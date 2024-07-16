@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/simple-types"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/simple-types"
+        elementFormDefault="qualified">
+
+    <xs:complexType name="mt700">
+        <xs:sequence>
+            <xs:element name="number" type="xs:decimal"/>
+            <xs:element name="value" type="xs:decimal"/>
+            <xs:group ref="swift:fields" maxOccurs="3"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:group name="fields">
+        <xs:sequence>
+            <xs:element name="fielda" type="xs:decimal"/>
+            <xs:element name="fieldb" type="xs:decimal" minOccurs="0"/>
+        </xs:sequence>
+    </xs:group>
+
+    <xs:complexType name="fieldGroup">
+        <xs:sequence>
+            <xs:element name="fielda" type="xs:decimal" />
+            <xs:element name="fieldb" type="xs:decimal" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="MT700" type="swift:mt700"/>
+
+    <xs:simpleType name="msisdn">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{0,20}" />
+            <xs:minLength value="1" />
+            <xs:maxLength value="20" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="amount" >
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{0}[,]"/>
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="minLength" >
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="maxLength" >
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="5"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+</xs:schema>

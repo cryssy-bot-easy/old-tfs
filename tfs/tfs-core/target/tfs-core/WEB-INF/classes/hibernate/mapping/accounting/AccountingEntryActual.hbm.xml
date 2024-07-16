@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.AccountingEntryActual" table="INT_AccEntryActual">
+
+        <id column="id" name="id" type="java.lang.Long">
+            <generator class="identity"/>
+        </id>
+
+        <property name="sequenceNumber" column="sequenceNumber"/>
+
+
+        <property name="unitCode" column="unitCode" type="string" length="20"/>
+        <property name="respondingUnitCode" column="respondingUnitCode" type="string" length="20"/>
+
+        <property name="bookCode" column="bookCode" type="string" length="20"/>
+
+        <property name="bookCurrency" column="bookCurrency" type="string" length="20"/>
+
+        <property name="originalCurrency" column="originalCurrency" type="string" length="20"/>
+
+        <property name="entryType" column="entryType" type="string" length="20"/>
+
+        <property name="accountingCode" column="accountingCode" type="string" length="100"/>
+
+        <property name="particulars" column="particulars" type="string" length="100"/>
+
+        <property name="gltsNumber" column="gltsNumber" type="string" length="6"/>
+
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal"/>
+
+        <property name="pesoAmount" column="pesoAmount" type="java.math.BigDecimal"/>
+
+        <property name="sourceBranch" column="sourceBranch"/>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId" access="field">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <component name="accountingEventTransactionId"
+                   class="com.ucpb.tfs.domain.accounting.AccountingEventTransactionId" access="field">
+            <property name="accountingEventTransactionId" column="accEvTranId" type="string" length="100"/>
+        </component>
+
+        <property name="effectiveDate" column="effectiveDate" type="java.util.Date"/>
+        <property name="postingDate" column="postingDate" type="java.util.Date"/>
+
+
+        <property name="status" column="status" type="string" length="50"/>
+        <property name="accType" column="accType" type="string" length="1"/>
+        <property name="contingentFlag" column="contingentFlag" type="string" length="8"/>
+        <property name="ucpbProductId" column="ucpbProductId" type="string" length="7"/>
+        <property name="withError" column="withError" type="string" length="20"/>
+        <property name="documentNumberStr" column="documentnumber" type="string" length="50"/>
+        <property name="transactionShortName" column="transactionShortName" type="string" length="8"/>
+        <property name="isPosted" column="isPosted" type="boolean"/>
+    </class>
+
+</hibernate-mapping>

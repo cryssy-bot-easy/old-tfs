@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.RatesRepository">
+
+    <select id="getRates" resultType="hashMap">
+        select
+        RATE.JFXDCD AS CURRENCY_CODE,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS BASE_CURRENCY,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        <!--where RATE.JHVDT6 =83112 -->
+    </select>
+
+    <select id="getRatesURR" resultType="hashMap">
+        select
+        RATE.JFXDCD AS CURRENCY_CODE,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS BASE_CURRENCY,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        where RATE.JFXDRN = 3
+        <!--and RATE.JHVDT6 =83112 -->
+    </select>
+
+    <select id="getRatesActual" resultType="hashMap">
+        select
+        RATE.JFXDCD AS BASE_CURRENCY,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS CURRENCY_CODE,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        --where RATE.JHVDT6 = 83112
+
+    </select>
+
+    <select id="getRatesByBaseCurrency" resultType="hashMap">
+        select
+        RATE.JFXDCD AS CURRENCY_CODE,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS BASE_CURRENCY,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        where RATE.JFXDBC = #{baseCurrency}
+
+        <!--and RATE.JHVDT6 =83112 -->
+        <!--          <if test="_environment.databaseId != 'derby'">#{date}</if> -->
+        <!--            <if test="_environment.databaseId == 'derby'"></if>      -->
+
+
+    </select>
+
+    <select id="getRatesByBaseCurrencyActual" resultType="hashMap">
+        select
+        RATE.JFXDCD AS BASE_CURRENCY,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS CURRENCY_CODE,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        where RATE.JFXDBC = #{baseCurrency}
+        <!--and RATE.JHVDT6 =83112 -->
+        <!--          <if test="_environment.databaseId != 'derby'">#{date}</if> -->
+        <!--            <if test="_environment.databaseId == 'derby'"></if>      -->
+
+
+    </select>
+
+
+    <select id="getHistoricalRates" resultType="hashMap">
+        select
+        JFXDCD,
+        JFXDRN,
+        JFXDCR,
+        JFXDBC,
+        JHVDT6,
+        JHVDT7
+        from
+          TFSDB2S.JHYXDT
+        where
+         JHVDT6 = #{date}
+    </select>
+
+    <select id="getHistoricalRatesByBaseCurrency" resultType="hashMap">
+        select
+        JFXDCD,JFXDRN,JFXDCR,JFXDBC,JHVDT6,JHVDT7
+        from
+        TFSDB2S.JHYXDT where JFXDBC LIKE #{baseCurrency}
+        --AND JHVDT6 = 83112
+    </select>
+
+    <select id="getConversionRateByType" resultType="hashMap">
+        select
+            rates.JFXDCD AS CURRENCY_CODE,
+            rates.JFXDRN AS RATE_NUMBER,
+            rates.JFXDCR AS CONVERSION_DATE,
+            rates.JFXDBC AS BASE_CURRENCY,
+            rates.JFXDCR AS CONVERSION_RATE,
+            rates.JHVDT6 AS CALENDAR_DATE,
+            rates.JHVDT7 AS JULIAN_DATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+          rates.JFXDBC LIKE #{targetCurrency}
+        AND rates.JFXDCD LIKE #{sourceCurrency}
+        AND rates.JFXDRN = #{type.rateNumber}
+
+        <!--and RATE.JHVDT6 =83112 -->
+    </select>
+
+    <select id="getAllConversionRateByRateNumber" resultType="hashMap">
+        select
+            rates.JFXDCD AS CURRENCY_CODE,
+            rates.JFXDRN AS RATE_NUMBER,
+            rates.JFXDBC AS BASE_CURRENCY,
+            rates.JFXDCR AS CONVERSION_RATE,
+            rates.JHVDT6 AS CALENDAR_DATE,
+            rates.JHVDT7 AS JULIAN_DATE
+        from
+        TFSDB2S.JHFXDT rates
+        where
+			rates.JHVDT6 = #{date}
+        AND 
+			rates.JFXDRN = #{rateNumber}
+    </select>
+
+    <select id="getAllConversionRateByRateNumberHistorical" resultType="hashMap">
+        select
+            rates.JFXDCD AS CURRENCY_CODE,
+            rates.JFXDRN AS RATE_NUMBER,
+            rates.JFXDBC AS BASE_CURRENCY,
+            rates.JFXDCR AS CONVERSION_RATE,
+            rates.JFXCD6 AS CALENDAR_DATE,
+            rates.JFXCD7 AS JULIAN_DATE
+        from
+        TFSDB2S.JHYXDT rates
+        where
+			rates.JFXCD6 = #{date}
+        AND 
+			rates.JFXDRN = #{rateNumber}
+    </select>
+
+    <select id="getConversionRate" resultType="java.math.BigDecimal">
+        select
+            rates.JFXDCR AS CONVERSION_RATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+            rates.JFXDBC LIKE #{targetCurrency}
+        AND rates.JFXDCD LIKE #{sourceCurrency}
+        AND rates.JFXDRN = #{rateNumber}
+        <!--and RATE.JHVDT6 =83112  -->
+        <!--rates.JHVDT6 = #{date}  -->
+    </select>
+
+    <select id="getUrrConversionRate" resultType="hashMap">
+        select
+        rates.JFXDCD AS BASE_CURRENCY,
+        rates.JFXDRN AS RATE_NUMBER,
+        rates.JFXDCR AS CONVERSION_RATE,
+        rates.JFXDBC AS CURRENCY_CODE,
+        rates.JHVDT6 AS CALENDAR_DATE,
+        rates.JHVDT7 AS JULIAN_DATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+            rates.JFXDBC LIKE #{targetCurrency}
+        AND rates.JFXDCD LIKE #{sourceCurrency}
+        AND rates.JFXDRN = 3
+        <!--and RATE.JHVDT6 =83112 -->
+
+    </select>
+
+    <select id="getAllUrr" resultType="hashMap">
+        select
+        RATE.JFXDCD AS CURRENCY_CODE,
+        RATE.JFXDRN AS RATE_NUMBER,
+        RATE.JFXDCR AS CONVERSION_RATE,
+        RATE.JFXDBC AS BASE_CURRENCY,
+        RATE.JHVDT6 AS CALENDAR_DATE,
+        RATE.JHVDT7 AS JULIAN_DATE,
+        REF_DEF.JFXRDS_UCPB AS RATE_DEFINITION,
+        REF_DEF.JFXRDS AS RATE_DEFINITION_LBP
+        from
+        TFSDB2S.JHFXDT RATE
+        INNER JOIN TFSDB2S.JHFXPR REF_DEF ON
+        RATE.JFXDRN = REF_DEF.JFXSEQ
+        where  RATE.JFXDRN = 3
+        <!--and RATE.JHVDT6 =83112 -->
+    </select>
+
+
+    <select id="getUrrConversionRateToday" resultType="java.math.BigDecimal">
+        select
+        rates.JFXDCR AS CONVERSION_RATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+        rates.JFXDBC = 'PHP'
+        AND rates.JFXDCD = 'USD'
+        AND rates.JFXDRN = 3
+        <!--and RATE.JHVDT6 =83112 -->
+    </select>
+
+    <select id="getAngolConversionRate" resultType="java.math.BigDecimal">
+        select
+        rates.JFXDCR AS CONVERSION_RATE
+        from
+        TFSDB2S.JHFXDT rates
+        INNER JOIN TFSDB2S.JHFXPR rateDefinition ON
+        rates.JFXDRN = rateDefinition.JFXSEQ
+        where
+            rates.JFXDBC = #{targetCurrency}
+        AND rates.JFXDCD = #{sourceCurrency}
+        AND rates.JFXDRN = #{rateNumber}
+        <!--and RATE.JHVDT6 =#{date}-->
+    </select>
+
+	<select id="getAllCurrency" resultType="hashMap">
+		SELECT DISTINCT JFXCOD AS CURRENCY_CODE,JFXDSC AS CURRENCY_NAME FROM TFSDB2S.JHFXRT
+	</select>
+
+</mapper>

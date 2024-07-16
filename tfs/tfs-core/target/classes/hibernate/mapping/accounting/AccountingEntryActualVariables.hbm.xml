@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.AccountingEntryActualVariables" table="INT_AccEntryActual_var">
+
+        <id column="id" name="id" type="long">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <property name="bookCode" column="bookCode" type="string" length="20"/>
+
+        <property name="bookCurrency" column="bookCurrency" type="string" length="20"/>
+
+        <property name="entryType" column="entryType" type="string" length="20"/>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal"/>
+
+        <property name="amountCode" column="amountCode" type="string" length="50"/>
+
+        <property name="paymentId" column="paymentId" type="string" length="50"/>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId" access="field">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <component name="accountingEventTransactionId"
+                   class="com.ucpb.tfs.domain.accounting.AccountingEventTransactionId" access="field">
+            <property name="accountingEventTransactionId" column="accEvTranId" type="string" length="100"/>
+        </component>
+
+        <property name="effectiveDate" column="effectiveDate" type="java.util.Date"/>
+        <property name="postingDate" column="postingDate" type="java.util.Date"/>
+
+    </class>
+
+</hibernate-mapping>

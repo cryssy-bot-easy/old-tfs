@@ -1,0 +1,153 @@
+		
+	---------------------  Instance Type and Transmission --------------	
+       Notification (Transmission) of Original sent to SWIFT (ACK)
+       Network Delivery Status   : Network Ack 
+       Priority/Delivery         : Normal
+       Message Input Reference   : 1156 121121UCPBPHMMAXXX6271113177
+	--------------------------- Message Header -------------------------	
+       Swift Input                   : FIN 700 Issue of a Documentary Credit
+       Sender   : UCPBPHMMXXX 
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+       Receiver : CITIHKHXXXX
+                  CITIBANK N.A.
+                  HONG KONG HK
+	--------------------------- Message Text ---------------------------	
+        27: Sequence of Total
+            1/1
+       40A: Form of Documentary Credit
+            IRREVOCABLE
+        20: Documentary Credit Number
+            FX56202012006360
+       31C: Date of Issue
+            121121
+       40E: Applicable Rules
+            UCP LATEST VERSION
+       31D: Date and Place of Expiry
+            130118IN HONGKONG
+        50: Applicant
+            SOMICO STEEL MILL CORPORATION
+            KM. 49 INDANG RD., BRGY. INOCENCIO
+            TRECE MARTIRES CITY, CAVITE
+            PHILIPPINES
+        59: Beneficiary - Name & Address
+            SINOMETAL MATERIAL AND SUPPLY
+            COMPANY LIMITED
+            SUITE 2804-5, SHUI ON CENTRE, 6-8
+            HARBOUR ROAD, WAN CHAI HONG KONG
+       32B: Currency Code, Amount
+            Currency       : USD (US DOLLAR)
+            Amount         :             #1,130,500.00#
+       39A: Percentage Credit Amt Tolerance
+            10/10
+       41D: Available With...By... - Name&Addr
+            ANY BANK
+            BY NEGOTIATION
+       42C: Drafts at...
+            SIGHT
+       42A: Drawee - FI BIC
+            UCPBPHMM
+            UNITED COCONUT PLANTERS BANK
+            MANILA  PH
+       43P: Partial Shipments
+            ALLOWED
+       43T: Transshipment
+            ALLOWED
+       44E: Port of Loading/Airport of Dep.
+            ANY PORT IN CHINA
+       44F: Port of Dischrge/Airport of Dest
+            MANILA PHILIPPINES
+       44C: Latest Date of Shipment
+            121219
+       45A: Descriptn of Goods &/or Services
+            +1,700MT HOT DIPPED GALVANIZED COIL
+            AS PER CONTRACT NUMBER SMS12/S-1025-P DATED 28TH AUGUST 2012
+            +PHILIPPINE STANDARD COMMODITY CLASSIFICATION CODE :674.13-04
+            +CFR MANILA
+       46A: Documents Required
+            +ONE FULL SET OF AT LEAST THREE ORIGINAL CLEAN 'ON BOARD' OCEAN
+            BILLS OF LADING IN NEGOTIABLE AND TRANSFERABLE FORM AND ONE NON-
+            NEGOTIABLE COPY ISSUED TO THE ORDER OF UNITED COCONUT PLANTERS
+            BANK MARKED FREIGHT PREPAID NOTIFY
+            APPLICANT
+            +COMMERCIAL INVOICE IN TRIPLICATE SHOWING BREAKDOWN OF FOB VALUE
+            AND FREIGHT CHARGES.
+            +PACKING LIST SHOWING ONLY TOTAL NUMBER OF COILS, TOTAL NET
+            WEIGHT AND TOTAL GROSS WEIGHT.
+            +BENEFICIARY'S CERTIFICATE CERTIFYING THAT CERTIFICATE OF
+            QUALITY/QUANTITY, CERTIFICATE OF ORIGIN, DETAILED PACKING LIST,
+            COPY OF COMMERCIAL INVOICE AND 3 NON-NEGOTIABLE BILL OF LADING
+            HAS BEEN SENT WITHIN 5 WORKING DAYS AFTER B/L DATE TO THE
+            FOLLOWING:
+              SONIC STEEL INDUSTRIES, INC.
+              ADD: 8/F GEDISCO TOWER, 534 ASUNCION ST.,
+              BINONDO MANILA PHILIPPINES 1006
+       47A: Additional Conditions
+            +OCEAN BILL OF LADING MUST BE DATED WITHIN THE VALIDITY PERIOD
+            OF THIS CREDIT
+            +ALL DOCUMENTS MUST INDICATE COMMODITY CLASSIFICATION
+            CODE AND LC NUMBER AS INDICATED ABOVE.
+            +BL       DATED PRIOR TO ISSUANCE OF THIS CREDIT NOT ALLOWED.
+            +A FEE OF USD  60.00 (OR EQUIVALENT) WILL BE CHARGED TO THE
+            BENEFICIARY IF DOCUMENTS CONTAINING DISCREPANCIES ARE
+            PRESENTED FOR PAYMENT/REIMBURSEMENT UNDER THIS LC.  THIS FEE
+            WILL BE CHARGED FOR EACH SET OF DISCREPANT DOCUMENTS PRESENTED
+            WHICH REQUIRE OUR OBTAINING ACCEPTANCE FROM OUR CUSTOMER.
+            +NEGOTIATING BANK MUST ADVISE US OF ANY CLAIMS THREE DAYS BEFORE
+             SUCH CLAIM IS TO BE MADE FROM THE REIMBURSING BANK.
+            +COMMERCIAL INVOICE TO INDICATE CONTRACT NO.SMS12/S-1025-P.
+            +ALL SHIPPING DOCUMENTS TO SHOW ONLY DESCRIPTION OF GOODS AS:
+            HOT DIPPED GALVANIZED COIL
+            +ALL SHIPPING DOCUMENTS MUST NOT SHOW SIZE/S.
+            +TOLERANCE OF PLUS/MINUS 10PCT ON TOTAL QUANTITY AND L/C VALUE
+            IS ALLOWED.
+            +THIRD PARTY DOCUMENTS ACCEPTABLE EXCEPT DRAFT AND COMMERCIAL
+            INVOICE.
+            +CLAUSED/FORWARDER'S BILL OF LADING ACCEPTABLE.
+            +CHARTER PARTY BILL OF LADING ACCEPTABLE.
+            +TELEGRAPHIC TRANSFER (T/T) REIMBURSEMENT ALLOWED.
+            +CONFIRMATION MAY BE ADDED TO THIS L/C AT BENEFICIARY'S EXPENSE.
+       71B: Charges
+            ALL CHARGES OUTSIDE THE
+            PHILIPPINES
+            ARE FOR THE ACCOUNT OF BENEFICIARY
+            INCLUDING REIMBURSING CHARGES
+        48: Period for Presentation
+            NOT LATER THAN 15 DAYS AFTER B/L
+            DATE BUT WITHIN THE VALIDITY OF
+            L/C
+        49: Confirmation Instructions
+            MAY ADD
+       53A: Reimbursing Bank - FI BIC
+            /36143038
+            CITIUS33
+            CITIBANK N.A.
+            NEW YORK,NY  US
+        78: Instr to Payg/Accptg/Negotg Bank
+            +NEGOTIATING BANK MUST ADVISE US OF NEGOTIATION DETAILS BY
+            TESTED CABLE AND ANY ADDITIONAL TRANSIT INTEREST THAT MAY ARISE
+            FOR NON- COMPLIANCE SHALL BE FOR THE ACCOUNT OF NEGOTIATING BANK
+            +NEGOTIATING BANK MUST FORWARD ALL DOCS NEGOTIATED UNDER THIS
+            CREDIT TO UNITED COCONUT PLANTERS BANK -TRADE SERVICES
+            DEPARTMENT AT UCPB BLDG., MAKATI AVENUE, MAKATI CITY
+            IN ONE LOT VIA COURIER.+DRAFTS DRAWN UNDER THIS CREDIT MUST BE
+            MARKED DRAWN UNDER LC NO.FX56202012006360   WE UNDERTAKE TO
+            HONOR DRAFT/S DRAWN AND PRESENTED IN COMPLIANCE WITH TERMS AND
+            CONDITIONS OF THIS CREDIT +THIS IS THE OPERATIVE INSTRUMENT.
+       57D: 'Advise Through' Bank -Name&Addr
+            RABOBANK INTERNATIONAL HONG KONG
+            BRANCH
+            SWIFT CODE: RABOHKHH
+	--------------------------- Message Trailer ------------------------	
+       {CHK:6FBA9AEE9757}
+       PKI Signature: MAC-Equivalent
+	---------------------------- Interventions -------------------------	
+       Category      : Network Report
+       Creation Time : 21/11/12 11:57:43
+       Application   : SWIFT Interface
+       Operator      : SYSTEM
+       Text
+       {1:F21UCPBPHMMAXXX6271113177}{4:{177:1211211156}{451:0}}
+
+
+

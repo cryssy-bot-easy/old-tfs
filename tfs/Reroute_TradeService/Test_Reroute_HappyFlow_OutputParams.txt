@@ -1,0 +1,7 @@
+ Name          Type   Data Type Value (OUT)                                          
+ ------------- ------ --------- ---------------------------------------------------- 
+
+
+      P_RETVAL OUTPUT   INTEGER                                                    0
+     P_MESSAGE OUTPUT   VARCHAR Document No. 909-09-930-18-00048-7 re-routed to TEST
+

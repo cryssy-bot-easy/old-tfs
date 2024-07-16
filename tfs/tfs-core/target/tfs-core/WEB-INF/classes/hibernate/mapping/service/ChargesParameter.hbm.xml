@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    <class name="com.ucpb.tfs.domain.service.ChargesParameter" table="CHARGES_PARAMETER">
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+        <property name="parameterName" column="PARAM_NAME" type="java.lang.String" />
+        <property name="parameterValue" column="PARAM_VALUE" type="java.lang.String" />
+        <property name="parameterChargeType" column="PARAM_CHARGE_TYPE" type="java.lang.String" />
+        <property name="parameterDocumentType" column="PARAM_DOC_TYPE" type="java.lang.String" />
+        <property name="parameterDocumentClass" column="PARAM_DOC_CLASS" type="java.lang.String" />
+        <property name="parameterDocumentSubType1" column="PARAM_DOC_SUBTYPE1" type="java.lang.String" />
+        <property name="parameterDocumentSubType2" column="PARAM_DOC_SUBTYPE2" type="java.lang.String" />
+        <property name="parameterServiceType" column="PARAM_SERVICE_TYPE" type="java.lang.String" />
+        <property name="parameterDescription" column="PARAM_DESCRIPTION" type="java.lang.String" />
+    </class>
+</hibernate-mapping>

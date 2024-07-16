@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="RoutineParameter">
+	<section name="WITH_APPROVED_REFERENCE_TABLES">
+		<section name="WITH_APPROVED_REFERENCE_TABLES_VARCHAR">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_TRADESERVICEID">
+				<item value="VARCHAR"/>
+				<item value="4ab1c51c-e963-4d93-ad0f-cf1492e01639"/>
+				<item value="false"/>
+			</list>
+		</section>
+		<section name="WITH_APPROVED_REFERENCE_TABLES_BIGINT">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_TRADESERVICEID">
+				<item value="BIGINT"/>
+				<item value="0"/>
+				<item value="false"/>
+			</list>
+		</section>
+	</section>
+	<section name="WITH_COMPLETE_REFERENCE_TABLES">
+		<section name="WITH_COMPLETE_REFERENCE_TABLES_VARCHAR_VARCHAR_VARCHAR">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_TRADESERVICEID">
+				<item value="VARCHAR"/>
+				<item value="7fa5d231-ace3-4353-8e6b-9ff4ff877214"/>
+				<item value="false"/>
+			</list>
+			<list key="P_DOCUMENTNUMBER">
+				<item value="VARCHAR"/>
+				<item value="909-04-220-16-00648-6"/>
+				<item value="false"/>
+			</list>
+			<list key="P_SERVICETYPE">
+				<item value="VARCHAR"/>
+				<item value="OPENING"/>
+				<item value="false"/>
+			</list>
+		</section>
+	</section>
+	<section name="SYNCHRONIZE_LC_STATUS">
+		<section name="SYNCHRONIZE_LC_STATUS_DATE_INTEGER_VARCHAR">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_DATE">
+				<item value="DATE"/>
+				<item value="2020-02-13"/>
+				<item value="false"/>
+			</list>
+		</section>
+		<section name="SYNCHRONIZE_LC_STATUS_DATE">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_DATE">
+				<item value="DATE"/>
+				<item value="2020-01-09"/>
+				<item value="false"/>
+			</list>
+		</section>
+	</section>
+	<section name="IS_UNSYNC">
+		<section name="IS_UNSYNC_VARCHAR">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_TRADESERVICEID">
+				<item value="VARCHAR"/>
+				<item value="7fa5d231-ace3-4353-8e6b-9ff4ff877214"/>
+				<item value="false"/>
+			</list>
+		</section>
+	</section>
+	<section name="MASTER_LAST_MODIFIED">
+		<section name="MASTER_LAST_MODIFIED_VARCHAR_VARCHAR_VARCHAR">
+			<item value="false" key="RunOptions.RunOptions.GatherPerformanceInformation"/>
+			<item value="true" key="RunOptions.RunOptions.CommitChanges"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.BeforeRunStmtTerminator"/>
+			<item value=";" key="RunOptions.RunRoutineConfiguration.AfterRunStmtTerminator"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.AfterRunScript"/>
+			<item value="&lt;![CDATA[]]&gt;" key="RunOptions.RunRoutineConfiguration.BeforeRunScript"/>
+			<item value="false" key="RunOptions.RunOptions.CollectActuals"/>
+			<item value="false" key="RunOptions.RunOptions.GatherTraceInformation"/>
+			<list key="P_DOCUMENTNUMBER">
+				<item value="VARCHAR"/>
+				<item value="909-04-220-16-00648-6"/>
+				<item value="false"/>
+			</list>
+			<list key="P_DOCUMENTCLASS">
+				<item value="VARCHAR"/>
+				<item value="LC"/>
+				<item value="false"/>
+			</list>
+			<list key="P_SERVICETYPE">
+				<item value="VARCHAR"/>
+				<item value="OPENING"/>
+				<item value="false"/>
+			</list>
+		</section>
+	</section>
+</section>

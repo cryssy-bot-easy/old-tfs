@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.instruction.IServiceInstructionFinder">
+    
+     <resultMap id="findServiceInstructionResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TYPE" column="type" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="USERACTIVEDIRECTORYID" column="userActiveDirectoryId" />
+        <result property="DATEAPPROVED" column="dateApproved" />
+        <result property="APPROVERS" column="approvers" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+        <result property="DOCUMENTCLASS" column="documentClass"/>
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADEPRODUCTNUMBER" column="tradeProductNumber" />
+        <result property="STATUS" column="status" />
+    </resultMap>
+
+    <select id="findServiceInstruction" resultMap="findServiceInstructionResultMap">
+        select ts.tradeServiceId, si.serviceInstructionId, si.type,
+        si.details,
+        si.userActiveDirectoryId, si.dateApproved, si.approvers,
+        ts.paymentStatus, ts.documentClass, ts.documentType, ts.documentSubType1, ts.documentSubType2, ts.documentNumber,
+        ts.tradeProductNumber, si.status
+        from ServiceInstruction si
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+
+        where si.serviceInstructionId = #{serviceInstructionId}
+    </select>
+    
+    <resultMap id="findIndemnityServiceInstructionResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="TRADESERVICEID" />
+        <result property="SERVICEINSTRUCTIONID" column="SERVICEINSTRUCTIONID" />
+        <result property="TYPE" column="TYPE" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="USERACTIVEDIRECTORYID" column="USERACTIVEDIRECTORYID" />
+        <result property="DATEAPPROVED" column="DATEAPPROVED" />
+        <result property="SHIPMENTCOUNT" column="SHIPMENTCOUNT" />
+    </resultMap>
+    
+    <select id="findIndemnityServiceInstruction" resultMap="findIndemnityServiceInstructionResultMap">
+        select
+        ts.tradeServiceId,
+        si.serviceInstructionId, si.type, si.details, si.userActiveDirectoryId, si.dateApproved,
+        lc.shipmentCount
+        from ServiceInstruction si
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        inner join LetterOfCredit lc
+        on lc.documentNumber = ts.documentNumber
+        where si.serviceInstructionId = #{serviceInstructionId}
+    </select>
+
+    <select id="findAllServiceInstruction" resultType="hashMap">
+        select * from ServiceInstruction
+    </select>
+
+    <select id="findAllApprovedServiceInstruction" resultType="hashMap">
+        select * from ServiceInstruction where status = 'APPROVED'
+    </select>
+    
+    <resultMap id="etsInquiryResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKOWNER" column="taskowner" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="STATUS" column="status" />
+        <result property="CREATEDDATE" column="createdDate" />
+        <result property="USERACTIVEDIRECTORYID" column="userActiveDirectoryId" />
+        <result property="CREATEDBY" column="createdBy" />
+        <result property="APPROVEDBY" column="approvedBy" />
+        <result property="LASTUSER" column="lastUser" />
+        <result property="DATEAPPROVED" column="dateApproved" />
+        <result property="MODIFIEDDATE" column="modifiedDate" />
+        <result property="TRADESERVICESTATUS" column="tradeServiceStatus" />
+        <result property="UNITCODE" column="unitCode" />
+        <result property="TSD_USER" column="tsd_user" />
+    </resultMap>
+
+    <select id="etsInquiry" resultMap="etsInquiryResultMap">
+        select
+        si.serviceInstructionId,
+        t.taskowner,
+        si.details,
+        si.status,
+        si.createdDate,
+        si.userActiveDirectoryId,
+        si.createdBy,
+        si.approvedBy,
+        si.lastUser,
+        si.dateApproved,
+        si.modifiedDate,
+        ts.status as tradeServiceStatus,
+        ts.ccbdBranchUnitCode as unitCode,
+        ts.userActiveDirectoryId as tsd_user
+        from ServiceInstruction si
+        join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        join task t
+        on t.taskreferencenumber = si.serviceinstructionid
+        where si.type = 'ETS' and
+        si.status in ('RETURNED', 'PREPARED', 'CHECKED', 'APPROVED', 'REVERSED','FOR_REVERSAL')
+
+        <if test="etsNumber != ''">
+            and UPPER(si.serviceInstructionId) LIKE '%' || UPPER(#{etsNumber}) || '%'
+        </if>
+        <if test="cifName != ''">
+            and UPPER(ts.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+        </if>
+        <if test="documentType != ''">
+            and ts.documentType = #{documentType}
+        </if>
+        <if test="documentClass != ''">
+            and ts.documentClass = #{documentClass}
+        </if>
+        <if test="documentSubType1 != ''">
+            and ts.documentSubType1 = #{documentSubType1}
+        </if>
+        <if test="serviceType != ''">
+            and ts.serviceType = #{serviceType}
+        </if>
+        <if test="status != ''">
+            and si.status = #{status}
+        </if>
+        <if test="createdDate != ''">
+            and date(si.createdDate) = #{createdDate}
+        </if>
+        <if test="modifiedDate != ''">
+            and date(si.modifiedDate) = #{modifiedDate}
+        </if>
+        <if test="approvedDate != ''">
+            and date(si.dateApproved) = #{approvedDate}
+        </if>
+        <if test="userId != ''">
+            and ( upper(si.createdBy) = upper(#{userId})
+                or upper(si.approvedBy) = upper(#{userId})
+                or upper(si.lastUser) = upper(#{userId})
+                )
+        </if>
+        <if test="cifNumber != ''">
+            and UPPER(ts.cifNumber) LIKE '%' || UPPER(#{cifNumber}) || '%'
+        </if>
+        <choose>
+            <when test="userActiveDirectoryId != ''">
+                and ts.ccbdBranchUnitCode = #{userActiveDirectoryId}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and ts.ccbdBranchUnitCode = #{unitcode}
+            </when>
+        </choose>
+        ORDER BY ts.modifiedDate DESC, si.serviceInstructionId ASC
+    </select>
+
+</mapper>

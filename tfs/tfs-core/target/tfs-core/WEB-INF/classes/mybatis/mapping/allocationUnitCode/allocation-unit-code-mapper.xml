@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.core.batch.process.allocationUnitCode.dao.AllocationUnitCodeDao">
+
+    <!-- Mapper for details from SIBS -->
+    <resultMap id="tfsAllocationUnitCodeRecordMap" type="com.ucpb.tfs.core.batch.process.allocationUnitCode.TfsAllocationUnitCodeRecord">
+        <result column="CIFNUMBER" property="cifNumber" jdbcType="VARCHAR"/>
+        <result column="CCBDBRANCHUNITCODE" property="branchUnitCode" jdbcType="VARCHAR"/>
+        <result column="ALLOCATIONUNITCODE" property="allocationUnitCode" jdbcType="VARCHAR"/>
+        <result column="OFFICERCODE" property="officerCode" jdbcType="VARCHAR"/>
+        <result column="ACCOUNTOFFICER" property="officerName" jdbcType="VARCHAR"/>
+        <result column="EXCEPTIONCODE" property="errorCode" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- Mapper for TradeService -->
+    <resultMap id="tradeServiceRecordMap" type="com.ucpb.tfs.core.batch.process.allocationUnitCode.TradeServiceRecord">
+        <result column="TRADESERVICEID" property="tradeServiceId" jdbcType="VARCHAR"/>
+        <result column="SERVICEINSTRUCTIONID" property="serviceInstructionId" jdbcType="VARCHAR"/>
+        <result column="DOCUMENTCLASS" property="documentClass" jdbcType="VARCHAR"/>
+        <result column="SERVICETYPE" property="serviceType" jdbcType="VARCHAR"/>
+        <result column="CIFNUMBER" property="cifNumber" jdbcType="VARCHAR"/>
+        <result column="CCBDBRANCHUNITCODE" property="branchUnitCode" jdbcType="VARCHAR"/>
+        <result column="ALLOCATIONUNITCODE" property="allocationUnitCode" jdbcType="VARCHAR"/>
+        <result column="OFFICERCODE" property="officerCode" jdbcType="VARCHAR"/>
+        <result column="ACCOUNTOFFICER" property="officerName" jdbcType="VARCHAR"/>
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <!-- Mapper for ServiceInstruction of the TradeService -->
+    <resultMap id="serviceInstructionRecordMap" type="com.ucpb.tfs.core.batch.process.allocationUnitCode.ServiceInstructionRecord">
+        <result column="SERVICEINSTRUCTIONID" property="serviceInstructionId" jdbcType="VARCHAR"/>
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="getAllActiveDistinctCifNumbers" resultMap="tfsAllocationUnitCodeRecordMap">
+        <!-- TradeProduct -->
+        select distinct cifNumber from tradeProduct where productType = 'LC' and status not in ('CANCELLED')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType = 'INDEMNITY' and status not in ('CANCELLED')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType in ('DA','DP','OA','DR') and status not in ('CANCELLED','CLOSED')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType = 'EXPORT_ADVISING' and status in ('OPEN')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType = 'EXPORT_BILLS' and status not in ('CANCELLED')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType = 'IADVPAYMENT' and status in ('OPEN')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct cifNumber from tradeProduct where productType = 'EADVPAYMENT' and status in ('OPEN')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        union
+        select distinct trim(CIFNO) from REFPAS5CLIENT
+		<choose>
+            <when test="cifNumber != null">
+                where CIFNO = #{cifNumber}
+            </when>
+            <otherwise>
+                where CIFNO is not null
+            </otherwise>
+        </choose>
+        <!-- TradeService -->
+        <!--
+        union
+        select distinct cifNumber from tradeService
+        where documentClass in ('LC', 'INDEMNITY', 'DA','DP','OA','DR', 'EXPORT_ADVISING', 'BC', 'BP', 'CORRES_CHARGE', 'IMPORT_ADVANCE', 'EXPORT_ADVANCE')
+        and status in ('MARV', 'PENDING', 'PREPARED', 'CHECKED', 'RETURNED', 'RETURNED_TO_BRANCH', 'FOR_REVERSAL')
+        <choose>
+            <when test="cifNumber != null">
+                and cifNumber = #{cifNumber}
+            </when>
+            <otherwise>
+                and cifNumber is not null
+            </otherwise>
+        </choose>
+        -->
+    </select>
+
+    <select id="getAllActiveTradeServices" resultMap="tradeServiceRecordMap">
+        select tradeServiceId, serviceInstructionId, documentClass, serviceType, cifNumber, ccbdBranchUnitCode, allocationUnitCode, accountOfficer, officerCode, details from tradeService
+        where documentClass in ('LC', 'INDEMNITY', 'DA','DP','OA','DR', 'EXPORT_ADVISING', 'BC', 'BP', 'CORRES_CHARGE', 'IMPORT_ADVANCE', 'EXPORT_ADVANCE')
+        and status in ('MARV', 'PENDING', 'RETURNED', 'RETURNED_TO_BRANCH')
+        and cifNumber = #{cifNumber}
+    </select>
+
+    <select id="getServiceInstruction" resultMap="serviceInstructionRecordMap">
+        select serviceInstructionId, details from serviceInstruction where serviceInstructionId = #{serviceInstructionId}
+    </select>
+
+    <update id="updateTradeProductLc">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'LC' and status not in ('CANCELLED')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductIndemnity">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'INDEMNITY' and status not in ('CANCELLED')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductNonLc">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType in ('DA','DP','OA','DR') and status not in ('CANCELLED','CLOSED')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductExportAdvising">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'EXPORT_ADVISING' and status in ('OPEN')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductExportBills">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'EXPORT_BILLS' and status not in ('CANCELLED')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductImportAdvancePayment">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'IADVPAYMENT' and status in ('OPEN')
+        ]]>
+    </update>
+
+    <update id="updateTradeProductExportAdvancePayment">
+        <![CDATA[
+          update tradeProduct set ccbdBranchUnitCode = (CASE WHEN #{tfsAllocationUnitCodeRecord.branchUnitCode} = 1 THEN '001' ELSE #{tfsAllocationUnitCodeRecord.branchUnitCode} END), allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, officerCode = #{tfsAllocationUnitCodeRecord.officerCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and productType = 'EADVPAYMENT' and status in ('OPEN')
+        ]]>
+    </update>
+
+
+    <update id="updateMarginalDeposit">
+        <![CDATA[
+          update marginalDeposit set ccbdBranchUnitCode = #{tfsAllocationUnitCodeRecord.branchUnitCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and status in ('MARV','APPROVED','OUTSTANDING')
+        ]]>
+    </update>
+
+    <update id="updateAccountsPayable">
+        <![CDATA[
+          update accountsPayable set ccbdBranchUnitCode = #{tfsAllocationUnitCodeRecord.branchUnitCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and status in ('MARV','APPROVED','OUTSTANDING')
+        ]]>
+    </update>
+
+    <update id="updateAccountsReceivable">
+        <![CDATA[
+          update accountsReceivable set ccbdBranchUnitCode = #{tfsAllocationUnitCodeRecord.branchUnitCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber} and status in ('MARV','APPROVED','OUTSTANDING')
+        ]]>
+    </update>
+
+    <update id="updateRebate">
+        <![CDATA[
+          update rebate set ccbdBranchUnitCode = #{tfsAllocationUnitCodeRecord.branchUnitCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName} where cifNumber = #{tfsAllocationUnitCodeRecord.cifNumber}
+        ]]>
+    </update>
+
+    <update id="updateRefPas5Client">
+        <![CDATA[
+         update refPas5Client set officerCode =  #{tfsAllocationUnitCodeRecord.officerCode}, branchUnitCode = #{tfsAllocationUnitCodeRecord.branchUnitCode}, accountOfficer = #{tfsAllocationUnitCodeRecord.officerName}, allocationUnitCode = #{tfsAllocationUnitCodeRecord.allocationUnitCode}, exceptionCode = #{tfsAllocationUnitCodeRecord.errorCode} where cifNo = #{tfsAllocationUnitCodeRecord.cifNumber}
+        ]]>
+    </update>
+
+    <update id="updateTradeService">
+        <![CDATA[
+          update tradeService set ccbdBranchUnitCode = (CASE WHEN #{tradeServiceRecord.branchUnitCode} = 1 THEN '001' ELSE #{tradeServiceRecord.branchUnitCode} END), allocationUnitCode = #{tradeServiceRecord.allocationUnitCode}, officerCode = #{tradeServiceRecord.officerCode}, accountOfficer = #{tradeServiceRecord.officerName}, details = #{tradeServiceRecord.details} where tradeServiceId = #{tradeServiceRecord.tradeServiceId}
+        ]]>
+    </update>
+
+    <update id="updateServiceInstruction">
+        <![CDATA[
+          update serviceInstruction set details = #{serviceInstructionRecord.details} where serviceInstructionId = #{serviceInstructionRecord.serviceInstructionId}
+        ]]>
+    </update>
+
+</mapper>

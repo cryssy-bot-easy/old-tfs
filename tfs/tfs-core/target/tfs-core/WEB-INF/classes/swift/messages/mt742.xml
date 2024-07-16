@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       
+   <!-- PROLOGUE:
+ 		(revision)
+		SCR/ER Number: 
+		SCR/ER Description: (Redmine 4117) Since the UI is now mandatory on the Issuing Bank field (with picklist), 
+			which is mandatory, Option A will then be used for Tag 52 and not option B. Also, additional comment, 
+			Issuing Bank Name and Address should no longer be enterable and should be colored gray, since values 
+			here are derived based on the Issuing Bank (with picklist). Please have this revised.
+		[Revised by:] Robin C. Rafael
+		[Date Deployed:]
+		Program [Revision] comment out 52D , adjusted 52A to always add the issuing bank code
+		PROJECT: CORE
+		MEMBER TYPE  : XML
+		Project Name: mt742.xml
+		
+		(revision)
+		Description: Changed "71B" to "71D" and "72" to "72Z".
+		[Modified by:] Rafael Ski Poblete
+		[Date Modified:] 08/01/2018
+		
+		[Date Modified:] 08/08/2018
+		Description: Changed formatter method for 72Z to be use in MT730 and MT742
+	-->
+
+    <util:map id="mt742Mapper">
+<!--    ON HOLD -->
+        <entry value="20" key="details?.get('documentNumber')?.replaceAll('-','')"/>
+        <entry value="21" key="details?.get('lcNumber')?.replaceAll('-','')"/>
+        <entry value="31C" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatSwiftDate(details?.get('lcIssueDate'))"/>
+<!--         <entry value="52A" key="details?.get('messageType') != null ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('issuingBankCode')) : 'test'"/> comment by robin 4117 1/24/2017-->
+		<entry value="52A" key="T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('issuingBankCode'))"/>
+<!--         <entry value="52D" key="details?.get('messageType') == null ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',details?.get('issuingBankName'),details?.get('issuingBankAddress')) : ''"/> comment out by robin 4117 1/24/2017-->
+        <entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('amount'))"/>
+        <entry value="33B" key="details?.get('additionalAmountClaimed') != '0.00' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('additionalAmountClaimed')) : ''"/> <!-- edited by max 7/1/2016 -->
+		<entry value="71D" key="details?.get('chargeAmount') != '0.00' ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('chargeCode'),details?.get('chargeAmount'),T(com.ucpb.tfs.util.SwiftUtil).formatChargeNarrative(details?.get('chargeNarrative'))) : ''"/> <!-- edited by max 7/1/2016 -->
+        <entry value="34A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('lcIssueDate'),details?.get('totalAmountCurrency'),details?.get('totalAmountClaimed'))"/>
+<!--         <entry value="34B" key="details?.get('')"/> -->
+		<entry value="34A" key="details?.get('totalAmountClaimedFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('totalAmountClaimedDate'),details?.get('totalAmountClaimedCurrencyA'),details?.get('totalAmountClaimedA')) : ''"/>
+		<entry value="34B" key="details?.get('totalAmountClaimedFlag') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('totalAmountClaimedCurrencyB'),details?.get('totalAmountClaimedB')) : ''"/>
+        <entry value="57A" key="details?.get('corresBankFlag') == 'A' ? details?.get('corresBankCode') : ''"/>
+        <entry value="57B" key="details?.get('corresBankFlag') == 'B' ? details?.get('corresBankLocation') : ''"/>
+        <entry value="57D" key="details?.get('corresBankFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('corresBankNameAndAddress')) : ''"/>
+        <entry value="58A" key="details?.get('corresBankAccountFlag') == 'A' ? (details?.get('corresBankAccountCode') ?: details?.get('beneficiaryIdentifierCode')) : ''"/>
+        <entry value="58D" key="details?.get('corresBankAccountFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,(details?.get('corresBankAccountNameAndAddress') ?: details?.get('beneficiaryNameAndAddress'))) : ''"/>
+        <!-- <entry value="72" key="details?.get('senderToReceiverInformation') != '' ? T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation')) : details?.get('senderToReceiver')"/> edited by max 7/1/2016 -->
+        <entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+        
+    </util:map>
+</beans>

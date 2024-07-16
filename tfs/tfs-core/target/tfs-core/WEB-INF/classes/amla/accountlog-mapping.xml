@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: No closing date when EBC Negotiation partially converted to EBP Nego
+	[Created by:] Jonh Henry Alabin
+	[Date deployed:] June 16,2017
+	Program [Revision] Details: Add handling for AMLA(new Event), add condition in close date under BPNegotiatedPriorBCEvent
+	PROJECT: CORE
+	MEMBER TYPE  : XML
+	Project Name: accountlog-mapping.xml
+ */
+ -->
+ 
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="inheritedNonLCAcct" abstract="true" class="com.ucpb.tfs.utils.BeanMapper">
+        <constructor-arg name="properties">
+            <map>
+                <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                <entry key="dateCreated" value="new java.util.Date()"/>
+                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                <entry key="accountType" value="'400'"/>
+                <entry key="transactionTypes" value="'NOSET'"/>
+                <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount'))"/>
+                <entry key="applicationCode" value="'0'"/>
+                <entry key="status" value="'A'" />
+                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                <entry key="payRollTag" value="'0'"/>
+            </map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+    </bean>
+
+    <util:map id="accountLogMappers">
+        <entry key="com.ucpb.tfs.domain.product.event.LetterOfCreditCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'LCOPN'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="letterOfCredit?.processDate"/>
+                        <!--<entry key="closingDate" value="letterOfCredit?.expiryDate"/>-->
+                        <entry key="accountBalance" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).formatAmount(tradeService?.details?.get('amount'))"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCAdjustedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'LCADJ'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                        <!-- <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amountTo') ?: (tradeService?.details?.get('amountFrom') ?: '0'))"/> -->
+                        <entry key="accountBalance" value="new java.math.BigDecimal(letterOfCredit?.outstandingBalance)"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCNegotiationCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.tradeProductNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                    <!--<entry key="transactionTypes" value="'DOMESTIC'.equals(tradeService?.details?.get('documentType')) ? 'ILCAM' : 'CASH'.equals(tradeService?.details?.get('documentSubType1')) ? 'ILCAC' : 'ILCAD'"/> -->
+                        <entry key="transactionTypes" value="'LCNEG'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('issueDate'),'MM/dd/yyyy')"/>
+                        <entry key="closingDate" value="negotiatedLetterOfCredit?.dateClosed"/>
+                        <entry key="accountBalance" value="new java.math.BigDecimal(negotiatedLetterOfCredit?.outstandingBalance)"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="(negotiatedLetterOfCredit?.outstandingBalance?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? 'A' : 'C'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('negotiationCurrency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+<!--
+        <entry key="com.ucpb.tfs.domain.product.event.UALoanAdjustedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'DOMESTIC'.equals(tradeService?.details?.get('documentType')) ? 'ILCAM' : 'CASH'.equals(tradeService?.details?.get('documentSubType1')) ? 'ILCAC' : 'ILCAD'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('issueDate'),'MM/dd/yyyy')"/>
+                        <entry key="accountBalance" value="new java.math.BigDecimal(letterOfCredit?.outstandingBalance)"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('negotiationCurrency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.UALoanPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'DOMESTIC'.equals(tradeService?.details?.get('documentType')) ? 'ILCAM' : 'CASH'.equals(tradeService?.details?.get('documentSubType1')) ? 'ILCAC' : 'ILCAD'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('issueDate'),'MM/dd/yyyy')"/>
+                        <entry key="closingDate" value="letterOfCredit?.dateClosed"/>
+                        <entry key="accountBalance" value="new java.math.BigDecimal(letterOfCredit?.outstandingBalance)"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'C'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('negotiationCurrency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+-->
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCAmendedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <!-- <entry key="transactionTypes" value="'CCBI'"/>-->
+                        <entry key="transactionTypes" value="'LCAMD'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('issueDate'),'MM/dd/yyyy')"/>
+                        <entry key="accountBalance" value="amendedLc?.outstandingBalance"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <!--  <entry key="transactionTypes" value="'ILCC'"/>-->
+                        <entry key="transactionTypes" value="'LCC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="letterOfCredit?.processDate"/>
+                        <entry key="closingDate" value="letterOfCredit?.cancellationDate"/>
+                        <entry key="accountBalance" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'C'"/>
+                        <entry key="accountCurrency" value="letterOfCredit?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.IndemnityCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBI'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="letterOfCredit?.processDate"/>
+                        <!--<entry key="closingDate" value="letterOfCredit?.expiryDate"/>-->
+                        <entry key="accountBalance" value="letterOfCredit?.outstandingBalance"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="letterOfCredit?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+<!--
+        <entry key="com.ucpb.tfs.domain.product.event.IndemnityCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'OGG'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                        <entry key="accountBalance" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).formatAmount(tradeService?.details?.get('amount'))"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+-->
+
+        <entry key="com.ucpb.tfs.domain.cdt.event.CDTPaymentRequestPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="accountTag" value="'CDT'"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + cdtPaymentRequest?.iedieirdNumber"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCOL'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="cdtPaymentRequest?.dateUploaded"/>
+                        <!--<entry key="closingDate" value="cdtPaymentRequest?.datePaid"/>-->
+                        <entry key="accountBalance" value="tradeService?.details?.get('amount')"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="'PHP'"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.cdt.event.CDTRefundCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + cdtPaymentRequest?.iedieirdNumber"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCOL'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="cdtPaymentRequest?.dateUploaded"/>
+                        <entry key="closingDate" value="cdtPaymentRequest?.datePaid"/> <!-- see paymentRequest.refundPayment() -->
+                        <entry key="accountBalance" value="T(java.math.BigDecimal).ZERO"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'C'"/>
+                        <entry key="accountCurrency" value="'PHP'"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.CDTRemittanceCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="tradeService?.details?.get('bocAccount')"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CPYGA'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <!--<entry key="openingDate" value="cdtRemittance?.remittanceDate"/>-->
+                        <!--<entry key="closingDate" value="cdtRemittance?.remittanceDate"/>-->
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'"/>
+                        <entry key="accountCurrency" value="'PHP'"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <!--Non-LC DA-->
+        <!-- Commented out; should only log AMLA when Accepted
+        <entry key="com.ucpb.tfs.domain.product.event.DACreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct" />
+        </entry>
+        -->
+
+        <entry key="com.ucpb.tfs.domain.product.event.DAAcceptedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="openingDate" value="documentAgainstAcceptance?.processDate"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DASettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="(documentAgainstAcceptance?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? 'A' : 'C'" />
+                        <entry key="openingDate" value="documentAgainstAcceptance?.processDate"/>
+                        <entry key="closingDate" value="(documentAgainstAcceptance?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? null : documentAgainstAcceptance?.settledDate"/>
+                        <entry key="accountBalance" value="documentAgainstAcceptance?.getOutstandingAmount()"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DACancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="'C'" />
+                        <entry key="openingDate" value="documentAgainstAcceptance?.processDate"/>
+                        <entry key="closingDate" value="documentAgainstAcceptance?.cancelledDate"/>
+                        <entry key="accountBalance" value="'0'"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <!--Non-LC DP-->
+        <entry key="com.ucpb.tfs.domain.product.event.DPCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DPSettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="(documentAgainstPayment?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? 'A' : 'C'" />
+                        <entry key="openingDate" value="documentAgainstPayment?.processDate"/>
+                        <entry key="closingDate" value="(documentAgainstPayment?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? null : documentAgainstPayment?.settledDate"/>
+                        <entry key="accountBalance" value="documentAgainstPayment?.getOutstandingAmount()"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DPCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="'C'" />
+                        <entry key="openingDate" value="documentAgainstPayment?.processDate"/>
+                        <entry key="closingDate" value="documentAgainstPayment?.cancelledDate"/>
+                        <entry key="accountBalance" value="'0'"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <!--Non-LC DR-->
+        <entry key="com.ucpb.tfs.domain.product.event.DRCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DRSettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="(directRemittance?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? 'A' : 'C'" />
+                        <entry key="openingDate" value="directRemittance?.processDate"/>
+                        <entry key="closingDate" value="(directRemittance?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? null : directRemittance?.settledDate"/>
+                        <entry key="accountBalance" value="directRemittance?.getOutstandingAmount()"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DRCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="'C'" />
+                        <entry key="openingDate" value="directRemittance?.processDate"/>
+                        <entry key="closingDate" value="directRemittance?.cancelledDate"/>
+                        <entry key="accountBalance" value="'0'"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <!--Non-LC OA-->
+        <entry key="com.ucpb.tfs.domain.product.event.OACreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.OASettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="(openAccount?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? 'A' : 'C'" />
+                        <entry key="openingDate" value="openAccount?.processDate"/>
+                        <entry key="closingDate" value="(openAccount?.getOutstandingAmount()?.compareTo(T(java.math.BigDecimal).ZERO) > 0) ? null : openAccount?.settledDate"/>
+                        <entry key="accountBalance" value="openAccount?.getOutstandingAmount()"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.OACancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCAcct">
+                <constructor-arg name="properties">
+                    <map merge="true">
+                        <entry key="status" value="'C'" />
+                        <entry key="openingDate" value="openAccount?.processDate"/>
+                        <entry key="closingDate" value="openAccount?.cancelledDate"/>
+                        <entry key="accountBalance" value="'0'"/>
+                    </map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.BCNegotiatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+		                <entry key="transactionTypes" value="'EXSET'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>  <!-- Will be overridden -->
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount'))"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.BCSettledPriorBCEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+		                <entry key="transactionTypes" value="'EXSET'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="exportBills?.negotiationDate"/>  <!-- Will be overridden -->
+		                <entry key="closingDate" value="exportBills?.settlementDate"/>
+		                <entry key="accountBalance" value="T(java.math.BigDecimal).ZERO"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'C'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BCCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBCE'"/>
+                        <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="exportBills?.negotiationDate"/>  <!-- Will be overridden -->
+                        <entry key="closingDate" value="new java.util.Date()"/>
+                        <entry key="accountBalance" value="T(java.math.BigDecimal).ZERO"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'C'" />
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BPNegotiatedPriorBCEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+		                <entry key="transactionTypes" value="'EXSET'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <entry key="closingDate" value="tradeService?.details?.get('bcAmount') != T(java.math.BigDecimal).ZERO ? null : T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.modifiedDate,'MM/dd/yyyy')"/>
+		                <!--<entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount'))"/>-->
+		                <entry key="accountBalance" value="tradeService?.details?.get('bcAmount')"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="tradeService?.details?.get('bcAmount') != T(java.math.BigDecimal).ZERO ? 'A' :'C'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.BPSettledPriorBCEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+		                <entry key="transactionTypes" value="'CCBCE'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <entry key="closingDate" value="exportBills.settlementDate"/>
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount'))"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'C'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'EXADV'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDateString(exportAdvising?.processDate,'MM/dd/yyyy')"/>
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('lcAmount'))"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('lcCurrency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingAmendedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'EXAMD'"/>
+		                <entry key="branchCode" value="tradeService?.processingUnitCode ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDateString(amendedExportAdvising?.lcIssueDate,'MM/dd/yyyy')"/>
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('lcAmount'))"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+		                <entry key="accountCurrency" value="tradeService?.details?.get('lcCurrency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBCE'"/>
+		                <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDateString(cancelledExportAdvising?.lcIssueDate,'MM/dd/yyyy')"/>
+		                <entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <entry key="accountBalance" value="T(java.math.BigDecimal).ZERO"/>
+		                <entry key="accountCurrency" value="tradeService?.details?.get('lcCurrency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'C'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvancePaymentCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBCE'"/>
+		                <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <!--<entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>-->
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount'))"/>
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvancePaymentRefundCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+		                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+		                <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CMISC'"/>
+		                <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+		                <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+		                <entry key="accountBalance" value="new java.math.BigDecimal(tradeService?.details?.get('amount').toString().replaceAll(',',''))"/>
+		                <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+		                <entry key="payRollTag" value="'0'"/>
+		                <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.corresCharges.event.CorresChargeActualApprovedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + (tradeService?.documentNumber?.toString() ?: tradeService?.details?.get('cifNumber'))"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CMISC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <!--<entry key="openingDate" value="letterOfCredit?.processDate"/>-->
+                        <!--<entry key="closingDate" value="letterOfCredit?.expiryDate"/>-->
+                        <!--<entry key="accountBalance" value="letterOfCredit?.outstandingBalance"/>-->
+                        <!--<entry key="accountCurrency" value="letterOfCredit?.currency?.currencyCode"/>-->
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+<!-- Not reportable to AMLA as per Ma'am Juliet 2/8/2014
+        <entry key="com.ucpb.tfs.domain.product.event.RebateCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CMISC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                        <entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                        <entry key="accountBalance" value="rebate?.amount"/>
+                        <entry key="accountCurrency" value="rebate?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'C'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+-->
+
+        <entry key="com.ucpb.tfs.domain.settlementaccount.event.MarginalDepositUpdatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <!--<entry key="openingDate" value="marginalDeposit?.modifiedDate"/>-->
+                        <!--<entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>-->
+                        <entry key="accountBalance" value="T(java.math.BigDecimal).ZERO"/>  <!-- Will be overidden -->
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+                        <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.APCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('bookingDate'),'MM/dd/yyyy')"/>
+                        <!--<entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>-->
+                        <entry key="accountBalance" value="accountsPayable?.getApOutstandingBalance()"/>
+                        <entry key="accountCurrency" value="accountsPayable?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.APAppliedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('bookingDate'),'MM/dd/yyyy')"/>
+                        <!--<entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>-->
+                        <entry key="accountBalance" value="accountsPayable?.getApOutstandingBalance()"/>
+                        <entry key="accountCurrency" value="accountsPayable?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ARCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('bookingDate'),'MM/dd/yyyy')"/>
+                        <!--<entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>-->
+                        <entry key="accountBalance" value="accountsReceivable?.getArOutstandingBalance()"/>
+                        <entry key="accountCurrency" value="accountsReceivable?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ARSettledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('bookingDate'),'MM/dd/yyyy')"/>
+                        <entry key="closingDate" value="T(com.ucpb.tfs.utils.DateUtil).convertToDate(tradeService?.details?.get('processDate'),'MM/dd/yyyy')"/>
+                        <entry key="accountBalance" value="accountsReceivable?.getArOutstandingBalance()"/>
+                        <entry key="accountCurrency" value="accountsReceivable?.currency?.currencyCode"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.CashLcRefundEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'IIPC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="new java.util.Date()"/>
+                        <!--<entry key="closingDate" value="new java.util.Date()"/>-->
+                        <entry key="accountBalance" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).formatAmount(tradeService?.details?.get('totalProceedsPayment'))"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ImportChargesPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + (letterOfCredit != null ? letterOfCredit?.documentNumber?.toString() : tradeService?.details?.get('cifNumber'))"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CMISC'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="letterOfCredit != null ? letterOfCredit?.processDate : new java.util.Date()"/>
+                        <!--<entry key="closingDate" value="letterOfCredit?.expiryDate"/>--> <!-- handle in program, not here -->
+                        <entry key="accountBalance" value="letterOfCredit != null ? letterOfCredit?.outstandingBalance : T(java.math.BigDecimal).ZERO"/>
+                        <entry key="accountCurrency" value="letterOfCredit != null ? letterOfCredit?.currency?.currencyCode : tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" /> <!-- handle in program, not here -->
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportChargesPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + (tradeService?.documentNumber?.toString() ?: tradeService?.details?.get('cifNumber'))"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBCE'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="new java.util.Date()"/>
+                        <!--<entry key="closingDate" value="new java.util.Date()"/>-->
+                        <entry key="accountBalance" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).formatAmount(tradeService?.details?.get('amount'))"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportChargesRefundEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="accountNumber" value="'TFSS' + (tradeService?.documentNumber?.toString() ?: tradeService?.details?.get('cifNumber'))"/>
+                        <entry key="accountType" value="'400'"/>
+                        <entry key="transactionTypes" value="'CCBCE'"/>
+                        <entry key="branchCode" value="tradeService?.details?.get('processingUnitCode') ?: tradeService?.details?.get('unitcode')"/>
+                        <entry key="openingDate" value="new java.util.Date()"/>
+                        <!--<entry key="closingDate" value="new java.util.Date()"/>-->
+                        <entry key="accountBalance" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).formatAmount(tradeService?.details?.get('amount'))"/>
+                        <entry key="accountCurrency" value="tradeService?.details?.get('currency')"/>
+                        <entry key="payRollTag" value="'0'"/>
+                        <entry key="applicationCode" value="'0'"/>
+		                <entry key="status" value="'A'" />
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.AccountLog"/>
+            </bean>
+        </entry>
+
+    </util:map>
+
+</beans>

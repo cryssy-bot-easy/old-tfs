@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: SCR IBD-16-0219-01
+	SCR/ER Description: Generate CIC File
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 02/24/2016
+	Program [Revision] Details: Define beans for the CIC extraction job
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  ER# 20140909-038
+	SCR/ER Description: CIF Normalization Not Working in TFS
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/05/2016
+	Program [Revision] Details: The CIF Normalization was redesigned, since not all tables are normalized and to make it run for adhoc.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: CIC folders - CIC monthly reports
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/26/2016
+	Program [Revision] Details: Add directories for the CIC reports.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: Account Purging
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/26/2016
+	Program [Revision] Details: Add directories for the CIC reports.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:
+	SCR/ER Description: ITRS Interface
+	[Revised by:] Prochina, Daniel Jericho B.
+	[Date Deployed:] 06-20-2018
+	Program [Revision] Details: Add directories for the ITRS Interface.
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<!--
+    PROLOGUE
+    Description: Replaced usage of silverlakeDao into silverlakeLocalDao
+    Revised by:  Cedrick C. Nungay
+    Date revised:01/25/2024
+-->
+
+<!--
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:
+	SCR/ER Description:
+	[Revised by:] Crystiann Puso
+	[Date Deployed:] 02-23-2024
+	Program [Revision] Details: Add directories for Cicls Process Job and Generate Cicls File
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: jobs
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:file="http://www.springframework.org/schema/integration/file"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+       http://www.springframework.org/schema/integration/file	http://www.springframework.org/schema/integration/file/spring-integration-file.xsd http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.0.xsd">
+
+
+    <import resource="directories.xml"/>
+    <import resource="job-details.xml"/>
+    <import resource="scheduler.xml"/>
+    <import resource="amla-jobs.xml"/>
+
+    <!--<bean id="sibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+    <!--<property name="dataSource" ref="interfaceDataSource" />-->
+    <!--<property name="mapperLocations" value="classpath*:/mappers/loan-mapper.xml"/>-->
+    <!--</bean>-->
+    <bean id="sibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="interfaceDataSource"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mappers/loan-mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="localSibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mappers/sibs-local-mapper.xml</value>
+                <value>classpath*:/mappers/cicls-mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- JOBS -->
+
+    <bean id="cancelDormantEtsJob" class="com.ucpb.tfs.batch.job.BatchEtsPurgingJob">
+        <property name="batchProcessDao" ref="batchProcessDao"/>
+    </bean>
+
+    <bean id="tradeProductExpireJob" class="com.ucpb.tfs.application.batch.TradeProductExpireJob">
+        <constructor-arg index="0" ref="tradeProductRepository"/>
+        <constructor-arg index="1" ref="accountingService"/>
+        <constructor-arg index="2" ref="gltsSequenceRepository"/>
+        <constructor-arg index="3" ref="myDataSource"/>
+        <property name="accountingService" ref="accountingService"/>
+        <property name="tradeProductRepository" ref="tradeProductRepository"/>
+        <property name="gltsSequenceRepository" ref="gltsSequenceRepository"/>
+        <property name="ratesService" ref="RatesService"/>
+        <property name="tfsDataSource" ref="myDataSource"/>
+    </bean>
+
+
+
+<!--     <bean id="batchFacilityRevaluationJob" class="com.ucpb.tfs.batch.job.BatchFacilityRevaluationJob"> -->
+<!--         <property name="batchFacilityRevaluationService" ref="batchFacilityRevaluationService"/> -->
+<!--     </bean> -->
+
+	<bean id="batchFacilityRevaluationJob" class="com.ucpb.tfs.application.batch.BatchFacilityRevaluationJob">
+        <property name="batchFacilityReearmarkService" ref="batchFacilityReearmarkService"/>
+        <property name="tradeServiceRepository" ref="tradeServiceRepository"/>
+    	<property name="letterOfCreditRepository" ref="letterOfCreditRepository"/>
+    	<property name="paymentRepository" ref="paymentRepository"/>
+    </bean>
+    
+    <bean id="itrsService" class="com.ucpb.tfs.domain.service.ItrsService">
+    	<property name="paymentRepository" ref="paymentRepository"/>
+    	<property name="tradeProductDao" ref="tradeProductDao"/>    	
+    	<property name="tradeServiceRepository" ref="tradeServiceRepository"/>      	
+    </bean>
+
+
+    <!--<bean id="recordEndOfDayBalanceJob" class="com.ucpb.tfs.report.dw.job.DailyBalanceRecorderJob">-->
+    <!--<constructor-arg name="dataSource" ref="myDataSource"/>-->
+    <!--<constructor-arg name="query"-->
+    <!--value="SELECT LC.DOCUMENTNUMBER AS DOCUMENTNUMBER, OUTSTANDINGBALANCE, DATECLOSED, PROCESSDATE, STATUS-->
+    <!--FROM LETTEROFCREDIT LC-->
+    <!--INNER JOIN-->
+    <!--TRADEPRODUCT TP-->
+    <!--ON TP.DOCUMENTNUMBER = LC.DOCUMENTNUMBER-->
+    <!--WHERE TP.STATUS = 'ACTIVE' OR-->
+    <!--(YEAR(LC.DATECLOSED) = YEAR(CURRENT_TIMESTAMP) AND MONTH(LC.DATECLOSED) = MONTH(CURRENT_TIMESTAMP))"/>-->
+    <!--<property name="beanMapper">-->
+    <!--<bean id="resultMapper" class="com.ucpb.tfs.batch.util.BeanRowMapper">-->
+    <!--<constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.Product"/>-->
+    <!--<constructor-arg name="mappings">-->
+    <!--<map>-->
+    <!--<entry key="documentNumber" value="DOCUMENTNUMBER"/>-->
+    <!--<entry key="outstandingBalance" value="OUTSTANDINGBALANCE"/>-->
+    <!--<entry key="entryDate" value="PROCESSDATE"/>-->
+    <!--<entry key="status" value="STATUS"/>-->
+    <!--</map>-->
+    <!--</constructor-arg>-->
+    <!--</bean>-->
+    <!--</property>-->
+    <!--<property name="repository" ref="dailyBalanceRepository"/>-->
+    <!--</bean>-->
+
+
+    <bean id="dailyBalanceRecorderJob" class="com.ucpb.tfs.report.dw.job.DailyBalanceRecorderJob">
+        <property name="batchProcessDao" ref="batchProcessDao"/>
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+
+    <!--<bean id="dailyBalanceRecorderJob" class="com.ucpb.tfs.batch.job.SqlRunnerJob">-->
+    <!--<constructor-arg name="jdbcTemplate" ref="tfsJdbcTemplate"/>-->
+    <!--<constructor-arg name="sql" value="-->
+    <!--INSERT INTO DAILYBALANCE (DOCUMENTNUMBER,BALANCE,BALANCEDATE)-->
+    <!--(SELECT DA.DOCUMENTNUMBER, DA.OUTSTANDINGAMOUNT AS BALANCE, CURRENT_TIMESTAMP-->
+    <!--FROM DOCUMENTAGAINSTACCEPTANCE DA, TRADEPRODUCT TP-->
+    <!--WHERE DA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER-->
+    <!--AND TP.STATUS = 'ACCEPTED'-->
+    <!--UNION-->
+    <!--SELECT DP.DOCUMENTNUMBER, DP.OUTSTANDINGAMOUNT AS BALANCE, CURRENT_TIMESTAMP-->
+    <!--FROM DOCUMENTAGAINSTPAYMENT DP, TRADEPRODUCT TP-->
+    <!--WHERE DP.DOCUMENTNUMBER = TP.DOCUMENTNUMBER-->
+    <!--AND TP.STATUS = 'NEGOTIATED'-->
+    <!--UNION-->
+    <!--SELECT DR.DOCUMENTNUMBER, DR.OUTSTANDINGAMOUNT AS BALANCE, CURRENT_TIMESTAMP-->
+    <!--FROM DIRECTREMITTANCE DR, TRADEPRODUCT TP-->
+    <!--WHERE DR.DOCUMENTNUMBER = TP.DOCUMENTNUMBER-->
+    <!--AND TP.STATUS = 'NEGOTIATED'-->
+    <!--UNION-->
+    <!--SELECT OA.DOCUMENTNUMBER, OA.OUTSTANDINGAMOUNT AS BALANCE, CURRENT_TIMESTAMP-->
+    <!--FROM OPENACCOUNT OA, TRADEPRODUCT TP-->
+    <!--WHERE OA.DOCUMENTNUMBER = TP.DOCUMENTNUMBER-->
+    <!--AND TP.STATUS = 'NEGOTIATED'-->
+    <!--UNION-->
+    <!--SELECT LC.DOCUMENTNUMBER, (LC.OUTSTANDINGBALANCE) AS BALANCE, CURRENT_TIMESTAMP-->
+    <!--FROM LETTEROFCREDIT LC, TRADEPRODUCT TP-->
+    <!--WHERE LC.DOCUMENTNUMBER = TP.DOCUMENTNUMBER-->
+    <!--AND TP.STATUS = 'OPEN'-->
+    <!--)-->
+    <!--"/>-->
+    <!--</bean>-->
+
+
+    <bean id="dailyBalanceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateDailyBalanceRepository"/>
+
+    <bean id="tradeServiceRevertJob" class="com.ucpb.tfs.application.batch.TradeServiceRevertJob">
+        <property name="paymentRepository" ref="paymentRepository"/>
+        <property name="tradeServiceRepository" ref="tradeServiceRepository"/>
+        <property name="taskRepository" ref="taskRepository"/>
+        <property name="eventPublisher" ref="eventPublisher"/>
+    </bean>
+    
+    <bean id="serviceInstructionRevertJob" class="com.ucpb.tfs.application.batch.ServiceInstructionRevertJob">
+    	<property name="tradeServiceRepository" ref="tradeServiceRepository"/>
+        <property name="serviceInstructionRepository" ref="serviceInstructionRepository"/>
+        <property name="taskRepository" ref="taskRepository"/>
+        <property name="eventPublisher" ref="eventPublisher"/>
+        <property name="FacilityService" ref="FacilityService"/>
+    </bean>
+
+    <bean id="setExpiredLcsStatusToExpired" class="com.ucpb.tfs.batch.job.CancelExpiredLettersOfCreditJob">
+        <property name="batchProcessDao" ref="batchProcessDao"/>
+    </bean>
+
+    <bean id="abortPendingEtsReversalJob" class="com.ucpb.tfs.batch.job.AbortPendingEtsReversalJob">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+    
+	<bean id="cifNormalization" class="com.ucpb.tfs.core.batch.process.CifNormalization">
+        <constructor-arg name="tfsDataSource" ref="myDataSource"/>
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+    
+    <!--  CIF Norm -->
+    <bean id="cifNormalizationProcess" class="com.ucpb.tfs.core.batch.process.CifNormalizationProcess">
+        <constructor-arg name="tfsDataSource" ref="myDataSource"/>
+        <constructor-arg name="sibsDataSource" ref="interfaceDataSource"/>
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    	<property name="tradeProductDao" ref="tradeProductDao"/>    	
+    </bean>
+    
+    <bean id="facilityReferenceNormalization" class="com.ucpb.tfs.core.batch.process.FacilityReferenceNormalization">
+        <constructor-arg name="tfsDataSource" ref="myDataSource"/>
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+
+    <!-- GL Movement -->
+    <bean id="glReportGeneratorJob" class="com.ucpb.tfs.batch.job.GlReportGeneratorJob">
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="glMovementOutputChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filenamePrefix" value="TFGLMVMT"/>
+        <constructor-arg name="dwFilenamePrefix" value="TF_Mvm"/>
+        <!--<constructor-arg name="filenamePrefix" value="TF_GL"/>-->
+        <constructor-arg name="query" value="
+                         SELECT
+                            GL.RESPONDINGUNITCODE,
+                            GL.BOOKCODE,
+                            CASE WHEN B.LBP_ACCOUNTINGCODE IS NULL OR B.LBP_ACCOUNTINGCODE = '' THEN
+                                GL.ACCOUNTINGCODE ELSE B.LBP_ACCOUNTINGCODE
+                            END AS ACCOUNTINGCODE,
+                            CASE WHEN B.LBP_ACCOUNTINGCODE IS NULL OR B.LBP_ACCOUNTINGCODE = '' THEN
+                                'NOT MAPPED: ' || GL.PARTICULARS ELSE B.LBP_PARTICULARS
+                            END AS PARTICULARS,
+                            GL.ORIGINALCURRENCY,
+                            GL.EFFECTIVEDATE,
+                            GL.ENTRYTYPE,
+                            GL.PESOAMOUNT,
+                            GL.ORIGINALAMOUNT,
+                            GL.UNITCODE,
+                            GL.RESPONDINGUNITCODE,
+                            TS.TRADEPRODUCTNUMBER AS DOCUMENTNUMBER,
+                            GL.ID,
+                            TS.SERVICEINSTRUCTIONID,
+                            GL.SERVICETYPE,
+                            TS.DOCUMENTCLASS,
+                            TS.DOCUMENTTYPE,
+                            GL.UCPBPRODUCTID,
+                            GL.TRANSACTIONSHORTNAME,
+                            TS.TRADESERVICEREFERENCENUMBER,
+                            TS.CIFNAME
+                         FROM INT_ACCENTRYACTUAL GL
+                         INNER JOIN
+                            TRADESERVICE TS ON
+                            TS.TRADESERVICEID = GL.TRADESERVICEID
+                         LEFT JOIN TFSDB2S.REF_GLMAPPING B
+                         ON GL.ACCOUNTINGCODE = B.ACCOUNTINGCODE
+                            AND GL.BOOKCODE = B.BOOKCODE
+                            AND GL.BOOKCURRENCY = B.BOOKCURRENCY
+                         WHERE DAYOFYEAR(EFFECTIVEDATE) = DAYOFYEAR(CURRENT_TIMESTAMP)
+                         AND YEAR(EFFECTIVEDATE) = YEAR(CURRENT_TIMESTAMP) ORDER BY ID"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.MovementRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="transactionBranch" value="UNITCODE"/>
+                        <entry key="bookCode" value="BOOKCODE"/>
+                        <entry key="transactionAccount" value="ACCOUNTINGCODE"/>
+                        <entry key="currencyType" value="ORIGINALCURRENCY"/>
+                        <entry key="transactionEffectiveDate" value="EFFECTIVEDATE"/>
+                        <entry key="transactionCode" value="ENTRYTYPE"/>
+                        <entry key="transactionAmount" value="ORIGINALAMOUNT"/>
+                        <entry key="transactionBaseAmount" value="PESOAMOUNT"/>
+                        <entry key="sourceBranch" value="RESPONDINGUNITCODE"/>
+                        <entry key="respondingBranch" value="UNITCODE"/>
+                        <entry key="transactionDescription" value="PARTICULARS"/>
+                        <entry key="transactionReferenceNumber" value="DOCUMENTNUMBER"/>
+                        <entry key="documentNumber" value="DOCUMENTNUMBER"/>
+                        <entry key="transactionSequenceNumber" value="ID"/>
+                        <entry key="etsNumber" value="SERVICEINSTRUCTIONID"/>
+                        <entry key="serviceType" value="SERVICETYPE"/>
+                        <entry key="productId" value="UCPBPRODUCTID"/>
+                        <entry key="tradeServiceReferenceNumber" value="TRADESERVICEREFERENCENUMBER"/>
+                        <entry key="cifName" value="CIFNAME"/>
+                        <entry key="transactionShortName" value="TRANSACTIONSHORTNAME"/>
+                        <entry key="documentClass" value="DOCUMENTCLASS"/>
+                        <entry key="documentType" value="DOCUMENTTYPE"/>
+                    </map>
+                </constructor-arg>
+                <property name="fixedValues">
+                    <map>
+                        <entry key="transactionCostCenter" value="000"/>
+                        <entry key="transactionProductCode" value="000"/>
+                        <entry key="transactionSystemCode" value="TD"/>
+                        <entry key="transactionBatchNumber" value="852"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="updateSql" value="UPDATE INT_ACCENTRYACTUAL SET POSTINGDATE = CURRENT_TIMESTAMP WHERE ID = ?"/>
+    </bean>
+
+    <!-- GLIS -->
+    <bean id="glisReportGeneratorJob" class="com.ucpb.tfs.batch.job.GlisReportGeneratorJob">
+        <constructor-arg name="channel" ref="glisOutputChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="query" value="
+            SELECT COMPANY_NUMBER, LBP_ACCOUNTING_CODE, TRANSACTION_CODE, RESP_CTR_NUMBER, SOURCE_CODE
+                , AMOUNT, TO_DATE(DATE, 'YYYY-MM-DD') DATE
+            FROM (
+                SELECT COMPANY_NUMBER, ACCOUNT_NUMBER LBP_ACCOUNTING_CODE, TRANSACTION_CODE, RESP_CTR_NUMBER, SOURCE_CODE
+                    , SUM(AMOUNT) AMOUNT, TO_CHAR(DATE, 'YYYY-MM-DD') DATE
+                FROM TFSDB2S.GLIS_HAND_OFF_FILE
+                WHERE IS_POSTED = 'N'
+                    AND IS_APPROVED = 'Y'
+                    AND ACCOUNT_NUMBER IS NOT NULL
+                    AND TO_CHAR(DATE, 'MMDDYYYY') &lt;= ?
+                GROUP BY COMPANY_NUMBER, ACCOUNT_NUMBER, TRANSACTION_CODE, RESP_CTR_NUMBER, SOURCE_CODE, TO_CHAR(DATE, 'YYYY-MM-DD')
+                ORDER BY COMPANY_NUMBER, ACCOUNT_NUMBER, TRANSACTION_CODE)"/>
+        <constructor-arg name="reconQuery" value="
+            SELECT A.COMPANY_NUMBER, B.BOOKCURRENCY, B.BOOKCODE
+                , A.ACCOUNT_NUMBER LBP_ACCOUNTING_CODE
+                , C.LBP_PARTICULARS
+                , A.UCPB_ACCOUNTING_CODE
+                , A.UCPB_PARTICULARS
+                , A.TRANSACTION_CODE, A.RESP_CTR_NUMBER, A.SOURCE_CODE
+                , A.AMOUNT, A.PESOAMOUNT, A.DATE, A.REF_TRAN_SEQ_NUMBER, A.TRAN_DES_DOCUMENT_NUMBER
+                , COALESCE(A.REMARKS, '') REMARKS, A.ACCENTRY_ID, A.IS_APPROVED
+            FROM TFSDB2S.GLIS_HAND_OFF_FILE A
+            LEFT JOIN TFSDB2S.COMPANY_NUMBERS B
+            ON A.COMPANY_NUMBER = B.CODE
+            LEFT JOIN (SELECT DISTINCT BOOKCODE, BOOKCURRENCY, LBP_ACCOUNTINGCODE, LBP_PARTICULARS FROM TFSDB2S.REF_GLMAPPING) C
+            ON A.ACCOUNT_NUMBER = C.LBP_ACCOUNTINGCODE
+                AND B.BOOKCURRENCY = C.BOOKCURRENCY
+                AND B.BOOKCODE = C.BOOKCODE
+            WHERE A.IS_POSTED = 'N'
+                AND TO_CHAR(DATE, 'MMDDYYYY') &lt;= ?
+            ORDER BY COMPANY_NUMBER, LBP_ACCOUNTING_CODE, TRANSACTION_CODE"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.GlisHandoffRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="companyNumber" value="COMPANY_NUMBER"/>
+                        <entry key="accountNumber" value="LBP_ACCOUNTING_CODE"/>
+                        <entry key="transactionCode" value="TRANSACTION_CODE"/>
+                        <entry key="responsibilityCenterNumber" value="RESP_CTR_NUMBER"/>
+                        <entry key="sourceCode" value="SOURCE_CODE"/>
+                        <entry key="amount" value="AMOUNT"/>
+                        <entry key="effectiveDate" value="DATE"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="reconMapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.GlisHandoffRecon"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="companyNumber" value="COMPANY_NUMBER"/>
+                        <entry key="bookCurrency" value="BOOKCURRENCY"/>
+                        <entry key="bookCode" value="BOOKCODE"/>
+                        <entry key="lbpAccountingCode" value="LBP_ACCOUNTING_CODE"/>
+                        <entry key="lbpParticulars" value="LBP_PARTICULARS"/>
+                        <entry key="ucpbAccountingCode" value="UCPB_ACCOUNTING_CODE"/>
+                        <entry key="ucpbParticulars" value="UCPB_PARTICULARS"/>
+                        <entry key="transactionCode" value="TRANSACTION_CODE"/>
+                        <entry key="responsibilityCenterNumber" value="RESP_CTR_NUMBER"/>
+                        <entry key="sourceCode" value="SOURCE_CODE"/>
+                        <entry key="amount" value="AMOUNT"/>
+                        <entry key="pesoAmount" value="PESOAMOUNT"/>
+                        <entry key="effectiveDate" value="DATE"/>
+                        <entry key="referenceId" value="REF_TRAN_SEQ_NUMBER"/>
+                        <entry key="transactionDescription" value="TRAN_DES_DOCUMENT_NUMBER"/>
+                        <entry key="remarks" value="REMARKS"/>
+                        <entry key="accentryId" value="ACCENTRY_ID"/>
+                        <entry key="isApproved" value="IS_APPROVED"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="sourceSystemCode" value="TR1"/>
+        <property name="updateSql" value="UPDATE TFSDB2S.GLIS_HAND_OFF_FILE SET IS_POSTED = 'Y'
+            WHERE TO_CHAR(DATE, 'MMDDYYYY') &lt;= ?"/>
+    </bean>
+
+    <!-- CICLS -->
+    <bean id="ciclsProcessorJob" class="com.ucpb.tfs.batch.job.CiclsProcessorJob">
+        <property name="ciclsDao" ref="ciclsDao"/>
+    </bean>
+
+    <bean id="ciclsReportGeneratorJob" class="com.ucpb.tfs.batch.job.CiclsReportGeneratorJob">
+        <constructor-arg name="channel" ref="ciclsOutputChannel"/>
+        <property name="ciclsDao" ref="ciclsDao"/>
+    </bean>
+	
+	   <!-- CIF PURGING -->
+    <bean id="cifPurgingGeneratorJob" class="com.ucpb.tfs.batch.job.CifPurgingGeneratorJob">
+    	<constructor-arg name="directory" value="${cif.purging.directory}"/>
+    	<constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <!-- DW Allocation -->
+    <bean id="glAllocationsReportJob" class="com.ucpb.tfs.batch.job.AllocationFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="glAllocationsOutputChannel"/>
+        <constructor-arg name="filenamePrefix" value="TF_ALLOC"/>
+        <constructor-arg name="allocationFileService" ref="allocationFileService"/>
+        <property name="profitLossAccountingCode" value="561501030000" />
+        <property name="treasuryAllocationCode" value="10903" />
+    </bean>
+    
+    <!-- DW Allocation Excel-->
+    <bean id="glAllocationsExcelJob" class="com.ucpb.tfs.batch.job.AllocationExcelFileGeneratorJob">
+        <constructor-arg name="channel" ref="glAllocationsExcelOutputChannel"/>
+        <constructor-arg name="filenamePrefix" value="TF_ALLOC"/>
+        <constructor-arg name="allocationFileService" ref="allocationFileService"/>
+        <property name="profitLossAccountingCode" value="561501030000" />
+        <property name="treasuryAllocationCode" value="10903" />
+    </bean>
+    
+
+    <!-- DW PARA 2 ? -->
+    <bean id="glParameterFileJob" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <constructor-arg name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="glParameterOutputChannel"/>
+        <!--<constructor-arg name="dataSource" ref="myDataSource"/>-->
+        <constructor-arg name="filenamePrefix" value="TF_GL"/>
+        <!--<constructor-arg name="query" value="SELECT GLCODE, RECORDTYPE FROM GL_ENTRY_TYPES"/>-->
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.GLParameterRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <!--<entry key="parameterType" value="GLCODE"/>-->
+                        <!--<entry key="description" value="RECORDTYPE"/>-->
+                        <entry key="parameterType" value="ACCTNO"/>
+                        <entry key="description" value="ACCTNAME"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- DW PARA 1 ? -->
+    <bean id="dwParameterRecord" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="parameterOutputChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filenamePrefix" value="TF_PARA1"/>
+        <constructor-arg name="query" value="SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR'"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.DWParameterRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="field" value="FIELD"/>
+                        <entry key="productId" value="PRODUCTID"/>
+                        <entry key="description" value="DESCRIPTION"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- DW PARA ? -->
+    <bean id="cbrParameterFileGenerator" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="cbrParameterOutputChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filenamePrefix" value="TF_PARA"/>
+        <constructor-arg name="query" value="SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR1' ORDER BY FIELD, PRODUCTID"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.DWParameterRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="field" value="FIELD"/>
+                        <entry key="productId" value="PRODUCTID"/>
+                        <entry key="description" value="DESCRIPTION"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+
+    <!-- DW Master -->
+    <bean id="masterFileReportGeneratorJob" class="com.ucpb.tfs.batch.job.MasterFileReportGeneratorJob">
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="glMasterOutputChannel"/>
+        <constructor-arg name="filename" value="TEMP_MASTER.txt"/>
+        <constructor-arg name="masterFileService" ref="masterFileService"/>
+    </bean>
+    
+    <!-- DW Master Excel -->
+    <bean id="masterExcelFileGeneratorJob" class="com.ucpb.tfs.batch.job.MasterExcelFileGeneratorJob">
+        <!--<constructor-arg name="channel" ref="datawarehouseOutputChannel"/>-->
+        <constructor-arg name="channel" ref="glMasterExcelOutputChannel"/>
+        <constructor-arg name="filename" value="TF_MASTER"/>
+        <constructor-arg name="masterFileService" ref="masterFileService"/>
+    </bean>
+
+    <bean id="masterFileService" class="com.ucpb.tfs.batch.report.dw.service.MasterFileServiceImpl">
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+        <property name="tradeProductDao" ref="tradeProductDao"/>
+    </bean>
+
+	<!-- SIBS Extraction -->
+    <bean id="sibsExtractionJob" class="com.ucpb.tfs.batch.job.SibsExtractionJob">
+    </bean>
+
+	<!-- IBD-16-0219-01 -->
+	<!-- Parameterized the CIC folder -->
+    <bean id="cicExtractionJob" class="com.ucpb.tfs.batch.job.CicExtractionJob">
+    	<constructor-arg name="directory" value="${cic.directory}"/>    	
+    	<constructor-arg name="directoryBackup" value="${cic.backup.directory}"/>
+    	<constructor-arg name="filename" value="${cic.file.name}"/>    	
+    	<constructor-arg name="fileFormat" value="${cic.file.format}"/>
+    </bean>
+    
+    <!-- SERVICES -->
+
+    <bean id="allocationFileService" class="com.ucpb.tfs.batch.report.dw.service.AllocationFileServiceImpl">
+        <property name="allocationDao" ref="allocationDao"/>
+        <property name="tradeProductDao" ref="tradeProductDao"/>
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+
+    <bean id="tradeProductDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.TradeProductDao" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt" />
+    </bean>
+
+    <bean id="allocationDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.AllocationDao" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt" />
+    </bean>
+
+    <bean id="ciclsDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.CiclsDao" />
+        <property name="sqlSessionFactory" ref="localSibsSqlSessionFactory" />
+    </bean>
+
+    <bean id="silverlakeLocalDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.SilverlakeLocalDao" />
+        <property name="sqlSessionFactory" ref="localSibsSqlSessionFactory" />
+       
+    </bean>
+
+    <bean id="batchFacilityRevaluationService" class="com.ucpb.tfs.batch.report.dw.service.BatchFacilityRevaluationServiceImpl">
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+
+    <bean id="batchFacilityReearmarkService" class="com.ucpb.tfs.batch.report.dw.service.BatchFacilityReearmarkServiceImpl">
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+    </bean>
+
+    <bean id="purgeSecEmloyeeAuditJob" class="com.ucpb.tfs.batch.job.PurgeSecEmloyeeAuditJob">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+    
+    <bean id="uploadRoutingJob" class="com.ucpb.tfs.application.batch.TransactionRoutingUpdateJob">
+    	<property name="batchProcessDao" ref="batchProcessDao"/>
+    </bean>
+
+
+    <!-- START: Spring Batch using Tasklet for Branch Unit Code / Allocation Unit Code updater job -->
+    <!-- This runs the tasklet in the background so that the main thread can be made not to wait for it to complete -->
+
+    <bean id="allocationUnitCodeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.core.batch.process.allocationUnitCode.dao.AllocationUnitCodeDao" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt" />
+    </bean>
+
+    <bean id="springBatchTransactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+    <bean id="springBatchJobRepository" class="org.springframework.batch.core.repository.support.SimpleJobRepository">
+    <!--<bean id="springBatchJobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">-->
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapJobInstanceDao"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapJobExecutionDao" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapStepExecutionDao"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapExecutionContextDao"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="springBatchJobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="springBatchJobRepository"/>
+        <property name="taskExecutor">
+            <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor" />
+        </property>
+    </bean>
+
+    <bean id="allocationUnitCodeTasklet" class="com.ucpb.tfs.core.batch.process.allocationUnitCode.AllocationUnitCodeTasklet">
+        <!-- Two database connections: one for SIBS, one for TFS -->
+        <property name="silverlakeLocalDao" ref="silverlakeLocalDao"/>
+        <property name="allocationUnitCodeDao" ref="allocationUnitCodeDao"/>
+    </bean>
+
+    <bean id="allocationUnitCodeTaskletStep" abstract="true" class="org.springframework.batch.core.step.tasklet.TaskletStep">
+        <property name="jobRepository" ref="springBatchJobRepository"/>
+        <property name="transactionManager" ref="springBatchTransactionManager"/>
+    </bean>
+
+    <bean id="allocationUnitCodeJob" class="org.springframework.batch.core.job.SimpleJob">
+        <property name="jobRepository" ref="springBatchJobRepository"/>
+        <property name="name" value="allocationUnitCodeJob" />
+        <property name="steps">
+            <list>
+                <bean parent="allocationUnitCodeTaskletStep">
+                    <property name="tasklet" ref="allocationUnitCodeTasklet"/>
+                </bean>
+                <!-- Can add another tasklet here -->
+            </list>
+        </property>
+    </bean>
+
+    <!-- END: Spring Batch using Tasklet for Branch Unit Code / Allocation Unit Code updater job -->
+    
+    <!-- YearEndInsertJob -->
+    <bean id="yearEndInsertJob" class="com.ucpb.tfs.batch.job.YearEndInsertJob">
+    </bean>
+    
+	   <!-- CIF PURGING2 -->
+    <bean id="cifPurgingJob" class="com.ucpb.tfs.batch.job.CifPurgingJob">
+    	<constructor-arg name="mydataSource" ref="myDataSource"/>
+    	<constructor-arg name="tempdataSource" ref="tempDataSource"/>
+    	<constructor-arg name="purgingRetention" value="${purging.major.retention}"/>
+    	<constructor-arg name="purgingTerm" value="${purging.major.term}"/>
+    	<constructor-arg name="purgingRetention2" value="${purging.minor.retention}"/>
+    	<constructor-arg name="purgingTerm2" value="${purging.minor.term}"/>
+    	<constructor-arg name="threadSleep" value="${purging.thread.sleep}"/>    	
+    	<constructor-arg name="prodSchema" value="${tfs.prod.schema}"/>
+    </bean>
+        
+    <bean id="rerouteTradeServiceJob" class="com.ucpb.tfs.batch.job.RerouteTradeServiceJob">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+</beans>

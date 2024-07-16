@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt740Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry key="applicationHeader.receiverAddress" value="#this.get('reimbursingbankIdentifierCode')"/>
+
+                <entry value="field20" key="#this.get('documentNumber')"/>
+                <entry value="field25" key="#this.get('field25')"/>
+                <entry value="field40F" key="#this.get('applicableRules')"/>
+                <entry value="field31D" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('expiryDate')) + ' IN ' + #this.get('expiryCountryCode') ?: ''"/>
+                <entry value="field58A" key="#this.get('reimbursingBankFlag') == 'A' ? #this.get('reimbursingBankIdentifierCode') : ''"/>
+                <entry value="field58D" key="#this.get('reimbursingBankFlag') == 'D' ? #this.get('reimbursingBankNameAndAddress') : ''"/>
+                <entry value="field59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+                <entry value="field32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amount'))"/>
+                <entry value="field39A" key="(#this.get('positiveToleranceLimit') ?: '' ) + '/' + (#this.get('negativeToleranceLimit') ?: '' )"/>
+                <entry value="field39B" key="#this.get('maximumCreditAmount')"/>
+                <entry value="field39C" key="#this.get('additionalAmountsCovered')"/>
+                <entry value="field41A" key="T(com.ucpb.tfs.util.SwiftUtil).formatField41A(#this.get('availableWith'),#this.get('availableBy'))"/>
+                <entry value="field42C" key="#this.get('tenorOfDraftNarrative')"/>
+                <entry value="field42A" key="#this.get('drawee')"/>
+                <entry value="field42M" key="#this.get('mixedPaymentDetails')"/>
+                <entry value="field42P" key="#this.get('deferredPaymentDetails')"/>
+                <!-- BLANK -->
+                <entry value="field71A" key="#this.get('71A')"/>
+                <entry value="field71B" key="#this.get('71B')"/>
+                <entry value="field72" key="#this.get('senderToReceiverInformation')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT740"/>
+    </bean>
+
+</beans>

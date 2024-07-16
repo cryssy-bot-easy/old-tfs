@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--(Revision)
+	Description: Changed "ChargeNarrative" to "ChargesNarrative" for variable consistency.
+	[Modified by:] Rafael Ski Poblete
+	[Date Modified:] 08/01/2018
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.report.dw.regen.dao.ExportBillsAuditDao">
+
+    <resultMap id="exportBillsAuditResultMap" type="com.ucpb.tfs.report.dw.regen.ExportBillsAudit" >
+        <id column="REV_ID" property="revId" jdbcType="INTEGER" />
+        <result column="DOCUMENTNUMBER" property="documentNumber" jdbcType="VARCHAR" />
+        <result column="EXPORTBILLTYPE" property="exportBillType" jdbcType="VARCHAR" />
+        <result column="EXPORTVIAPDDTSFLAG" property="exportViaPddtsFlag" jdbcType="SMALLINT" />
+        <result column="CWTFLAG" property="cwtFlag" jdbcType="SMALLINT" />
+        <result column="PAYMENTMODE" property="paymentMode" jdbcType="VARCHAR" />
+        <result column="OUTSTANDINGAMOUNT" property="outstandingAmount" jdbcType="DECIMAL" />
+        <result column="NEGOTIATIONNUMBER" property="negotiationNumber" jdbcType="VARCHAR" />
+        <result column="FACILITYTYPE" property="facilityType" jdbcType="VARCHAR" />
+        <result column="FACILTIYID" property="faciltiyId" jdbcType="VARCHAR" />
+        <result column="BOOKINGCURRENCY" property="bookingCurrency" jdbcType="VARCHAR" />
+        <result column="LOANAMOUNT" property="loanAmount" jdbcType="DECIMAL" />
+        <result column="INTERESTRATE" property="interestRate" jdbcType="DECIMAL" />
+        <result column="INTERESTTERMCODE" property="interestTermCode" jdbcType="VARCHAR" />
+        <result column="INTERESTTERM" property="interestTerm" jdbcType="BIGINT" />
+        <result column="LOANTERMCODE" property="loanTermCode" jdbcType="VARCHAR" />
+        <result column="LOANTERM" property="loanTerm" jdbcType="BIGINT" />
+        <result column="LOANMATURITYDATE" property="loanMaturityDate" jdbcType="TIMESTAMP" />
+        <result column="NUMBEROFFREEFLOATDAYS" property="numberOfFreeFloatDays" jdbcType="BIGINT" />
+        <result column="AGRIAGRATAGGING" property="agriAgraTagging" jdbcType="VARCHAR" />
+        <result column="PAYMENTCODE" property="paymentCode" jdbcType="VARCHAR" />
+        <result column="PNNUMBER" property="pnNumber" jdbcType="VARCHAR" />
+        <result column="TRANSACTIONPOSTINGSTATUS" property="transactionPostingStatus" jdbcType="VARCHAR" />
+        <result column="ADVISENUMBER" property="adviseNumber" jdbcType="VARCHAR" />
+        <result column="LCNUMBER" property="lcNumber" jdbcType="VARCHAR" />
+        <result column="LCISSUEDATE" property="lcIssueDate" jdbcType="TIMESTAMP" />
+        <result column="LCTYPE" property="lcType" jdbcType="VARCHAR" />
+        <result column="LCTENOR" property="lcTenor" jdbcType="VARCHAR" />
+        <result column="USANCETERM" property="usanceTerm" jdbcType="VARCHAR" />
+        <result column="LCCURRENCY" property="lcCurrency" jdbcType="VARCHAR" />
+        <result column="LCAMOUNT" property="lcAmount" jdbcType="DECIMAL" />
+        <result column="LCEXPIRYDATE" property="lcExpiryDate" jdbcType="TIMESTAMP" />
+        <result column="ISSUINGBANKCODE" property="issuingBankCode" jdbcType="VARCHAR" />
+        <result column="ISSUINGBANKADDRESS" property="issuingBankAddress" jdbcType="VARCHAR" />
+        <result column="REIMBURSINGBANKCODE" property="reimbursingBankCode" jdbcType="VARCHAR" />
+        <result column="TENOR" property="tenor" jdbcType="VARCHAR" />
+        <result column="TENORTERM" property="tenorTerm" jdbcType="BIGINT" />
+        <result column="NONLCTENOR" property="nonLcTenor" jdbcType="VARCHAR" />
+        <result column="NONLCTENORTERM" property="nonLcTenorTerm" jdbcType="VARCHAR" />
+        <result column="DRAFTCURRENCY" property="draftCurrency" jdbcType="VARCHAR" />
+        <result column="DRAFTAMOUNT" property="draftAmount" jdbcType="DECIMAL" />
+        <result column="DUEDATE" property="dueDate" jdbcType="TIMESTAMP" />
+        <result column="COLLECTINGBANKCODE" property="collectingBankCode" jdbcType="VARCHAR" />
+        <result column="COLLECTINGBANKADDRESS" property="collectingBankAddress" jdbcType="VARCHAR" />
+        <result column="INVOICENUMBER" property="invoiceNumber" jdbcType="VARCHAR" />
+        <result column="ADDITIONALAMOUNT" property="additionalAmount" jdbcType="DECIMAL" />
+        <result column="CHARGESCODE" property="chargesCode" jdbcType="VARCHAR" />
+        <result column="CHARGEAMOUNT" property="chargeAmount" jdbcType="DECIMAL" />
+        <result column="CHARGENARRATIVE" property="chargeNarrative" jdbcType="VARCHAR" />
+        <result column="TOTALAMOUNTCLAIMEDFLAG" property="totalAmountClaimedFlag" jdbcType="VARCHAR" />
+        <result column="TOTALAMOUNTCLAIMEDDATE" property="totalAmountClaimedDate" jdbcType="TIMESTAMP" />
+        <result column="TOTALAMOUNTCLAIMED" property="totalAmountClaimed" jdbcType="DECIMAL" />
+        <result column="TOTALAMOUNTCLAIMEDCURRENCY" property="totalAmountClaimedCurrency" jdbcType="VARCHAR" />
+        <result column="CORRESBANKFLAG" property="corresBankFlag" jdbcType="VARCHAR" />
+        <result column="CORRESBANKCODE" property="corresBankCode" jdbcType="VARCHAR" />
+        <result column="CORRESBANKNAME" property="corresBankName" jdbcType="VARCHAR" />
+        <result column="CORRESBANKACCOUNTFLAG" property="corresBankAccountFlag" jdbcType="VARCHAR" />
+        <result column="CORRESBANKACCOUNTCODE" property="corresBankAccountCode" jdbcType="VARCHAR" />
+        <result column="CORRESBANKACCOUNTNAMEANDADDRESS" property="corresBankAccountNameAndAddress" jdbcType="VARCHAR" />
+        <result column="ACCOUNTTYPE" property="accountType" jdbcType="VARCHAR" />
+        <result column="DEPOSITORYACCOUNTNUMBER" property="depositoryAccountNumber" jdbcType="VARCHAR" />
+        <result column="GLCODE" property="glCode" jdbcType="VARCHAR" />
+        <result column="CORRESBANKCURRENCY" property="corresBankcurrency" jdbcType="VARCHAR" />
+        <result column="SENDERTORECEIVERINFORMATION" property="senderToReceiverInformation" jdbcType="VARCHAR" />
+        <result column="PROCESSDATE" property="processDate" jdbcType="TIMESTAMP" />
+        <result column="SETTLEMENTDATE" property="settlementDate" jdbcType="TIMESTAMP" />
+        <result column="PROCEEDSAMOUNT" property="proceedsAmount" jdbcType="DECIMAL" />
+        <result column="MTFLAG" property="mtFlag" jdbcType="SMALLINT" />
+        <result column="COUNTRYCODE" property="countryCode" jdbcType="VARCHAR" />
+        <result column="SELLERNAME" property="sellerName" jdbcType="VARCHAR" />
+        <result column="BUYERNAME" property="buyerName" jdbcType="VARCHAR" />
+        <result column="BUYERADDRESS" property="buyerAddress" jdbcType="VARCHAR" />
+        <result column="REASONFORCANCELLATION" property="reasonForCancellation" jdbcType="VARCHAR" />
+        <result column="PARTIALNEGO" property="partialNego" jdbcType="VARCHAR" />
+        <result column="BPAMOUNT" property="bpAmount" jdbcType="DECIMAL" />
+        <result column="BPCURRENCY" property="bpCurrency" jdbcType="VARCHAR" />
+        <result column="EXPORTERCBCODE" property="exporterCbCode" jdbcType="VARCHAR" />
+        <result column="NEGOTIATIONDATE" property="negotiationDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        REV_ID, DOCUMENTNUMBER, EXPORTBILLTYPE, EXPORTVIAPDDTSFLAG, CWTFLAG, PAYMENTMODE,
+        OUTSTANDINGAMOUNT, NEGOTIATIONNUMBER, FACILITYTYPE, FACILTIYID, BOOKINGCURRENCY,
+        LOANAMOUNT, INTERESTRATE, INTERESTTERMCODE, INTERESTTERM, LOANTERMCODE, LOANTERM,
+        LOANMATURITYDATE, NUMBEROFFREEFLOATDAYS, AGRIAGRATAGGING, PAYMENTCODE, PNNUMBER,
+        TRANSACTIONPOSTINGSTATUS, ADVISENUMBER, LCNUMBER, LCISSUEDATE, LCTYPE, LCTENOR, USANCETERM,
+        LCCURRENCY, LCAMOUNT, LCEXPIRYDATE, ISSUINGBANKCODE, ISSUINGBANKADDRESS, REIMBURSINGBANKCODE,
+        TENOR, TENORTERM, NONLCTENOR, NONLCTENORTERM, DRAFTCURRENCY, DRAFTAMOUNT, DUEDATE,
+        COLLECTINGBANKCODE, COLLECTINGBANKADDRESS, INVOICENUMBER, ADDITIONALAMOUNT, CHARGESCODE,
+        CHARGEAMOUNT, CHARGENARRATIVE, TOTALAMOUNTCLAIMEDFLAG, TOTALAMOUNTCLAIMEDDATE, TOTALAMOUNTCLAIMED,
+        TOTALAMOUNTCLAIMEDCURRENCY, CORRESBANKFLAG, CORRESBANKCODE, CORRESBANKNAME, CORRESBANKACCOUNTFLAG,
+        CORRESBANKACCOUNTCODE, CORRESBANKACCOUNTNAMEANDADDRESS, ACCOUNTTYPE, DEPOSITORYACCOUNTNUMBER,
+        GLCODE, CORRESBANKCURRENCY, SENDERTORECEIVERINFORMATION, PROCESSDATE, SETTLEMENTDATE,
+        PROCEEDSAMOUNT, MTFLAG, COUNTRYCODE, SELLERNAME, BUYERNAME, BUYERADDRESS, REASONFORCANCELLATION,
+        PARTIALNEGO, BPAMOUNT, BPCURRENCY, EXPORTERCBCODE, NEGOTIATIONDATE
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpb.tfs.report.dw.regen.ExportBillsAudit" >
+        insert into EXPORTBILLS_AUDIT (
+            REV_ID, DOCUMENTNUMBER, EXPORTBILLTYPE,
+            EXPORTVIAPDDTSFLAG, CWTFLAG, PAYMENTMODE,
+            OUTSTANDINGAMOUNT, NEGOTIATIONNUMBER, FACILITYTYPE,
+            FACILTIYID, BOOKINGCURRENCY, LOANAMOUNT,
+            INTERESTRATE, INTERESTTERMCODE, INTERESTTERM,
+            LOANTERMCODE, LOANTERM, LOANMATURITYDATE,
+            NUMBEROFFREEFLOATDAYS, AGRIAGRATAGGING,
+            PAYMENTCODE, PNNUMBER, TRANSACTIONPOSTINGSTATUS,
+            ADVISENUMBER, LCNUMBER, LCISSUEDATE,
+            LCTYPE, LCTENOR, USANCETERM,
+            LCCURRENCY, LCAMOUNT, LCEXPIRYDATE,
+            ISSUINGBANKCODE, ISSUINGBANKADDRESS, REIMBURSINGBANKCODE,
+            TENOR, TENORTERM, NONLCTENOR,
+            NONLCTENORTERM, DRAFTCURRENCY, DRAFTAMOUNT,
+            DUEDATE, COLLECTINGBANKCODE, COLLECTINGBANKADDRESS,
+            INVOICENUMBER, ADDITIONALAMOUNT, CHARGESCODE,
+            CHARGEAMOUNT, CHARGENARRATIVE, TOTALAMOUNTCLAIMEDFLAG,
+            TOTALAMOUNTCLAIMEDDATE, TOTALAMOUNTCLAIMED,
+            TOTALAMOUNTCLAIMEDCURRENCY, CORRESBANKFLAG,
+            CORRESBANKCODE, CORRESBANKNAME, CORRESBANKACCOUNTFLAG,
+            CORRESBANKACCOUNTCODE, CORRESBANKACCOUNTNAMEANDADDRESS,
+            ACCOUNTTYPE, DEPOSITORYACCOUNTNUMBER, GLCODE,
+            CORRESBANKCURRENCY, SENDERTORECEIVERINFORMATION,
+            PROCESSDATE, SETTLEMENTDATE, PROCEEDSAMOUNT,
+            MTFLAG, COUNTRYCODE, SELLERNAME,
+            BUYERNAME, BUYERADDRESS, REASONFORCANCELLATION,
+            PARTIALNEGO, BPAMOUNT, BPCURRENCY,
+            EXPORTERCBCODE, NEGOTIATIONDATE
+        )
+        values (#{revId,jdbcType=INTEGER}, #{documentNumber,jdbcType=VARCHAR}, #{exportBillType,jdbcType=VARCHAR},
+        #{exportViaPddtsFlag,jdbcType=SMALLINT}, #{cwtFlag,jdbcType=SMALLINT}, #{paymentMode,jdbcType=VARCHAR},
+        #{outstandingAmount,jdbcType=DECIMAL}, #{negotiationNumber,jdbcType=VARCHAR}, #{facilityType,jdbcType=VARCHAR},
+        #{faciltiyId,jdbcType=VARCHAR}, #{bookingCurrency,jdbcType=VARCHAR}, #{loanAmount,jdbcType=DECIMAL},
+        #{interestRate,jdbcType=DECIMAL}, #{interestTermCode,jdbcType=VARCHAR}, #{interestTerm,jdbcType=BIGINT},
+        #{loanTermCode,jdbcType=VARCHAR}, #{loanTerm,jdbcType=BIGINT}, #{loanMaturityDate,jdbcType=TIMESTAMP},
+        #{numberOfFreeFloatDays,jdbcType=BIGINT}, #{agriAgraTagging,jdbcType=VARCHAR},
+        #{paymentCode,jdbcType=VARCHAR}, #{pnNumber,jdbcType=VARCHAR}, #{transactionPostingStatus,jdbcType=VARCHAR},
+        #{adviseNumber,jdbcType=VARCHAR}, #{lcNumber,jdbcType=VARCHAR}, #{lcIssueDate,jdbcType=TIMESTAMP},
+        #{lcType,jdbcType=VARCHAR}, #{lcTenor,jdbcType=VARCHAR}, #{usanceTerm,jdbcType=VARCHAR},
+        #{lcCurrency,jdbcType=VARCHAR}, #{lcAmount,jdbcType=DECIMAL}, #{lcExpiryDate,jdbcType=TIMESTAMP},
+        #{issuingBankCode,jdbcType=VARCHAR}, #{issuingBankAddress,jdbcType=VARCHAR}, #{reimbursingBankCode,jdbcType=VARCHAR},
+        #{tenor,jdbcType=VARCHAR}, #{tenorTerm,jdbcType=BIGINT}, #{nonLcTenor,jdbcType=VARCHAR},
+        #{nonLcTenorTerm,jdbcType=VARCHAR}, #{draftCurrency,jdbcType=VARCHAR}, #{draftAmount,jdbcType=DECIMAL},
+        #{dueDate,jdbcType=TIMESTAMP}, #{collectingBankCode,jdbcType=VARCHAR}, #{collectingBankAddress,jdbcType=VARCHAR},
+        #{invoiceNumber,jdbcType=VARCHAR}, #{additionalAmount,jdbcType=DECIMAL}, #{chargesCode,jdbcType=VARCHAR},
+        #{chargeAmount,jdbcType=DECIMAL}, #{chargeNarrative,jdbcType=VARCHAR}, #{totalAmountClaimedFlag,jdbcType=VARCHAR},
+        #{totalAmountClaimedDate,jdbcType=TIMESTAMP}, #{totalAmountClaimed,jdbcType=DECIMAL},
+        #{totalAmountClaimedCurrency,jdbcType=VARCHAR}, #{corresBankFlag,jdbcType=VARCHAR},
+        #{corresBankCode,jdbcType=VARCHAR}, #{corresBankName,jdbcType=VARCHAR}, #{corresBankAccountFlag,jdbcType=VARCHAR},
+        #{corresBankAccountCode,jdbcType=VARCHAR}, #{corresBankAccountNameAndAddress,jdbcType=VARCHAR},
+        #{accountType,jdbcType=VARCHAR}, #{depositoryAccountNumber,jdbcType=VARCHAR}, #{glCode,jdbcType=VARCHAR},
+        #{corresBankcurrency,jdbcType=VARCHAR}, #{senderToReceiverInformation,jdbcType=VARCHAR},
+        #{processDate,jdbcType=TIMESTAMP}, #{settlementDate,jdbcType=TIMESTAMP}, #{proceedsAmount,jdbcType=DECIMAL},
+        #{mtFlag,jdbcType=SMALLINT}, #{countryCode,jdbcType=VARCHAR}, #{sellerName,jdbcType=VARCHAR},
+        #{buyerName,jdbcType=VARCHAR}, #{buyerAddress,jdbcType=VARCHAR}, #{reasonForCancellation,jdbcType=VARCHAR},
+        #{partialNego,jdbcType=VARCHAR}, #{bpAmount,jdbcType=DECIMAL}, #{bpCurrency,jdbcType=VARCHAR},
+        #{exporterCbCode,jdbcType=VARCHAR}, #{negotiationDate,jdbcType=TIMESTAMP})
+    </insert>
+
+</mapper>

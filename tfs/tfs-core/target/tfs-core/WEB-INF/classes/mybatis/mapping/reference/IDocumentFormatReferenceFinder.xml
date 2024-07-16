@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.reference.IDocumentFormatReferenceFinder">
+
+    <select id="findAllDocumentFormat" resultType="hashMap">
+        select
+         formatCode
+        from RefDocumentFormat
+    </select>
+
+    <select id="findAllDocumentFormatByTagging" resultType="hashMap">
+        select
+         formatCode
+        from RefDocumentFormat
+        where formatCode like '%' || #{tagging} || '%'
+    </select>
+
+    <select id="findAllDocumentFormatByFormatCode" resultType="hashMap">
+        select
+          cast(formatDescription as varchar(10000)) as formatDescription
+        from RefDocumentFormat where formatCode = #{formatCode}
+    </select>
+
+</mapper>

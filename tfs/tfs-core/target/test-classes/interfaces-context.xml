@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/jdbc
+       http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+
+    <bean id="conversionService" class="com.ucpb.tfs.application.service.ConversionService">
+        <property name="ratesService" ref="RatesService"/>
+    </bean>
+
+    <bean id="RatesService" class="com.ucpb.tfs.interfaces.services.impl.RatesServiceImpl">
+        <property name="ratesRepository" ref="ratesRepository"/>
+    </bean>
+
+    <bean id="ratesRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.RatesRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="interfaceSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="interfaceDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+    </bean>
+
+    <jdbc:embedded-database id="interfaceDataSource" type="DERBY">
+        <jdbc:script location="classpath:mockddl/ucdatpbwc/create-ucdatpbwc-schema.sql"/>
+        <jdbc:script location="classpath:mockddl/ucdatpbwc/create-ucdatubwc1-schema.sql"/>
+        <jdbc:script location="classpath:mockddl/ucdatpbwc/create-cifmast-table.sql"/>
+        <jdbc:script location="classpath:mockddl/ucdatpbwc/create-cif-addr-table.sql"/>
+        <!--         UCDATPLNS (FACILITIES) -->
+        <jdbc:script location="classpath:mockddl/ucparpcmn/create-ucparucmn1-schema.sql"/>
+        <jdbc:script location="classpath:mockddl/ucparpcmn/create-daily-rates-table-jhfxdt.sql"/>
+        <jdbc:script location="classpath:mockddl/ucparpcmn/create-rates-definition-table-jhfxpr.sql"/>
+        <jdbc:script location="classpath:mockddl/ucparpcmn/insert-mock-rates-data.sql"/>
+
+        <!--         UCDATPLNS (LOANS) -->
+        <jdbc:script location="classpath:mockddl/ucdatplns/create-loan-table-lntfint.sql"/>
+        <jdbc:script location="classpath:mockddl/ucdatplns/create-loan-exception-table.sql"/>
+
+
+    </jdbc:embedded-database>
+
+
+</beans>

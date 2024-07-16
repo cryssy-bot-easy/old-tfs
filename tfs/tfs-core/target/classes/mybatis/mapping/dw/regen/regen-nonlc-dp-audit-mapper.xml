@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.report.dw.regen.dao.DocumentAgainstPaymentAuditDao">
+
+    <resultMap id="documentAgainstPaymentResultMap" type="com.ucpb.tfs.report.dw.regen.DocumentAgainstPaymentAudit" >
+        <id column="REV_ID" property="revId" jdbcType="INTEGER" />
+        <result column="DOCUMENTNUMBER" property="documentNumber" jdbcType="VARCHAR" />
+        <result column="TSNUMBER" property="tsNumber" jdbcType="VARCHAR" />
+        <result column="DOCUMENTTYPE" property="documentType" jdbcType="VARCHAR" />
+        <result column="REMITTINGBANK" property="remittingBank" jdbcType="VARCHAR" />
+        <result column="REIMBURSINGBANK" property="reimbursingBank" jdbcType="VARCHAR" />
+        <result column="PROCESSDATE" property="processDate" jdbcType="TIMESTAMP" />
+        <result column="REMITTINGBANKREFERENCENUMBER" property="remittingBankReferenceNumber" jdbcType="VARCHAR" />
+        <result column="CURRENCY" property="currency" jdbcType="VARCHAR" />
+        <result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+        <result column="OUTSTANDINGAMOUNT" property="outstandingAmount" jdbcType="DECIMAL" />
+        <result column="DATEOFBLAIRWAYBILL" property="dateOfBlAirwayBill" jdbcType="TIMESTAMP" />
+        <result column="MATURITYDATE" property="maturityDate" jdbcType="TIMESTAMP" />
+        <result column="IMPORTERCIFNUMBER" property="importerCifNumber" jdbcType="VARCHAR" />
+        <result column="ORIGINALPORT" property="originalPort" jdbcType="VARCHAR" />
+        <result column="IMPORTERCBCODE" property="importerCbCode" jdbcType="VARCHAR" />
+        <result column="IMPORTERNAME" property="importerName" jdbcType="VARCHAR" />
+        <result column="IMPORTERADDRESS" property="importerAddress" jdbcType="VARCHAR" />
+        <result column="SENDERTORECEIVERINFORMATION" property="senderToReceiverInformation" jdbcType="VARCHAR" />
+        <result column="BENEFICIARYNAME" property="beneficiaryName" jdbcType="VARCHAR" />
+        <result column="BENEFICIARYADDRESS" property="beneficiaryAddress" jdbcType="VARCHAR" />
+        <result column="LASTTRANSACTION" property="lastTransaction" jdbcType="VARCHAR" />
+        <result column="CANCELLEDDATE" property="cancelledDate" jdbcType="TIMESTAMP" />
+        <result column="SETTLEDDATE" property="settledDate" jdbcType="TIMESTAMP" />
+        <result column="PROCESSINGUNITCODE" property="processingUnitCode" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        REV_ID, DOCUMENTNUMBER, TSNUMBER, DOCUMENTTYPE, REMITTINGBANK, REIMBURSINGBANK, PROCESSDATE,
+        REMITTINGBANKREFERENCENUMBER, CURRENCY, AMOUNT, OUTSTANDINGAMOUNT, DATEOFBLAIRWAYBILL,
+        MATURITYDATE, IMPORTERCIFNUMBER, ORIGINALPORT, IMPORTERCBCODE, IMPORTERNAME, IMPORTERADDRESS,
+        SENDERTORECEIVERINFORMATION, BENEFICIARYNAME, BENEFICIARYADDRESS, LASTTRANSACTION,
+        CANCELLEDDATE, SETTLEDDATE, PROCESSINGUNITCODE
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpb.tfs.report.dw.regen.DocumentAgainstPaymentAudit" >
+        insert into DOCUMENTAGAINSTPAYMENT_AUDIT (
+            REV_ID, DOCUMENTNUMBER, TSNUMBER,
+            DOCUMENTTYPE, REMITTINGBANK, REIMBURSINGBANK,
+            PROCESSDATE, REMITTINGBANKREFERENCENUMBER,
+            CURRENCY, AMOUNT, OUTSTANDINGAMOUNT,
+            DATEOFBLAIRWAYBILL, MATURITYDATE, IMPORTERCIFNUMBER,
+            ORIGINALPORT, IMPORTERCBCODE, IMPORTERNAME,
+            IMPORTERADDRESS, SENDERTORECEIVERINFORMATION,
+            BENEFICIARYNAME, BENEFICIARYADDRESS, LASTTRANSACTION,
+            CANCELLEDDATE, SETTLEDDATE, PROCESSINGUNITCODE
+        )
+        values (#{revId,jdbcType=INTEGER}, #{documentNumber,jdbcType=VARCHAR}, #{tsNumber,jdbcType=VARCHAR},
+        #{documentType,jdbcType=VARCHAR}, #{remittingBank,jdbcType=VARCHAR}, #{reimbursingBank,jdbcType=VARCHAR},
+        #{processDate,jdbcType=TIMESTAMP}, #{remittingBankReferenceNumber,jdbcType=VARCHAR},
+        #{currency,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{outstandingAmount,jdbcType=DECIMAL},
+        #{dateOfBlAirwayBill,jdbcType=TIMESTAMP}, #{maturityDate,jdbcType=TIMESTAMP}, #{importerCifNumber,jdbcType=VARCHAR},
+        #{originalPort,jdbcType=VARCHAR}, #{importerCbCode,jdbcType=VARCHAR}, #{importerName,jdbcType=VARCHAR},
+        #{importerAddress,jdbcType=VARCHAR}, #{senderToReceiverInformation,jdbcType=VARCHAR},
+        #{beneficiaryName,jdbcType=VARCHAR}, #{beneficiaryAddress,jdbcType=VARCHAR}, #{lastTransaction,jdbcType=VARCHAR},
+        #{cancelledDate,jdbcType=TIMESTAMP}, #{settledDate,jdbcType=TIMESTAMP}, #{processingUnitCode,jdbcType=VARCHAR}
+        )
+    </insert>
+
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.report.DailyFunding" table="DailyFunding">
+		
+		<id name="id" column="id" type="long">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+        
+        <property name="bank" column="bank" type="string" length="11"/>
+        
+        <property name="bankName" column="bankName" type="string" length="50"/>
+        
+        <property name="bankType" column="bankType" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.report.enums.BankType</param>
+            </type>
+        </property>
+        
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+			
+		<property name="amount" column="amount" type="java.math.BigDecimal"/>
+        
+        <property name="settledDate" column="settledDate" type="java.util.Date"/>
+        
+	</class>
+</hibernate-mapping>

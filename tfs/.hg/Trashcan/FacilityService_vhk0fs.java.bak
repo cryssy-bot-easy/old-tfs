@@ -1,0 +1,68 @@
+package com.ucpb.tfs.interfaces.services;
+
+import com.ucpb.tfs.interfaces.domain.Availment;
+import com.ucpb.tfs.interfaces.domain.Facility;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+/*
+	(revision)
+	SCR/ER Number: ER# 20170109-040
+	SCR/ER Description: Transaction allowed to be created even the facility is expired
+	[Revised by:] Jesse James Joson
+	[Date revised:] 1/17/2017
+	Program [Revision] Details: Check the expiry date of the facility before allowing to amend LC
+	Member Type: Java
+	Project: Core
+	Project Name: FacilityService.java
+
+
+------------------------------------------------------------------------------------------------------
+	Description: 	Updated getFacilitiesByCifNumberAndFacilityTypesSearch method to fix
+						existing error
+	Revised by: 	Cedrick C. Nungay
+	Date revised:	02/26/2024
+*/
+
+public interface FacilityService {
+
+	public List<Map<String,?>> getFacilitiesByCifNumber(String cifNumber);
+	
+	public List<Map<String,?>> getFacilitiesByChildAndMainCifNumber(String childCifNumber,String mainCifNumber,String facilityType);
+	
+	public List<Map<String,Object>> getFacilitiesByCifNumberAndType(String cifNumber,String type);
+	
+	public boolean earmarkAvailment(Availment availment);
+
+    public boolean updateAvailmentAmount(String documentNumber, String currency, BigDecimal amount, Boolean reinstate);
+
+    public boolean updateAvailmentAmountEarmark(String documentNumber, String currency, BigDecimal amount, BigDecimal outstandingBalance, Boolean reinstate);
+    
+    public boolean updateAvailmentAmountUnearmark(String documentNumber, String currency, BigDecimal amount, BigDecimal outstandingBalance, Boolean reinstate, BigDecimal negotiationAmount);
+
+    public boolean unearmarkAvailment(String documentNumber);
+
+    public boolean updateAvailmentCif(String documentNumber, String cifNumber);
+
+	public boolean updateAvailmentFacilityReferenceNumber(String documentNumber, String facilityReferenceNumber);
+
+    public Long insertFacilityBalanceQuery(Facility Facility);
+
+    public Map<String,Object> getFacilityBalance(Long transactionSequenceNumber);
+
+//    public List<Map<String,Object>> getFacilitiesByCifNumberAndFacilityTypes(String cifNumber, String... facilityTypes);
+    public List<Map<String,Object>> getFacilitiesByCifNumberAndFacilityTypes(String cifNumber, String mainCifNumber, String seqNo, String... facilityTypes);
+
+    public List<Map<String,Object>> getFacilitiesByCifNumberAndFacilityTypesSearch(String cifNumber,
+    																			   String mainCifNumber,
+                                                                                   String seqNo,
+                                                                                   String... facilityTypes);
+
+//    public List<Map<String,Object>> getFacilitiesByCifCurrencyAndFacilityTypes(String cifNumber,String currency, String... facilityTypes);
+    public List<Map<String,Object>> getFacilitiesByCifCurrencyAndFacilityTypes(String cifNumber,String mainCifNumber,String currency,String seqNo, String... facilityTypes);
+
+    public List<Map<String,Object>> getFacilitiesByCifAndFacility(String cifNumber, String facilityRefNo, String facilityType, String facilityId);
+
+}

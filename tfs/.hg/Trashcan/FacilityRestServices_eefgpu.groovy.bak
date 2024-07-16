@@ -1,0 +1,179 @@
+package com.ucpb.tfs2.infrastructure.rest
+
+import org.springframework.stereotype.Component
+import javax.ws.rs.Path
+import javax.ws.rs.POST
+import javax.ws.rs.Produces
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
+import javax.ws.rs.core.Context
+import javax.ws.rs.core.UriInfo
+import com.google.gson.Gson
+import org.springframework.util.Assert
+
+import com.ucpb.tfs.domain.service.TradeServiceRepository
+import org.springframework.beans.factory.annotation.Autowired
+import com.ucpb.tfs.domain.service.TradeService
+
+import com.ucpb.tfs.interfaces.services.FacilityService
+import com.ucpb.tfs.interfaces.domain.Facility
+import org.apache.commons.lang.StringUtils
+import com.ucpb.tfs.interfaces.services.RatesService
+
+import com.ucpb.tfs.domain.instruction.ServiceInstructionRepository
+import com.ucpb.tfs.domain.instruction.ServiceInstructionId
+import com.ucpb.tfs.domain.instruction.ServiceInstruction
+
+import com.ucpb.tfs.domain.service.enumTypes.ServiceType
+import com.ucpb.tfs.domain.product.TradeProduct
+import com.ucpb.tfs.domain.product.TradeProductRepository
+
+/**
+ */
+@Component
+@Path("/facility")
+class FacilityRestServices {
+
+    private static final GSON = new Gson();
+
+    private static final Currency PHP = Currency.getInstance("PHP");
+    private static final int RATE_PRECISION = 6
+    private static final String CRAM_FLAG = "cramFlag"
+    private static final String FACILITY_BALANCE = "FACILITY_BALANCE"
+    private static final String CURRENCY = "CURRENCY"
+    private static final String REQUEST_STATUS = "REQUEST_STATUS"
+
+    @Autowired
+    private TradeServiceRepository tradeServiceRepository;
+
+    @Autowired
+    private ServiceInstructionRepository serviceInstructionRepository;
+
+    @Autowired
+    private FacilityService facilityService;
+
+    @Autowired
+    private RatesService ratesService;
+	
+	@Autowired
+	private TradeProductRepository tradeProductRepository
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/inquireBalance")
+    public Response inquireFacilityBalanceQuery(@Context UriInfo allUri, String postRequestBody){
+        Map formDetails = GSON.fromJson(postRequestBody, Map.class);
+        Assert.notNull(formDetails["etsNumber"],"ETS Number must not be null!");
+
+        ServiceInstruction ets = serviceInstructionRepository.load(new ServiceInstructionId(formDetails["etsNumber"]));
+
+        Facility facility = new Facility();
+        facility.setCifNumber(ets.getDetails().get("mainCifNumber"));
+        facility.setFacilityType(ets.getDetails().get("facilityType"));
+        facility.setFacilityId(Integer.valueOf(ets.getDetails().get("facilityId")));
+
+        Long transactionSequenceNumber = facilityService.insertFacilityBalanceQuery(facility);
+
+        return Response.status(200).entity(GSON.toJson([status : "success", transactionSequenceNumber : transactionSequenceNumber])).build();
+    }
+    
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/insertBalance")
+    public Response insertFacilityBalanceQuery(@Context UriInfo allUri, String postRequestBody){
+    	Map formDetails = GSON.fromJson(postRequestBody, Map.class);
+    	Assert.notNull(formDetails["facilityId"],"Facility ID must not be null!");
+    	Assert.notNull(formDetails["facilityType"],"Facility Type must not be null!");
+    	Assert.notNull(formDetails["cifNumber"],"CIF Number must not be null!");
+    	
+    	Facility facility = new Facility();
+    	facility.setCifNumber(formDetails["cifNumber"]);
+    	facility.setFacilityType(formDetails["facilityType"]);
+    	facility.setFacilityId(Integer.valueOf(formDetails["facilityId"]));
+    	
+    	Long transactionSequenceNumber = facilityService.insertFacilityBalanceQuery(facility);
+		
+		println "transactionSequenceNumber = " + transactionSequenceNumber
+    	
+    	return Response.status(200).entity(GSON.toJson([status : "success", transactionSequenceNumber : transactionSequenceNumber])).build();
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/getBalance")
+    public Response getFacilityBalance(@Context UriInfo allUri, String postRequestBody){
+        Map formDetails = GSON.fromJson(postRequestBody, Map.class);
+        Assert.notNull(formDetails["transactionSequenceNumber"],"Transaction Sequence Number must not be null!");
+        Assert.notNull(formDetails["etsNumber"],"ETS Number must not be null!");
+
+        println "formDetails[\"transactionSequenceNumber\"]:"+formDetails["transactionSequenceNumber"]
+        Map<String,Object> facility = facilityService.getFacilityBalance(new BigDecimal(formDetails["transactionSequenceNumber"]).longValue());
+        String status
+        BigDecimal facilityBalance;
+        boolean isFacilityBalanceSufficient = false;
+        boolean hasCramApproval = false;
+		println "REQUEST_STATUS: " + facility.get(REQUEST_STATUS)
+        if(StringUtils.isBlank(facility.get(REQUEST_STATUS))){
+            status = "pending";
+        }else if ("Y".equals(facility.get(REQUEST_STATUS))){
+            status = "success";
+            facilityBalance = facility.get(FACILITY_BALANCE);
+            String facilityCurrency = StringUtils.trim(facility.get(CURRENCY));
+            TradeService tradeService = tradeServiceRepository.load(new ServiceInstructionId(formDetails["etsNumber"]));
+            ServiceInstruction serviceInstruction = serviceInstructionRepository.load(new ServiceInstructionId(formDetails["etsNumber"]));
+            hasCramApproval = "true".equalsIgnoreCase(tradeService.getDetails().get("cramFlag"));
+			
+			Currency productCurrency = null
+			BigDecimal productAmount = BigDecimal.ZERO
+			if (tradeService.getServiceType().equals(ServiceType.ADJUSTMENT)){
+				println "ADJUSTMENT!!!!!!!!"
+				TradeProduct tradeProduct = tradeProductRepository.load(tradeService.getDocumentNumber())
+				productCurrency = tradeProduct.getCurrency()
+				productAmount = tradeProduct.getAmount()
+			} else {
+				productCurrency = tradeService.getProductChargeCurrency()
+				productAmount = tradeService.getProductChargeAmount()
+			}
+            if (productCurrency?.getCurrencyCode()?.equals(facilityCurrency)){
+               isFacilityBalanceSufficient = productAmount?.compareTo(facilityBalance) <= 0;
+            }else{
+                BigDecimal rate = ratesService.getConversionRateByType(productCurrency?.getCurrencyCode(),facilityCurrency,3);
+                isFacilityBalanceSufficient = (rate.multiply(productAmount).setScale(2, BigDecimal.ROUND_HALF_UP)).compareTo(facilityBalance) <= 0;
+            }
+            tradeService.getDetails().put("isOverAvailed",!isFacilityBalanceSufficient);
+            serviceInstruction.getDetails().put("isOverAvailed",!isFacilityBalanceSufficient);
+//            tradeService.getDetails().put("facilityBalance",)
+            tradeServiceRepository.saveOrUpdate(tradeService);
+            serviceInstructionRepository.merge(serviceInstruction);
+        }else{
+			status = "rejected";
+        }
+		
+        def result = [ status : status, balance : facilityBalance?.toPlainString(), error : facility.get("ERROR_MESSAGE"),
+                isBalanceSufficient : isFacilityBalanceSufficient, hasCramApproval : hasCramApproval]
+
+        return Response.status(200).entity(GSON.toJson(result)).build();
+    }
+
+
+    private BigDecimal getConversionRate(TradeService tradeService){
+        Currency tradeServiceCurrency = tradeService.getProductChargeCurrency();
+        String conversionRate;
+        BigDecimal resultRate = null;
+        if(!PHP.equals(tradeServiceCurrency)){
+            conversionRate = (String)tradeService.getDetails().get(tradeServiceCurrency.toString() + "-PHP");
+            if(StringUtils.isNumeric(conversionRate)){
+                resultRate = new BigDecimal(conversionRate).setScale(RATE_PRECISION,BigDecimal.ROUND_HALF_UP);
+            }else{
+                conversionRate = (String)tradeService.getDetails().get(tradeServiceCurrency.toString() + "-PHP_text_pass_on_rate");
+                if(!StringUtils.isEmpty(conversionRate)){
+                    resultRate = new BigDecimal(conversionRate).setScale(RATE_PRECISION,BigDecimal.ROUND_HALF_UP);
+                }
+            }
+
+        }
+        return resultRate;
+    }
+
+
+}

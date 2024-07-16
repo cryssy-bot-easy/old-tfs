@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ipc.rbac.domain.AuthorityType" table="RBAC_AuthorityType">
+
+		<id name="id" column="id" type="long">
+			<generator class="increment" />
+		</id>
+		
+		<discriminator column="type" type="string" />
+				
+		<property name="name" type="string" />
+
+		<property name="description" type="string" />
+
+        <subclass name="com.ipc.rbac.domain.Role" discriminator-value="ROLE">
+            <!-- This mapping goes to AuthorityType -->
+			<list name="permissions">
+				<key column="roleId" />
+				<index column="permissionId" />
+				<one-to-many class="com.ipc.rbac.domain.Permission" />
+			</list>
+	        <join table="RBAC_Role">
+	            <key column="id"/>
+		        <!-- Add specific properties here for Role only -->
+	        </join>
+        </subclass>
+
+        <subclass name="com.ipc.rbac.domain.Permission" discriminator-value="PERMISSION">
+	        <join table="RBAC_Permission">
+	            <key column="id"/>
+	            <!-- Add specific properties here for Permission only -->
+	        </join>
+        </subclass>
+
+	</class>
+</hibernate-mapping>

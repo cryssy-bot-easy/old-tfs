@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.settlementaccount.activity.ApActivity" table="AccountsPayableActivity" abstract="true">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="settlementAccountType">
+            <column name="settlementAccountType" length="10"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.SettlementAccountType</param>
+            </type>
+        </property>
+
+        <property name="activityType">
+            <column name="activityType" length="6"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.ActivityType</param>
+            </type>
+        </property>
+
+        <property name="referenceType">
+            <column name="referenceType" length="40"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.ReferenceType</param>
+            </type>
+        </property>
+
+        <property name="referenceNumber" column="referenceNumber" type="string" length="30"/>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal"/>
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+
+        <property name="status" column="status" length="8"> <!--not used-->
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.settlementaccount.enumTypes.ActivityStatus</param>
+            </type>
+        </property>
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date"/>
+
+        <property name="bookingDate" column="bookingDate" type="java.util.Date"/>
+
+        <property name="applicationReferenceNumber" column="applicationReferenceNumber" type="string" length="40"/> <!--not used-->
+
+        <property name="natureOfTransaction" column="natureOfTransaction" type="string" length="100"/> <!--not used-->
+
+        <!--<property name="serviceType" column="serviceType">-->
+            <!--<type name="org.hibernate.type.EnumType">-->
+                <!--<param name="type">12</param>-->
+                <!--<param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>-->
+            <!--</type>-->
+        <!--</property>-->
+
+    </class>
+
+</hibernate-mapping>

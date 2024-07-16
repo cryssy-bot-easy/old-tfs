@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.SequenceRepository">
+
+    <resultMap id="sequenceMap" type="com.ucpb.tfs.interfaces.domain.Sequence">
+        <!-- <id property="id" column="user_id" /> -->
+        <result property="sequenceNumber" column="SEQUENCE" />
+        <result property="dateInitialized" column="DATE_INITIALIZED" />
+        <result property="sequenceType" column="SEQUENCE_TYPE"/>
+    </resultMap>
+
+    <select id="getSequence" resultType="com.ucpb.tfs.interfaces.domain.Sequence" resultMap="sequenceMap">
+		SELECT * FROM SIBS_SEQUENCES WHERE SEQUENCE_TYPE = #{sequenceType}
+	</select>
+
+
+    <update id="incrementSequence">
+		UPDATE SIBS_SEQUENCES
+			SET
+				 SEQUENCE = SEQUENCE + 1,
+				 DATE_INITIALIZED = CURRENT_TIMESTAMP
+	    WHERE SEQUENCE_TYPE = #{sequenceType}
+	</update>
+
+    <update id="resetSequence">
+		UPDATE SIBS_SEQUENCES
+			SET
+				 SEQUENCE = 1,
+				 DATE_INITIALIZED = CURRENT_TIMESTAMP
+		WHERE SEQUENCE_TYPE = #{sequenceType}
+	</update>
+
+
+
+</mapper>

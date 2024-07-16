@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.service.TradeService" table="TradeService">
+
+        <composite-id name="tradeServiceId" access="field">
+            <key-property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </composite-id>
+
+        <component name="serviceInstructionId" class="com.ucpb.tfs.domain.instruction.ServiceInstructionId" access="field">
+            <property name="serviceInstructionId" column="serviceInstructionId" type="string" length="12"/>
+        </component>
+
+        <component name="tradeServiceReferenceNumber" class="com.ucpb.tfs.domain.service.TradeServiceReferenceNumber" access="field">
+            <property name="tradeServiceReferenceNumber" column="tradeServiceReferenceNumber" type="string" length="20"/>
+        </component>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </component>
+
+        <component name="tradeProductNumber" class="com.ucpb.tfs.domain.service.TradeProductNumber">
+            <property name="tradeProductNumber" column="tradeProductNumber" type="string" length="21"/>
+        </component>
+
+        <property name="status" column="status" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.TradeServiceStatus</param>
+            </type>
+        </property>
+
+        <property name="processId" column="processId" type="long" />
+
+        <!--evaluate other options for this, may be better as binary blob or something-->
+        <property name="tradeServiceDetails" column="details" type="org.hibernate.type.MaterializedClobType" length="400000" access="property"/>
+
+        <property name="chargesCurrency" column="chargesCurrency" type="java.util.Currency" length="3"/>
+
+	    <property name="approvers" column="approvers" type="java.lang.String" length="50"/>
+
+	    <set name="serviceCharges" cascade="save-update, all-delete-orphan" lazy="false">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.service.ServiceCharge" />
+        </set>
+
+        <component name="productCharge" class="com.ucpb.tfs.domain.service.ProductCharge">
+            <property name="amount" column="amount" type="java.math.BigDecimal" />
+            <property name="defaultAmount" column="defaultAmount" type="java.math.BigDecimal" />
+            <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+        </component>
+
+        <property name="cifNumber" column="cifNumber" type="string" length="10"/>
+        <property name="cifName" column="cifName" type="string" length="100"/>
+        <property name="longName" column="cifFullName" type="string" length="300"/>
+
+        <property name="mainCifNumber" column="mainCifNumber" type="string" length="10"/>
+        <property name="mainCifName" column="mainCifName" type="string" length="100"/>
+
+        <property name="facilityId" column="facilityId" type="string" length="11"/>
+        <property name="facilityType" column="facilityType" type="string" length="4"/>
+
+        <property name="accountOfficer" column="accountOfficer" type="string" length="80"/>
+
+        <property name="serviceType" column="serviceType" length="30">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="documentType" column="documentType" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentType</param>
+            </type>
+        </property>
+
+        <property name="documentClass" column="documentClass" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentClass</param>
+            </type>
+        </property>
+
+        <property name="documentSubType1" column="documentSubType1" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType1</param>
+            </type>
+        </property>
+
+        <property name="documentSubType2" column="documentSubType2" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType2</param>
+            </type>
+        </property>
+
+        <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="userActiveDirectoryId" type="string" length="20"/>
+        </component>
+
+        <!--last user-->
+        <component name="lastUser" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="lastUser" type="string" length="20"/>
+        </component>
+
+        <!--prepared by-->
+        <component name="preparedBy" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="preparedBy" type="string" length="20"/>
+        </component>
+
+        <property name="createdDate" column="createdDate" type="java.util.Date" />
+
+        <property name="modifiedDate" column="modifiedDate" type="java.util.Date" />
+
+        <property name="narrative" column="narrative" type="org.hibernate.type.MaterializedClobType" length="2000"/>
+
+        <property name="reasonForCancellation" column="reasonForCancellation" type="org.hibernate.type.MaterializedClobType" length="500"/>
+
+        <property name="processingUnitCode" column="processingUnitCode" type="string" length="10"/>
+
+        <property name="ccbdBranchUnitCode" column="ccbdBranchUnitCode" type="string" length="10"/>
+        <property name="allocationUnitCode" column="allocationUnitCode" type="string" length="10"/>
+        <property name="passOnRateThirdToUSDServiceCharge" column="passOnRateThirdToUSDServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="passOnRateUsdToPhpServiceCharge" column="passOnRateUsdToPhpServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="passOnRateThirdToPhpServiceCharge" column="passOnRateThirdToPhpServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="passOnUrrServiceCharge" column="passOnUrrServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateThirdToUsdServiceCharge" column="specialRateThirdToUsdServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateUsdToPhpServiceCharge" column="specialRateUsdToPhpServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateThirdToPhpServiceCharge" column="specialRateThirdToPhpServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateUrrServiceCharge" column="specialRateUrrServiceCharge" type="java.math.BigDecimal" precision="31"  scale="15"/>
+
+
+
+        <set name="attachments" cascade="save-update, all-delete-orphan" lazy="false">
+            <key>
+                <column name="attachmentId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.attach.Attachment" />
+        </set>
+
+        <property name="paymentStatus" column="paymentStatus" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.payment.enumTypes.PaymentStatus</param>
+            </type>
+        </property>
+
+        <property name="reinstateFlag" column="reinstateFlag" type="java.lang.Boolean"/>
+
+        <component name="createdBy" class="com.ucpb.tfs.domain.security.UserId">
+            <property name="id" column="createdBy" length="20"/>
+        </component>
+
+
+        <!--required documents-->
+        <set name="requiredDocument" cascade="save-update, all-delete-orphan" lazy="false" order-by="sequenceNumber asc">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.documents.RequiredDocument" />
+        </set>
+
+        <!--instruction to bank-->
+        <set name="instructionToBank" cascade="save-update, all-delete-orphan" lazy="false">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.reimbursing.InstructionToBank" />
+        </set>
+
+        <!--instruction to bank-->
+        <set name="additionalCondition" cascade="save-update, all-delete-orphan" lazy="false"  order-by="sequenceNumber asc">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.condition.AdditionalCondition" />
+        </set>
+
+        <!--transmittal letter-->
+        <set name="transmittalLetter" cascade="save-update, all-delete-orphan" lazy="false" order-by="sequenceNumber asc">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.letter.TransmittalLetter" />
+        </set>
+
+        <!--swift charge-->
+        <set name="swiftCharge" cascade="save-update, all-delete-orphan" lazy="false">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.swift.SwiftCharge" />
+        </set>
+
+        <!-- Product Refund details -->
+        <set name="productRefundDetails" cascade="save-update, all-delete-orphan">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.service.ProductRefundDetail" />
+        </set>
+
+        <!-- Product Collectible details -->
+        <set name="productCollectibleDetails" cascade="save-update, all-delete-orphan">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.service.ProductCollectibleDetail" />
+        </set>
+
+        <!-- Other Charge details -->
+        <set name="otherChargesDetails" cascade="save-update, all-delete-orphan">
+            <key>
+                <column name="tradeServiceId"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.service.OtherChargesDetail" />
+        </set>
+        
+        <property name="firstName" column="firstName" type="string" length="100"/>
+        <property name="middleName" column="middleName" type="string" length="40"/>
+        <property name="lastName" column="lastName" type="string" length="100"/>
+        <property name="tinNumber" column="tinNumber" type="string" length="20"/>
+        
+        <property name="officerCode" column="officerCode" type="string" length="3"/>
+        <property name="exceptionCode" column="exceptionCode" type="string" length="2"/>
+        
+        <property name="specialRateThirdToUsd" column="specialRateThirdToUsd" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateThirdToPhp" column="specialRateThirdToPhp" type="java.math.BigDecimal" precision="31"  scale="15"/>
+        <property name="specialRateUrr" column="specialRateUrr" type="java.math.BigDecimal" precision="31"  scale="15"/>
+
+		<property name="maturityDate" column="maturityDate" type="java.util.Date" />
+		
+		<property name="expiryDate" column="expiryDate" type="java.util.Date" />
+		<property name="processDate" column="processDate" type="java.util.Date" />
+    </class>
+
+</hibernate-mapping>
+

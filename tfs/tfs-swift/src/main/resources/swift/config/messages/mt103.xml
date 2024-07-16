@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt103Mapper">
+        <entry value="20" key="#this.get('documentNumber')"/>
+        <entry value="23B" key="#this.get('bankOperationCode')"/>
+        <entry value="32A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(#this.get('neg
+    otiationValueDate'),#this.get('currency'),#this.get('negotiationAmount'))"/>
+        <entry value="52A" key="(#this.get('cifNumber') ?: '') + (#this.get('orderingCustomerAddress') ?: '') + (#this.get('orderingCustomerName') ?: '')"/>
+        <entry value="57D" key="(#this.get('accountWithIns
+    titution') ?: '') + (#this.get('nameAndAddress') ?: '')"/>
+        <entry value="59" key="'/' + #this.get('beneficiarysAccountNumber') + (#this.get('beneficiaryCustomerName') ?: '') + (#this.get('beneficiaryCustom
+    erAddress') ?: '')"/>
+        <!--<entry value="60" key=""/>-->
+        <entry value="71A" key="#this.get('detailsOfCharges')"/>
+        <entry value="72" key="#this.get('senderToReceiverInformation')"/>
+    </util:map>
+
+
+</beans>

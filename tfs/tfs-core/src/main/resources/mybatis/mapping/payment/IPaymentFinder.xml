@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.payment.IPaymentFinder">
+    
+    <select id="findPaymentPNNumberByDocumentNumber" resultType="hashMap">
+        select pd.pnnumber
+        from paymentdetail as pd
+        where pd.referenceNumber = #{documentNumber}
+    </select>
+    
+    <select id="findPaymentServiceCharge" resultType="hashMap">
+        select
+        pd.amount from paymentdetail pd
+        join payment p on pd.paymentid = p.id
+        where p.tradeserviceid= #{tradeServiceId}
+    </select>
+
+    <select id="findServiceChargesEtsPaymentDetail" resultType="hashMap">
+        select etsPmtDtl.referenceNumber, etsPmtDtl.paymentInstrumentType,
+        etsPmtDtl.currency, etsPmtDtl.amount, etsPmtDtl.status
+        from EtsPaymentDetail etsPmtDtl
+        join EtsPayment etsPmt on etsPmtDtl.paymentId = etsPmt.id
+        join TradeService ts on ts.tradeServiceId = etsPmt.tradeServiceId
+        where
+        etsPmt.tradeServiceId = #{tradeServiceId}
+        AND etsPmt.chargeType = 'SERVICE'
+    </select>
+    
+    <resultMap id="findServiceChargesPaymentDetailResultMap" type="hashmap">    
+        <result property="ID" column="id"/>
+        <result property="PAYMENTINSTRUMENTTYPE" column="paymentInstrumentType" />
+        <result property="REFERENCENUMBER" column="referenceNumber" />
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+        <result property="STATUS" column="status" />
+        <result property="BOOKINGCURRENCY" column="bookingCurrency" />
+        <result property="INTERESTRATE" column="interestRate"/>
+        <result property="INTERESTTERM" column="interestTerm" />
+        <result property="LOANMATURITYDATE" column="loanMaturityDate"  />
+        <result property="LOANTERM" column="loanTerm" />
+        <result property="LOANTERMCODE" column="loanTermCode" />
+        <result property="REPRICINGTERM" column="repricingTerm" />
+        <result property="REPRICINGTERMCODE" column="repricingTermCode" />
+        <result property="REFERENCEID" column="referenceId" />
+        <result property="PASSONRATETHIRDTOPHP" column="passOnRateThirdToPhp"/>
+        <result property="PASSONRATETHIRDTOUSD" column="passOnRateThirdToUsd"/>
+        <result property="PASSONRATEUSDTOPHP" column="passOnRateUsdToPhp"/>
+        <result property="SPECIALRATETHIRDTOPHP" column="specialRateThirdToPhp"/>
+        <result property="SPECIALRATETHIRDTOUSD" column="specialRateThirdToUsd"/>
+        <result property="SPECIALRATEUSDTOPHP" column="specialRateUsdToPhp"/>
+        <result property="URR" column="urr"/>
+        <result property="LCCURRENCY" column="lcCurrency" />
+        <result property="PAYMENTTERM" column="PAYMENTTERM"/>
+        <result property="PNNUMBER" column="pnNumber"/>
+        <result property="FACILITYID" column="facilityId"/>
+        <result property="FACILITYTYPE" column="facilityType"/>
+        <result property="FACILITYREFERENCENUMBER" column="facilityReferenceNumber" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="SEQUENCENUMBER" column="sequenceNumber"/>
+        <result property="INTERESTTERMCODE" column="interestTermCode" />
+        <result property="WITHCRAMAPPROVAL" column="withCramApproval" />
+        <result property="ACCOUNTNAME" column="accountName" />
+    </resultMap>
+    
+    <select id="findServiceChargesPaymentDetail" resultMap="findServiceChargesPaymentDetailResultMap">
+        select pmtDtl.id, pmtDtl.paymentInstrumentType, pmtDtl.referenceNumber,
+        pmtDtl.amount, pmtDtl.currency, pmtDtl.status,
+        pmtDtl.bookingCurrency, pmtDtl.interestRate, pmtDtl.interestTerm, pmtDtl.loanMaturityDate,
+        pmtDtl.loanTerm, pmtDtl.loanTermCode,
+        pmtDtl.repricingTerm, pmtDtl.repricingTermCode, pmtDtl.referenceId,
+        pmtDtl.passOnRateThirdToPhp, pmtDtl.passOnRateThirdToUsd,
+        pmtDtl.passOnRateUsdToPhp,
+        pmtDtl.specialRateThirdToPhp, pmtDtl.specialRateThirdToUsd, pmtDtl.specialRateUsdToPhp, pmtDtl.urr,
+        ts.currency as lcCurrency, pmtDtl.PAYMENTTERM, pmtDtl.pnNumber,
+        pmtDtl.facilityId, pmtDtl.facilityType,
+        pmtDtl.facilityReferenceNumber, ts.details, pmtDtl.sequenceNumber, pmtDtl.interestTermCode,
+        pmtDtl.withCramApproval,
+        pmtDtl.accountName
+        from PaymentDetail pmtDtl
+        join Payment pmt on pmtDtl.paymentId = pmt.id
+        join TradeService ts on ts.tradeServiceId = pmt.tradeServiceId
+        where
+        pmt.tradeServiceId = #{tradeServiceId}
+        AND pmt.chargeType = 'SERVICE'
+    </select>
+
+    <select id="findProductChargeEtsPaymentDetail" resultType="hashMap">
+        select etsPmtDtl.referenceNumber, etsPmtDtl.pnNumber,
+        etsPmtDtl.paymentInstrumentType,
+        etsPmtDtl.currency, etsPmtDtl.amount, etsPmtDtl.status
+        from EtsPaymentDetail etsPmtDtl
+        join EtsPayment etsPmt on etsPmtDtl.paymentId = etsPmt.id
+        join TradeService ts on ts.tradeServiceId = etsPmt.tradeServiceId
+        where
+        etsPmt.tradeServiceId = #{tradeServiceId}
+        AND etsPmt.chargeType = 'PRODUCT'
+    </select>
+
+    <resultMap id="findProductChargePaymentDetailResultMap" type="hashmap">    
+        <result property="ID" column="id" />
+        <result property="PAYMENTINSTRUMENTTYPE" column="paymentInstrumentType" />
+        <result property="REFERENCENUMBER" column="referenceNumber" />
+        <result property="CURRENCY" column="currency" />
+        <result property="STATUS" column="status" />
+        <result property="PAIDDATE" column="paidDate" />
+        <result property="BOOKINGCURRENCY" column="bookingCurrency" />
+        <result property="INTERESTTERM" column="interestTerm" />
+        <result property="LOANMATURITYDATE" column="loanMaturityDate" />
+        <result property="LOANTERM" column="loanTerm" />
+        <result property="LOANTERMCODE" column="loanTermCode" />
+        <result property="REPRICINGTERM" column="repricingTerm" />
+        <result property="REPRICINGTERMCODE" column="repricingTermCode" />
+        <result property="REFERENCEID" column="referenceId" />
+        <result property="LCCURRENCY" column="lcCurrency" />
+        <result property="FACILITYTYPE" column="facilityType" />
+        <result property="FACILITYREFERENCENUMBER" column="facilityReferenceNumber" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="INTERESTTERMCODE" column="interestTermCode" />
+        <result property="AGRIAGRATAGGING" column="agriAgraTagging" />
+        <result property="ACCOUNTNAME" column="accountName" />
+        <result property="WITHCRAMAPPROVAL" column="withCramApproval"/>
+        <result property="PAYMENTCODE" column="paymentCode"/>
+        <result property="FACILITYID" column="facilityId"/>
+        <result property="PAYMENTTERM" column="paymentTerm"/>
+        <result property="AMOUNTINLCCURRENCY" column="amountInLcCurrency"/>
+        <result property="URR" column="urr"/>
+        <result property="PASSONRATETHIRDTOPHP" column="passOnRateThirdToPhp"/>
+        <result property="PASSONRATETHIRDTOUSD" column="passOnRateThirdToUsd"/>
+        <result property="PASSONRATEUSDTOPHP" column="passOnRateUsdToPhp"/>
+        <result property="SPECIALRATETHIRDTOPHP" column="specialRateThirdToPhp"/>
+        <result property="SPECIALRATETHIRDTOUSD" column="specialRateThirdToUsd"/>
+        <result property="SPECIALRATEUSDTOPHP" column="specialRateUsdToPhp"/>
+        <result property="INTERESTRATE" column="interestRate"/>
+        <result property="AMOUNT" column="amount"/>
+        <result property="NUMBEROFFREEFLOATDAYS" column="numberOfFreeFloatDays"/>
+        <result property="SEQUENCENUMBER" column="sequenceNumber"/>
+        <result property="PNNUMBER" column="pnNumber"/>
+    </resultMap>
+    
+    <select id="findProductChargePaymentDetail" resultMap="findProductChargePaymentDetailResultMap">
+        select pmtDtl.id, pmtDtl.paymentInstrumentType, pmtDtl.referenceNumber,
+        pmtDtl.amount, pmtDtl.currency, pmtDtl.status, pmtDtl.paidDate,
+        pmtDtl.bookingCurrency, pmtDtl.interestRate, pmtDtl.interestTerm,
+        pmtDtl.loanMaturityDate, pmtDtl.loanTerm, pmtDtl.loanTermCode,
+        pmtDtl.repricingTerm, pmtDtl.repricingTermCode, pmtDtl.referenceId,
+        pmtDtl.passOnRateThirdToPhp, pmtDtl.passOnRateThirdToUsd,
+        pmtDtl.passOnRateUsdToPhp,
+        pmtDtl.specialRateThirdToPhp, pmtDtl.specialRateThirdToUsd, pmtDtl.specialRateUsdToPhp, pmtDtl.urr,
+        ts.currency as lcCurrency, pmtDtl.PAYMENTTERM, pmtDtl.pnNumber,
+        pmtDtl.facilityId, pmtDtl.facilityType,
+        pmtDtl.facilityReferenceNumber, ts.details, pmtDtl.sequenceNumber, pmtDtl.interestTermCode,
+        pmtDtl.withCramApproval,
+        pmtDtl.paymentCode, pmtDtl.amountInLcCurrency, pmtDtl.agriAgraTagging,
+        pmtDtl.accountName, pmtDtl.numberOfFreeFloatDays
+        from PaymentDetail pmtDtl
+        join Payment pmt on pmtDtl.paymentId = pmt.id
+        join TradeService ts on ts.tradeServiceId = pmt.tradeServiceId
+        where pmt.tradeServiceId = #{tradeServiceId}
+        AND pmt.chargeType = 'PRODUCT'
+    </select>
+
+    <select id="findProceedsEtsPaymentDetail" resultType="hashMap">
+        select etsPmtDtl.referenceNumber, etsPmtDtl.paymentInstrumentType,
+        etsPmtDtl.currency, etsPmtDtl.amount, etsPmtDtl.status
+        from EtsPaymentDetail etsPmtDtl
+        join EtsPayment etsPmt on etsPmtDtl.paymentId = etsPmt.id
+        join TradeService ts on ts.tradeServiceId = etsPmt.tradeServiceId
+        where
+        etsPmt.tradeServiceId = #{tradeServiceId}
+        AND etsPmt.chargeType = 'SETTLEMENT'
+    </select>
+    
+    <resultMap id="findProceedsPaymentDetailResultMap" type="hashmap">    
+        <result property="ID" column="id"/>
+        <result property="PAYMENTINSTRUMENTTYPE" column="paymentInstrumentType" />
+        <result property="REFERENCENUMBER" column="referenceNumber" />
+        <result property="AMOUNT" column="amount"/>
+        <result property="CURRENCY" column="currency" />
+        <result property="STATUS" column="status" />
+        <result property="BOOKINGCURRENCY" column="bookingCurrency" />
+        <result property="INTERESTRATE" column="interestRate"/>
+        <result property="INTERESTTERM" column="interestTerm" />
+        <result property="LOANMATURITYDATE" column="loanMaturityDate" />
+        <result property="LOANTERM" column="loanTerm" />
+        <result property="LOANTERMCODE" column="loanTermCode" />
+        <result property="REPRICINGTERM" column="repricingTerm" />
+        <result property="REPRICINGTERMCODE" column="repricingTermCode" />
+        <result property="REFERENCEID" column="referenceId" />
+        <result property="PASSONRATETHIRDTOPHP" column="passOnRateThirdToPhp"/>
+        <result property="PASSONRATETHIRDTOUSD" column="passOnRateThirdToUsd"/>
+        <result property="PASSONRATEUSDTOPHP" column="passOnRateUsdToPhp"/>
+        <result property="SPECIALRATETHIRDTOPHP" column="specialRateThirdToPhp"/>
+        <result property="SPECIALRATETHIRDTOUSD" column="specialRateThirdToUsd"/>
+        <result property="SPECIALRATEUSDTOPHP" column="specialRateUsdToPhp"/>
+        <result property="URR" column="urr"/>
+        <result property="LCCURRENCY" column="lcCurrency" />
+        <result property="PAYMENTTERM" column="PAYMENTTERM"/>
+        <result property="PNNUMBER" column="pnNumber"/>
+        <result property="FACILITYID" column="facilityId"/>
+        <result property="FACILITYTYPE" column="facilityType" />
+        <result property="WITHCRAMAPPROVAL" column="withCramApproval"/>
+        <result property="FACILITYREFERENCENUMBER" column="facilityReferenceNumber" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="ACCOUNTNAME" column="accountName" />
+    </resultMap>
+
+    <select id="findProceedsPaymentDetail" resultMap="findProceedsPaymentDetailResultMap">
+        select pmtDtl.id, pmtDtl.paymentInstrumentType, pmtDtl.referenceNumber,
+        pmtDtl.amount, pmtDtl.currency, pmtDtl.status,
+        pmtDtl.bookingCurrency, pmtDtl.interestRate, pmtDtl.interestTerm, pmtDtl.loanMaturityDate,
+        pmtDtl.loanTerm, pmtDtl.loanTermCode,
+        pmtDtl.repricingTerm, pmtDtl.repricingTermCode, pmtDtl.referenceId,
+        pmtDtl.passOnRateThirdToPhp, pmtDtl.passOnRateThirdToUsd,
+        pmtDtl.passOnRateUsdToPhp,
+        pmtDtl.specialRateThirdToPhp, pmtDtl.specialRateThirdToUsd, pmtDtl.specialRateUsdToPhp, pmtDtl.urr,
+        ts.currency as lcCurrency, pmtDtl.PAYMENTTERM,
+        pmtDtl.pnNumber,pmtDtl.facilityId, pmtDtl.facilityType,
+        pmtDtl.withCramApproval,
+        pmtDtl.facilityReferenceNumber, ts.details,
+        pmtDtl.accountName
+        from PaymentDetail pmtDtl
+        join Payment pmt on pmtDtl.paymentId = pmt.id
+        join TradeService ts on ts.tradeServiceId = pmt.tradeServiceId
+        where pmt.tradeServiceId = #{tradeServiceId}
+        AND pmt.chargeType = 'SETTLEMENT'
+    </select>
+
+    <select id="getAllProductPayments" resultType="hashMap">
+        select p.paiddate,
+        (select servicetype from tradeservice where tradeserviceid =
+        p.tradeserviceid) as transactiontype,
+        (select tp.currency from tradeproduct tp inner join letterofcredit lc on
+        tp.documentnumber = lc.documentnumber where tp.documentnumber =
+        #{documentNumber}) as lccurrency,
+        (select outstandingbalance from letterofcredit where documentnumber =
+        #{documentNumber}) as outstandingbalance,
+        pd.specialratethirdtousd,
+        pd.specialratethirdtophp,
+        pd.specialrateusdtophp,
+        pd.currency,
+        pd.amount
+        from payment p
+        inner join
+        paymentdetail pd
+        on pd.paymentid = p.id
+        where p.chargetype = 'PRODUCT'
+
+        and p.tradeserviceid = #{tradeServiceId}
+    </select>
+
+    <select id="findRefundablePayments" resultType="hashMap">
+        select
+        pd.currency,
+        sum(pd.amount) as paidAmount
+        from payment p
+        inner join paymentDetail pd
+        on pd.paymentId = p.id
+        where p.chargetype = 'PRODUCT'
+        and p.tradeServiceId in (select tradeServiceId from tradeService where
+        documentNumber = #{documentNumber} and documentClass = 'LC')
+
+        group by pd.currency
+    </select>
+    
+    <select id="findAllPaymentProductForAmla" resultType="hashMap">
+        select pmtDtl.id, 
+        pmtDtl.paymentInstrumentType,
+        pmtDtl.referenceNumber,
+        pmtDtl.amount,
+        pmtDtl.amountInLcCurrency,
+        pmtDtl.currency
+        from PaymentDetail pmtDtl
+        join Payment pmt on pmtDtl.paymentId = pmt.id
+        join TradeService ts on ts.tradeServiceId = pmt.tradeServiceId
+        where pmt.tradeServiceId = #{tradeServiceId}
+        AND pmt.chargeType = 'PRODUCT'
+    </select>
+    
+    <select id="findAllPaymentProductForExports" resultType="hashMap">
+        select pmtDtl.id, 
+        pmtDtl.paymentInstrumentType,
+        pmtDtl.referenceNumber,
+        pmtDtl.amount,
+        pmtDtl.currency
+        from PaymentDetail pmtDtl
+        join Payment pmt on pmtDtl.paymentId = pmt.id
+        join TradeService ts on ts.tradeServiceId = pmt.tradeServiceId
+        where pmt.tradeServiceId = #{tradeServiceId}
+        AND pmt.chargeType = 'SETTLEMENT'
+    </select>
+
+</mapper>

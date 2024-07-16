@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       /ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration
+		http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc-2.0.xsd">
+
+    <bean id="loanApproverTask" class="com.ucpb.tfs.interfaces.util.SqlRunnerTask">
+        <constructor-arg name="ds" ref="interfaceDataSource"/>
+        <constructor-arg name="sql" value="update ucdatulns2.LNTFINT set acctno = (SELECT MAX(ACCTNO) + 1 FROM UCDATULNS2.LNTFINT), trsts = 'Y' where TRSTS IS NULL or TRSTS = ''"/>
+    </bean>
+
+    <bean id="balanceCheckingTask" class="com.ucpb.tfs.interfaces.util.SqlRunnerTask">
+        <constructor-arg name="ds" ref="interfaceDataSource"/>
+        <constructor-arg name="sql" value="update ucdatulns2.LNTFCON set TRSTS = 'Y', AVLAMT = 9999999, TOCUR = 'PHP' where TRSTS IS NULL or TRSTS = ''"/>
+    </bean>
+
+    <bean id="loanApproverSchedulerTask"
+          class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+        <property name="targetObject" ref="loanApproverTask" />
+        <property name="targetMethod" value="runSql" />
+    </bean>
+
+    <bean id="balanceCheckingSchedulerTask"
+          class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+        <property name="targetObject" ref="balanceCheckingTask" />
+        <property name="targetMethod" value="runSql" />
+    </bean>
+
+
+    <bean class="org.springframework.scheduling.timer.TimerFactoryBean" lazy-init="false">
+        <property name="scheduledTimerTasks">
+            <list>
+                <bean id="loanApproverTimerTask"
+                      class="org.springframework.scheduling.timer.ScheduledTimerTask" lazy-init="false">
+                    <property name="timerTask" ref="loanApproverSchedulerTask" />
+                    <property name="delay" value="1000" />
+                    <property name="period" value="30000" />
+                </bean>
+                <bean id="balanceCheckingTimerTask"
+                      class="org.springframework.scheduling.timer.ScheduledTimerTask" lazy-init="false">
+                    <property name="timerTask" ref="balanceCheckingSchedulerTask" />
+                    <property name="delay" value="1000" />
+                    <property name="period" value="30000" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+</beans>

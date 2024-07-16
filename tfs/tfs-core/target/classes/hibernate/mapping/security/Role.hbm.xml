@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Role" table="Sec_Role">
+
+        <composite-id name="roleId" access="field">
+            <key-property name="roleId" column="id" type="string" length="20"/>
+        </composite-id>
+
+        <property name="description" column="description" type="string" length="100"/>
+
+        <property name="adGroupName" column="adgroup" type="string" length="100"/>
+
+        <component name="parentRoleId" access="field">
+            <property name="roleId" column="parent" type="string" length="20"/>
+        </component>
+
+        <set name="permissions" table="sec_role_permissions" inverse="false">
+            <key column="roleId"/>
+            <many-to-many class="com.ucpb.tfs.domain.security.Permission" column="permissionId" />
+        </set>
+
+        <!--<bag name="permissions">-->
+            <!--<key column="roleId"/>-->
+            <!--<many-to-many foreign-key="permissionId" class="com.ucpb.tfs.domain.security.PermissionId">-->
+                <!--<column name="permissionId"/>-->
+            <!--</many-to-many>-->
+        <!--</bag>-->
+
+    </class>
+
+
+</hibernate-mapping>

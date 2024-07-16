@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.product.LCNegotiation" table="LCNegotiation">
+
+        <id column="id" name="id" length="32">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" length="21"/>
+        </component>
+
+        <component name="negotiationNumber" class="com.ucpb.tfs.domain.product.NegotiationNumber">
+            <property name="negotiationNumber" column="negotiationNumber" length="36"/>
+        </component>
+
+        <property name="lcNegotiationStatus" column="lcNegotiationStatus" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCNegotiationStatus</param>
+            </type>
+        </property>
+
+        <component name="icNumber" class="com.ucpb.tfs.domain.product.ICNumber">
+            <property name="icNumber" column="icNumber" length="21"/>
+        </component>
+
+        <property name="negotiationAmount" column="negotiationAmount" type="java.math.BigDecimal"/>
+        <property name="negotiationCurrency" column="negotiationCurrency" type="java.util.Currency" length="3"/>
+
+        <property name="valueDate" column="valueDate" type="java.util.Date"/>
+        <property name="processDate" column="processDate" type="java.util.Date"/>
+        <property name="negotiationValueDate" column="negotiationValueDate" type="java.util.Date"/>
+
+        <property name="sendersCorrespondentLocation" column="sendersCorrespondentLocation" type="string" length="160"/>
+        <property name="accountWithInstitutionLocation" column="accountWithInstitutionLocation" type="string" length="160"/>
+        <!--<property name="interestTerm" column="interestTerm" type="string" length="1"/>-->
+        <property name="sendersCorrespondentNameAndAddress" column="sendersCorrespondentNameAndAddress" type="string" length="200"/>
+        <property name="instructionAction" column="instructionAction" type="string" length="100"/>
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal"/>
+        <property name="originalCurrency" column="originalCurrency" type="java.util.Currency" length="3"/>
+        <property name="beneficiarysInstitution" column="beneficiarysInstitution" type="string" length="50"/>
+        <property name="reimbursingCurrency" column="reimbursingCurrency" type="java.util.Currency" length="3"/>
+        <property name="shipmentNumber" column="shipmentNumber" type="string" length="30"/>
+        <property name="accountWithInstitution" column="accountWithInstitution" type="string" length="30"/>
+        <property name="outstandingBalance" column="outstandingBalance" type="java.math.BigDecimal"/>
+        <!--<property name="loanTermCode" column="loanTermCode" type="string" length="20"/>-->
+        <property name="receiversCorrespondent" column="receiversCorrespondent" type="string" length="11"/>
+        <!--<property name="loanTerm" column="loanTerm" type="string" length="1"/>-->
+
+        <property name="intermediary" column="intermediary" type="string" length="11"/>
+        <property name="overdrawnNegotiationAmountInNegotiationCurrency" column="overdrawnNegotiationAmountInNegotiationCurrency" type="java.math.BigDecimal"/>
+        <property name="negotiationAmountInReimbursingCurrency" column="negotiationAmountInReimbursingCurrency" type="java.math.BigDecimal"/>
+        <!--<property name="interestTermCode" column="interestTermCode" type="string" length="20"/>-->
+        <property name="outstandingAmount" column="outstandingAmount" type="java.math.BigDecimal"/>
+        <property name="accountWithInstitutionNameAndAddress" column="accountWithInstitutionNameAndAddress" type="string" length="200"/>
+        <property name="cwtFlag" column="cwtFlag" type="java.lang.Boolean"/>
+        <property name="beneficiarysInstitutionNameAndAddress" column="beneficiarysInstitutionNameAndAddress" type="string" length="200"/>
+        <property name="apCashAmountInNegotiationCurrency" column="apCashAmountInNegotiationCurrency" type="java.math.BigDecimal"/>
+        <property name="reimbursingBank" column="reimbursingBank" type="string" length="11"/>
+        <property name="negotiatingBanksReferenceNumber" column="negotiatingBanksReferenceNumber" type="string" length="30"/>
+        <property name="agriAgraTagging" column="agriAgraTagging" type="string" length="7"/>
+        <property name="orderingInstitutionIdentifierCode" column="orderingInstitutionIdentifierCode" type="string" length="11"/>
+        <property name="orderingInstitutionNameAndAddress" column="orderingInstitutionNameAndAddress" type="string" length="200"/>
+
+        <property name="orderingInstitution" column="orderingInstitution" type="string" length="11"/>
+        <property name="senderCorrespondentIdentifierCode" column="senderCorrespondentIdentifierCode" type="string" length="11"/>
+        <property name="receiversCorrespondentNameAndAddress" column="receiversCorrespondentNameAndAddress" type="string" length="200"/>
+        <property name="typeOfLoan" column="typeOfLoan" type="string" length="8"/>
+        <property name="receiversCorrespondentLocation" column="receiversCorrespondentLocation" type="string" length="160"/>
+        <property name="negotiationFacilityType" column="negotiationFacilityType" type="string" length="4"/>
+        <property name="discrepancyFeeCharge" column="discrepancyFeeCharge" type="java.math.BigDecimal"/>
+        <property name="receiversCorrespondentIdentifierCode" column="receiversCorrespondentIdentifierCode" type="string" length="11"/>
+        <property name="generateMt" column="generateMt" type="string" length="5"/>
+        <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="235"/>
+        <property name="bookingCurrency" column="bookingCurrency" type="java.util.Currency" length="3"/>
+        <property name="intermediaryNameAndAddress" column="intermediaryNameAndAddress" type="string" length="200"/>
+        <property name="negotiationFacilityId" column="negotiationFacilityId" type="string" length="1"/>
+        <property name="beneficiarysInstitutionIdentifierCode" column="beneficiarysInstitutionIdentifierCode" type="string" length="11"/>
+
+        <property name="sendersCorrespondent" column="sendersCorrespondent" type="string" length="11"/>
+        <property name="accountWithInstitutionIdentifierCode" column="accountWithInstitutionIdentifierCode" type="string" length="11"/>
+        <property name="intermediaryIdentifierCode" column="intermediaryIdentifierCode" type="string" length="11"/>
+        <property name="furtherIdentification" column="furtherIdentification" type="string" length="30"/>
+        <property name="expiryDate" column="expiryDate" type="java.util.Date"/>
+        <property name="issueDate" column="issueDate" type="java.util.Date"/>
+        <property name="overdrawnAmount" column="overdrawnAmount" type="java.math.BigDecimal"/>
+        <property name="reimbursingBankSpecialRate" column="reimbursingBankSpecialRate" type="string" length="25"/>
+        <property name="interestRate" column="interestRate" type="string" length="10"/>
+        <property name="loanMaturityDate" column="loanMaturityDate" type="java.util.Date"/>
+        <property name="negotiatingBank" column="negotiatingBank" type="string" length="11"/>
+        <property name="negotiationType" column="negotiationType" type="string" length="30"/>
+        <property name="netAmount" column="netAmount" type="java.math.BigDecimal"/>
+
+        <property name="cramFlag" column="cramFlag" type="java.lang.Boolean"/>
+
+        <property name="totalAmount" column="totalAmount" type="java.math.BigDecimal"/>
+        <property name="totalAmountCurrency" column="totalAmountCurrency" type="java.util.Currency" length="3"/>
+        <property name="bank" column="bank" type="string" length="50"/>
+        <property name="beneficiaryCustomerName" column="beneficiaryCustomerName" type="string" length="50"/>
+        <property name="byOrder" column="byOrder" type="string" length="50"/>
+
+        <property name="orderingCustomerAddress" column="orderingCustomerAddress" type="string" length="160"/>
+        <property name="detailsOfCharges" column="detailsOfCharges" type="string" length="220"/>
+        <property name="beneficiary" column="beneficiary" type="string" length="50"/>
+        <property name="bankOperationCode" column="bankOperationCode" type="string" length="50"/>
+        <property name="beneficiaryCustomerAddress" column="beneficiaryCustomerAddress" type="string" length="160"/>
+
+        <property name="nameAndAddress" column="nameAndAddress" type="string" length="200"/>
+        <property name="orderingCustomerName" column="orderingCustomerName" type="string" length="50"/>
+        <property name="beneficiarysAccountNumber" column="beneficiarysAccountNumber" type="string" length="50"/>
+        <property name="fundingReferenceNumber" column="fundingReferenceNumber" type="string" length="50"/>
+        <property name="senderReference" column="senderReference" type="string" length="50"/>
+
+        <property name="receivingBank" column="receivingBank" type="string" length="30"/>
+        <property name="swift" column="swift" type="string" length="30"/>
+        <property name="remittanceFee" column="remittanceFee" type="java.math.BigDecimal"/>
+        <property name="remittanceFeeCurrency" column="remittanceFeeCurrency" type="java.util.Currency" length="3"/>
+
+        <property name="pnNumber" column="pnNumber" type="string" length="20"/>
+
+        <!--
+                <property name="documentType" column="documentType">
+                    <type name="org.hibernate.type.EnumType">
+                        <param name="type">12</param>
+                        <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCDocumentType</param>
+                    </type>
+                </property>
+        -->
+
+    </class>
+
+</hibernate-mapping>

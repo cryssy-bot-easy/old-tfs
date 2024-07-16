@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.corresCharges.CorresChargeAdvance" table="CorresChargeAdvance">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </component>
+
+        <property name="serviceType" column="serviceType" length="50">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="corresChargeType" column="corresChargeType" length="20">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.corresCharges.enumTypes.CorresChargeType</param>
+            </type>
+        </property>
+
+        <property name="status" column="status" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.corresCharges.enumTypes.CorresChargeStatus</param>
+            </type>
+        </property>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" precision="19" scale="2"/>
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+
+        <property name="coveredAmount" column="coveredAmount" type="java.math.BigDecimal" precision="19" scale="2"/>
+
+        <property name="specialRateThirdToUsd" column="specialRateThirdToUsd" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateThirdToPhp" column="specialRateThirdToPhp" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateUrr" column="specialRateUrr" type="java.math.BigDecimal" precision="19" scale="4" />
+
+        <property name="remittedDate" column="remittedDate" type="java.util.Date"/>
+
+        <property name="createdDate" column="createdDate" type="java.util.Date"/>
+
+    </class>
+
+</hibernate-mapping>

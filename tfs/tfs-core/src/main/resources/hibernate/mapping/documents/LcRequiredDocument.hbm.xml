@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.documents.LcRequiredDocument" table="LcRequiredDocument" abstract="true">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="documentCode" class="com.ucpb.tfs.domain.documents.DocumentCode" access="field">
+            <property name="documentCode" column="documentCode" type="string" length="10"/>
+        </component>
+
+        <property name="description" column="description" type="org.hibernate.type.MaterializedClobType" length="6500"/>
+
+        <property name="requiredDocumentType">
+            <column name="requiredDocumentType" length="10"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.documents.enumTypes.RequiredDocumentType</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

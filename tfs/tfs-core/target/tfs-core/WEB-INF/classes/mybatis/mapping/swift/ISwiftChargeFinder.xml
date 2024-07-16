@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.swift.ISwiftChargeFinder">
+
+    <select id="findAllSwiftCharge" resultType="hashMap">
+        select * from RefSwiftCharge
+    </select>
+
+    <select id="findAllSavedSwiftCharge" resultType="hashMap">
+         select
+           sc.code,
+           sc.currency,
+           sc.amount
+          from
+            SwiftCharge sc
+           where sc.tradeServiceId = #{tradeServiceId}
+    </select>
+
+    <select id="findAllDefaultSwiftCharge" resultType="hashMap">
+         select
+           sc.code,
+           sc.currency,
+           sc.amount
+          from
+            SwiftCharge sc
+           where sc.tradeServiceId = #{tradeServiceId}
+
+          union
+
+         select
+           rsc.code,
+           '' as currency,
+           0 as amount
+        from
+          RefSwiftCharge rsc
+        where rsc.code not in( select
+                sc.code
+          from
+                  SwiftCharge sc
+          where sc.tradeServiceId = #{tradeServiceId})
+    </select>
+
+
+</mapper>

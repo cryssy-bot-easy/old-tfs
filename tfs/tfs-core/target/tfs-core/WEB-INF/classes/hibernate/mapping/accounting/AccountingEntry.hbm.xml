@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.AccountingEntry" table="RefAccEntry">
+
+        <id column="id" name="id" type="long">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="accountingEntryType" column="accountingEntryType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.AccountingEntryType</param>
+            </type>
+        </property>
+
+        <component name="accountingEventTransactionId"
+                   class="com.ucpb.tfs.domain.accounting.AccountingEventTransactionId" access="field">
+            <property name="accountingEventTransactionId" column="accEvTranId" type="string" length="100"/>
+        </component>
+
+        <property name="unitCode" column="unitCode" type="string" length="20"/>
+        <property name="respondingUnitCode" column="respondingUnitCode" type="string" length="20"/>
+
+        <property name="bookCode" column="bookCode">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.BookCode</param>
+            </type>
+        </property>
+
+        <property name="bookCurrency" column="bookCurrency">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.BookCurrency</param>
+            </type>
+        </property>
+
+        <property name="lcCurrency" column="lcCurrency">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.BookCurrency</param>
+            </type>
+        </property>
+
+        <property name="settlementCurrency" column="settlementCurrency">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.BookCurrency</param>
+            </type>
+        </property>
+
+        <property name="entryType" column="entryType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.accounting.enumTypes.EntryType</param>
+            </type>
+        </property>
+
+        <property name="accountingCode" column="accountingCode" type="string" length="100"/>
+
+        <property name="formulaAccountingCode" column="formulaAccountingCode"
+                  type="org.hibernate.type.MaterializedClobType" length="5000"/>
+
+        <property name="formulaParticulars" column="formulaParticulars" type="org.hibernate.type.MaterializedClobType"
+                  length="5000"/>
+
+        <property name="formulaValue" column="formulaValue" type="org.hibernate.type.MaterializedClobType"
+                  length="5000"/>
+
+        <property name="formulaPesoValue" column="formulaPesoValue" type="org.hibernate.type.MaterializedClobType"
+                  length="5000"/>
+
+    </class>
+
+</hibernate-mapping>

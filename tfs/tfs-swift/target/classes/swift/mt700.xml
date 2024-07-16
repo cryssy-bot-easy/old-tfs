@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt700Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="applicationHeader.receiverAddress" key="#this.get('destinationBank')"/>
+
+
+                <entry value="field27" key="#this.get('27')"/>
+                <entry value="field40A" key="#this.get('40A')"/>
+                <entry value="field20" key="#this.get('20')"/>
+                <entry value="field31C" key="#this.get('31C')"/>
+                <entry value="field40E" key="#this.get('40E')"/>
+                <entry value="field31D" key="#this.get('31D')"/>
+                <entry value="field50" key="#this.get('50')"/>
+                <entry value="field59" key="#this.get('59')"/>
+                <entry value="field32B" key="#this.get('32B')"/>
+                <entry value="field39A" key="#this.get('32A')"/>
+                <entry value="field39B" key="#this.get('39B')"/>
+                <entry value="field41D" key="#this.get('41D')"/>
+                <entry value="field41A" key="#this.get('41A')"/>
+                <entry value="field42C" key="#this.get('42C')"/>
+                <entry value="field42A" key="#this.get('42A')"/>
+                <entry value="field42M" key="#this.get('42M')"/>
+                <entry value="field42P" key="#this.get('42P')"/>
+                <entry value="field43P" key="#this.get('43P')"/>
+                <entry value="field39C" key="#this.get('39C')"/>
+                <entry value="field42M" key="#this.get('42M')"/>
+                <entry value="field43T" key="#this.get('43T')"/>
+                <entry value="field44A" key="#this.get('44A')"/>
+                <entry value="field44B" key="#this.get('44B')"/>
+                <entry value="field44D" key="#this.get('44D')"/>
+                <entry value="field44E" key="#this.get('44E')"/>
+                <entry value="field44F" key="#this.get('44F')"/>
+                <entry value="field44C" key="#this.get('44C')"/>
+                <entry value="field45A" key="#this.get('45A')"/>
+                <entry value="field46A" key="#this.get('46A')"/>
+                <entry value="field47A" key="#this.get('47A')"/>
+                <entry value="field48" key="#this.get('48')"/>
+                <entry value="field49" key="#this.get('49')"/>
+                <entry value="field71B" key="#this.get('71B')"/>
+                <entry value="field53A" key="#this.get('53A')"/>
+                <entry value="field57A" key="#this.get('57A')"/>
+                <entry value="field57D" key="#this.get('57D')"/>
+                <entry value="field78" key="#this.get('78')"/>
+
+
+                <entry value="field27" key="'1/1'"/>
+
+                <entry value="field40A" key="T(com.ucpb.tfs.swift.message.constants.FormOfDocumentaryCredit).getLabel(#this.get('formOfDocumentaryCredit'))"/>
+                <entry value="field20" key="#this.get('documentNumber')"/>
+
+                <!-- Convert to swift here -->
+                <entry value="field31C" key="#this.get('issueDate') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('issueDate')) : #this.get('issueDate')"/>
+                <entry value="field40E" key="T(com.ucpb.tfs.swift.message.constants.ApplicableRules).getLabel(#this.get('applicableRules'))"/>
+                <!-- convert to swift date and append place of expiry -->
+                <entry value="field31D" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('expiryDate')) + ' IN ' + #this.get('expiryCountryCode') ?: ''"/>
+                <entry value="field50" key="T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('importerName'),#this.get('importerAddress'))"/>
+                <entry value="field59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+
+                <!-- Append amount -->
+                <entry value="field32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amount'))"/>
+                <!-- //TODO: also include positive tolerance limit -->
+                <entry value="field39A" key="#this.get('maximumCreditAmount') == null ? (#this.get('positiveToleranceLimit') ?: '' ) + '/' + (#this.get('negativeToleranceLimit') ?: '' ) : ''"/>
+                <entry value="field39B" key="#this.get('maximumCreditAmount')"/>
+                <entry value="field39C" key="#this.get('additionalAmountsCovered')"/>
+                <entry value="field41A" key="#this.get('availableWithFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('identifierCode'),T(com.ucpb.tfs.swift.enums.AvailableBy).getLabel(#this.get('availableBy')))  : ''"/>
+                <entry value="field41D" key="#this.get('availableWithFlag') == 'D' ?  T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('nameAndAddress'),T(com.ucpb.tfs.swift.enums.AvailableBy).getLabel(#this.get('availableBy'))) : ''"/>
+                <entry value="field42C" key="#this.get('tenorOfDraftNarrative')"/>
+                <entry value="field42A" key="#this.get('drawee')"/>
+                <entry value="field42M" key="#this.get('mixedPaymentDetails')"/>
+                <entry value="field42P" key="#this.get('deferredPaymentDetails')"/>
+                <entry value="field43P" key="#this.get('partialShipment')"/>
+                <entry value="field43T" key="#this.get('transShipment')"/>
+                <entry value="field44A" key="#this.get('placeOfTakingDispatchOrReceipt')"/>
+                <entry value="field44B" key="#this.get('placeOfFinalDestination')"/>
+                <entry value="field44E" key="#this.get('portOfLoadingOrDeparture')"/>
+                <entry value="field44F" key="#this.get('portOfDischargeOrDestination')"/>
+
+                <!-- TODO: convert to swift message formatted date -->
+                <entry value="field44C" key="#this.get('latestShipmentDate') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy', #this.get('latestShipmentDate')) : #this.get('latestShipmentDate')"/>
+                <entry value="field44D" key="#this.get('shipmentPeriod')"/>
+                <entry value="field45A" key="#this.get('generalDescriptionOfGoods')"/>
+                <entry value="field46A" key="#this.get('requiredDocuments')"/>
+                <entry value="field47A" key="#this.get('additionalConditions')"/>
+                <entry value="field48" key="#this.get('periodForPresentation')"/>
+                <entry value="field49" key="T(com.ucpb.tfs.swift.message.constants.ConfirmationInstructions).getValue(#this.get('confirmationInstructionsFlag') ?: '').getSwiftCode()"/>
+                <entry value="field71B" key="#this.get('additionalNarrative')"/>
+                <entry value="field53A" key=" #this.get('reimbursingBankFlag') == 'A' ? #this.get('reimbursingbankIdentifierCode') : ''"/>
+                <entry value="field53D" key=" #this.get('reimbursingBankFlag') == 'D' ? #this.get('reimbursingBankNameAndAddress') : ''"/>
+                <entry value="field57A" key="#this.get('adviseThroughBankFlag') == 'A' ? #this.get('advisadeThroughBankIdentifierCode') : '' "/>
+                <entry value="field57B" key="#this.get('adviseThroughBankFlag') == 'B' ? #this.get('adviseThroughBankLocation') : '' "/>
+                <entry value="field57D" key="#this.get('adviseThroughBankFlag') == 'D' ? #this.get('adviseThroughBankNameAndAddress') : ''  "/>
+                <entry value="field72" key="#this.get('senderToReceiverInformation')"/>
+                <entry value="field78" key="#this.get('instructionsToBank')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT700"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,309 @@
+<?xml version="1.0"?>
+<!-- Modified by: Rafael Ski Poblete
+	 Date: 8/28/18
+	 Description: Added otherPlaceOfExpiry, 
+					    narrativeFor740, 
+					    specialPaymentConditionsForBeneficiary, 
+					    specialPaymentConditionsForReceivingBank, 
+					    requestedConfirmationParty -->
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<!-- Description:   Added purposeOfMessage, otherPlaceOfExpiry, specialPaymentConditionsForBeneficiary
+	and specialPaymentConditionsForReceivingBank -->
+<!-- Modified by:   Cedrick C. Nungay -->
+<!-- Date Modified: 08/08/18 -->
+<!-- Description:   Added narrativeFor747 -->
+<!-- Modified by:   Cedrick C. Nungay -->
+<!-- Date Modified: 09/13/18 -->
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <subclass name="com.ucpb.tfs.domain.product.LetterOfCredit" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="LC" lazy="false">
+
+        <set name="negotiations" cascade="all">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.product.LCNegotiation" />
+        </set>
+
+        <set name="negotiationDiscrepancies" cascade="all">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.product.LCNegotiationDiscrepancy" />
+        </set>
+
+        <!--instruction to bank-->
+        <set name="requiredDocument" cascade="all">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.documents.LcRequiredDocument" />
+        </set>
+
+        <!--instruction to bank-->
+        <set name="instructionToBank" cascade="all">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.reimbursing.LcInstructionToBank" />
+        </set>
+
+        <!--instruction to bank-->
+        <set name="additionalCondition" cascade="all">
+            <key>
+                <column name="documentNumber"/>
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.condition.LcAdditionalCondition" />
+        </set>
+
+        <join table="LetterOfCredit">
+
+            <key column="documentNumber"/>
+
+            <property name="documentType" column="documentType" length="10">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCDocumentType</param>
+                </type>
+            </property>
+
+            <property name="purpose" column="purpose" type="string" length="400"/>
+
+            <property name="processDate" column="processDate" type="java.util.Date"/>
+            <property name="expiryDate" column="expiryDate" type="java.util.Date"/>
+
+            <property name="reasonForCancellation" column="reasonForCancellation" type="string" length="80"/>
+            <property name="cancellationDate" column="cancellationDate" type="java.util.Date"/>
+
+            <property name="tenor" column="tenor" length="8">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCTenor</param>
+                </type>
+            </property>
+
+            <property name="type" column="type" length="10">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCType</param>
+                </type>
+            </property>
+
+            <property name="paymentMode" column="paymentMode" length="12">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCPaymentMode</param>
+                </type>
+            </property>
+
+            <property name="usancePeriod" column="usancePeriod" type="long"/>
+            <property name="usancePeriodStart" column="usancePeriodStart" type="string" length="100"/>
+
+            <property name="expiryCountryCode" column="expiryCountryCode" type="string" length="3"/>
+
+            <!-- flags -->
+            <property name="partialShipment" column="partialShipment" type="string" length="15"/>
+            <property name="partialDelivery" column="partialDelivery" type="string" length="15"/>
+            <property name="transShipment" column="transShipment" type="string" length="15"/>
+            <property name="irrevocable" column="irrevocable" type="boolean"/>
+            <property name="negotiationRestriction" column="negotiationRestriction" type="boolean"/>
+            <property name="lastNegotiationDate" column="lastNegotiationDate" type="java.util.Date"/>
+
+            <property name="adviseThroughBank" column="adviseThroughBank" type="boolean"/>
+
+            <property name="priceTerm" column="priceTerm" length="3">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCPriceTerm</param>
+                </type>
+            </property>
+
+            <!-- Start: attributes for revolving LC -->
+            <property name="revolvingAmount" column="revolvingAmount" type="java.math.BigDecimal"/>
+
+            <property name="revolvingPeriod" column="revolvingPeriod" length="10">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCRevolvingPeriod</param>
+                </type>
+            </property>
+
+            <property name="daysRevolving" column="daysRevolving" type="java.lang.Integer"/>
+            <property name="cumulative" column="cumulative" type="boolean"/>
+            <property name="aggregateAmount" column="aggregateAmount" type="java.math.BigDecimal"/>
+            <!-- End: attributes for revolving LC -->
+
+            <property name="cashFlag" column="cashFlag" type="java.lang.Boolean"/>
+
+            <!-- TODO: this can be calculated based on doc transactions instead (declare as transient?) -->
+            <property name="totalNegotiatedAmount" column="totalNegotiatedAmount" type="java.math.BigDecimal"/>
+
+            <property name="cashAmount" column="cashAmount" type="java.math.BigDecimal"/>
+            <property name="totalNegotiatedCashAmount" column="totalNegotiatedCashAmount" type="java.math.BigDecimal"/>
+
+            <!--<property name="lcOutstandingBalance" column="outstandingBalance" type="java.math.BigDecimal" access="property"/>-->
+            <property name="outstandingBalance" column="outstandingBalance" type="java.math.BigDecimal"/>
+
+            <property name="refundAmount" column="refundAmount" type="java.math.BigDecimal"/>
+
+            <property name="portOfOrigination" column="portOfOrigination" type="string" length="65"/>
+            <property name="portOfDestination" column="portOfDestination" type="string" length="65"/>
+
+            <!-- TODO: this is a VO, declare a class? -->
+            <property name="portOfOriginCountryCode" column="portOfOriginCountryCode" length="3"/>
+            
+            <property name="importerAddress" column="importerAddress" type="string" length="160"/>
+            <property name="beneficiaryAddress" column="beneficiaryAddress" type="string" length="160"/>
+
+            <property name="beneficiaryName" column="beneficiaryName" type="string" length="50"/>
+
+            <!-- TODO: these are value objects, should we declare a custom VO type? -->
+            <property name="advisingBankCode" column="advisingBankCode" type="string" length="11"/>
+            <property name="confirmingBankCode" column="confirmingBankCode" type="string" length="11"/>
+
+            <property name="reimbursingCurrency" column="reimbursingCurrency" type="java.util.Currency" length="3"/>
+
+            <property name="drawee" column="drawee" type="string" length="105"/>
+
+            <property name="adviseMedium" column="adviseMedium" length="6">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCAdviseMedium</param>
+                </type>
+            </property>
+
+            <property name="latestShipmentDate" column="latestShipmentDate" type="java.util.Date"/>
+
+            <property name="dispatchPlace" column="dispatchPlace" type="string" length="65"/>
+            <property name="finalDestinationPlace" column="finalDestinationPlace" type="string" length="65"/>
+
+            <property name="applicableRules" column="applicableRules" type="string" length="30"/>
+
+            <property name="formOfDocumentaryCredit" column="formOfDocumentaryCredit" type="string" length="30"/>
+
+            <property name="destinationBank" column="destinationBank" type="string" length="11"/>
+
+            <property name="issueDate" column="issueDate" type="java.util.Date"/>
+
+            <property name="priceTermNarrative" column="priceTermNarrative" type="org.hibernate.type.MaterializedClobType" length="3000"/>
+
+            <property name="confirmationInstructionsFlag" column="confirmationInstructionsFlag" type="string" length="15"/>
+
+            <property name="marineInsurance" column="marineInsurance" length="8">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.MarineInsurance</param>
+                </type>
+            </property>
+
+            <property name="generalDescriptionOfGoods" column="generalDescriptionOfGoods" type="org.hibernate.type.MaterializedClobType" length="6500"/>
+
+            <property name="cwtFlag" column="cwtFlag" type="boolean"/>
+
+            <property name="advanceCorresChargesFlag" column="advanceCorresChargesFlag" type="boolean"/>
+
+            <property name="otherPriceTerm" column="otherPriceTerm" type="string" length="100"/>
+
+            <property name="adviseThroughBankIdentifierCode" column="adviseThroughBankIdentifierCode" type="string" length="11"/>
+            <property name="tenorOfDraftNarrative" column="tenorOfDraftNarrative" type="string" length="105"/>
+            <property name="maximumCreditAmount" column="maximumCreditAmount" type="string" length="20"/>
+            <property name="shipmentPeriod" column="shipmentPeriod" type="string" length="65"/>
+            <property name="availableWithFlag" column="availableWithFlag" type="string" length="30"/>
+            <property name="adviseThroughBankLocation" column="adviseThroughBankLocation" type="string" length="160"/>
+            <property name="periodForPresentation" column="periodForPresentation" type="string" length="140"/>
+            <property name="periodForPresentationNumber" column="periodForPresentationNumber" type="java.lang.Integer" length="5"/>
+            <property name="periodForPresentationAdviseThroughBank" column="periodForPresentationAdviseThroughBank" type="string" length="140"/>
+
+            <property name="mixedPaymentDetails" column="mixedPaymentDetails" type="string" length="150"/>
+            <property name="importerName" column="importerName" type="string" length="50"/>
+            <property name="placeOfFinalDestination" column="placeOfFinalDestination" type="string" length="65"/>
+            <property name="exporterName" column="exporterName" type="string" length="50"/>
+            <property name="placeOfTakingDispatchOrReceipt" column="placeOfTakingDispatchOrReceipt" type="string" length="65"/>
+            <property name="exporterAddress" column="exporterAddress" type="string" length="160"/>
+            <property name="negativeToleranceLimit" column="negativeToleranceLimit" type="java.math.BigDecimal"/>
+
+            <property name="reimbursingBankFlag" column="reimbursingBankFlag" type="string" length="1"/>
+            <property name="adviseThroughBankNameAndAddress" column="adviseThroughBankNameAndAddress" type="string" length="200"/>
+            <property name="identifierCode" column="identifierCode" type="string" length="11"/>
+            <property name="availableBy" column="availableBy" type="string" length="20"/>
+            <property name="reimbursingBankNameAndAddress" column="reimbursingBankNameAndAddress" type="string" length="200"/>
+
+            <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="235"/>
+            <property name="reimbursingBankIdentifierCode" column="reimbursingBankIdentifierCode" type="string" length="11"/>
+            <property name="nameAndAddress" column="nameAndAddress" type="string" length="200"/>
+            <property name="reimbursingAccountType" column="reimbursingAccountType" type="string" length="50"/>
+            <property name="importerCbCode" column="importerCbCode" type="string" length="15"/>
+            <property name="bspCountryCode" column="bspCountryCode" type="string" length="10"/>
+
+            <property name="importerCifNumber" column="importerCifNumber" type="string" length="10"/>
+            <property name="deferredPaymentDetails" column="deferredPaymentDetails" type="string" length="150"/>
+            <property name="reimbursingBankAccountNumber" column="reimbursingBankAccountNumber" type="string" length="30"/>
+            <property name="positiveToleranceLimit" column="positiveToleranceLimit" type="java.math.BigDecimal"/>
+            <property name="latestDateShipment" column="latestDateShipment" type="java.util.Date"/>
+            <property name="availableWith" column="availableWith" type="string" length="70"/>
+
+            <property name="additionalAmountsCovered" column="additionalAmountsCovered" type="string" length="70"/>
+            <property name="portOfDischargeOrDestination" column="portOfDischargeOrDestination" type="string" length="65"/>
+            <property name="adviseThroughBankFlag" column="adviseThroughBankFlag" type="string" length="1"/>
+            <property name="senderToReceiverInformationNarrative" column="senderToReceiverInformationNarrative" type="string" length="235"/>
+            <property name="exporterCbCode" column="exporterCbCode" type="string" length="10"/>
+            <property name="portOfLoadingOrDeparture" column="portOfLoadingOrDeparture" type="string" length="65"/>
+
+            <property name="standbyTagging" column="standbyTagging" type="string" length="20"/>
+            <property name="furtherIdentification" column="furtherIdentification" type="string" length="50"/>
+            <property name="purposeOfStandby" column="purposeOfStandby" type="string" length="100"/>
+            <property name="formatType" column="formatType" type="string" length="20"/>
+            <property name="detailsOfGuarantee" column="detailsOfGuarantee" type="org.hibernate.type.MaterializedClobType" length="9800"/>
+
+            <!-- APPLICANTNAME LENGTH CHANGE FROM 50 TO 120 -->
+            <property name="applicantCifNumber" column="applicantCifNumber" type="string" length="10"/>
+            <property name="applicantName" column="applicantName" type="string" length="120"/>
+            <property name="applicantAddress" column="applicantAddress" type="string" length="160"/>
+
+            <property name="placeOfReceipt" column="placeOfReceipt" type="string" length="65"/>
+            <property name="placeOfDelivery" column="placeOfDelivery" type="string" length="65"/>
+            <property name="otherDocumentsInstructions" column="otherDocumentsInstructions" type="org.hibernate.type.MaterializedClobType" length="1000"/>
+
+            <!--for bgbe-->
+            <property name="shipmentCount" column="shipmentCount" type="java.lang.Integer"/>
+
+            <property name="dateClosed" column="dateClosed" type="java.util.Date"/>
+
+            <property name="currentAmount" column="currentAmount" type="java.math.BigDecimal"/>
+
+            <!--for amendment-->
+            <property name="numberOfAmendments" column="numberOfAmendments" type="java.lang.Integer"/>
+            <property name="lastAmendmentDate" column="lastAmendmentDate" type="java.util.Date"/>
+
+            <property name="lastReinstatementDate" column="lastReinstatementDate" type="java.util.Date"/>
+
+            <property name="lastTransaction" column="lastTransaction" type="string" length="50"/>
+
+            <property name="lastModifiedDate" column="lastModifiedDate" type="java.util.Date"/>
+
+            <property name="narrative" column="narrative" type="org.hibernate.type.MaterializedClobType" length="2000"/>
+
+            <property name="receiversReference" column="receiversReference" type="string" length="16"/>
+            <property name="sendersReference" column="sendersReference" type="string" length="16"/>
+
+            <property name="expiryPlace" column="expiryPlace" type="string" length="20"/>
+            
+            <property name="swiftNarrativeRadio" column="swiftNarrativeRadio" type="string" length="10"/>
+            
+            <property name="otherPlaceOfExpiry" column="otherPlaceOfExpiry" type="string" length="90"/>
+            <property name="narrativeFor740" column="narrativeFor740" type="org.hibernate.type.MaterializedClobType" length="6700"/>
+            <property name="specialPaymentConditionsForBeneficiary" column="specialPaymentConditionsForBeneficiary" type="org.hibernate.type.MaterializedClobType" length="6700"/>
+            <property name="specialPaymentConditionsForReceivingBank" column="specialPaymentConditionsForReceivingBank" type="org.hibernate.type.MaterializedClobType" length="6700"/>            
+            <property name="requestedConfirmationParty" column="requestedConfirmationParty" type="string" length="35"/>
+
+            <property name="purposeOfMessage" column="purposeOfMessage" type="string" length="4"/>
+
+            <property name="narrativeFor747" column="narrativeFor747" type="string" length="6700"/>
+        </join>
+
+    </subclass>
+    
+</hibernate-mapping>

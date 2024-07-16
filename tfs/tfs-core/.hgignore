@@ -1,0 +1,8 @@
+glob:.idea/**
+glob:dddcqrs.iml
+glob:*.iml
+glob:target/**
+glob:.project
+glob:.settings/**
+glob:.classpath
+glob:*.tlog

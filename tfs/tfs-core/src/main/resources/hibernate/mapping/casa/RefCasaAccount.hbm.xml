@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.casa.RefCasaAccount" table="REF_CASA_ACCOUNT">
+        <id column="id" type="string" name="id">
+            <generator class="uuid" />
+        </id>
+
+        <property name="cifNumber" column="CIF_NO" type="string" length="7" />
+        <property name="currency" column="CURRENCY" type="java.util.Currency" length="3" />
+        <property name="accountNumber" column="ACCT_NO" type="string" length="12" />
+        <property name="accountName" column="ACCT_NAME" type="string" length="20" />
+
+        <property name="accountType" column="ACCT_TYPE" length="1">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.casa.enums.CasaAccountType</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

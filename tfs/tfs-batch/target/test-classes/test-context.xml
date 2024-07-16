@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:file="http://www.springframework.org/schema/integration/file"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/integration/file	http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd">
+
+    <jdbc:embedded-database id="testReportDatabase" type="DERBY">
+    	<!-- DB2 FUNCTIONS -->
+  		<jdbc:script location="classpath*:ddl/functions/create-dayofyear-function.sql"/>	
+  		<jdbc:script location="classpath*:ddl/functions/create-year-function.sql"/>	
+    
+		<!-- TABLES AND TEST DATA -->    
+		<jdbc:script location="classpath*:create-accounting-entry-table.sql"/>	
+		<jdbc:script location="classpath*:ddl/create-tradeservice-table.sql"/>
+		<jdbc:script location="classpath*:ddl/tfs/create-daily-balances-table.sql"/>
+        <jdbc:script location="classpath*:ddl/create-dw-param-table.sql"/>
+        <jdbc:script location="classpath*:ddl/create-lc-table.sql"/>
+        <jdbc:script location="classpath*:ddl/insert-mock-accounting-entries.sql"/>
+        <jdbc:script location="classpath*:ddl/create-gl-entry-types-table.sql"/>
+        <jdbc:script location="classpath*:ddl/insert-gl-entry-types.sql"/>
+        <jdbc:script location="classpath*:ddl/insert-dw-params.sql"/>
+        <jdbc:script location="classpath:ddl/create-lc-nego-table.sql"/>
+
+        <jdbc:script location="classpath:ddl/create-gl-codes-table.sql"/>
+        <jdbc:script location="classpath:ddl/insert-gl-codes-data.sql"/>
+
+        <jdbc:script location="classpath:ddl/tfs/create-trade-product-table.sql"/>
+
+        <!-- mock daily balances -->
+        <jdbc:script location="classpath*:ddl/testdata/insert-mock-daily-balances-service.sql"/>
+        <jdbc:script location="classpath*:ddl/insert-lc-data.sql"/>
+        <jdbc:script location="classpath:ddl/insert-tradeservice-data.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/create-service-instruction-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/create-routes-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/insert-routing-data.sql"/>
+
+        <jdbc:script location="classpath*:ddl/tfs/create-da-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/insert-da-data.sql"/>
+
+        <jdbc:script location="classpath*:ddl/tfs/create-dp-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/insert-dp-data.sql"/>
+
+        <jdbc:script location="classpath*:ddl/tfs/create-dr-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/insert-dr-data.sql"/>
+
+        <jdbc:script location="classpath*:ddl/tfs/create-oa-table.sql"/>
+        <jdbc:script location="classpath*:ddl/tfs/insert-oa-data.sql"/>
+    </jdbc:embedded-database>
+
+    <jdbc:embedded-database id="sibsDataSource" type="DERBY">
+        <jdbc:script location="classpath:ddl/create-ucdatulns1-schema.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-ucparucmn-schema.sql"/>
+        <jdbc:script location="classpath:ddl/create-lnmast-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lncbcd-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lnclst-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lncolx-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-cfcold-table.sql"/>
+        <jdbc:script location="classpath:ddl/insert-lnmast-data.sql"/>
+
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-jhparl-table.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-lnpan4-table.sql"/>
+
+        <jdbc:script location="classpath*:ddl/ucdatulns/create-facility-table.sql"/>
+    </jdbc:embedded-database>
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="testReportDatabase"/>
+    </bean>
+
+	<!-- File output channels -->
+    <int:channel id="glOutputChannel"/>
+    <int:channel id="glAllocationsOutputChannel"/>
+    <int:channel id="glParameterQutputChannel"/>
+    <int:channel id="dwParameterQutputChannel"/>
+    <int:channel id="dwMasterFileOutputChannel"/>
+
+
+
+
+    <file:outbound-channel-adapter id="glOutputDirectory"
+                                   directory="tfs-batch/src/test/resources/outputReports"
+                                   channel="glOutputChannel"
+                                   filename-generator-expression="'TFGLMVMT.txt'"
+                                   delete-source-files="true"/>
+                                   
+    <file:outbound-channel-adapter id="glAllocationsDirectory"
+                               directory="tfs-batch/src/test/resources/outputReports"
+                               channel="glAllocationsOutputChannel"
+                               filename-generator-expression="'TFGLALLOC.txt'"
+                               delete-source-files="true"/>
+                               
+   <file:outbound-channel-adapter id="dwParameterDirectory"
+                             directory="tfs-batch/src/test/resources/outputReports"
+                           channel="dwParameterQutputChannel"
+                             filename-generator-expression="'TFGLPARAM.txt'"
+                             delete-source-files="true"/>
+
+    <file:outbound-channel-adapter id="dwMasterFileDirectory"
+                                   directory="tfs-batch/src/test/resources/outputReports"
+                                   channel="dwMasterFileOutputChannel"
+                                   filename-generator-expression="'TFGLMAST.txt'"
+                                   delete-source-files="true"/>
+
+    <bean id="batchEtsPurgingJob" class="com.ucpb.tfs.batch.job.BatchEtsPurgingJob">
+        <property name="batchProcessDao" ref="batchProcessDao"/>
+    </bean>
+
+    <bean id="sqlSessionFactoryAlt" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="testReportDatabase"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mappers/batch-process-mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="batchProcessDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.dao.BatchProcessDao"/>
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt" />
+    </bean>
+
+
+    <bean id="glReportGeneratorJob" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="glOutputChannel"/>
+        <constructor-arg name="dataSource" ref="testReportDatabase"/>
+        <constructor-arg name="filename" value="'TEMP_GL.txt'"/>
+        <constructor-arg name="query" value="SELECT * FROM INT_ACCENTRYACTUAL GL
+                         INNER JOIN
+                            TRADESERVICE TS ON
+                            TS.TRADESERVICEID = GL.TRADESERVICEID
+                         WHERE DAYOFYEAR(EFFECTIVEDATE) = DAYOFYEAR(CURRENT_TIMESTAMP)
+                         AND YEAR(EFFECTIVEDATE) = YEAR(CURRENT_TIMESTAMP)"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.MovementRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="transactionBranch" value="RESPONDINGUNITCODE"/>
+                        <entry key="bookCode" value="BOOKCODE"/>
+                        <entry key="transactionAccount" value="ACCOUNTINGCODE"/>
+                        <entry key="currencyType" value="ORIGINALCURRENCY"/>
+                        <entry key="transactionEffectiveDate" value="EFFECTIVEDATE"/>
+                        <entry key="transactionCode" value="ENTRYTYPE"/>
+                        <entry key="transactionAmount" value="PESOAMOUNT"/>
+                        <entry key="transactionBaseAmount" value="ORIGINALAMOUNT"/>
+                        <entry key="sourceBranch" value="UNITCODE"/>
+                        <entry key="respondingBranch" value="RESPONDINGUNITCODE"/>
+                        <entry key="transactionDescription" value="PARTICULARS"/>
+                        <!--<entry key="transactionReferenceNumber" value="DOCUMENTNUMBER"/>-->
+                        <entry key="transactionSequenceNumber" value="ID"/>
+                    </map>
+                </constructor-arg>
+                <!--<property name="fixedValues">-->
+                    <!--<map>-->
+                        <!--<entry key="transactionCostCenter" value="123"/>-->
+                        <!--<entry key="transactionProductCode" value="000"/>-->
+                        <!--<entry key="transactionSystemCode" value="TD"/>-->
+                        <!--<entry key="transactionBatchNumber" value="852"/>-->
+                    <!--</map>-->
+                <!--</property>-->
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="glAllocationsReportJob" class="com.ucpb.tfs.batch.job.AllocationFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="glAllocationsOutputChannel"/>
+        <constructor-arg name="filename" value="'TEMP_ALLOC_FILE.txt'"/>
+        <constructor-arg name="allocationFileService" ref="allocationFileService"/>
+    </bean>
+
+    <bean id="interfaceSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="testReportDatabase" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+    </bean>
+
+    <bean id="sibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="sibsDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+    </bean>
+
+
+    <bean id="silverlakeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.SilverlakeDao" />
+        <property name="sqlSessionFactory" ref="sibsSqlSessionFactory" />
+    </bean>
+
+    <bean id="allocationFileService" class="com.ucpb.tfs.batch.report.dw.service.AllocationFileServiceImpl">
+        <property name="allocationDao" ref="allocationDao"/>
+        <property name="tradeProductDao" ref="tradeProductDao"/>
+        <property name="silverlakeDao" ref="silverlakeDao"/>
+    </bean>
+
+    <bean id="tradeProductDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.TradeProductDao" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="allocationDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.AllocationDao" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="masterFileReportGeneratorJob" class="com.ucpb.tfs.batch.job.MasterFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="dwMasterFileOutputChannel"/>
+        <constructor-arg name="filename" value="TEMP_MASTER.txt"/>
+        <constructor-arg name="masterFileService" ref="masterFileService"/>
+    </bean>
+
+    <bean id="masterFileService" class="com.ucpb.tfs.batch.report.dw.service.MasterFileServiceImpl">
+        <property name="silverlakeDao" ref="silverlakeDao"/>
+        <property name="tradeProductDao" ref="tradeProductDao"/>
+
+    </bean>
+
+
+	<!--<bean id="glAllocationsReportJob" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">-->
+        <!--<constructor-arg name="rest" value="-->
+         			<!--SELECT -->
+	        			<!--EFFECTIVEDATE, ACCOUNTINGCODE, BOOKCODE,ORIGINALCURRENCY,TS.DOCUMENTNUMBER,PRODUCTID,-->
+	         			<!--ORIGINALAMOUNT,DESCRIPTION,CCBDBRANCHUNITCODE, DATECLOSED, PROCESSDATE, TOTALBALANCE, TS.CIFNUMBER-->
+          			<!--FROM TFS.INT_ACCENTRYACTUAL GL-->
+                      <!--INNER JOIN -->
+                      	<!--TFS.GL_ENTRY_TYPES GL_CODES ON -->
+                     	<!--GL_CODES.GLCODE = GL.ACCOUNTINGCODE-->
+                   	  <!--INNER JOIN -->
+                      	<!--TFS.TRADESERVICE TS ON -->
+                      	<!--GL.TRADESERVICEID = TS.TRADESERVICEID-->
+                      <!--INNER JOIN-->
+                      	<!--TFS.LETTEROFCREDIT LC ON-->
+                      	<!--LC.DOCUMENTNUMBER = TS.DOCUMENTNUMBER-->
+                     <!--INNER JOIN-->
+                      	<!--(SELECT SUM(BALANCE) TOTALBALANCE, DOCUMENTNUMBER FROM TFS.DAILYBALANCE-->
+                      	<!--WHERE MONTH(BALANCE_DATE) = MONTH(CURRENT_TIMESTAMP) AND YEAR(BALANCE_DATE) = YEAR(CURRENT_TIMESTAMP)-->
+                      	<!--GROUP BY DOCUMENTNUMBER) BALANCES-->
+                      	<!--ON BALANCES.DOCUMENTNUMBER = TS.DOCUMENTNUMBER-->
+                      <!--WHERE MONTH(GL.EFFECTIVEDATE) = MONTH(CURRENT_TIMESTAMP)-->
+                      <!--AND YEAR(GL.EFFECTIVEDATE) = YEAR(CURRENT_TIMESTAMP) -->
+                      <!--AND GL_CODES.RECORDTYPE = 'INCOME'"/>-->
+        <!--<constructor-arg name="dataSource" ref="testReportDatabase"/>-->
+        <!--<constructor-arg name="channel" ref="glAllocationsOutputChannel"/>-->
+        <!--<constructor-arg name="filename" value="TEMP_GL_ALLOC.txt"/>-->
+  <!---->
+        <!--<property name="mapper">-->
+            <!--<bean class="com.ucpb.tfs.batch.util.BeanRowMapper">-->
+                <!--<constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.AllocationFileRecord"/>-->
+                <!--<constructor-arg name="mappings">-->
+                    <!--<map>-->
+                        <!--<entry key="openDate" value="PROCESSDATE"/>-->
+                        <!--<entry key="totalAmount" value="TOTALBALANCE"/>-->
+                        <!--<entry key="bookingDate" value="EFFECTIVEDATE"/>-->
+                         <!--<entry key="glAccountId" value="ACCOUNTINGCODE"/>-->
+                        <!--<entry key="bookCode" value="BOOKCODE"/>-->
+<!--&lt;!&ndash;                         <entry key="allocationUnit" value="TODO:"/> &ndash;&gt;-->
+                        <!--<entry key="currencyId" value="ORIGINALCURRENCY"/>-->
+                        <!--<entry key="applicationAccountId" value="DOCUMENTNUMBER"/>-->
+                        <!--<entry key="customerId" value="CIFNUMBER"/>-->
+                        <!--<entry key="productId" value="PRODUCTID"/>-->
+                        <!--<entry key="originalTransactionAmount" value="ORIGINALAMOUNT"/>-->
+                        <!--<entry key="transactionType" value="DESCRIPTION"/>-->
+                        <!--<entry key="branchUnitCode" value="CCBDBRANCHUNITCODE"/>-->
+                    <!--</map>-->
+                <!--</constructor-arg>-->
+            <!--</bean>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+
+
+    <bean id="glParameterFileJob" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="glOutputChannel"/>
+        <constructor-arg name="dataSource" ref="testReportDatabase"/>
+        <constructor-arg name="filename" value="TEMP_GL_PARAM.txt"/>
+        <constructor-arg name="query" value="SELECT GLCODE, RECORDTYPE FROM TFS.GL_ENTRY_TYPES"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.GLParameterRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="parameterType" value="GLCODE"/>
+                        <entry key="description" value="RECORDTYPE"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="dwParameterRecord" class="com.ucpb.tfs.batch.job.FixedFileReportGeneratorJob">
+        <constructor-arg name="channel" ref="dwParameterQutputChannel"/>
+        <constructor-arg name="dataSource" ref="testReportDatabase"/>
+        <constructor-arg name="filename" value="TEMP_GL_PARAM.txt"/>
+        <constructor-arg name="query" value="SELECT * FROM TFS.DW_REFERENCE"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.BeanRowMapper">
+                <constructor-arg name="beanClass" value="com.ucpb.tfs.batch.report.dw.DWParameterRecord"/>
+                <constructor-arg name="mappings">
+                    <map>
+                        <entry key="field" value="FIELD"/>
+                        <entry key="productId" value="PRODUCTID"/>
+                        <entry key="description" value="DESCRIPTION"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    
+
+
+</beans>

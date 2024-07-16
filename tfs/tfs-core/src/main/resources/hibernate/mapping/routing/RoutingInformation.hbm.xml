@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.routing.Route" table="Routes">
+        <id name="id" column="id">
+            <generator class="increment"/>
+        </id>
+        <!--RBAC_User-->
+        <component name="sender" class="com.ipc.rbac.domain.User">
+            <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+                <property name="userActiveDirectoryId" column="senderActiveDirectoryId" length="20"/>
+            </component>
+        </component>
+        <!--<many-to-one name="sender" class="com.ipc.rbac.domain.User"-->
+                     <!--column="senderActiveDirectoryId"/>-->
+
+        <component name="receiver" class="com.ipc.rbac.domain.User">
+            <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+                <property name="userActiveDirectoryId" column="receiverActiveDirectoryId" length="20"/>
+            </component>
+        </component>
+
+        <!--<many-to-one name="receiver" class="com.ipc.rbac.domain.User"-->
+                     <!--column="receiverActiveDirectoryId"/>-->
+
+        <property name="dateSent" column="dateSent" type="java.util.Date"/>
+        <property name="status" column="status" length="20"/>
+    </class>
+
+
+    <class name="com.ucpb.tfs.domain.routing.RoutingInformation" table="RoutingInformation">
+       <composite-id name="routingInformationId" class="com.ucpb.tfs.domain.routing.RoutingInformationId">
+            <key-property name="routingInformationId" column="routingInformationId"/>
+        </composite-id>
+
+       <bag name="routes" table="ROUTES">
+           <key column="routingInformationId" />
+           <one-to-many class="com.ucpb.tfs.domain.routing.Route"/>
+       </bag>
+    </class>
+
+
+
+</hibernate-mapping>

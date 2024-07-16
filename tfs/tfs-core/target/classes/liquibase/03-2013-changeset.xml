@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--
+        REMINDER:
+        *DO NOT DELETE/ALTER any declared changesets (AND their corresponding SQL files).
+        If you want to correct any wrong changesets committed, MAKE A NEW CHANGESET to correct
+        your previous one.
+        *Changeset IDs should be unique
+     -->
+
+    <changeSet id="initial-uat-migration-changeset" author="robbie" dbms="derby">
+        <sqlFile path="src/main/resources/ddl/derby/tfs-init-tables.sql"/>
+    </changeSet>
+
+    <changeSet id="initial-uat-migration-data-changeset" author="robbie" dbms="derby">
+        <sqlFile path="src/main/resources/ddl/derby/tfs-init-inserts.sql"/>
+    </changeSet>
+
+    <changeSet id="initial-uat-migration-sequence-changeset" author="robbie" dbms="derby">
+        <sqlFile path="src/main/resources/ddl/derby/tfs-init-sequences.sql"/>
+    </changeSet>
+
+
+
+    <changeSet id="initial-uat-migration-changeset-db2" author="robbie" dbms="db2">
+        <sqlFile path="src/main/resources/ddl/db2/tfs-init-tables.sql"/>
+    </changeSet>
+
+    <changeSet id="initial-uat-migration-data-changeset-db2" author="robbie" dbms="db2">
+        <sqlFile path="src/main/resources/ddl/db2/tfs-init-inserts.sql"/>
+    </changeSet>
+
+    <changeSet id="initial-uat-migration-sequence-changeset-db2" author="robbie" dbms="db2">
+        <sqlFile path="src/main/resources/ddl/db2/tfs-init-sequences.sql"/>
+    </changeSet>
+
+    <changeSet id="add-tellerId-column" author="robbie">
+        <sqlFile path="src/main/resources/ddl/common/03-21-2013-add-tellerId-column.sql"/>
+    </changeSet>
+
+    <changeSet id="add-tellerId-data" author="robbie">
+        <sqlFile path="src/main/resources/ddl/common/03-21-2013-add-tellerId-data.sql"/>
+    </changeSet>
+
+
+    <changeSet id="add-exportbills-tables" author="marv">
+        <sqlFile path="src/main/resources/ddl/common/03-22-2013-add-exportbills-tables.sql"/>
+    </changeSet>
+
+    <changeSet id="add-old-users" author="marv">
+        <sqlFile path="src/main/resources/ddl/common/03-22-2013-add-old-users.sql"/>
+    </changeSet>
+
+    <changeSet id="update-old-user-names" author="robbie">
+        <sqlFile path="src/main/resources/ddl/common/03-22-2013-update-uat-user-names.sql"/>
+    </changeSet>
+
+    <changeSet id="add-last-updated-column-to-customerlog" author="robbie">
+        <sqlFile path="src/main/resources/ddl/common/03-26-2013-add-last-updated-column.sql"/>
+    </changeSet>
+
+    <!--<changeSet id="change-revid-column-to-autoincrement" author="robbie" dbms="db2">-->
+        <!--<sqlFile path="src/main/resources/ddl/db2/03-22-2013-add-autoincrement-revinfo.sql"/>-->
+    <!--</changeSet>-->
+
+</databaseChangeLog>

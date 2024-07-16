@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt103Mapper">
+    	<entry value="20" key="T(com.ucpb.tfs.utils.SwiftPhilPassUtils).evaluateDocumentNumber(
+    		details?.get('lcNumber') != null ? 
+	    	details?.get('lcNumber').toString()?.replaceAll('-','') : 
+	    	documentNumber?.toString()?.replaceAll('-',''),details.get('tradeServiceId'))"/>
+    	<entry value="13C" key="T(com.ucpb.tfs.util.SwiftUtil).formatTimeIndication(details?.get('timeIndication'),details.get('timeIndicationField'))"/>
+    	<entry value="23B" key="details?.get('bankOperationCode')"/>
+    	<entry value="23E" key="T(com.ucpb.tfs.util.SwiftUtil).formatInstructionCode(details?.get('instructionCode'),details?.get('bankOperationTextArea'))"/>
+    	<entry value="26T" key="details?.get('transactionTypeCode')"/>
+    	<entry value="32A" key="details?.get('valueDate') != null and details?.get('swiftAmount') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('valueDate'),details?.get('currency'),details?.get('swiftAmount')) :
+    						T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('processDate'),details?.get('currency'),details?.get('productAmount'))"/>
+<!--     	<entry value="33B" key="details?.get('currency33b') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency33b'),details?.get('productAmount33b')) :  -->
+<!--     		details?.get('settlementCurrencyMT103') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('settlementCurrencyMT103'),details?.get('settlementAmountMT103')) : T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('currency'),details?.get('productAmount'))"/> -->
+        <!-- //TODO: format amount -->
+    	<entry value="36" key="T(com.ucpb.tfs.util.SwiftUtil).formatRate(details?.get('exchangeRate'))"/>
+
+<!-- Bug 3118 Start -->
+<!-- Code before Bug 3118-->  	
+<!--     	<entry value="50K" key="details?.get('importerName') != null and details?.get('importerAddress') !=null ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('importerAccountNumber'),details?.get('importerName'),details?.get('importerAddress')) : -->
+<!--     	T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingAccountNumber'),details?.get('orderingAddress'))"/>    importer -->
+    	
+<!-- Code after Bug 3118-->
+<entry value="50K" key="details?.get('documentType') == 'DOMESTIC' ?  T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingAccountNumber'),details?.get('orderingName'), details?.get('orderingAddress')) :
+    	T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('importerAccountNumber'),details?.get('importerNameMT103'), details?.get('importerAddressMT103'))"/>    <!-- importer -->
+<!-- Bug 3118 End -->
+
+    	<!--<entry value="51A" key="details?.get('sendingInstitution')"/>-->
+<!--     	commented out following fields, only included in mt202,400 -->
+        <entry value="52A" key="details?.get('orderingBankFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingInstitutionPartyIdentifier'),details?.get('orderInstIdentifierCode')) : ''"/>
+        <entry value="52D" key="details?.get('orderingBankFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('orderingInstitutionPartyIdentifier'),details?.get('bankNameAndAddress')) : ''"/>
+
+        <entry value="53A" key="details?.get('sendersCorrespondentFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('sendersPartyIdentifier'),details?.get('senderIdentifierCode')) : ''"/>
+        <entry value="53B" key="details?.get('sendersCorrespondentFlag') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).appendSwiftStartingPrefix(details?.get('senderLocation') ?: details?.get('sendersLocation')) : ''"/>
+        <entry value="53D" key="details?.get('sendersCorrespondentFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('sendersPartyIdentifier'),details?.get('senderNameAndAddress')) : ''"/>
+
+        <entry value="54A" key="details?.get('receiversCorrespondentFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifier'),details?.get('receiverCorrIdentifierCode')) : ''"/>
+        <entry value="54B" key="details?.get('receiversCorrespondentFlag') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifier'),details?.get('receiverLocation')) : ''"/>
+        <entry value="54D" key="details?.get('receiversCorrespondentFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifier'),details?.get('receiverNameAndAddress')) : ''"/>
+
+
+        <entry value="55A" key="details?.get('thirdReimbursementInstitution')"/>
+
+        <entry value="56A" key="details?.get('intermediaryFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('intermediaryPartyIdentifier'),details?.get('intermedIdentifierCode')) : ''"/>
+        <entry value="56D" key="details?.get('intermediaryFlag') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('intermediaryPartyIdentifier'),(details?.get('intermediaryNameAndAddress') ?: details?.get('intermediaryNameAndAddressMt'))) : ''"/>
+
+
+        <entry value="57A" key="details?.get('accountWithBankFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('acctWithInstPartyIdentifier'),details?.get('acctWithInstIdentifierCode')) : ''"/>
+<!--         <entry value="57A" key="details?.get('acctWithInstIdentifierCode')"/> -->
+<!--         <entry value="57B" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('acctWithInstPartyIdentifier'),details?.get('accountLocation'))"/> -->
+        <entry value="57B" key="details?.get('accountWithBankFlag') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('acctWithInstPartyIdentifier'),details?.get('accountLocation')) : ''"/>
+        <entry value="57D" key="details?.get('accountWithBankFlag') == 'D' or details?.get('accountWithBankFlag') == null ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation((details?.get('acctWithInstPartyIdentifier') ?: details?.get('accountWithInstitution')),details?.get('accountNameAndAddress')) : ''"/>
+
+        <entry value="59" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('beneficiaryAccountNumber'),
+        		details?.get('beneficiaryName'),details?.get('beneficiaryAddress'))"/>
+        
+    	<entry value="70" key="T(com.ucpb.tfs.utils.SwiftPhilPassUtils).evaluateRemittanceInfo(
+    		details?.get('remittanceInformation'),
+    		details?.get('remittanceInformationTextArea'),
+    		details?.get('tradeServiceId'))"/>
+        <!-- charges and currency -->
+        <entry value="71A" key="details?.get('detailsOfCharges')"/>
+        <entry value="71F" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('senderChargesCurrency'),details?.get('senderCharges'))"/>
+    	<entry value="71G" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('receiverChargesCurrency'),details?.get('receiverCharges'))"/>
+    	<entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(
+	    	details?.get('senderToReceiverInformation'),
+	    	details?.get('senderToReceiverInformationTextArea'))"/>
+    	<entry value="77B" key="T(com.ucpb.tfs.util.SwiftUtil).formatRemittanceInfo(
+	    	details?.get('regulatoryReporting'),
+	    	details?.get('regulatoryReportingTextArea'))"/>
+    	<entry value="77T" key="T(com.ucpb.tfs.util.SwiftUtil).formatRemittanceInfo(
+	    	details?.get('envelopeContents'),
+	    	details?.get('envelopeContentsTextArea'))"/>
+    </util:map>
+</beans>

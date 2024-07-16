@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ipc.rbac.domain.Authorization" table="RBAC_Authorization">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="userActiveDirectoryId"/>
+        </component>
+
+        <list name="authorities" access="field" cascade="delete-orphan">
+			<key column="authorizationId" />
+			<index column="authorityId" />
+			<one-to-many class="com.ipc.rbac.domain.Authority" />
+		</list>
+		
+	</class>
+
+</hibernate-mapping>

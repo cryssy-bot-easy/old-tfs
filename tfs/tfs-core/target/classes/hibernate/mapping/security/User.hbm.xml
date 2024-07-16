@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.User" table="Sec_User">
+
+        <composite-id name="userId" class="com.ucpb.tfs.domain.security.UserId" access="field">
+            <key-property name="id" column="id" type="string" length="20"/>
+        </composite-id>
+
+        <set name="roles" table="sec_user_roles" inverse="false">
+            <key column="userId"/>
+            <many-to-many class="com.ucpb.tfs.domain.security.Role" column="roleId" />
+        </set>
+
+        <!--<set name="permissions" table="sec_user_permissions" inverse="false">-->
+            <!--<key column="userId"/>-->
+            <!--<many-to-many class="com.ucpb.tfs.domain.security.Permission" column="permissionId" />-->
+        <!--</set>-->
+
+        <property name="lastLogin" column="last_login" type="timestamp" />
+        
+        <property name="lastLogout" column="last_logout" type="timestamp" />
+
+        <property name="isLoggedIn" column="isLoggedIn" type="boolean"/>
+
+	</class>
+
+</hibernate-mapping>

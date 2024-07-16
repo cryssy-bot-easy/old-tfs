@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.RequiredDocumentsReference" table="RefRequiredDocuments">
+
+        <id column="id" name="id">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="documentCode" class="com.ucpb.tfs.domain.documents.DocumentCode" access="field">
+            <property name="documentCode" column="documentCode" type="string" length="21"/>
+        </component>
+
+        <property name="description" column="description" type="string" length="1000"/>
+
+        <property name="documentType">
+            <column name="documentType" length="15"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentType</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

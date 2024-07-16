@@ -1,0 +1,251 @@
+package com.ucpb.tfs.batch.report.dw.dao;
+
+import com.ucpb.tfs.batch.report.dw.CicRecord;
+import com.ucpb.tfs.batch.report.dw.CifNormalizationModel;
+import com.ucpb.tfs.batch.report.dw.ItrsRecord;
+import com.ucpb.tfs.batch.report.dw.TradeProduct;
+
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ */
+
+/*	PROLOGUE:
+ * 	(revision)
+  	SCR/ER Number: IBD-15-0828-01
+	SCR/ER Description: Comparison of Balances in DW and SIBS-GL
+	[Revised by:] Jesse James Joson
+	[Date revised:] 09/17/2015
+	Program [Revision] Details: add new methods that will connect to the mapper
+	INPUT: deleteMasterData, insertMasterData, deleteGlBalance, insertGlBalance
+	OUTPUT: Daily_Master_GL_Summary.xls & Daily_Master_GL_DailyBalance_Summary.xls
+	PROCESS: Called by another class to call specify parameters needed to in the mapper
+	
+	(revision)
+	SCR/ER Number: 20151104-015
+	SCR/ER Description: Wrong Closed date and status  of Regular LC part for all fully adjusted to Cash in Master.
+	[Revised by:] Lymuel Arrome Saul
+	[Date revised:] 10/23/2015
+	Program [Revision] Details: Added function getAuditRevId() which retrieved all revIds of a specific document number.
+	 							Added function getLetterOfCreditAuditByRevId() which retrieved LastModifiedDate based on
+	 							the revId.
+	Date deployment: 11/04/2015
+	Member Type: JAVA
+	Project: CORE
+	Project Name: TradeProductDao.java
+ */
+
+/*  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: SCR IBD-16-0219-01
+	SCR/ER Description: Generate CIC File
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 02/24/2016
+	Program [Revision] Details: Add some methods for extraction of CIC file 
+	PROJECT: CORE
+	MEMBER TYPE  : Java
+	Project Name: TradeProductDao
+ */
+
+	/**
+		(revision)
+	SCR/ER Number: ER# 20160505-030
+	SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 � only Tenor was amended from sight to usance.
+	 						The AE are okay, debit the contingent for sight and credit to usance. But the DW Allocation reported the LC once 
+	 						and the ADB are not reported separately  for sight and usance.
+						2.  Adjustment on Standby LC tagging was not correctly reported in DW
+	[Revised by:] Lymuel Arrome Saul
+	[Date revised:] 05/05/2016
+	Program [Revision] Details: Added functions checkIfTenorChange, getRegularSightCloseDate, getOpeningStandbyTagging, and getRefProductInfo.
+	Date deployment: 
+	Member Type: JAVA
+	Project: CORE
+	Project Name: TradeProductDao.java	
+	*/
+
+/**  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: ER# 20140909-038
+	SCR/ER Description: CIF Normalization Not Working in TFS
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 08/05/2016
+	Program [Revision] Details: Add Method to select TRADESERVICE and SERVICEINSTRUCTION tables.
+	PROJECT: CORE
+	MEMBER TYPE  : Java
+	Project Name: TradeProductDao
+ */
+
+/*  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number:
+	SCR/ER Description: ITRS Interface
+	[Revised by:] Prochina, Daniel Jericho B.
+	[Date Deployed:] 06/20/2018
+	Program [Revision] Details: Add some methods for Itrs Interface.
+	PROJECT: CORE
+	MEMBER TYPE  : Java
+	Project Name: TradeProductDao
+ */
+
+/*
+* PROLOGUE
+* SCR/ER Description: 20181217-064 - The program that generates MT 707 during LC Amendment extracts the expiry country code in field 31D instead of the expiry country name.
+*	[Revised by:] Jesse James Joson
+*	Program [Revision] Details: Added method to retrieve the Country Name based on Country Code
+*	Date deployment: 12/18/2018
+	PROJECT: CORE
+	MEMBER TYPE  : Java
+	Project Name: TradeProductDao	
+*/
+public interface TradeProductDao {
+	
+	public List<TradeProduct> getAllCdtBranch();
+	
+	public List<TradeProduct> getAllCdtProduct();
+	
+    public List<TradeProduct> getActiveLettersOfCredit(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveDocumentsAgainstAcceptance(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveDocumentsAgainstPayment(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveOpenAccounts(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveDirectRemittances(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveLetterOfCreditsWithAdb(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveBillsCollection(@Param("cutoffDate") String cutoffDate);
+    //public List<TradeProduct> getActiveBillsCollectionAndPurchase(@Param("cutoffDate") String cutoffDate);
+    
+    public List<TradeProduct> getActiveBillsPurchase(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveAdvancePayment(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveExportAdvising(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveBankGuarantee(@Param("cutoffDate") String cutoffDate);
+
+    //TODO: there should be only one contingent per tradeservice per type (A,L),
+    //however because the contingent flag is not being populated at this point, this method will returning a list for the meantime
+    public List<Map<String,String>> getContingentByTradeServiceIdAndType(@Param("tradeServiceId")String tradeServiceId,@Param("type")String type);
+
+    public String getProductIdByTradeServiceId(@Param("tradeServiceId")String tradeServiceId);
+
+    public String getSettlementBookCodeByDocumentNumber(@Param("documentNumber")String documentNumber);
+    
+    public List<TradeProduct> getActiveLettersOfCreditException(@Param("cutoffDate") String cutoffDate);
+    
+    public List<TradeProduct> getActiveDocumentsAgainstAcceptanceException(@Param("cutoffDate") String cutoffDate);
+
+    public List<TradeProduct> getActiveDocumentsAgainstPaymentException(@Param("cutoffDate") String cutoffDate);
+    
+    public List<TradeProduct> getActiveBillsCollectionException(@Param("cutoffDate") String cutoffDate);
+    
+    public List<TradeProduct> getActiveBankGuaranteeException(@Param("cutoffDate") String cutoffDate);
+
+	public void deleteMasterData(@Param("day") String day);
+    
+    public void insertMasterData(@Param("day") String day,
+    		@Param("applicationAccountId") String applicationAccountId,
+    		@Param("facilityId") String facilityId,
+    		@Param("customerId") String customerId,
+    		@Param("accountStatusId") String accountStatusId,
+    		@Param("branchId") String branchId,
+    		@Param("entityId") String entityId,
+    		@Param("oBookCode") String oBookCode,
+    		@Param("oCurrencyId") String oCurrencyId,
+    		@Param("productId") String productId,
+    		@Param("oDate") String oDate,
+    		@Param("nDate") String nDate,
+    		@Param("cDate") String cDate,
+    		@Param("mDate") String mDate,
+    		@Param("lADate") String lADate,
+    		@Param("lRDate") String lRDate,
+    		@Param("zero") String zero,
+    		@Param("oCAssets") BigDecimal oCAssets,
+    		@Param("oCLiabilities") BigDecimal oCLiabilities,
+    		@Param("cAssetsGlNumber") String cAssetsGlNumber,
+    		@Param("cLiabilitiesGlNumber") String cLiabilitiesGlNumber);
+    
+    public void deleteGlBalance(@Param("day") String day);
+    
+    public void insertGlBalance(@Param("day") String day, @Param("acctno") String acctno, @Param("gmctyp") String gmctyp, @Param("orgBalance") BigDecimal orgBalance, @Param("phpBalance") BigDecimal phpBalance);
+  
+    public List<Integer> getAuditRevId(@Param("docNum") String docNum, @Param("cutoffDate") String cutoffDate);
+    
+    public List<TradeProduct> getLetterOfCreditAuditByRevId(@Param("revId") Integer revId);
+    
+    public int getMaxIdDocNum();
+
+    public int getMaxIdNego();
+
+    public int getMaxIdIc();
+
+    public int getMaxIdIndemnity();
+
+    public int getMaxIdNonLC();
+    
+    public void insertDocSequence(@Param("id") int id, @Param("product") String product, @Param("one") int one, @Param("branch") String branch, @Param("year") int year);
+    
+    public void insertNegotiationSequence(@Param("id") int id, @Param("product") String product, @Param("one") int one, @Param("branch") String branch, @Param("year") int year);
+    
+    public void insertIcSequence(@Param("id") int id, @Param("product") String product, @Param("one") int one, @Param("branch") String branch, @Param("year") int year);
+    
+    public void insertIndemnitySequence(@Param("id") int id, @Param("product") String product, @Param("one") int one, @Param("branch") String branch, @Param("year") int year);
+    
+    public void insertNonLcSequence(@Param("id") int id, @Param("product") String product, @Param("one") int one, @Param("branch") String branch, @Param("year") int year);
+    
+	// Start: IBD-16-0219-01
+    public List<CicRecord> getCicAll(@Param("appDate") String appDate);
+    
+    public String getOpeningType(@Param("docNumber") String docNumber);
+    
+    public Date getAdjustmentDate(@Param("docNumber") String docNumber);
+    
+    public Map<String,String> getFacilityInfo(@Param("c") String bgNumber);
+    
+    public List<CicRecord> getMonthlyCic(@Param("day") String day);
+    
+    public Date getCashNegoDate(@Param("docNumber") String docNumber);
+    // End: IBD-16-0219-01
+    
+    public String checkIfTenorChange(@Param("documentNumber")String documentNumber, @Param("cutoffDate") String cutoffDate);
+    
+    public Date getRegularSightCloseDate(@Param("documentNumber")String documentNumber, @Param("cutoffDate") String cutoffDate);
+    
+    public String getOpeningStandbyTagging(@Param("documentNumber")String documentNumber);
+    
+    public Map<String,String> getRefProductInfo(@Param("documentClass") String documentClass, @Param("documentType") String documentType, @Param("documentSubType1") String documentSubType1, @Param("documentSubType2") String documentSubType2, @Param("documentSubType3") String documentSubType3);
+  
+    public List<CifNormalizationModel> getTradeService(@Param("tradeServiceId") String tradeServiceId); //ER# 20140909-038
+    
+    public List<CifNormalizationModel> getServiceInstruction(@Param("serviceInstructionId") String serviceInstructionId); //ER# 20140909-038
+
+    public List<Map<String,Object>> getIcAccount(@Param("documentNumber") String documentNumber, @Param("cutoffDate") String cutoffDate);
+
+    public BigDecimal getAdbOfIcAccount(@Param("documentNumber")String documentNumber, @Param("currentDate")Date currentDate);
+
+	public List<Map<String, Object>> getIcAccountWithoutDash(@Param("documentNumber")String documentNumber, @Param("currentDate")Date currentDate);
+	
+	public List<Map<String, Object>> getItrsRecords(@Param("day")Integer day);
+	
+	public void deleteItrsRecords(@Param("day") int day);
+	
+	public List<ItrsRecord> getSchedule2(@Param("reportDate") Date reportDate);
+	public List<ItrsRecord> getSchedule3(@Param("reportDate") Date reportDate);
+	public List<ItrsRecord> getSchedule4(@Param("reportDate") Date reportDate);
+	
+	public void insertSched2(@Param("itrsRecord") ItrsRecord itrsRecord, @Param("day") int day);
+	
+	public void insertSched3(@Param("itrsRecord") ItrsRecord itrsRecord, @Param("day") int day);
+
+	public void insertSched4(@Param("itrsRecord") ItrsRecord itrsRecord, @Param("day") int day);
+
+	public String getCountryName(@Param("code") String code);
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/mt2series"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:mt2="http://www.ucpb.com.ph/tfs/schemas/mt2series"
+        xmlns:mt="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields" schemaLocation="swift-fields.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-message" schemaLocation="swift-message.xsd"/>
+
+
+    <xs:complexType name="mt202">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                    <xs:element name="field20" type="swift:field20"/>
+                    <xs:element name="field21" type="swift:field21" />
+                    <xs:element name="field13C" type="swift:field13C" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="field32A" type="swift:field32A"/>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field52A" type="swift:field52A"/>
+                        <xs:element name="field52D" type="swift:field52D"/>
+                    </xs:choice>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field53A" type="swift:field53A"/>
+                        <xs:element name="field53B" type="swift:field53B"/>
+                        <xs:element name="field53D" type="swift:field53D"/>
+                    </xs:choice>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field54A" type="swift:field54A"/>
+                        <xs:element name="field54B" type="swift:field54B"/>
+                        <xs:element name="field54D" type="swift:field54D"/>
+                    </xs:choice>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field56A" type="swift:field56A"/>
+                        <xs:element name="field56D" type="swift:field56D"/>
+                    </xs:choice>
+                    <xs:choice minOccurs="0">
+                        <xs:element name="field57A" type="swift:field57A"/>
+                        <xs:element name="field57B" type="swift:field57B"/>
+                        <xs:element name="field57D" type="swift:field57D"/>
+                    </xs:choice>
+                    <xs:choice>
+                        <xs:element name="field58A" type="swift:field58A"/>
+                        <xs:element name="field58D" type="swift:field58D"/>
+                    </xs:choice>
+                    <xs:element name="field72" type="swift:field72" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+	<xs:complexType name="mt299">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20" minOccurs="1"/>
+                	<xs:element name="field21" type="swift:field21" minOccurs="0"/>
+                	<xs:element name="field79" type="swift:field79" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="mt202" type="mt2:mt202"/>
+    <xs:element name="mt299" type="mt2:mt299"/>
+
+
+</xs:schema>

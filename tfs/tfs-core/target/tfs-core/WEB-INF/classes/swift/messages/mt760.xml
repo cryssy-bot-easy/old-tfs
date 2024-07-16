@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt760Mapper">
+        <entry value="27" key="'1/1'"/>
+ 		<entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+ 		<!-- TODO: get Value -->
+ 		<entry value="23" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('furtherIdentification'))"/>
+		<entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details.get('issueDate'))"/>
+		<!-- TODO: copied from 40E -->
+ 		<entry value="40C" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('applicableRules'))"/>
+ 		<entry value="77C" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,details?.get('detailsOfGuarantee'))"/>
+ 		<entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    </util:map>
+</beans>

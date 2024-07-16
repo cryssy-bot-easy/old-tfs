@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt202Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="field20" key="#this.get('documentNumber')"/>
+                <entry value="field21" key="#this.get('negotiatingBanksReferenceNumber')"/>
+                <entry value="field32A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(#this.get('valueDate'),#this.get('originalCurrency'),#this.get('netAmount'))"/>
+                <entry value="field52A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('orderingInstitutionNameAndAddress'),#this.get('orderingInstitutionIdentifierCode'))"/>
+                <entry value="field53A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('sendersCorrespondentLocation'),#this.get('sendersCorrespondentNameAndAddress'),#this.get('senderCorrespondentIdentifierCode'))"/>
+                <entry value="field54A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('receiversCorrespondentLocation'),#this.get('receiversCorrespondentNameAndAddress'),#this.get('receiversCorrespondentIdentifierCode'))"/>
+                <entry value="field56A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('intermediaryNameAndAddress'),#this.get('intermediaryIdentifierCode'))"/>
+                <entry value="field57A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('accountWithInstitutionLocation'),#this.get('accountWithInstitutionNameAndAddress'),#this.get('accountWithInstitutionIdentifierCode'))"/>
+                <entry value="field58A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('accountWithInstitutionLocation'),#this.get('beneficiarysInstitutionNameAndAddress'),#this.get('beneficiarysInstitutionIdentifierCode'))"/>
+                <entry value="field72" key="#this.get('senderToReceiverInformation')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT202"/>
+    </bean>
+
+</beans>

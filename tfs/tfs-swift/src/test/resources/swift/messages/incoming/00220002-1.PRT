@@ -1,0 +1,128 @@
+
+
+
+24/05/09-13:24:45	            Outgoing-0002-000001 	 1
+_______________________________________________________________________________
+	---------------------  Instance Type and Transmission --------------	
+       Notification (Transmission) of Original sent to SWIFT (ACK)
+       Network Delivery Status   : Network Ack 
+       Priority/Delivery         : Normal
+       Message Input Reference   : 1310 090524UCPBPHM0AXXX0266000934
+	--------------------------- Message Header -------------------------	
+       Swift Input                   : FIN 700 Issue of a Documentary Credit
+       Sender   : UCPBPHM0XXX 
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+       Receiver : UCPBPHM0XXX
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+	--------------------------- Message Text ---------------------------	
+        27: Sequence of Total
+            1/1
+       40A: Form of Documentary Credit
+            IRREVOCABLE
+        20: Documentary Credit Number
+            TEST202008007173
+       31C: Date of Issue
+            080919
+       40E: Applicable Rules
+            UCP LATEST VERSION
+       31D: Date and Place of Expiry
+            081210 IN JAPAN
+        50: Applicant
+            MONARK EQUIPMENT COR MONARK EQUIPME
+            NT COR 123 IMPRTR ST TONDO MLA
+        59: Beneficiary - Name & Address
+            MALOU 14 CHAMPACA ST CAINTA RIZAL P
+            HILS
+       32B: Currency Code, Amount
+            Currency       : JPY (YEN)
+            Amount         :                   #100,#
+       41D: Available With...By... - Name&Addr
+            ANY BANK
+            BY NEGOTIATION
+       42C: Drafts at...
+            SIGHT
+       42A: Drawee - BIC
+            AEIBUS33XXX
+            AMERICAN EXPRESS BANK, LTD.
+            NEW YORK,NY  US
+       43P: Partial Shipments
+            NOT ALLOWED
+       43T: Transhipment
+            NOT ALLOWED
+       44A: Pl of Tking in Chrg / of Rceipt
+            DSGDS
+       44E: Port of Loading/Airport of Dep.
+            ANY PORT IN MLA
+       44F: Port of Dischrge/Airport of Dest
+            ANY PORT IN MLA
+       44B: Pl of Final Dest / of Delivery
+            DGGGGG
+       44C: Latest Date of Shipment
+            081210
+       45A: Descriptn of Goods &/or Services
+            +FOB
+       46A: Documents Required
+            +SIGNED COMMERCIAL INVOICE IN  TRIPLICATE
+            +PACKING LIST
+            +ONE FULL SET OF AT LEAST THREE ORIGINAL CLEAN 'ON BOARD' OCEAN
+            BILLS OF LADING IN NEGOTIABLE AND TRANSFERABLE FORM AND ONE NON-
+            NEGOTIABLE COPY ISSUED TO THE ORDER OF UNITED COCONUT PLANTERS 
+            BANK MARKED FREIGHT COLLECT NOTIFY
+            FXLC FULL SET
+            +BENEFICIARY CERTIFICATE THAT COPY OF COMMERCIAL INVOICE, PACKING
+            LIST AND ONE FULL SET OF NON-NEGOTIABLE SHIPPING DOCUMENTS HAVE
+            BEEN AIRMAILED DIRECTLY TO BUYER.
+            DOC REQ - 1
+            DOC REQD -2
+       47A: Additional Conditions
+            +OCEAN BILL OF LADING/AIR WAYBILL MUST BE DATED WITHIN THE
+             VALIDITY PERIOD OF THIS CREDIT
+            +ALL DOCUMENTS MUST INDICATE COMMODITY CLASSIFICATION
+            CODE AND LC NUMBER AS INDICATED ABOVE.
+            +BL/AWB   DATED PRIOR TO ISSUANCE OF THIS CREDIT NOT ALLOWED.
+            +A FEE OF USD  20.00 (OR EQUIVALENT) WILL BE CHARGED TO THE
+            BENEFICIARY IF DOCUMENTS CONTAINING DISCREPANCIES ARE 
+            PRESENTED FOR PAYMENT/REIMBURSEMENT UNDER THIS LC.  THIS FEE 
+            WILL BE CHARGED FOR EACH SET OF DISCREPANT DOCUMENTS PRESENTED
+            WHICH REQUIRE OUR OBTAINING ACCEPTANCE FROM OUR CUSTOMER.
+            +NEGOTIATING BANK MUST PRESENT ALL DOCS AND REIMB CLAIMS  UNDER
+            THIS CREDIT TO THE CONF. BANK.  ANY BANK
+            WHICH HOLDS SPECIAL PAYMENT AND REIMBURSEMENT INSTRUCTIONS.
+            ADD CON - 1
+       71B: Charges
+            ALL CHARGES OUTSIDE THE PHILIPPINES
+            ARE FOR THE ACCOUNT OF BENEFICIARY
+            INCLUDING REIMBURSING CHARGES
+            TEST OTHER CHARGES
+        49: Confirmation Instructions
+            CONFIRM
+       53A: Reimbursing Bank - BIC
+            /2000090649754
+            PNBPUS33PHL
+            WACHOVIA BANK, NA
+            (INTERNATIONAL OPERATIONS)
+            PHILADELPHIA,PA  US
+        78: Instr to Payg/Accptg/Negotg Bank
+            +NEGOTIATING BANK MUST ADVISE US OF NEGOTIATION DETAILS BY TESTED
+            CABLE AND ANY ADDITIONAL TRANSIT INTEREST THAT MAY ARISE FOR NON-
+            COMPLIANCE SHALL BE FOR THE ACCOUNT OF NEGOTIATING BANK
+            +NEGOTIATING BANK MUST FORWARD ALL DOCS NEGOTIATED UNDER THIS
+            CREDIT TO UNITED COCONUT PLANTERS BANK -TRADE SERVICES DEPARTMENT
+            AT UCPB BLDG., MAKATI AVENUE, MAKATI CITY
+            IN ONE LOT VIA COURIER.+DRAFTS DRAWN UNDER THIS CREDIT MUST BE
+            MARKED DRAWN UNDER LC NO.FX56202008007173   WE UNDERTAKE TO HONOR
+            DRAFT/S DRAWN AND PRESENTED IN COMPLIANCE WITH TERMS AND
+            CONDITIONS OF THIS CREDIT +THIS IS THE OPERATIVE INSTRUMENT.
+	--------------------------- Message Trailer ------------------------	
+       {CHK:B280E09BE89B}
+       PKI Signature: MAC-Equivalent
+	---------------------------- Interventions -------------------------	
+       Category      : Network Report
+       Creation Time : 24/05/09 13:09:54
+       Application   : SWIFT Interface
+       Operator      : SYSTEM
+       Text
+       {1:F21UCPBPHM0AXXX0266000934}{4:{177:0905241310}{451:0}}
+		

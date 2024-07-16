@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt750Mapper">
+    	<entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+    	<entry value="21" key="details?.get('negotiatingBanksReferenceNumber')"/>
+    	<entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('negotiationCurrency'),details?.get('negotiationAmount'))"/>
+    	<entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    	<entry value="77J" key="T(com.ucpb.tfs.util.SwiftUtil).formatDiscrepancies(
+    		details.get('expiredLcSwitch'), 
+    		details.get('overdrawnForAmountSwitch'),
+    		details.get('overdrawnForAmount'),
+    		details.get('descriptionOfGoodsNotPerLcSwitch'),
+    		details.get('documentsNotPresentedSwitch'),
+    		details.get('othersSwitch'),
+    		details.get('others')
+    		)"/>
+    </util:map>
+</beans>
+<!--     	<entry value="32B" key="T(com.ucpb.tfs.utils.SwiftFormatter).formatCurrencyAmount(discrepancy.negotiationCurrency, discrepancy.negotiationAmount)"/> -->

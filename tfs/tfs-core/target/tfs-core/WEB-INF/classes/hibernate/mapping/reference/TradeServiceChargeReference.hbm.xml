@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.TradeServiceChargeReference" table="RefTradeServiceCharge">
+
+        <!--<id column="id" name="id" length="36">-->
+            <!--<generator class="org.hibernate.id.UUIDHexGenerator"/>-->
+        <!--</id>-->
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <component name="chargeId" class="com.ucpb.tfs.domain.reference.ChargeId" access="field">
+            <property name="chargeId" column="chargeId" type="string" length="30"/>
+        </component>
+
+        <property name="serviceType" column="serviceType" length="30">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="formula" column="formula" type="org.hibernate.type.MaterializedClobType" length="20000" />
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.service.OtherChargesDetail" table="OtherChargeDetail">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="transactionType" column="transactionType" length="50"/>
+        <property name="chargeType" column="chargeType" length="50"/>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" />
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+        
+        <property name="cwtFlag" column="cwtFlag" length="1"/>
+
+    </class>
+
+</hibernate-mapping>

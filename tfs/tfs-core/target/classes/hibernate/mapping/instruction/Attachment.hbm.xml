@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.attach.Attachment" table="Attachment">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+		<property name="filename" column="filename" type="string" length="200"/>
+		
+		<property name="noderefid" column="noderefid" type="string" length="64"/>
+		
+		<property name="createdDate" column="createdDate" type="java.util.Date" />
+
+        <property name="attachmentType" column="attachmentType" type="string" length="200"/>
+
+    </class>
+
+</hibernate-mapping>

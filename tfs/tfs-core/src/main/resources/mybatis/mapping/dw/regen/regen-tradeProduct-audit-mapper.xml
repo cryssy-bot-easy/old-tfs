@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.report.dw.regen.dao.TradeProductAuditDao">
+
+    <resultMap id="tradeProductAuditResultMap" type="com.ucpb.tfs.report.dw.regen.TradeProductAudit">
+        <id column="REV_ID" property="revId" jdbcType="INTEGER" />
+        <result column="REV_TYPE" property="revType" jdbcType="SMALLINT" />
+        <result column="DOCUMENTNUMBER" property="documentNumber" jdbcType="VARCHAR" />
+        <result column="PRODUCTTYPE" property="productType" jdbcType="VARCHAR" />
+        <result column="CIFNUMBER" property="cifNumber" jdbcType="VARCHAR" />
+        <result column="CIFNAME" property="cifName" jdbcType="VARCHAR" />
+        <result column="MAINCIFNUMBER" property="mainCifNumber" jdbcType="VARCHAR" />
+        <result column="MAINCIFNAME" property="mainCifName" jdbcType="VARCHAR" />
+        <result column="ACCOUNTOFFICER" property="accountOfficer" jdbcType="VARCHAR" />
+        <result column="CCBDBRANCHUNITCODE" property="ccbdBranchUnitCode" jdbcType="VARCHAR" />
+        <result column="FACILITYID" property="facilityId" jdbcType="VARCHAR" />
+        <result column="FACILITYTYPE" property="facilityType" jdbcType="VARCHAR" />
+        <result column="FACILITYREFERENCENUMBER" property="facilityReferenceNumber" jdbcType="VARCHAR" />
+        <result column="ALLOCATIONUNITCODE" property="allocationUnitCode" jdbcType="VARCHAR" />
+        <result column="STATUS" property="status" jdbcType="VARCHAR" />
+        <result column="LONGNAME" property="longName" jdbcType="VARCHAR" />
+        <result column="ADDRESS1" property="address1" jdbcType="VARCHAR" />
+        <result column="ADDRESS2" property="address2" jdbcType="VARCHAR" />
+        <result column="PASSONRATETHIRDTOUSD" property="passOnRateThirdToUsd" jdbcType="DECIMAL" />
+        <result column="PASSONRATETHIRDTOPHP" property="passOnRateThirdToPhp" jdbcType="DECIMAL" />
+        <result column="PASSONRATEUSDTOPHP" property="passOnRateUsdToPhp" jdbcType="DECIMAL" />
+        <result column="SPECIALRATETHIRDTOUSD" property="specialRateThirdToUsd" jdbcType="DECIMAL" />
+        <result column="SPECIALRATETHIRDTOPHP" property="specialRateThirdToPhp" jdbcType="DECIMAL" />
+        <result column="SPECIALRATEUSDTOPHP" property="specialRateUsdToPhp" jdbcType="DECIMAL" />
+        <result column="URR" property="urr" jdbcType="DECIMAL" />
+        <result column="AMOUNT" property="amount" jdbcType="DECIMAL" />
+        <result column="CURRENCY" property="currency" jdbcType="VARCHAR" />
+        <result column="FIRSTNAME" property="firstName" jdbcType="VARCHAR" />
+        <result column="MIDDLENAME" property="middleName" jdbcType="VARCHAR" />
+        <result column="LASTNAME" property="lastName" jdbcType="VARCHAR" />
+        <result column="TINNUMBER" property="tinNumber" jdbcType="VARCHAR" />
+        <result column="EXCEPTIONCODE" property="exceptionCode" jdbcType="VARCHAR" />
+        <result column="OFFICERCODE" property="officerCode" jdbcType="VARCHAR" />
+        <result column="PROCESSINGUNITCODE" property="processingUnitCode" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        REV_ID, REV_TYPE, DOCUMENTNUMBER, PRODUCTTYPE, CIFNUMBER, CIFNAME, MAINCIFNUMBER,
+        MAINCIFNAME, ACCOUNTOFFICER, CCBDBRANCHUNITCODE, FACILITYID, FACILITYTYPE, FACILITYREFERENCENUMBER,
+        ALLOCATIONUNITCODE, STATUS, LONGNAME, ADDRESS1, ADDRESS2, PASSONRATETHIRDTOUSD, PASSONRATETHIRDTOPHP,
+        PASSONRATEUSDTOPHP, SPECIALRATETHIRDTOUSD, SPECIALRATETHIRDTOPHP, SPECIALRATEUSDTOPHP,
+        URR, AMOUNT, CURRENCY, FIRSTNAME, MIDDLENAME, LASTNAME, TINNUMBER, EXCEPTIONCODE,
+        OFFICERCODE, PROCESSINGUNITCODE
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpb.tfs.report.dw.regen.TradeProductAudit">
+        insert into TRADEPRODUCT_AUDIT (
+            REV_ID, REV_TYPE, DOCUMENTNUMBER,
+            PRODUCTTYPE, CIFNUMBER, CIFNAME,
+            MAINCIFNUMBER, MAINCIFNAME, ACCOUNTOFFICER,
+            CCBDBRANCHUNITCODE, FACILITYID, FACILITYTYPE,
+            FACILITYREFERENCENUMBER, ALLOCATIONUNITCODE,
+            STATUS, LONGNAME, ADDRESS1,
+            ADDRESS2, PASSONRATETHIRDTOUSD, PASSONRATETHIRDTOPHP,
+            PASSONRATEUSDTOPHP, SPECIALRATETHIRDTOUSD,
+            SPECIALRATETHIRDTOPHP, SPECIALRATEUSDTOPHP,
+            URR, AMOUNT, CURRENCY,
+            FIRSTNAME, MIDDLENAME, LASTNAME,
+            TINNUMBER, EXCEPTIONCODE, OFFICERCODE,
+            PROCESSINGUNITCODE
+        )
+        values
+        (#{revId,jdbcType=INTEGER}, #{revType,jdbcType=SMALLINT}, #{documentNumber,jdbcType=VARCHAR},
+        #{productType,jdbcType=VARCHAR}, #{cifNumber,jdbcType=VARCHAR}, #{cifName,jdbcType=VARCHAR},
+        #{mainCifNumber,jdbcType=VARCHAR}, #{mainCifName,jdbcType=VARCHAR}, #{accountOfficer,jdbcType=VARCHAR},
+        #{ccbdBranchUnitCode,jdbcType=VARCHAR}, #{facilityId,jdbcType=VARCHAR}, #{facilityType,jdbcType=VARCHAR},
+        #{facilityReferenceNumber,jdbcType=VARCHAR}, #{allocationUnitCode,jdbcType=VARCHAR},
+        #{status,jdbcType=VARCHAR}, #{longName,jdbcType=VARCHAR}, #{address1,jdbcType=VARCHAR},
+        #{address2,jdbcType=VARCHAR}, #{passOnRateThirdToUsd,jdbcType=DECIMAL}, #{passOnRateThirdToPhp,jdbcType=DECIMAL},
+        #{passOnRateUsdToPhp,jdbcType=DECIMAL}, #{specialRateThirdToUsd,jdbcType=DECIMAL},
+        #{specialRateThirdToPhp,jdbcType=DECIMAL}, #{specialRateUsdToPhp,jdbcType=DECIMAL},
+        #{urr,jdbcType=DECIMAL}, #{amount,jdbcType=DECIMAL}, #{currency,jdbcType=VARCHAR},
+        #{firstName,jdbcType=VARCHAR}, #{middleName,jdbcType=VARCHAR}, #{lastName,jdbcType=VARCHAR},
+        #{tinNumber,jdbcType=VARCHAR}, #{exceptionCode,jdbcType=VARCHAR}, #{officerCode,jdbcType=VARCHAR},
+        #{processingUnitCode,jdbcType=VARCHAR})
+    </insert>
+
+</mapper>

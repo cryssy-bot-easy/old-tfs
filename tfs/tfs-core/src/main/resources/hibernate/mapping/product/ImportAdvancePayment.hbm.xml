@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <subclass name="com.ucpb.tfs.domain.product.ImportAdvancePayment" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="IADVPAYMENT" lazy="false">
+
+        <join table="ADVANCEPAYMENT">
+
+            <key column="documentNumber"/>
+
+            <property name="paymentStatus" column="PAYMENT_STATUS" length="19">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.payment.enumTypes.PaymentStatus</param>
+                </type>
+            </property>
+
+            <property name="advancePaymentType" column="ADV_PAYMENT_TYPE" length="6">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AdvancePaymentType</param>
+                </type>
+            </property>
+
+            <property name="importerCBCode" column="IMPORTERCBCODE" type="string" length="15"/>
+            <property name="importerName" column="IMPORTERNAME" type="string" length="50"/>
+
+            <property name="reimbursingBankCode" column="REIMBBANK_CODE" type="string" length="11"/>
+            <property name="reimbursingBankCurrency" column="REIMBBANK_CURR" type="java.util.Currency" length="3"/>
+
+            <property name="accountType" column="ACCT_TYPE" length="4">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AccountType</param>
+                </type>
+            </property>
+
+            <property name="depositoryAccountNumber" column="ACCT_NUMBER" type="string" length="20"/>
+
+			<property name="exporterCbCode" column="EXPORTERCBCODE" type="string" length="15" />
+            <property name="beneficiaryName" column="BENEFICIARY_NAME" type="string" length="50"/>
+            <property name="beneficiaryAddress" column="BENEFICIARY_ADDRESS" type="string" length="160"/>
+
+            <property name="timeIndicationCode" column="TIME_INDICATION_CODE" type="string" length="7"/>
+            <property name="timeIndication" column="TIME_INDICATION" type="string" length="18"/>
+
+            <property name="bankOperationCode" column="BANK_OPCODE" type="string" length="16"/>
+
+            <property name="instructionCode" column="INST_CODE" type="string" length="124"/>
+
+            <property name="transactionTypeCode" column="TRANSTYPE_CODE" type="string" length="4"/>
+
+            <property name="exchangeRate" column="EXCHANGE_RATE" type="java.math.BigDecimal"/>
+
+            <property name="sendingInstitutionCode" column="SENDIG_INST_CODE" type="string" length="11"/>
+            <property name="sendingInstitution" column="SENDIG_INST" type="string" length="11"/>
+
+            <property name="orderingBankCode" column="ORDERINGBANK_CODE" type="string" length="11"/>
+            <property name="orderingBankNameAndAddress" column="ORDERINGBANK_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="sendersCorrespondentCode" column="SENDERSCORRES_CODE" type="string" length="11"/>
+            <property name="sendersNameAndAddress" column="SENDERSCORRES_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="receiversCorrespondentCode" column="RCVCORRES_CODE" type="string" length="11"/>
+            <property name="receiversNameAndAddress" column="RCVCORRES_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="thirdReimbursementCode" column="THIRDREIMB_CODE" type="string" length="11"/>
+            <property name="thirdReimbursementNameAndAddress" column="THIRDREIMB_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="intermediaryCode" column="INTERMEDIARY_CODE" type="string" length="11"/>
+            <property name="intermediaryNameAndAddress" column="INTERMEDIARY_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="accountWithBankCode" column="ACCTWITHBANK_CODE" type="string" length="37"/>
+            <property name="accountWithBankNameAndAddress" column="ACCTWITHBANK_NAMEANDADDRESS" type="string" length="144"/>
+
+            <property name="detailsOfCharges" column="CHARGES_DETAILS" type="string" length="3"/>
+            <property name="remittanceInformationCode" column="REM_INF_CODE" type="string" length="3"/>
+            <property name="remittanceInformation" column="REM_INF" type="string" length="144"/>
+
+            <property name="sendersChargesCurrency" column="SENDERSCHARGE_CURR" type="java.util.Currency" length="3"/>
+            <property name="sendersChargesAmount" column="SENDERSCHARGE_AMOUNT" type="java.math.BigDecimal"/>
+
+            <property name="receiversChargesCurrency" column="RCVCHARGE_CURR" type="java.util.Currency" length="3"/>
+            <property name="receiversChargesAmount" column="RCVCHARGE_AMOUNT" type="java.math.BigDecimal"/>
+
+            <property name="regulatoryReportingCode" column="REGULATORY_REPORTIG_CODE" type="string" length="8"/>
+            <property name="regulatoryReporting" column="REGULATORY_REPORTIG" type="string" length="108"/>
+            <property name="envelopeContentCode" column="ENVELOPE_CONTENT_CODE" type="string" length="4"/>
+            <property name="envelopeContent" column="ENVELOPE_CONTENT" type="org.hibernate.type.MaterializedClobType" length="3000"/>
+
+            <!--refund-->
+            <property name="cwtFlag" column="WITHCWT" type="boolean"/>
+
+            <property name="corresBankCode" column="CORRESBANK_CODE" type="string" length="11"/>
+
+            <property name="countryCode" column="COUNTRY_CODE" type="string" length="3"/>
+
+            <property name="shipmentDate" column="SHIP_DATE" type="java.util.Date"/>
+
+            <property name="creditFacilityCode" column="CREDITFACILITY" length="9">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.CreditFacilityCode</param>
+                </type>
+            </property>
+
+        </join>
+
+    </subclass>
+    
+</hibernate-mapping>

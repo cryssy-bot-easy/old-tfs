@@ -1,0 +1,7 @@
+#Fri Aug 07 15:11:15 SGT 2020
+ConnectionName=TFS
+generateSchema=false
+useridCurrentSchema=false
+currentSchema=TFSDB2C
+currentPath=SYSIBM,SYSFUN,SYSPROC,SYSIBMADM,TFSDB2C
+ProjectAnnotation=TFS\:jdbc\:db2\://localhost\:50000/OLDTFS\:retrieveMessagesFromServerOnGetMessage\=true;

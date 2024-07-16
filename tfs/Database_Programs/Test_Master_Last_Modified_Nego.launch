@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="BaseResultFiles" value="Test_Master_Last_Modified_Nego_BaseResult"/>
+<intAttribute key="BaseResultFilesCount" value="1"/>
+<stringAttribute key="OutputResultFiles" value="Test_Master_Last_Modified_Nego_OutputResult"/>
+<intAttribute key="OutputResultFilesCount" value="1"/>
+<stringAttribute key="RoutineParameter.P_DOCUMENTCLASS" value="LC"/>
+<stringAttribute key="RoutineParameter.P_DOCUMENTNUMBER" value="909-19-928-19-00332"/>
+<stringAttribute key="RoutineParameter.P_SERVICETYPE" value="NEGOTIATION"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="true"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BaselineDesc" value="13/02/2020, 3:24 PM - Run Test: Test_Master_Last_Modified_Nego - TFSDB2P.MASTER_LAST_MODIFIED:(VARCHAR(36), VARCHAR(50), VARCHAR(30))"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS2212"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2P"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="true"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="MASTER_LAST_MODIFIED_VARCHAR_VARCHAR_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="MASTER_LAST_MODIFIED"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2P"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2P.MASTER_LAST_MODIFIED:(VARCHAR(36), VARCHAR(50), VARCHAR(30))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.UserDefinedFunction"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineVersion" value=""/>
+<booleanAttribute key="RunRoutineConfiguration.UseOutputAsBaseline" value="false"/>
+<stringAttribute key="ServiceOptions.Project" value="Trade Finance System"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

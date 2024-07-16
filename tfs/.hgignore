@@ -1,0 +1,26 @@
+syntax: glob
+tfs-app/target/**
+tfs-batch/target/**
+tfs-core/target/**
+tfs-interfaces/target/**
+tfs-swift/target/**
+tfs-app/.classpath
+tfs-core/.settings/org.eclipse.m2e.core.prefs
+tfs-app/.project
+tfs-app/.settings/org.eclipse.jdt.core.prefs
+tfs-app/.settings/org.eclipse.m2e.core.prefs
+tfs-batch/.classpath
+tfs-batch/.project
+tfs-batch/.settings/org.eclipse.jdt.core.prefs
+tfs-batch/.settings/org.eclipse.m2e.core.prefs
+tfs-core/.project
+tfs-interfaces/.classpath
+tfs-interfaces/.project
+tfs-interfaces/.settings/org.eclipse.jdt.core.prefs
+tfs-interfaces/.settings/org.eclipse.m2e.core.prefs
+tfs-swift/.classpath
+tfs-swift/.project
+tfs-swift/.settings/org.eclipse.jdt.core.prefs
+tfs-swift/.settings/org.eclipse.m2e.core.prefs
+.settings/org.eclipse.m2e.core.prefs
+*.class

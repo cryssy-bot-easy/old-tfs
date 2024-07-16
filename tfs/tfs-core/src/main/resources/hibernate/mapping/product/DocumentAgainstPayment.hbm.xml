@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<subclass name="com.ucpb.tfs.domain.product.DocumentAgainstPayment" discriminator-value="DP" extends="com.ucpb.tfs.domain.product.TradeProduct" lazy="false">
+				
+		<join table="DocumentAgainstPayment">
+		
+			<key column="documentNumber"/>
+		
+		    <component name="tsNumber" class="com.ucpb.tfs.domain.service.TradeServiceReferenceNumber" access="field">
+               <property name="tradeServiceReferenceNumber" column="tsNumber" type="string" length="12"/>
+            </component>
+
+			<property name="documentType" column="documentType" length="10">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.DCDocumentType</param>
+                </type>
+            </property>
+			
+			<property name="remittingBank" column="remittingBank" type="string" length="11"/>
+            <property name="reimbursingBank" column="reimbursingBank" type="string" length="11"/>
+			
+			<property name="processDate" column="processDate" type="java.util.Date"/>
+			
+			<property name="remittingBankReferenceNumber" column="remittingBankReferenceNumber" type="string" length="25"/>
+			
+			<property name="currency" column="currency" type="java.util.Currency" length="3"/>
+			
+			<property name="amount" column="amount" type="java.math.BigDecimal"/>
+			
+			<property name="outstandingAmount" column="outstandingAmount" type="java.math.BigDecimal"/>
+			
+			<property name="dateOfBlAirwayBill" column="dateOfBlAirwayBill" type="java.util.Date"/>
+			
+			<property name="maturityDate" column="maturityDate" type="java.util.Date"/>
+			
+			<property name="importerCifNumber" column="importerCifNumber" type="string" length="10"/>
+			
+			<property name="originalPort" column="originalPort" type="string" length="65"/>
+			
+			<property name="importerCbCode" column="importerCbCode" type="string" length="15"/>
+			
+			<property name="importerName" column="importerName" type="string" length="60"/>
+			
+			<property name="importerAddress" column="importerAddress" type="string" length="160"/>
+			
+			<property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="210"/>
+			
+			<property name="beneficiaryName" column="beneficiaryName" type="string" length="60"/>
+			
+			<property name="beneficiaryAddress" column="beneficiaryAddress" type="string" length="160"/>
+			
+			<property name="lastTransaction" column="lastTransaction" type="string" length="50"/>
+			
+			<property name="cancelledDate" column="cancelledDate" type="java.util.Date"/>
+			
+			<property name="settledDate" column="settledDate" type="java.util.Date"/>
+			
+			<property name="processingUnitCode" column="processingUnitCode" type="string" length="10"/>
+		
+		</join>
+		
+    </subclass>
+    
+</hibernate-mapping>

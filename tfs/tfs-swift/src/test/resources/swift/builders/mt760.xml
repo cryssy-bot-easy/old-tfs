@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt760Mapper" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingMessageBlockBuilder">
+        <constructor-arg name="tagMapping">
+            <util:map>
+                <entry value="27" key="'1/1'"/>
+                <entry value="20" key="#this.get('documentNumber')"/>
+                <entry value="23" key="#this.get('furtherIdentification')"/>
+                <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(#this.get('issueDate'))"/>
+                <entry value="40C" key="#this.get('applicableRules') ?: 'NONE'"/>
+                <entry value="77C" key="#this.get('detailsOfGuarantee')"/>
+                <entry value="72" key="#this.get('senderToReceiverInformation')"/>
+            </util:map>
+        </constructor-arg>
+    </bean>
+
+</beans>

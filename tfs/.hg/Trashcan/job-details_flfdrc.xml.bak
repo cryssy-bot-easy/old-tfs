@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="springJob" class="org.springframework.scheduling.quartz.JobDetailBean" abstract="true">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+    </bean>
+
+    <!--<bean id="cancelDormantEtsJobDetail" parent="springJob">-->
+        <!--<property name="jobDataAsMap">-->
+            <!--<map>-->
+                <!--<entry key="jobBeanName" value="setExpiredLcsStatusToExpired"/>-->
+            <!--</map>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <bean id="purgeDormantEtsJobDetail" parent="springJob">
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="cancelDormantEtsJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="glReportGeneratorJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="glReportGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="masterFileReportGeneratorJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="masterFileReportGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="masterExcelFileGeneratorJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="masterExcelFileGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+
+	<bean id="sibsExtractionJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="sibsExtractionJob"/>
+            </map>
+        </property>
+    </bean>
+
+
+    <bean id="glAllocationsReportJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="glAllocationsReportJob"/>
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="glAllocationsExcelJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="glAllocationsExcelJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean name="tradeServiceExpireJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="tradeServiceRevertJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean name="tradeServiceRevertJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="tradeServiceRevertJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="recordEndOfDayBalanceJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="recordEndOfDayBalanceJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="glParameterFileJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="glParameterFileJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="dwParameterRecordJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="dwParameterRecord"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="cbrParameterRecordJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="cbrParameterFileGenerator"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean name="tradeServiceExpireTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="tradeServiceExpireJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+
+    <bean name="tradeServiceRevertTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="tradeServiceRevertJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <!--<bean id="cancelDormantEtsJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+        <!--<property name="jobDetail" ref="cancelDormantEtsJobDetail"/>-->
+        <!--<property name="cronExpression" value="${tradeservice.report.trigger}"/>-->
+    <!--</bean>-->
+
+    <bean id="purgeDormantEtsJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="purgeDormantEtsJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="glReportGeneratorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="glReportGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+        <!--<property name="jobGroup" value="dailyBatch"/>-->
+    </bean>
+
+    <bean id="recordEndOfDayBalanceJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="recordEndOfDayBalanceJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+        <!--<property name="jobGroup" value="dailyBatch"/>-->
+    </bean>
+
+
+
+    <bean id="glMasterGeneratorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="masterFileReportGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+        <!--<property name="jobGroup" value="dailyBatch"/>-->
+    </bean>
+    
+    <bean id="glMasterExcelGeneratorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="masterExcelFileGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+        <!--<property name="jobGroup" value="dailyBatch"/>-->
+    </bean>
+
+    <bean id="glAllocationsReportJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="glAllocationsReportJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+    
+    <bean id="glAllocationsExcelJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="glAllocationsExcelJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="glParameterFileJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="glParameterFileJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="dwParameterRecordJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="dwParameterRecordJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="cbrParameterRecordJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="cbrParameterRecordJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+
+
+
+</beans>

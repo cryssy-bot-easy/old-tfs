@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.reference.IServiceChargeFinder">
+
+	<select id="findSumServiceCharge" resultType="hashMap">
+		select 
+			sum(originalamount) as totalAmount 
+		from servicecharge 
+			where tradeserviceid = #{tradeServiceId}
+	</select>
+	
+    <select id="findAllChargeByChargeId" resultType="hashMap">
+        select
+          cc.chargeId,
+          cc.description,
+          cc.link,
+          cc.displayName
+          from Charge cc
+          where cc.chargeId = #{chargeId}
+          order by cc.chargeId asc
+    </select>
+
+    <select id="findAllChargesByServiceInstructionId" resultType="hashMap">
+        select
+          sc.chargeId,
+          sc.amount,
+          sc.defaultAmount,
+          sc.currency
+          from ServiceCharge sc
+          inner join TradeService ts
+          on ts.tradeServiceId = sc.tradeServiceId
+          where ts.serviceInstructionId = #{serviceInstructionId}
+          order by sc.chargeId asc
+    </select>
+    
+    <select id="findAllChargesByTradeServiceId" resultType="hashMap">
+        select
+          sc.chargeId,
+          sc.amount,
+          sc.defaultAmount,
+          sc.currency,
+          sc.originalAmount
+          from ServiceCharge sc 
+          where sc.tradeServiceId= #{tradeServiceId}
+          order by sc.chargeId asc
+    </select>
+    
+	<select id="findAllApprovedEtsChargesByTradeServiceId" resultType="hashMap">
+		select
+		  ec.chargeId,
+          charge.displayName,
+          ec.originalCurrency,
+          ec.originalAmount,
+          ec.currency,
+          ec.amount
+          from EtsServiceCharge ec
+          inner join Charge
+          on charge.chargeId = ec.chargeId
+          where ec.tradeServiceId = #{tradeServiceId}
+          order by ec.chargeId asc
+	</select>
+
+</mapper>

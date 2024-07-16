@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+       xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+		http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc-2.0.xsd">
+
+    <bean id="sqlRunnerTask" class="com.ucpb.tfs.interfaces.util.SqlRunnerTask">
+        <constructor-arg name="ds" ref="interfaceDataSource"/>
+        <constructor-arg name="sql" value="update ucdatulns2.LNTFINT set acctno = (SELECT MAX(ACCTNO) + 1 FROM UCDATULNS2.LNTFINT), trsts = 'Y' where TRSTS IS NULL or TRSTS = ''"/>
+    </bean>
+
+    <bean id="schedulerTask"
+          class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+        <property name="targetObject" ref="sqlRunnerTask" />
+        <property name="targetMethod" value="runSql" />
+    </bean>
+
+    <bean id="timerTask"
+          class="org.springframework.scheduling.timer.ScheduledTimerTask" lazy-init="false">
+        <property name="timerTask" ref="schedulerTask" />
+        <property name="delay" value="1000" />
+        <property name="period" value="30000" />
+    </bean>
+
+    <bean class="org.springframework.scheduling.timer.TimerFactoryBean" lazy-init="false">
+        <property name="scheduledTimerTasks">
+            <list>
+                <ref local="timerTask" />
+            </list>
+        </property>
+    </bean>
+</beans>

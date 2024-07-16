@@ -1,0 +1,7 @@
+ Name          Type   Data Type Value (OUT)                                          
+ ------------- ------ --------- ---------------------------------------------------- 
+
+
+      P_RETVAL OUTPUT   INTEGER                                                    2
+     P_MESSAGE OUTPUT   VARCHAR User -IBDLCM is identical to the current task owner.
+

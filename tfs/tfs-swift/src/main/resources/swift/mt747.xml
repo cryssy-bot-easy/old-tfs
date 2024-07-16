@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt747Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="field20" key="#this.get('documentNumber')"/>
+                <entry value="field21" key="'reimbursing banks reference'"/>
+                <entry value="field30" key="'date of original authorization to reimburse'"/>
+                <entry value="field31E" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftDate(#this.get('expiryDateTo'))"/>
+
+                <!-- TODO: perform computations here new amount - previous -->
+                <entry value="field32B" key="#this.get('lcAmountFlag') == 'INC' ? #this.get('amountTo') : null"/>
+                <!-- TODO: perform computations previous - new -->
+                <entry value="field33B" key="#this.get('lcAmountFlag') == 'DEC' ? #this.get('amountTo') : null"/>
+                <entry value="field39B" key="#this.get('maximumCreditAmountTo')"/>
+                <entry value="field39C" key="#this.get('additionalAmountsCoveredTo')"/>
+                <entry value="field72" key="#this.get('senderToReceiverInformation')"/>
+                <entry value="field77A" key="#this.get('narrative_ie')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT747"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt750Mapper">
+        <entry value="20" key="#this.get('20')"/>
+        <entry value="21" key="#this.get('21')"/>
+        <entry value="32B" key="#this.get('32B')"/>
+        <entry value="33B" key="#this.get('33B')"/>
+        <entry value="71B" key="#this.get('71B')"/>
+        <entry value="34B" key="#this.get('34B')"/>
+        <entry value="57A" key="#this.get('57A')"/>
+        <entry value="72" key="#this.get('72')"/>
+        <entry value="77J" key="#this.get('77J')"/>
+    </util:map>
+
+</beans>

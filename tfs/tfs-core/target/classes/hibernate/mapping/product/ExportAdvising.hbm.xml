@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!-- Modified by: Rafael Ski Poblete
+	 Date: 7/26/18
+	 Description: Added Charges Narrative -->
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <subclass name="com.ucpb.tfs.domain.product.ExportAdvising" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="EXPORT_ADVISING" lazy="false">
+
+        <join table="ExportAdvising">
+
+            <key column="documentNumber"/>
+
+            <property name="advisingBankType" column="advisingBankType" length="6">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AdvisingBankType</param>
+                </type>
+            </property>
+
+            <property name="processDate" column="processDate" type="java.util.Date"/>
+            <property name="exporterCbCode" column="exporterCbCode" type="string" length="10"/>
+            <property name="exporterName" column="exporterName" type="string" length="50"/>
+            <property name="exporterAddress" column="exporterAddress" type="string" length="160"/>
+            <property name="importerName" column="importerName" type="string" length="50"/>
+            <property name="importerAddress" column="importerAddress" type="string" length="160"/>
+
+            <property name="lcType" column="lcType" length="10">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCType</param>
+                </type>
+            </property>
+
+            <component name="lcNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+                <property name="documentNumber" column="lcNumber" type="string" length="21"/>
+            </component>
+
+            <property name="lcIssueDate" column="lcIssueDate" type="java.util.Date"/>
+
+            <property name="lcTenor" column="lcTenor" length="8">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.LCTenor</param>
+                </type>
+            </property>
+
+            <property name="usanceTerm" column="usanceTerm" type="string" length="350"/>
+            <property name="lcCurrency" column="lcCurrency" type="java.util.Currency" length="3"/>
+            <property name="lcAmount" column="lcAmount" type="java.math.BigDecimal" />
+            <property name="lcExpiryDate" column="expiryDate" type="java.util.Date"/>
+            <property name="confirmedFlag" column="confirmedFlag" type="java.lang.Boolean"/>
+            <property name="issuingBank" column="issuingBank" type="string" length="50"/>
+            <property name="issuingBankName" column="issuingBankName" type="string" length="100" />
+            <property name="issuingBankAddress" column="issuingBankAddress" type="string" length="350"/>
+            <property name="reimbursingBank" column="reimbursingBank" type="string" length="21"/>
+            <property name="receivingBank" column="receivingBank" type="string" length="21"/>
+            <property name="advisingBank" column="advisingBank" type="string" length="21"/>
+            <property name="advisingBankAddress" column="advisingBankAddress" type="string" length="160"/>
+            <property name="totalBankCharges" column="totalBankCharges" type="java.math.BigDecimal" />
+
+            <property name="numberOfAmendments" column="amendmentCount" type="java.lang.Integer"/>
+            <property name="lastAmendmentDate" column="lastAmendmentDate" type="java.util.Date"/>
+            <property name="senderToReceiver" column="senderToReceiver" type="string" length="10"/>
+            <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="230"/>
+            <property name="chargeNarrative" column="chargeNarrative" type="string" length="210"/>
+            
+            <property name="withMt730" column="withMt730" type="java.lang.Boolean"/>
+            <property name="withMt799" column="withMt799" type="java.lang.Boolean"/>
+
+            <property name="narrative" column="narrative" type="string" length="105"/>
+            <property name="relatedReference" column="relatedReference" type="string" length="21"/>
+            <property name="cancellationDate" column="cancellationDate" type="java.util.Date"/>
+
+            <property name="lastTransaction" column="lastTransaction" type="string" length="12"/>
+
+            <property name="cwtFlag" column="cwtFlag" type="java.lang.Boolean"/>
+        </join>
+
+    </subclass>
+    
+</hibernate-mapping>

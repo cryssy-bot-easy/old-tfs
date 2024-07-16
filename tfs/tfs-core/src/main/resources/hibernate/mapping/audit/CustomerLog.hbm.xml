@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.audit.CustomerLog" table="CustomerLog">
+
+        <id column="id" type="java.lang.Long" name="id">
+            <generator class="increment" />
+        </id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <property name="customerType" column="customerType" type="string" length="10"/>
+        <property name="firstName" column="firstName" type="string" length="100"/>
+        <property name="middleName" column="middleName" type="string" length="100"/>
+        <property name="lastName" column="lastName" type="string" length="100"/>
+        <property name="gender" column="gender" type="string" length="10"/>
+        <property name="dateOfBirth" column="dateOfBirth" type="java.util.Date" not-null="false"/>
+        <property name="placeOfBirth" column="placeOfBirth" type="string" length="50"/>
+        <property name="maritalStatus" column="maritalStatus" type="string" length="10"/>
+        <property name="nationality" column="nationality" type="string" length="10"/>
+        <property name="nationOfBirth" column="nationOfBirth" type="string" length="3"/>
+
+        <component name="businessAddress" class="com.ucpb.tfs.domain.audit.Address">
+            <property name="address1" column="businessAddress1" type="string" length="350"/>
+            <property name="address2" column="businessAddress2" type="string" length="350"/>
+            <property name="address3" column="businessAddress3" type="string" length="350"/>
+            <property name="address4" column="businessAddress4" type="string" length="350"/>
+            <property name="zipCode" column="businessAddressZipCode" type="string" length="10"/>
+        </component>
+
+        <property name="lengthOfStayInPresentAddress" column="lengthOfStayInPresentAddress" type="integer"/>
+
+        <component name="permanentAddress" class="com.ucpb.tfs.domain.audit.Address">
+            <property name="address1" column="permanentAddress1" type="string" length="350"/>
+            <property name="address2" column="permanentAddress2" type="string" length="350"/>
+            <property name="address3" column="permanentAddress3" type="string" length="350"/>
+            <property name="address4" column="permanentAddress4" type="string" length="350"/>
+            <property name="zipCode" column="permanentAddressZipCode" type="string" length="10"/>
+        </component>
+
+        <property name="lengthOfStayInPermanentAddress" column="lengthOfStayInPermanentAddress" type="java.lang.Integer"/>
+        <property name="occupation" column="occupation" type="string" length="50"/>
+        <property name="natureOfBusiness" column="natureOfBusiness" type="string" length="50"/>
+        <property name="monthlyIncome" column="monthlyIncome" type="java.math.BigDecimal"/>
+        <property name="annualIncome" column="annualIncome" type="java.math.BigDecimal"/>
+        <property name="financialStatus" column="financialStatus" type="java.math.BigDecimal"/>
+        <property name="individualOrCorporate" column="individualOrCorporate" type="string" length="1"/>
+        <property name="residencePhoneNumber" column="residencePhoneNumber" type="string" length="15"/>
+        <property name="officePhoneNumber" column="officePhoneNumber" type="string" length="15"/>
+        <property name="mobileNumber" column="mobileNumber" type="string" length="15"/>
+        <property name="natureOfWork" column="natureOfWork" type="string" length="10"/>
+        <property name="natureOfSelfEmployment" column="natureOfSelfEmployment" type="string" length="10"/>
+        <property name="sourceOfFunds" column="sourceOfFunds" type="string" length="100"/>
+
+        <property name="lastUpdated" column="last_updated" type="java.util.Date"/>
+
+    </class>
+
+
+
+</hibernate-mapping>

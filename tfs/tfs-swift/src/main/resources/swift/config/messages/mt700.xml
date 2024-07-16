@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt700Mapper">
+        <entry value="27" key="#this.get('27')"/>
+        <entry value="40A" key="#this.get('40A')"/>
+        <entry value="20" key="#this.get('20')"/>
+        <entry value="31C" key="#this.get('31C')"/>
+        <entry value="40E" key="#this.get('40E')"/>
+        <entry value="31D" key="#this.get('31D')"/>
+        <entry value="50" key="#this.get('50')"/>
+        <entry value="59" key="#this.get('59')"/>
+        <entry value="32B" key="#this.get('32B')"/>
+        <entry value="39A" key="#this.get('32A')"/>
+        <entry value="39B" key="#this.get('39B')"/>
+        <entry value="41D" key="#this.get('41D')"/>
+        <entry value="41A" key="#this.get('41A')"/>
+        <entry value="42C" key="#this.get('42C')"/>
+        <entry value="42A" key="#this.get('42A')"/>
+        <entry value="42M" key="#this.get('42M')"/>
+        <entry value="42P" key="#this.get('42P')"/>
+        <entry value="43P" key="#this.get('43P')"/>
+        <entry value="39C" key="#this.get('39C')"/>
+        <entry value="42M" key="#this.get('42M')"/>
+        <entry value="43T" key="#this.get('43T')"/>
+        <entry value="44A" key="#this.get('44A')"/>
+        <entry value="44B" key="#this.get('44B')"/>
+        <entry value="44D" key="#this.get('44D')"/>
+        <entry value="44E" key="#this.get('44E')"/>
+        <entry value="44F" key="#this.get('44F')"/>
+        <entry value="44C" key="#this.get('44C')"/>
+        <entry value="45A" key="#this.get('45A')"/>
+        <entry value="46A" key="#this.get('46A')"/>
+        <entry value="47A" key="#this.get('47A')"/>
+        <entry value="48" key="#this.get('48')"/>
+        <entry value="49" key="#this.get('49')"/>
+        <entry value="71B" key="#this.get('71B')"/>
+        <entry value="53A" key="#this.get('53A')"/>
+        <entry value="57A" key="#this.get('57A')"/>
+        <entry value="57D" key="#this.get('57D')"/>
+        <entry value="78" key="#this.get('78')"/>
+
+        <entry value="27" key="'1/1'"/>
+        <entry value="40A" key="T(com.ucpb.tfs.swift.enums.FormOfDocumentaryCredit).getLabel(#this.get('formOfDocumentaryCredit'))"/>
+        <entry value="20" key="#this.get('documentNumber')"/>
+        <!-- Convert to swift here -->
+        <entry value="31C" key="#this.get('issueDate') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('issueDate')) : #this.get('issueDate')"/>
+        <entry value="40E" key="T(com.ucpb.tfs.swift.enums.ApplicableRules).getLabel(#this.get('applicableRules'))"/>
+        <!-- convert to swift date and append place of expiry -->
+        <entry value="31D" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('expiryDate')) + ' IN ' + #this.get('expiryCountryCode') ?: ''"/>
+        <entry value="50" key="T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('importerName'),#this.get('importerAddress'))"/>
+        <entry value="59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+
+        <!-- Append amount -->
+        <entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amount'))"/>
+        <entry value="39A" key="#this.get('maximumCreditAmount') == null ? (#this.get('positiveToleranceLimit') ?: '' ) + '/' + (#this.get('negativeToleranceLimit') ?: '' ) : ''"/>
+        <entry value="39B" key="#this.get('maximumCreditAmount')"/>
+        <entry value="39C" key="#this.get('additionalAmountsCovered')"/>
+        <entry value="41A" key="#this.get('availableWithFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('identifierCode'),T(com.ucpb.tfs.swift.enums.AvailableBy).getLabel(#this.get('availableBy')))  : ''"/>
+        <entry value="41D" key="#this.get('availableWithFlag') == 'D' ?  T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('nameAndAddress'),T(com.ucpb.tfs.swift.enums.AvailableBy).getLabel(#this.get('availableBy'))) : ''"/>
+        <entry value="42C" key="#this.get('tenorOfDraftNarrative')"/>
+        <entry value="42A" key="#this.get('drawee')"/>
+        <entry value="42M" key="#this.get('mixedPaymentDetails')"/>
+        <entry value="42P" key="#this.get('deferredPaymentDetails')"/>
+        <entry value="43P" key="#this.get('partialShipment')"/>
+        <entry value="43T" key="#this.get('transShipment')"/>
+        <entry value="44A" key="#this.get('placeOfTakingDispatchOrReceipt')"/>
+        <entry value="44B" key="#this.get('placeOfFinalDestination')"/>
+        <entry value="44E" key="#this.get('portOfLoadingOrDeparture')"/>
+        <entry value="44F" key="#this.get('portOfDischargeOrDestination')"/>
+
+        <!-- TODO: convert to swift message formatted date -->
+        <entry value="44C" key="#this.get('latestShipmentDate') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy', #this.get('latestShipmentDate')) : #this.get('latestShipmentDate')"/>
+        <entry value="44D" key="T(com.ucpb.tfs.util.SwiftUtil).formatMultiLine(#this.get('shipmentPeriod'),65)"/>
+        <entry value="45A" key="#this.get('generalDescriptionOfGoods')"/>
+        <entry value="46A" key="T(com.ucpb.tfs.util.SwiftUtil).formatMultiLine(#this.get('requiredDocuments'),65)"/>
+        <entry value="47A" key="T(com.ucpb.tfs.util.SwiftUtil).formatMultiLine(#this.get('additionalConditions'),65)"/>
+        <entry value="48" key="#this.get('periodForPresentation')"/>
+        <entry value="49" key="T(com.ucpb.tfs.swift.message.constants.ConfirmationInstructions).getValue(#this.get('confirmationInstructionsFlag') ?: '').getSwiftCode()"/>
+        <entry value="71B" key="#this.get('additionalNarrative')"/>
+        <entry value="53A" key=" #this.get('reimbursingBankFlag') == 'A' ? #this.get('reimbursingbankIdentifierCode') : ''"/>
+        <entry value="53D" key=" #this.get('reimbursingBankFlag') == 'D' ? #this.get('reimbursingBankNameAndAddress') : ''"/>
+        <entry value="57A" key="#this.get('adviseThroughBankFlag') == 'A' ? #this.get('advisadeThroughBankIdentifierCode') : '' "/>
+        <entry value="57B" key="#this.get('adviseThroughBankFlag') == 'B' ? #this.get('adviseThroughBankLocation') : '' "/>
+        <entry value="57D" key="#this.get('adviseThroughBankFlag') == 'D' ? #this.get('adviseThroughBankNameAndAddress') : ''  "/>
+        <entry value="72" key="#this.get('senderToReceiverInformation')"/>
+        <entry value="78" key="#this.get('instructionsToBank')"/>
+    </util:map>
+
+</beans>

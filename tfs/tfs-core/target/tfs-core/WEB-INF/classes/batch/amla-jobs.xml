@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <bean id="sibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="interfaceDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/loan-mapper.xml"/>
+    </bean>
+
+    <!-- JOBS -->
+
+    <!-- Transaction -->
+    <bean id="transactionLogGeneratorJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="transactionLogChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'TRN71'"/>
+        <constructor-arg name="query" value="
+            SELECT * from TRANSACTIONLOG WHERE DAYOFYEAR(TXNDATE) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(TXNDATE) = YEAR(CURRENT_TIMESTAMP) 
+            AND TRANSACTIONTYPECODE IN ('ICOBD','ICDCC','IDLDC','IDLDD','IDLDM','IDLIC','IDLID','IDLIM','IDLSD','IDNIC','IDNID','IDNIM','IOBLC','IOBLK','IOBLM','IOBNC','IOBNK','IOBNM') or BATCHFLAG = 1
+        "/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="TXNDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsTimeStamp(#this) : 'NULL'"/>
+                        <entry key="TXNREFERENCENUMBER" value="#this ?: 'NULL'"/>
+                        <entry key="DEALNUMBER" value=""/>
+                        <entry key="TRANSACTIONTYPECODE" value="#this ?: 'NULL'"/>
+                        <entry key="TRANSACTIONSUBTYPE" value=""/>
+                        <entry key="TRANSACTIONMODE" value=""/>
+                        <entry key="TRANSACTIONAMOUNT" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).getAmountString(#this,2)"/>
+                        <entry key="DEBIT_CREDIT_FLAG" value=""/>
+                        <entry key="DIRECTION" value=""/>
+                        <entry key="BRANCHCODE" value="#this ?: 'NULL'"/>
+                        <entry key="ACCOUNTNUMBER" value=""/>
+                        <entry key="SETTLEMENTCURRENCY" value=""/>
+                        <entry key="EXCHANGERATE" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).getAmountString(#this,8)"/>
+                        <entry key="SETTLEMENTAMOUNT" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).getAmountString(#this,2)"/>
+                        <entry key="PURPOSE" value=""/>
+                        <entry key="CPACCOUNTNO" value=""/>
+                        <entry key="CPNAME1" value=""/>
+                        <entry key="CPNAME2" value=""/>
+                        <entry key="CPNAME3" value=""/>
+                        <entry key="CPINSTITUTION" value=""/>
+                        <entry key="CPINSTITUTIONCOUNTRY" value=""/>
+                        <entry key="CP_ADDRESS1" value=""/>
+                        <entry key="CP_ADDRESS2" value=""/>
+                        <entry key="CP_ADDRESS3" value=""/>
+                        <entry key="CORRESPONDENTBANKNAME" value=""/>
+                        <entry key="CORRESPONDENTCOUNTRYCODE" value=""/>
+                        <entry key="CORRESPONDENTADDRESS1" value=""/>
+                        <entry key="CORRESPONDENTADDRESS2" value=""/>
+                        <entry key="CORRESPONDENTADDRESS3" value=""/>
+                        <entry key="INTRINSTITUTIONNAME" value=""/>
+                        <entry key="INTRINSTITUTIONCOUNTRY" value=""/>
+                        <entry key="INTRINSTITUTIONADDR1" value=""/>
+                        <entry key="INTRINSTITUTIONADDR2" value=""/>
+                        <entry key="INTRINSTITUTIONADDR3" value=""/>
+                        <entry key="BENEFICIARYNAME1" value=""/>
+                        <entry key="BENEFICIARYNAME2" value=""/>
+                        <entry key="BENEFICIARYNAME3" value=""/>
+                        <entry key="BENEFICIARYADDR1" value=""/>
+                        <entry key="BENEFICIARYADDR2" value=""/>
+                        <entry key="BENEFICIARYADDR3" value=""/>
+                        <entry key="BENEFICIARYCOUNTRY" value=""/>
+                        <entry key="PRODUCTTYPE" value=""/>
+                        <entry key="PRODUCTOWNERNAME1" value=""/>
+                        <entry key="PRODUCTOWNERNAME2" value=""/>
+                        <entry key="PRODUCTOWNERNAME3" value=""/>
+                        <entry key="PRODUCTOWNERADDR1" value=""/>
+                        <entry key="PRODUCTOWNERADDR2" value=""/>
+                        <entry key="PRODUCTOWNERADDR3" value=""/>
+                        <entry key="INCEPTIONDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsDateString(#this) : 'NULL'"/>
+                        <entry key="MATURITYDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsDateString(#this) : 'NULL'"/>
+                        <entry key="NARRATION" value=""/>
+                        <entry key="REMARKS" value=""/>
+                        <entry key="NATURE" value=""/>
+                        <entry key="FUNDSSOURCE" value=""/>
+                        <entry key="CERTIFIEDDOCUMENTS" value=""/>
+                        <entry key="INPUTDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsDateString(#this) : 'NULL'"/>
+                        <entry key="REGULARDOCUMENTS" value=""/>
+                        <entry key="TRANSACTIONCODE" value=""/>
+                        <entry key="PAYMENTMODE" value=""/>
+                        <entry key="AMOUNTTOCLAIM" value=""/>
+                        <entry key="NOOFSHARES" value=""/>
+                        <entry key="NETASSETVALUE" value=""/>
+                        <entry key="ISSUERNAME1" value=""/>
+                        <entry key="ISSUERNAME2" value=""/>
+                        <entry key="ISSUERNAME3" value=""/>
+                        <entry key="ISSUERADDRESS1" value=""/>
+                        <entry key="ISSUERADDRESS2" value=""/>
+                        <entry key="ISSUERADDRESS3" value=""/>
+                        <entry key="BENEFICIARYACCOUNTNO" value=""/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!-- Account -->
+    <bean id="accountLogGeneratorJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="accountLogChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'ACC71'"/>
+        <constructor-arg name="query" value="
+            select * from ACCOUNTLOG WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)  or BATCHFLAG = 1
+        "/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="ACCOUNTNUMBER" value="#this ?: 'NULL'"/>
+                        <entry key="ACCOUNTTYPE" value="#this ?: 'NULL'"/>
+                        <!--<entry key="INITIALDEPOSIT" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).getAmountString(#this,2)"/>-->
+                        <entry key="INITIALDEPOSIT" value=""/>
+                        <entry key="ACCOUNTPURPOSE" value=""/>
+                        <entry key="MONTHLYESTIMATEDTRANSACTIONCOUNT" value=""/>
+                        <entry key="MONTHLYESTIMATEDTRANSACTIONVOLUME" value=""/>
+                        <entry key="TRANSACTIONTYPES" value=""/>
+                        <entry key="BRANCHCODE" value=""/>
+                        <entry key="OPENINGDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsDateString(#this) : 'NULL'"/>
+                        <entry key="CLOSINGDATE" value="#this != null ? T(com.ucpb.tfs.utils.DateUtil).convertToTfsDateString(#this) : 'NULL'"/>
+                        <entry key="RISKSCORE" value=""/>
+                        <entry key="ACCOUNTBALANCE" value="T(com.ucpb.tfs.utils.AmlaLoggingUtil).getAmountString(#this,2)"/>
+                        <entry key="APPLICATIONCODE" value=""/>
+                        <entry key="STATUS" value="#this ?: 'NULL'"/>
+                        <entry key="ACCOUNTCURRENCY" value="#this ?: 'NULL'"/>
+                        <entry key="PAYROLLTAG" value="#this ?: 'NULL'"/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!-- Customer Account -->
+    <bean id="customerAccountLogGeneratorJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="customerAccountLogChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'CAC71'"/>
+        <constructor-arg name="query" value="
+            SELECT * from CUSTOMERACCOUNT WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)  or BATCHFLAG = 1
+        "/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="CUSTOMER_NUMBER" value=""/>
+                        <entry key="ACCOUNT_NUMBER" value=""/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!-- Synchronize Routing Status -->
+    <bean id="synchronizeRoutingStatusCsvJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="synchronizeRoutingStatusLogChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'sync_status'"/>
+        <constructor-arg name="query" value="{CALL SYNCHRONIZE_LC_STATUS(?,?,?)}"/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="REC_NO" value=""/>
+                        <entry key="TRADESERVICEID" value=""/>
+                        <entry key="AFFECTEDTABLE" value=""/>
+                        <entry key="OLDSTATUS" value=""/>
+                        <entry key="SYNCHDATE" value=""/>
+                        <entry key="REMARKS" value=""/>
+                        <entry key="DOCUMENTNUMBER" value=""/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!-- Customer -->
+    <bean id="customerLogGeneratorJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="customerLogChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'CST71'"/>
+        <constructor-arg name="query" value="
+            SELECT
+                ID,
+                customerType,
+                firstName,
+                middleName,
+                lastName,
+                surname,
+                fathername,
+                mothername,
+                gender,
+                dateOfBirth,
+                placeOfBirth,
+                maritalStatus,
+                '' AS DUMMY,
+                nationality,
+                nationOfBirth,
+                businessAddress1,
+                businessAddress2,
+                businessAddress3,
+                businessAddress4,
+                businessAddressZipCode,
+                lengthOfStayInPresentAddress,
+                permanentAddress1,
+                permanentAddress2,
+                permanentAddress3,
+                permanentAddress4,
+                permanentAddressZipCode,
+                lengthOfStayInPermanentAddress,
+                occupation,
+                monthlyIncome,
+                annualIncome,
+                financialStatus,
+                individualOrCorporate,
+                financialStatus,
+                residencePhoneNumber,
+                officePhoneNumber,
+                mobileNumber,
+                natureofselfemployment,
+                sourceoffunds,
+                last_updated
+            from
+                CUSTOMERLOG
+            WHERE DAYS(LAST_UPDATED) = DAYS(CURRENT_TIMESTAMP)
+        "/>
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="ID" value=""/>
+                        <entry key="CUSTOMERTYPE" value=""/>
+                        <entry key="FIRSTNAME" value=""/>
+                        <entry key="MIDDLENAME" value=""/>
+                        <entry key="LASTNAME" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="GENDER" value=""/>
+                        <entry key="DATEOFBIRTH" value=""/>
+                        <entry key="PLACEOFBIRTH" value=""/>
+                        <entry key="MARITALSTATUS" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="NATIONALITY" value=""/>
+                        <entry key="NATIONOFBIRTH" value=""/>
+                        <entry key="BUSINESSADDRESS1" value=""/>
+                        <entry key="BUSINESSADDRESS2" value=""/>
+                        <entry key="BUSINESSADDRESS3" value=""/>
+                        <entry key="BUSINESSADDRESS4" value=""/>
+                        <entry key="BUSINESSADDRESSZIPCODE" value=""/>
+                        <entry key="LENGTHOFSTAYINPRESENTADDRESS" value=""/>
+                        <entry key="PERMANENTADDRESS1" value=""/>
+                        <entry key="PERMANENTADDRESS2" value=""/>
+                        <entry key="PERMANENTADDRESS3" value=""/>
+                        <entry key="PERMANENTADDRESS4" value=""/>
+                        <entry key="PERMANENTADDRESSZIPCODE" value=""/>
+                        <entry key="LENGTHOFSTAYINPERMANENTADDRESS" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="OCCUPATION" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="NATUREOFBUSINESS" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="MONTHLYINCOME" value=""/>
+                        <entry key="ANNUALINCOME" value=""/>
+                        <entry key="FINANCIALSTATUS" value=""/>
+                        <entry key="FINANCIALSTATUS" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="individualOrCorporate" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="RESIDENCEPHONENUMBER" value=""/>
+                        <entry key="OFFICEPHONENUMBER" value=""/>
+                        <entry key="MOBILENUMBER" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="DUMMY" value=""/>
+                        <entry key="NATUREOFSELFEMPLOYMENT" value=""/>
+                        <entry key="SOURCEOFFUNDS" value=""/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!-- AMLA Totals -->
+    <bean id="amlaTotalsGeneratorJob" class="com.ucpb.tfs.batch.job.CsvReportGeneratorJob">
+        <constructor-arg name="channel" ref="amlaTotalsChannel"/>
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+        <constructor-arg name="filename" value="'TOT71'"/>
+        <constructor-arg name="query" value=""/>  <!-- This should be overidden -->
+        <property name="mapper">
+            <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                <constructor-arg name="rowMapping">
+                    <util:map>
+                        <entry key="FILENAME" value=""/>
+                        <entry key="TOTALRECORDS" value=""/>
+                        <entry key="TOTALAMOUNT" value=""/>
+                    </util:map>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="separator" value="|"/>
+    </bean>
+
+    <!--<util:list id="columnMapping">-->
+        <!--&lt;!&ndash;<value>ID</value>&ndash;&gt;-->
+        <!--<value>TXNDATE</value>-->
+        <!--<value>TXNREFERENCENUMBER</value>-->
+        <!--<value>DEALNUMBER</value>-->
+        <!--<value>TRANSACTIONTYPECODE</value>-->
+        <!--<value>TRANSACTIONSUBTYPE</value>-->
+        <!--<value>TRANSACTIONMODE</value>-->
+        <!--<value>TRANSACTIONAMOUNT</value>-->
+        <!--<value>DEBIT_CREDIT_FLAG</value>-->
+        <!--<value>DIRECTION</value>-->
+        <!--<value>BRANCHCODE</value>-->
+        <!--<value>ACCOUNTNUMBER</value>-->
+        <!--<value>SETTLEMENTCURRENCY</value>-->
+        <!--<value>EXCHANGERATE</value>-->
+        <!--<value>SETTLEMENTAMOUNT</value>-->
+        <!--<value>PURPOSE</value>-->
+        <!--<value>CPACCOUNTNO</value>-->
+        <!--<value>CPNAME1</value>-->
+        <!--<value>CPNAME2</value>-->
+        <!--<value>CPNAME3</value>-->
+        <!--<value>CPINSTITUTION</value>-->
+        <!--<value>CPINSTITUTIONCOUNTRY</value>-->
+        <!--<value>CP_ADDRESS1</value>-->
+        <!--<value>CP_ADDRESS2</value>-->
+        <!--<value>CP_ADDRESS3</value>-->
+
+        <!--<value>CORRESPONDENTBANKNAME</value>-->
+        <!--<value>CORRESPONDENTCOUNTRYCODE</value>-->
+        <!--<value>CORRESPONDENTADDRESS1</value>-->
+        <!--<value>CORRESPONDENTADDRESS2</value>-->
+        <!--<value>CORRESPONDENTADDRESS3</value>-->
+
+        <!--<value>INTRINSTITUTIONNAME</value>-->
+        <!--<value>INTRINSTITUTIONCOUNTRY</value>-->
+        <!--<value>INTRINSTITUTIONADDR1</value>-->
+        <!--<value>INTRINSTITUTIONADDR2</value>-->
+        <!--<value>INTRINSTITUTIONADDR3</value>-->
+
+
+        <!--<value>BENEFICIARYNAME1</value>-->
+        <!--<value>BENEFICIARYNAME2</value>-->
+        <!--<value>BENEFICIARYNAME3</value>-->
+        <!--<value>BENEFICIARYADDR1</value>-->
+        <!--<value>BENEFICIARYADDR2</value>-->
+        <!--<value>BENEFICIARYADDR3</value>-->
+
+        <!--<value>BENEFICIARYCOUNTRY</value>-->
+        <!--<value>PRODUCTTYPE</value>-->
+
+        <!--<value>PRODUCTOWNERNAME1</value>-->
+        <!--<value>PRODUCTOWNERNAME2</value>-->
+        <!--<value>PRODUCTOWNERNAME3</value>-->
+        <!--<value>PRODUCTOWNERADDR1</value>-->
+        <!--<value>PRODUCTOWNERADDR2</value>-->
+        <!--<value>PRODUCTOWNERADDR3</value>-->
+        <!--<value>INCEPTIONDATE</value>-->
+        <!--<value>MATURITYDATE</value>-->
+        <!--<value>NARRATION</value>-->
+        <!--<value>REMARKS</value>-->
+        <!--<value>NATURE</value>-->
+        <!--<value>FUNDSSOURCE</value>-->
+        <!--<value>CERTIFIEDDOCUMENTS</value>-->
+        <!--<value>INPUTDATE</value>-->
+        <!--<value>REGULARDOCUMENTS</value>-->
+        <!--<value>TRANSACTIONCODE</value>-->
+        <!--<value>PAYMENTMODE</value>-->
+    <!--</util:list>-->
+
+
+    <!--<util:list id="accountLogMapping">-->
+        <!--<value>ACCOUNTNUMBER</value>-->
+        <!--<value>ACCOUNTTYPE</value>-->
+        <!--<value>INITIALDEPOSIT</value>-->
+        <!--<value>ACCOUNTPURPOSE</value>-->
+        <!--<value>MONTHLYESTIMATEDTRANSACTIONCOUNT</value>-->
+        <!--<value>MONTHLYESTIMATEDTRANSACTIONVOLUME</value>-->
+        <!--<value>TRANSACTIONTYPES</value>-->
+        <!--<value>BRANCHCODE</value>-->
+        <!--<value>OPENINGDATE</value>-->
+        <!--<value>CLOSINGDATE</value>-->
+        <!--<value>RISKSCORE</value>-->
+        <!--<value>ACCOUNTBALANCE</value>-->
+        <!--<value>APPLICATIONCODE</value>-->
+        <!--<value>STATUS</value>-->
+        <!--<value>ACCOUNTCURRENCY</value>-->
+        <!--<value>PAYROLLTAG</value>-->
+    <!--</util:list>-->
+
+    <!--<util:list id="customerAccountMapping">-->
+        <!--<value>ACCOUNT_NUMBER</value>-->
+        <!--<value>CUSTOMER_NUMBER</value>-->
+    <!--</util:list>-->
+
+</beans>

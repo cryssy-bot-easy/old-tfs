@@ -1,0 +1,29 @@
+CREATE OR REPLACE FUNCTION GET_AE (IN P_TRADESERVICEID VARCHAR(36))
+	RETURNS CHAR(1)
+    NO EXTERNAL ACTION
+F1: BEGIN
+	-- #######################################################################
+	-- # Check existance of AE record and check witherror value
+	-- # 
+	-- # Mark Leonard Partoza 8/13/2020
+	-- #  
+	-- ######################################################################
+	DECLARE cnt_ae INTEGER DEFAULT 0;
+	DECLARE cnt_no_error INTEGER DEFAULT 0;
+    DECLARE v_out CHAR(1) DEFAULT 'N';
+     
+    SET cnt_ae = COALESCE((SELECT COUNT(*) FROM INT_ACCENTRYACTUAL WHERE TRADESERVICEID = P_TRADESERVICEID),0);
+    
+    IF (cnt_ae = 0) THEN 
+        SET v_out = 'Y';
+    ELSE 
+        SET cnt_no_error = COALESCE((SELECT COUNT(*) FROM INT_ACCENTRYACTUAL WHERE TRADESERVICEID = P_TRADESERVICEID 
+   	                                  AND WITHERROR IN ('', NULL)),0);
+   	    IF (cnt_no_error > 0) THEN
+   	        SET v_out = 'Y'; 
+        END IF; 
+    END IF;
+    
+
+	RETURN v_out;
+END

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt707Mapper" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingMessageBlockBuilder">
+        <constructor-arg name="tagMapping">
+            <util:map>
+                <entry value="20" key="#this.get('documentNumber')"/>
+                <entry value="21" key="#this.get('20') ?: 'NON-REF'"/>
+                <entry value="23" key="#this.get('documentNumber')"/>
+                <entry value="52A" key="#this.get('52A')"/>
+                <entry value="31C" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('issueDate'))"/>
+                <entry value="30C" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(new java.util.Date())"/>
+                <entry value="26E" key="#thisl.get('numberOfAmendment')"/>
+                <entry value="59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+                <entry value="31E" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(new java.util.Date())"/>
+                <entry value="32B" key="#thisl.get('32B')"/>
+                <entry value="33B" key="#thisl.get('33B')"/>
+                <entry value="34B" key="#thisl.get('34B')"/>
+                <entry value="39A" key="#thisl.get('39A')"/>
+                <entry value="39B" key="#thisl.get('39B')"/>
+                <entry value="44A" key="#thisl.get('44A')"/>
+                <entry value="44E" key="#thisl.get('44E')"/>
+                <entry value="44F" key="#thisl.get('44F')"/>
+                <entry value="44B" key="#thisl.get('44B')"/>
+                <entry value="44C" key="#thisl.get('44C')"/>
+                <entry value="44F" key="#thisl.get('44D')"/>
+                <entry value="79" key="#thisl.get('79')"/>
+                <entry value="72" key="#thisl.get('72')"/>
+            </util:map>
+        </constructor-arg>
+    </bean>
+
+</beans>

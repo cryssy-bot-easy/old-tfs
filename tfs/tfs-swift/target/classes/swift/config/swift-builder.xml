@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="classpath:swift/config/message-factory.xml"/>
+
+
+    <import resource="classpath:swift/config/messages/mt103.xml"/>
+    <import resource="classpath:swift/config/messages/mt202.xml"/>
+    <import resource="classpath:swift/config/messages/mt700.xml"/>
+    <import resource="classpath:swift/config/messages/mt707.xml"/>
+    <import resource="classpath:swift/config/messages/mt701.xml"/>
+    <import resource="classpath:swift/config/messages/mt708.xml"/>
+    <import resource="classpath:swift/config/messages/mt740.xml"/>
+    <import resource="classpath:swift/config/messages/mt747.xml"/>
+    <import resource="classpath:swift/config/messages/mt750.xml"/>
+    <import resource="classpath:swift/config/messages/mt752.xml"/>
+    <import resource="classpath:swift/config/messages/mt760.xml"/>
+    <import resource="classpath:swift/config/messages/mt767.xml"/>
+    <import resource="classpath:swift/config/messages/mt799.xml"/>
+
+
+    <bean id="swiftMessageBuilder" class="com.ucpb.tfs.swift.message.builder.SwiftMessageBuilder">
+        <property name="builders">
+            <list>
+                <bean id="basicHeaderBuilder" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingBasicHeaderBuilder">
+                    <constructor-arg name="mapping">
+                        <map>
+                            <entry value="applicationIdentifier" key="'${swift.app.identifier}'"/>
+                            <entry value="serviceIndentifier" key="'${swift.service.identifier}'"/>
+                            <entry value="ltIdentifier" key="'${swift.lt.identifier}'"/>
+                            <entry value="sessionNumber" key="'${swift.session.number}'"/>
+                            <entry value="sequenceNumber" key="'${swift.sequence.number}'"/>
+                        </map>
+                    </constructor-arg>
+                </bean>
+                <bean id="applicationHeaderBuilder" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingApplicationHeaderBuilder">
+                    <constructor-arg name="headerMapping">
+                        <map>
+                            <entry value="ioIdentifier" key="'${swift.io.identifier}'"/>
+                            <!--<entry key="applicationHeader.messageType" value="#this.get('messageType')"/>-->
+                            <!--<entry value="receiverAddress" key="'XXXX'"/>-->
+                            <entry value="messagePriority" key="'${swift.obsolence.period}'"/>
+                            <!--<entry value="deliveryMonitoring" key="'${swift.delivery.monitoring}'"/>-->
+                            <!--<entry value="obsolescencePeriod" key="'${swift.obsolence.period}'"/>-->
+                        </map>
+                    </constructor-arg>
+                </bean>
+                <bean class="com.ucpb.tfs.swift.message.builder.MessageBlockFactory">
+                    <constructor-arg name="builders">
+                        <map>
+                            <entry key="103" value-ref="mt103Mapper"/>
+                            <entry key="202" value-ref="mt202Mapper"/>
+                            <entry key="700" value-ref="mt700Mapper"/>
+                            <entry key="707" value-ref="mt707Mapper"/>
+                            <entry key="701" value-ref="mt701Mapper"/>
+                            <entry key="708" value-ref="mt708Mapper"/>
+                            <entry key="740" value-ref="mt740Mapper"/>
+                            <entry key="747" value-ref="mt747Mapper"/>
+                            <entry key="750" value-ref="mt750Mapper"/>
+                            <entry key="752" value-ref="mt752Mapper"/>
+                            <entry key="760" value-ref="mt760Mapper"/>
+                            <entry key="767" value-ref="mt767Mapper"/>
+                            <entry key="799" value-ref="mt799Mapper"/>
+                        </map>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="destinationMapping">
+            <map>
+                <entry key="103" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="202" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="700" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="707" value="(#this.get('destinationBankSwitchDisplay') == 'on' ? #this.get('destinationBank') : #this.get('destinationBank'))  + 'XXXX'"/>
+                <entry key="740" value="(#this.get('destinationBankSwitchDisplay') == 'on' ? #this.get('destinationBank') : #this.get('destinationBank'))  + 'XXXX'"/>
+                <entry key="747" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="750" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="752" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="760" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="767" value="#this.get('destinationBank') + 'XXXX'"/>
+                <entry key="799" value="#this.get('destinationBank') + 'XXXX'"/>
+            </map>
+        </property>
+        <property name="splitterFactory" ref="splitter"/>
+    </bean>
+
+
+    <bean id="splitter" class="com.ucpb.tfs.swift.message.splitter.SplitterFactory">
+        <constructor-arg name="registry">
+            <util:map>
+                <entry key="com.ucpb.tfs.swift.message.mt7series.MT700"
+                       value="com.ucpb.tfs.swift.message.splitter.MT700Splitter"/>
+            </util:map>
+        </constructor-arg>
+    </bean>
+
+
+</beans>

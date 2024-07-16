@@ -1,0 +1,1937 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    PROLOGUE:
+    (revision)
+    SCR/ER Number: 20161128-114
+    SCR/ER Description: Income not found in Allocation File for September 2016.
+    [Revised by:] Lymuel Arrome Saul
+    [Date revised:] 11/14/2016
+    Program [Revision] Details: Included allocation unit code from the data/information to be retrieved from BG/BE Issuance upon creation of BG/BE Cancellation.
+    Date deployment: 11/29/2016 
+    Member Type: XML
+    Project: CORE
+    Project Name: ITradeServiceFinder.xml   
+-->
+
+<!--
+  PROLOGUE:
+    (revision)
+    SCR/ER Number: 
+    SCR/ER Description: IC Document - Inquiry 
+    [Revised by:] John Patrick C. Bautista
+    [Date Revised:] 08/16/2017
+    Program [Revision] Details: Added query for IC Inquiry.
+    PROJECT: tfs-core
+    MEMBER TYPE  : XML
+    Project Name: ITradeServiceFinder.xml
+-->
+
+<mapper namespace="com.ucpb.tfs.application.query.service.ITradeServiceFinder">
+    <resultMap id="findTradeServiceResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="STATUS" column="status" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="APPROVERS" column="approvers" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+        <result property="TRADEPRODUCTNUMBER" column="tradeProductNumber" />
+    </resultMap>
+
+    <select id="findTradeService" resultMap="findTradeServiceResultMap">
+select
+        ts.tradeServiceId, ts.documentNumber, ts.serviceType, ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.cifName,
+        ts.details,
+        ts.status,
+        si.serviceInstructionId, ts.approvers,
+        ts.tradeServiceReferenceNumber,
+        ts.paymentStatus,
+        ts.tradeProductNumber
+  from TradeService ts
+          left join ServiceInstruction si
+    on si.serviceInstructionId = ts.serviceInstructionId
+  where ts.tradeServiceId = #{tradeServiceId}
+    </select>
+    
+    <resultMap id="findTradeServiceByServiceInstructionIdResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="STATUS" column="status" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="APPROVERS" column="approvers" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+        <result property="TRADEPRODUCTNUMBER" column="tradeProductNumber" />
+    </resultMap>
+
+    <select id="findTradeServiceByServiceInstructionId" resultMap="findTradeServiceByServiceInstructionIdResultMap">
+select
+        ts.tradeServiceId, ts.documentNumber, ts.serviceType, ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.cifName,
+        ts.details,
+        ts.status,
+        si.serviceInstructionId, ts.approvers,
+        ts.tradeServiceReferenceNumber,
+        ts.paymentStatus,
+        ts.tradeProductNumber
+  from TradeService ts
+          left join ServiceInstruction si
+    on si.serviceInstructionId = ts.serviceInstructionId
+  where ts.serviceInstructionId = #{serviceInstructionId}
+    </select>
+
+    <!--<select id="findIndemnityTradeService" resultType="hashMap">-->
+        <!--select-->
+                <!--ts.tradeServiceId, ts.documentNumber, ts.serviceType, ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.cifName, ts.details, ts.status,-->
+                <!--si.serviceInstructionId,-->
+                <!--i.shipmentSequenceNumber,-->
+                <!--i.indemnityNumber,-->
+                <!--i.blAirwayBillNumber,-->
+                <!--i.processDate,-->
+                <!--i.indemnityIssueDate,-->
+                <!--ts.negotiationNumber-->
+          <!--from TradeService ts-->
+                  <!--inner join ServiceInstruction si-->
+            <!--on si.serviceInstructionId = ts.serviceInstructionId-->
+                  <!--inner join indemnity i-->
+            <!--on i.referenceNumber = ts.documentNumber-->
+                <!--and i.indemnitynumber = ts.indemnitynumber-->
+          <!--where ts.tradeServiceId = #{tradeServiceId}-->
+    <!--</select>-->
+
+    <select id="findIndemnity" resultType="hashMap">
+      select
+        tp.documentNumber,
+        lc.documentType,
+        lc.type as documentSubType1,
+        lc.tenor as documentSubType2,
+        lc.shipmentCount as shipmentSequenceNumber,
+        lc.outstandingBalance,
+        tp.cifName,
+        tp.cifNumber,
+        tp.ccbdBranchUnitCode,
+        tp.accountOfficer,
+        --cast(ts.details as varchar(30000)) as details,
+        --ts.status,
+        i.*,
+        --ts.serviceInstructionId,
+        tp.status as productStatus,
+        tp.firstName,
+        tp.middleName,
+        tp.lastName,
+        tp.tinNumber,
+        tp.officerCode,
+        tp.allocationUnitCode,
+        tp.exceptionCode
+        --tp.tradeProductNumber
+      from
+        Indemnity i
+      inner join
+        LetterOfCredit lc
+      on
+        lc.documentNumber = i.referenceNumber
+      --inner join
+      --  ServiceInstruction si
+      --on
+      --  si.serviceInstructionId = ts.serviceInstructionId
+      inner join
+        TradeProduct tp
+      on
+        tp.documentNumber = i.indemnityNumber
+      and
+        tp.productType = 'INDEMNITY'
+      where i.referenceNumber = #{referenceNumber}
+      and i.indemnityNumber = #{indemnityNumber}
+    </select>
+
+    <!--<select id="findLcTradeService" resultType="hashMap">-->
+        <!--select-->
+                <!--ts.tradeServiceId, ts.documentNumber, ts.serviceType, ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.cifName, ts.details, ts.status,-->
+                <!--si.serviceInstructionId,-->
+                <!--lc.shipmentCount as shipmentSequenceNumber-->
+          <!--from TradeService ts-->
+          <!--inner join-->
+          <!--LetterOfCredit lc-->
+          <!--on lc.documentNumber = ts.documentNumber-->
+          <!--inner join-->
+          <!--ServiceInstruction si-->
+          <!--on si.serviceInstructionId = ts.serviceInstructionId-->
+          <!--where ts.tradeServiceId = #{tradeServiceId}-->
+    <!--</select>-->
+
+    <!--retrieves letter of credit: used in lc inquiry create transaction-->
+    <resultMap id="findLetterOfCreditResultMap" type="hashmap"> 
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="PURPOSE" column="purpose" />
+        <result property="PROCESSDATE" column="processDate" />
+        <result property="EXPIRYDATE" column="expiryDate" />
+        <result property="REASONFORCANCELLATION" column="reasonForCancellation" />
+        <result property="CANCELLATIONDATE" column="cancellationDate" />
+        <result property="TENOR" column="tenor" />
+        <result property="TYPE" column="type" />
+        <result property="PAYMENTMODE" column="paymentMode" />
+        <result property="USANCEPERIOD" column="usancePeriod" />
+        <result property="USANCEPERIODSTART" column="usancePeriodStart" />
+        <result property="EXPIRYCOUNTRYCODE" column="expiryCountryCode" />
+        <result property="PARTIALSHIPMENT" column="partialShipment" />
+        <result property="PARTIALDELIVERY" column="partialDelivery" />
+        <result property="TRANSSHIPMENT" column="transShipment" />
+        <result property="IRREVOCABLE" column="irrevocable" />
+        <result property="NEGOTIATIONRESTRICTION" column="negotiationRestriction" />
+        <result property="ADVISETHROUGHBANK" column="adviseThroughBank" />
+        <result property="PRICETERM" column="priceTerm" />
+        <result property="REVOLVINGAMOUNT" column="revolvingAmount" />
+        <result property="REVOLVINGPERIOD" column="revolvingPeriod" />
+        <result property="DAYSREVOLVING" column="daysRevolving" />
+        <result property="CUMULATIVE" column="cumulative" />
+        <result property="AGGREGATEAMOUNT" column="aggregateAmount" />
+        <result property="CASHFLAG" column="cashFlag" />
+        <result property="TOTALNEGOTIATEDAMOUNT" column="totalNegotiatedAmount" />
+        <result property="CASHAMOUNT" column="cashAmount" />
+        <result property="TOTALNEGOTIATEDCASHAMOUNT" column="totalNegotiatedCashAmount" />
+        <result property="OUTSTANDINGBALANCE" column="outstandingBalance" />
+        <result property="REFUNDAMOUNT" column="refundAmount" />
+        <result property="PORTOFORIGINATION" column="portOfOrigination" />
+        <result property="PORTOFDESTINATION" column="portOfDestination" />
+        <result property="PORTOFORIGINCOUNTRYCODE" column="portOfOriginCountryCode" />
+        <result property="IMPORTERADDRESS" column="importerAddress" />
+        <result property="BENEFICIARYADDRESS" column="beneficiaryAddress" />
+        <result property="BENEFICIARYNAME" column="beneficiaryName" />
+        <result property="ADVISINGBANKCODE" column="advisingBankCode" />
+        <result property="CONFIRMINGBANKCODE" column="confirmingBankCode" />
+        <result property="REIMBURSINGCURRENCY" column="reimbursingCurrency" />
+        <result property="DRAWEE" column="drawee" />
+        <result property="ADVISEMEDIUM" column="adviseMedium" />
+        <result property="LATESTSHIPMENTDATE" column="latestShipmentDate" />
+        <result property="DISPATCHPLACE" column="dispatchPlace" />
+        <result property="FINALDESTINATIONPLACE" column="finalDestinationPlace" />
+        <result property="APPLICABLERULES" column="applicableRules" />
+        <result property="FORMOFDOCUMENTARYCREDIT" column="formOfDocumentaryCredit" />
+        <result property="PURPOSEOFMESSAGE" column="purposeOfMessage" />
+        <result property="DESTINATIONBANK" column="destinationBank" />
+        <result property="ISSUEDATE" column="issueDate" />
+        <result property="PRICETERMNARRATIVE" column="priceTermNarrative" />
+        <result property="CONFIRMATIONINSTRUCTIONSFLAG" column="confirmationInstructionsFlag" />
+        <result property="MARINEINSURANCE" column="marineInsurance" />
+        <result property="GENERALDESCRIPTIONOFGOODS" column="generalDescriptionOfGoods" javaType="string" jdbcType="CLOB"/>
+        <result property="CWTFLAG" column="cwtFlag" />
+        <result property="ADVANCECORRESCHARGESFLAG" column="advanceCorresChargesFlag" />
+        <result property="OTHERPRICETERM" column="otherPriceTerm" />
+        <result property="ADVISETHROUGHBANKIDENTIFIERCODE" column="adviseThroughBankIdentifierCode" />
+        <result property="TENOROFDRAFTNARRATIVE" column="tenorOfDraftNarrative" />
+        <result property="MAXIMUMCREDITAMOUNT" column="maximumCreditAmount" />
+        <result property="SHIPMENTPERIOD" column="shipmentPeriod" />
+        <result property="AVAILABLEWITHFLAG" column="availableWithFlag" />
+        <result property="ADVISETHROUGHBANKLOCATION" column="adviseThroughBankLocation" />
+        <result property="PERIODFORPRESENTATION" column="periodForPresentation" />
+        <result property="PERIODFORPRESENTATIONADVISETHROUGHBANK" column="periodForPresentationAdviseThroughBank" />
+        <result property="MIXEDPAYMENTDETAILS" column="mixedPaymentDetails" />
+        <result property="IMPORTERNAME" column="importerName" />
+        <result property="PLACEOFFINALDESTINATION" column="placeOfFinalDestination" />
+        <result property="EXPORTERNAME" column="exporterName" />
+        <result property="PLACEOFTAKINGDISPATCHORRECEIPT" column="placeOfTakingDispatchOrReceipt" />
+        <result property="EXPORTERADDRESS" column="exporterAddress" />
+        <result property="NEGATIVETOLERANCELIMIT" column="negativeToleranceLimit" />
+        <result property="REIMBURSINGBANKFLAG" column="reimbursingBankFlag" />
+        <result property="ADVISETHROUGHBANKNAMEANDADDRESS" column="adviseThroughBankNameAndAddress" />
+        <result property="IDENTIFIERCODE" column="identifierCode" />
+        <result property="AVAILABLEBY" column="availableBy" />
+        <result property="REIMBURSINGBANKNAMEANDADDRESS" column="reimbursingBankNameAndAddress" />
+        <result property="SENDERTORECEIVERINFORMATION" column="senderToReceiverInformation" />
+        <result property="REIMBURSINGBANKIDENTIFIERCODE" column="reimbursingBankIdentifierCode" />
+        <result property="NAMEANDADDRESS" column="nameAndAddress" />
+        <result property="REIMBURSINGACCOUNTTYPE" column="reimbursingAccountType" />
+        <result property="IMPORTERCBCODE" column="importerCbCode" />
+        <result property="BSPCOUNTRYCODE" column="bspCountryCode" />
+        <result property="IMPORTERCIFNUMBER" column="importerCifNumber" />
+        <result property="DEFERREDPAYMENTDETAILS" column="deferredPaymentDetails" />
+        <result property="REIMBURSINGBANKACCOUNTNUMBER" column="reimbursingBankAccountNumber" />
+        <result property="POSITIVETOLERANCELIMIT" column="positiveToleranceLimit" />
+        <result property="LATESTDATESHIPMENT" column="latestDateShipment" />
+        <result property="AVAILABLEWITH" column="availableWith" />
+        <result property="ADDITIONALAMOUNTSCOVERED" column="additionalAmountsCovered" />
+        <result property="PORTOFDISCHARGEORDESTINATION" column="portOfDischargeOrDestination" />
+        <result property="ADVISETHROUGHBANKFLAG" column="adviseThroughBankFlag" />
+        <result property="SENDERTORECEIVERINFORMATIONNARRATIVE" column="senderToReceiverInformationNarrative" />
+        <result property="EXPORTERCBCODE" column="exporterCbCode" />
+        <result property="PORTOFLOADINGORDEPARTURE" column="portOfLoadingOrDeparture" />
+        <result property="STANDBYTAGGING" column="standbyTagging" />
+        <result property="FURTHERIDENTIFICATION" column="furtherIdentification" />
+        <result property="PURPOSEOFSTANDBY" column="purposeOfStandby" />
+        <result property="FORMATTYPE" column="formatType" />
+        <result property="DETAILSOFGUARANTEE" column="detailsOfGuarantee" />
+        <result property="APPLICANTNAME" column="applicantName" />
+        <result property="APPLICANTADDRESS" column="applicantAddress" />
+        <result property="PLACEOFRECEIPT" column="placeOfReceipt" />
+        <result property="PLACEOFDELIVERY" column="placeOfDelivery" />
+        <result property="OTHERDOCUMENTSINSTRUCTIONS" column="otherDocumentsInstructions" />
+        <result property="SHIPMENTCOUNT" column="shipmentCount" />
+        <result property="DATECLOSED" column="dateClosed" />
+        <result property="CURRENTAMOUNT" column="currentAmount" />
+        <result property="NUMBEROFAMENDMENTS" column="numberOfAmendments" />
+        <result property="LASTAMENDMENTDATE" column="lastAmendmentDate" />
+        <result property="LASTREINSTATEMENTDATE" column="lastReinstatementDate" />
+        <result property="LASTTRANSACTION" column="lastTransaction" />
+        <result property="LASTMODIFIEDDATE" column="lastModifiedDate" />
+        <result property="NARRATIVE" column="narrative" />
+        <result property="PRODUCTAMOUNT" column="productAmount" />
+        <result property="PRODUCTSTATUS" column="productStatus" />
+        <result property="ORIGINALAMOUNT" column="originalAmount" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="ACCOUNTOFFICER" column="accountOfficer" />
+        <result property="CCBDBRANCHUNITCODE" column="ccbdBranchUnitCode" />
+        <result property="ALLOCATIONUNITCODE" column="allocationUnitCode" />
+        <result property="LONGNAME" column="longName" />
+        <result property="ADDRESS1" column="address1" />
+        <result property="ADDRESS2" column="address2" />
+        <result property="FACILITYID" column="facilityId" />
+        <result property="FACILITYTYPE" column="facilityType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="STATUS" column="status" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="ICCOUNT" column="icCount" />
+    </resultMap>
+    
+    <select id="findLetterOfCredit" resultMap="findLetterOfCreditResultMap">
+        select lc.documentNumber,
+        lc.documentType,
+        lc.purpose,
+        lc.processDate,
+        lc.expiryDate,
+        lc.reasonForCancellation,
+        lc.cancellationDate,
+        lc.tenor,
+        lc.type,
+        lc.paymentMode,
+        lc.usancePeriod,
+        lc.usancePeriodStart,
+        lc.expiryCountryCode,
+        lc.partialShipment,
+        lc.partialDelivery,
+        lc.transShipment,
+        lc.irrevocable,
+        lc.negotiationRestriction,
+        lc.adviseThroughBank,
+        lc.priceTerm,
+        lc.revolvingAmount,
+        lc.revolvingPeriod,
+        lc.daysRevolving,
+        lc.cumulative,
+        lc.aggregateAmount,
+        lc.cashFlag,
+        lc.totalNegotiatedAmount,
+        lc.cashAmount,
+        lc.totalNegotiatedCashAmount,
+        lc.outstandingBalance,
+        lc.refundAmount,
+        lc.portOfOrigination,
+        lc.portOfDestination,
+        lc.portOfOriginCountryCode,
+        lc.importerAddress,
+        lc.beneficiaryAddress,
+        lc.beneficiaryName,
+        lc.advisingBankCode,
+        lc.confirmingBankCode,
+        lc.reimbursingCurrency,
+        lc.drawee,
+        lc.adviseMedium,
+        lc.latestShipmentDate,
+        lc.dispatchPlace,
+        lc.finalDestinationPlace,
+        lc.applicableRules,
+        lc.formOfDocumentaryCredit,
+        lc.purposeOfMessage,
+        lc.destinationBank,
+        lc.issueDate,
+        cast(lc.priceTermNarrative as varchar(30000)) as priceTermNarrative,
+        lc.confirmationInstructionsFlag,
+        lc.marineInsurance,
+        lc.generalDescriptionOfGoods,
+        lc.cwtFlag,
+        lc.advanceCorresChargesFlag,
+        lc.otherPriceTerm,
+        lc.adviseThroughBankIdentifierCode,
+        lc.tenorOfDraftNarrative,
+        lc.maximumCreditAmount,
+        lc.shipmentPeriod,
+        lc.availableWithFlag,
+        lc.adviseThroughBankLocation,
+        lc.periodForPresentation,
+        lc.periodForPresentationAdviseThroughBank,
+        lc.mixedPaymentDetails,
+        lc.importerName,
+        lc.placeOfFinalDestination,
+        lc.exporterName,
+        lc.placeOfTakingDispatchOrReceipt,
+        lc.exporterAddress,
+        lc.negativeToleranceLimit,
+        lc.reimbursingBankFlag,
+        lc.adviseThroughBankNameAndAddress,
+        lc.identifierCode,
+        lc.availableBy,
+        lc.reimbursingBankNameAndAddress,
+        lc.senderToReceiverInformation,
+        lc.reimbursingBankIdentifierCode,
+        lc.nameAndAddress,
+        lc.reimbursingAccountType,
+        lc.importerCbCode,
+        lc.bspCountryCode,
+        lc.importerCifNumber,
+        lc.deferredPaymentDetails,
+        lc.reimbursingBankAccountNumber,
+        lc.positiveToleranceLimit,
+        lc.latestDateShipment,
+        lc.availableWith,
+        lc.additionalAmountsCovered,
+        lc.portOfDischargeOrDestination,
+        lc.adviseThroughBankFlag,
+        lc.senderToReceiverInformationNarrative,
+        lc.exporterCbCode,
+        lc.portOfLoadingOrDeparture,
+        lc.standbyTagging,
+        lc.furtherIdentification,
+        lc.purposeOfStandby,
+        lc.formatType,
+        cast(lc.detailsOfGuarantee as varchar(2000)) as detailsOfGuarantee,
+        lc.applicantName,
+        lc.applicantAddress,
+        lc.placeOfReceipt,
+        lc.placeOfDelivery,
+        cast(lc.otherDocumentsInstructions as varchar(1000)) as otherDocumentsInstructions,
+        lc.shipmentCount,
+        lc.dateClosed,
+        lc.currentAmount,
+        lc.numberOfAmendments,
+        lc.lastAmendmentDate,
+        lc.lastReinstatementDate,
+        lc.lastTransaction,
+        lc.lastModifiedDate,
+        cast(lc.narrative as varchar(700)) as narrative,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        tp.amount as originalAmount,
+        tp.cifNumber,
+        tp.cifName,
+        tp.accountOfficer,
+        tp.ccbdBranchUnitCode,
+        tp.allocationUnitCode,
+        tp.longName,
+        tp.address1,
+        tp.address2,
+        tp.facilityId,
+        tp.facilityType,
+        a.documentClass,
+        a.documentType,
+        a.documentSubType1,
+        a.documentSubType2,
+        a.serviceType,
+        a.tradeServiceReferenceNumber,
+        a.serviceInstructionId,
+        a.status,
+        a.details,
+                (select count(*) from LcNegotiationDiscrepancy where documentNumber = lc.documentNumber) as icCount
+  from
+          LetterOfCredit lc
+                  inner join
+                  TradeProduct tp
+            on
+                    tp.documentNumber = lc.documentNumber
+                            and tp.productType = 'LC'
+                  inner join
+
+                  (select
+                          ts.cifName,
+                          ts.serviceInstructionId,
+                          ts.status,
+                          ts.details,
+                          b.serviceType,
+                          b.tradeServiceReferenceNumber,
+                          ts.documentClass,
+                          ts.documentType,
+                          ts.documentSubType1,
+                          ts.documentSubType2,
+                          ts.documentNumber,
+                          ts.tradeProductNumber
+                    from
+                            TradeService ts
+                                    inner join
+
+                                    (select
+                                            ts.documentNumber,
+                                            ts.serviceType,
+                                            ts.tradeServiceReferenceNumber
+                                      from
+                                              TradeService ts
+                                      where ts.tradeProductNumber = #{documentNumber} and ts.documentClass = 'LC'
+                                              and ts.createdDate = (select
+                                              max(ts1.createdDate) as createdDate
+                                        from
+                                                TradeService ts1
+                                        where ts1.tradeProductNumber = #{documentNumber} and ts1.documentClass = 'LC')) b
+
+                              on ts.tradeProductNumber = b.documentNumber
+
+                    where ts.tradeProductNumber = #{documentNumber} and ts.documentClass = 'LC'
+                            and ts.serviceType = 'OPENING') a
+
+            on a.documentNumber = lc.documentNumber
+
+
+  where lc.documentNumber = #{documentNumber}
+    </select>
+
+    <!--retrieves all negotiation numbers with the same document number-->
+    <select id="findAllNegotiationNumbers" resultType="hashMap">
+        select distinct
+          negotiationNumber
+        from
+          LcNegotiation
+        where
+          documentNumber = #{documentNumber}
+    </select>
+    
+    <resultMap id="findNonEtsTradeServiceResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="STATUS" column="status" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+        <result property="APPROVERS" column="approvers" />
+        <result property="TRADEPRODUCTNUMBER" column="tradeProductNumber" />
+    </resultMap>
+
+    <select id="findNonEtsTradeService" resultMap="findNonEtsTradeServiceResultMap">
+        select
+        ts.tradeServiceId, ts.tradeServiceReferenceNumber, ts.documentNumber, ts.serviceType, ts.documentType,
+        ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.cifName, ts.details,
+        ts.status, ts.paymentStatus, ts.approvers, ts.tradeProductNumber
+        from TradeService ts
+
+        where ts.tradeServiceId = #{tradeServiceId}
+    </select>
+
+    <select id="lcInquiry" resultType="hashMap">
+        select
+            tp.ccbdBranchUnitCode as unitCode,
+            lc.documentNumber,
+            lc.documentType,
+            lc.type as documentSubType1,
+            lc.tenor as documentSubType2,
+            tp.cifNumber,
+            tp.cifName,
+            tp.amount,
+            lc.expiryDate,
+            tp.status,
+            lc.outstandingBalance,
+            tp.amount as originalAmount,
+            tp.currency as originalCurrency,
+            lc.lastTransaction,
+            lc.currentAmount,
+            tp.mainCifNumber
+        from
+            LetterOfCredit lc
+        inner join
+            TradeProduct tp
+        on
+            tp.documentNumber = lc.documentNumber
+        <where>
+            <if test="documentNumber != ''">
+               UPPER(lc.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+            </if>
+            <if test="cifName != ''">
+                and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+            </if>
+            <if test="status != ''">
+                and tp.status = #{status}
+            </if>
+            <if test="expiryDate != ''">
+                and date(lc.expiryDate) = #{expiryDate}
+            </if>
+            <if test="currency != ''">
+                and tp.currency = #{currency}
+            </if>
+            <if test="openingDateFrom != ''">
+              and lc.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{openingDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+            </if>
+            <if test="openingDateTo != ''">
+              and lc.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{openingDateTo} || ' 240000','MMDDYYYY HH24MISS')
+            </if>
+            <choose>
+                <when test="outstandingLcAmountFrom != '' and outstandingLcAmountTo != ''">
+                    and lc.outstandingBalance between cast (#{outstandingLcAmountFrom} AS DECIMAL(11,2))
+                        and cast(#{outstandingLcAmountTo} AS DECIMAL(11,2))
+                </when>
+                <when test="outstandingLcAmountFrom != ''">
+                    and lc.outstandingBalance <![CDATA[>=]]> cast(#{outstandingLcAmountFrom} AS DECIMAL(11,2))
+                </when>
+                <when test="outstandingLcAmountTo != ''">
+                    and lc.outstandingBalance <![CDATA[<=]]> cast(#{outstandingLcAmountTo} AS DECIMAL(11,2))
+                </when>
+            </choose>
+            <choose>
+                <when test="unitCode != ''">
+                    and tp.ccbdBranchUnitCode = #{unitCode}
+                </when>
+                <when test="unitcode != '' and unitcode != '909'">
+                    and tp.ccbdBranchUnitCode = #{unitcode}
+                </when>
+            </choose>
+        </where>
+        order by lc.lastModifiedDate DESC, lc.documentNumber ASC
+    </select>
+    
+    <select id="icInquiry" resultType="hashMap">
+        select 
+            tp.ccbdBranchUnitCode as unitCode,
+            lc.documentNumber,
+            tp.cifName, 
+            tp.currency as originalCurrency,
+            tp.amount as originalAmount,
+            lnd.icNumber,
+            lnd.negotiationAmount,
+            CASE 
+                WHEN lnd.icDate is null THEN lnd.lastModifiedDate
+                WHEN lnd.icDate is not null THEN lnd.icDate
+            END as lastIcDate
+        from 
+            LetterOfCredit lc
+        inner join 
+            TradeProduct tp
+         on
+            tp.documentNumber = lc.documentNumber
+         inner join
+            LcNegotiationDiscrepancy lnd
+         on
+            lnd.documentNumber = lc.documentNumber      
+        <where>
+            <if test="documentNumber != ''">
+               UPPER(lc.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+            </if>
+            <if test="cifName != ''">
+                and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+            </if>
+            <if test="currency != ''">
+                and tp.currency = #{currency}   
+            </if>
+            <if test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </if>
+            <choose>
+                <when test="lcAmountFrom != '' and lcAmountTo != ''">
+                    and tp.amount between cast (#{lcAmountFrom} AS DECIMAL(11,2))
+                        and cast(#{lcAmountTo} AS DECIMAL(11,2))
+                </when>
+                <when test="lcAmountFrom != ''">
+                    and tp.amount <![CDATA[>=]]> cast(#{lcAmountFrom} AS DECIMAL(11,2))
+                </when>
+                <when test="lcAmountTo != ''">
+                    and tp.amount <![CDATA[<=]]> cast(#{lcAmountTo} AS DECIMAL(11,2))
+                </when>
+            </choose>
+            <if test="icNumber != ''">
+                UPPER(lnd.icNumber) LIKE '%' || UPPER(#{icNumber}) || '%'
+            </if>
+            <choose>
+                <when test="icAmountFrom != '' and icAmountTo != ''">
+                    and lnd.negotiationAmount between cast (#{icAmountFrom} AS DECIMAL(11,2))
+                        and cast(#{icAmountTo} AS DECIMAL(11,2))
+                </when>
+                <when test="icAmountFrom != ''">
+                    and lnd.negotiationAmount <![CDATA[>=]]> cast(#{icAmountFrom} AS DECIMAL(11,2))
+                </when>
+                <when test="icAmountTo != ''">
+                    and lnd.negotiationAmount <![CDATA[<=]]> cast(#{icAmountTo} AS DECIMAL(11,2))
+                </when>
+            </choose>
+                <if test="icDateFrom != ''">
+                    and lnd.icDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{icDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+                </if>
+                <if test="icDateTo != ''">
+                    and lnd.icDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{icDateTo} || ' 240000','MMDDYYYY HH24MISS')
+                </if>
+                and lnd.lcNegotiationDiscrepancyStatus != 'CLOSED' and lnd.lcNegotiationDiscrepancyStatus != 'CANCELLED'
+        </where>
+         order by lastIcDate DESC
+    </select>
+    
+    <select id="nonLcInquiry" resultType="hashMap">
+    (select
+          tp.ccbdBranchUnitCode as unitCode,      
+          da.documentNumber,
+          da.documentType,
+          tp.status,
+          tp.cifName,
+          da.importerName,
+          da.maturityDate,
+          da.processDate as negoDate,
+          da.settledDate,
+          (da.amount - da.outstandingAmount) as settlementAmount,
+          da.currency as negoCurrency,
+          da.outstandingAmount as outstandingAmount,
+          da.amount as negoAmount,
+          da.lastTransaction,
+          tp.productType as documentClass
+          
+        from
+          DocumentAgainstAcceptance da
+        inner join
+          TradeProduct tp
+        on
+          tp.documentNumber = da.documentNumber
+          
+        <if test="documentNumber != ''">
+          and UPPER(da.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+        </if>
+        <if test="status != ''">
+          and tp.status = #{status}
+        </if>
+        <if test="cifName != ''">
+          and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+        </if>
+        <if test="negotiationDateFrom != ''">
+          and da.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{negotiationDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="negotiationDateTo != ''">
+          and da.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{negotiationDateTo} || ' 240000','MMDDYYYY HH24MISS')
+        </if>
+<!--         <if test="userrole != '' and userrole == 'BRANCH'"> -->
+<!--           and tp.status not in ('CANCELLED', 'CLOSED') -->
+<!--         </if> -->
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and (tp.ccbdBranchUnitCode = #{unitcode} or tp.ccbdBranchUnitCode is null)
+            </when>
+        </choose>)
+      
+      union
+      
+      (select
+          tp.ccbdBranchUnitCode as unitCode,      
+          dp.documentNumber,
+          dp.documentType,
+          tp.status,
+          tp.cifName,
+          dp.importerName,
+          dp.maturityDate,
+          dp.processDate as negoDate,
+          dp.settledDate,
+          (dp.amount - dp.outstandingAmount) as settlementAmount,
+          dp.currency as negoCurrency,
+          dp.outstandingAmount as outstandingAmount,
+          dp.amount as negoAmount,
+          dp.lastTransaction,
+          tp.productType as documentClass
+          
+        from
+          DocumentAgainstPayment dp
+        inner join
+          TradeProduct tp
+        on
+          tp.documentNumber = dp.documentNumber
+          
+        <if test="documentNumber != ''">
+          and UPPER(dp.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+        </if>
+        <if test="status != ''">
+          and tp.status = #{status}
+        </if>
+        <if test="cifName != ''">
+          and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+        </if>
+        <if test="negotiationDateFrom != ''">
+          and dp.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{negotiationDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="negotiationDateTo != ''">
+          and dp.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{negotiationDateTo} || ' 240000','MMDDYYYY HH24MISS')
+        </if>
+<!--         <if test="userrole != '' and userrole == 'BRANCH'"> -->
+<!--           and tp.status not in ('CANCELLED', 'CLOSED') -->
+<!--         </if> -->
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and (tp.ccbdBranchUnitCode = #{unitcode} or tp.ccbdBranchUnitCode is null)
+            </when>
+        </choose>)
+      
+      union
+      
+      (select
+          tp.ccbdBranchUnitCode as unitCode,      
+          oa.documentNumber,
+          oa.documentType,
+          tp.status,
+          tp.cifName,
+          oa.importerName,
+          oa.maturityDate,
+          oa.processDate as negoDate,
+          oa.settledDate,
+          (oa.amount - oa.outstandingAmount) as settlementAmount,
+          oa.currency as negoCurrency,
+          oa.outstandingAmount as outstandingAmount,
+          oa.amount as negoAmount,
+          oa.lastTransaction,
+          tp.productType as documentClass
+          
+        from
+          OpenAccount oa
+        inner join
+          TradeProduct tp
+        on
+          tp.documentNumber = oa.documentNumber
+          
+        <if test="documentNumber != ''">
+          and UPPER(oa.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+        </if>
+        <if test="status != ''">
+          and tp.status = #{status}
+        </if>
+        <if test="cifName != ''">
+          and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+        </if>
+        <if test="negotiationDateFrom != ''">
+          and oa.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{negotiationDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="negotiationDateTo != ''">
+          and oa.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{negotiationDateTo} || ' 240000','MMDDYYYY HH24MISS')
+        </if>
+<!--         <if test="userrole != '' and userrole == 'BRANCH'"> -->
+<!--           and tp.status not in ('CANCELLED', 'CLOSED') -->
+<!--         </if> -->
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and (tp.ccbdBranchUnitCode = #{unitcode} or tp.ccbdBranchUnitCode is null)
+            </when>
+        </choose>)
+      
+      union
+      
+      (select
+          tp.ccbdBranchUnitCode as unitCode,      
+          dr.documentNumber,
+          dr.documentType,
+          tp.status,
+          tp.cifName,
+          dr.importerName,
+          dr.maturityDate,
+          dr.processDate as negoDate,
+          dr.settledDate,
+          (dr.amount - dr.outstandingAmount) as settlementAmount,
+          dr.currency as negoCurrency,
+          dr.outstandingAmount as outstandingAmount,
+          dr.amount as negoAmount,
+          dr.lastTransaction,
+          tp.productType as documentClass
+          
+        from
+          DirectRemittance dr
+        inner join
+          TradeProduct tp
+        on
+          tp.documentNumber = dr.documentNumber
+          
+        <if test="documentNumber != ''">
+          and UPPER(dr.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+        </if>
+        <if test="status != ''">
+          and tp.status = #{status}
+        </if>
+        <if test="cifName != ''">
+          and UPPER(tp.cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+        </if>
+        <if test="negotiationDateFrom != ''">
+          and dr.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{negotiationDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="negotiationDateTo != ''">
+          and dr.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{negotiationDateTo} || ' 240000','MMDDYYYY HH24MISS')
+        </if>
+<!--         <if test="userrole != '' and userrole == 'BRANCH'"> -->
+<!--           and tp.status not in ('CANCELLED', 'CLOSED') -->
+<!--         </if> -->
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and (tp.ccbdBranchUnitCode = #{unitcode} or tp.ccbdBranchUnitCode is null)
+            </when>
+        </choose>)
+        
+        order by negoDate DESC, documentNumber ASC
+          
+    </select>
+
+    <select id="findLcNegotiation" resultType="hashMap">
+        select
+          lcn.*,
+          lc.documentType,
+          lc.type as documentSubType1,
+          lc.tenor as documentSubType2,
+          lc.issueDate,
+          lc.applicantName,
+          lc.outstandingBalance,
+          lc.reimbursingBankIdentifierCode,
+          lc.reimbursingBankNameAndAddress,
+          lc.reimbursingAccountType,
+          lc.reimbursingBankAccountNumber,
+          lc.shipmentCount,
+          pd.loanMaturityDate as maturityDate,
+          pd.referenceNumber,
+          pd.amount as uaLoanAmount,
+          pd.currency as uaLoanCurrency,
+          tp.amount as lcAmount,
+          tp.currency as lcCurrency,
+          ts.tradeServiceId as negoTradeServiceId,
+          ts.processingUnitCode,
+          tp.cifName,
+          tp.cifNumber,
+          tp.mainCifName,
+          tp.mainCifNumber,
+          tp.facilityId,
+          tp.facilityType,
+          tp.accountOfficer,
+          tp.ccbdBranchUnitCode,
+          tp.allocationUnitCode,
+          tp.longName,
+          tp.address1,
+          tp.address2,
+          tp.firstName,
+          tp.middleName,
+          tp.lastName,
+          tp.tinNumber,
+          tp.officerCode,
+          tp.exceptionCode,
+          tp.participantCode,
+          tp.commodityCode
+        from
+          LcNegotiation lcn
+        inner join
+          LetterOfCredit lc
+        on
+          lc.documentNumber = lcn.documentNumber
+        inner join
+          TradeService ts
+        on
+          ts.documentNumber = lcn.negotiationNumber
+        and
+          (ts.status in ('APPROVED', 'POSTED', 'POST_APPROVED') or ts.status is null)
+        inner join
+          Payment p
+        on
+          p.tradeServiceId = ts.tradeServiceId
+        inner join
+          PaymentDetail pd
+        on
+          pd.paymentId = p.id
+        and
+          pd.paymentInstrumentType = 'UA_LOAN'
+        inner join
+          TradeProduct tp
+        on
+          tp.documentNumber = lc.documentNumber
+        where
+          lcn.id = #{id}
+    </select>
+
+    <select id="negotiationInquiry" resultType="hashMap">
+    select
+         tp.ccbdBranchUnitCode as unitCode,
+         ts.tradeServiceId,
+         ts.serviceInstructionId as etsNumber,
+         lcn.id,
+        <!--(select
+        count(*)
+        FROM tradeservice
+        WHERE servicetype =
+        'UA_LOAN_SETTLEMENT' AND STATUS IN ('APPROVED', 'POSTED') AND
+        details like concat(concat('%', lcn.negotiationNumber), '%')
+        ) AS approvedsettlement,-->
+        (select
+        count(*)
+        from
+        TradeService ts2
+        where
+        ts2.serviceType = 'UA_LOAN_SETTLEMENT' and
+        ts2.status in ('APPROVED', 'POSTED') and
+        position(lcn.negotiationNumber, ts2.details, CODEUNITS16) != 0
+        ) approvedSettlement,
+         (select
+         count(*)
+          from
+            PaymentDetail
+          where
+            paymentId = p.id
+            and
+            paymentInstrumentType = 'UA_LOAN'
+         ) uacount,
+         lcn.documentNumber,
+         lcn.negotiationNumber,
+         lc.outstandingBalance,
+         lcn.negotiationCurrency,
+         lcn.negotiationAmount,
+         lcn.processDate,
+         lcn.negotiationValueDate,
+         lcn.negotiationType,
+         lc.documentType,
+         lcn.negotiatingBanksReferenceNumber,
+         (select
+         loanMaturityDate
+          from
+            PaymentDetail
+          where
+            paymentId = p.id
+            and
+            paymentInstrumentType
+            like '%LOAN%') maturityDate,
+         (select
+         pnNumber
+           from
+             PaymentDetail
+           where
+             paymentId = p.id
+           and
+             paymentInstrumentType
+             like '%LOAN%') pnNumber
+        from
+           LcNegotiation lcn
+           inner join
+           LetterOfCredit lc
+             on
+               lc.documentNumber = lcn.documentNumber
+           inner join
+           TradeService ts
+             on
+               ts.documentnumber = lcn.negotiationNumber
+           inner join TradeProduct tp
+             on
+               lc.documentNumber = tp.documentNumber
+           inner join
+           Payment p
+             on
+               p.tradeServiceId = ts.tradeServiceId
+               and p.chargeType = 'PRODUCT'
+         where lcn.id is not null
+        <if test="documentNumber != ''">
+            and UPPER(lcn.documentNumber) like UPPER('%' || #{documentNumber} || '%')
+        </if>
+        <if test="negotiationNumber != ''">
+            and UPPER(lcn.negotiationNumber) like UPPER('%' || #{negotiationNumber} || '%')
+        </if>
+        <if test="cifName != ''">
+            and UPPER(ts.cifName) like UPPER('%' || #{cifName} || '%')
+        </if>
+        <if test="negotiationDateFrom != ''">
+          and lcn.processDate <![CDATA[>=]]> TIMESTAMP_FORMAT(#{negotiationDateFrom} || ' 000000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="negotiationDateTo != ''">
+          and lcn.processDate <![CDATA[<=]]> TIMESTAMP_FORMAT(#{negotiationDateTo} || ' 240000','MMDDYYYY HH24MISS')
+        </if>
+        <if test="clientName != ''">
+            and  (UPPER(da.importerName) like 'and tp.ccbdBranchUnitCode = #{unitcode}%' || UPPER(#{clientName}) || '%' or
+                  UPPER(dr.importerName) like '%' || UPPER(#{clientName}) || '%' or
+                  UPPER(dp.importerName) like '%' || UPPER(#{clientName}) || '%' or
+                  UPPER(oa.importerName) like '%' || UPPER(#{clientName}) || '%' or
+                  UPPER(lc.importerName) like '%' || UPPER(#{clientName}) || '%')
+        </if>      
+<!--         <if test="negotiationDateFrom != '' and negotiationDateTo == ''"> -->
+<!--             and trunc_timestamp(lcn.processDate, 'ddd') &gt;= date(#{negotiationDateFrom}) -->
+<!--         </if> -->
+
+<!--         <if test="negotiationDateFrom == '' and negotiationDateTo != ''"> -->
+<!--             and trunc_timestamp(lcn.processDate, 'ddd') &lt;= date(#{negotiationDateTo}) -->
+<!--         </if> -->
+
+<!--         <if test="negotiationDateFrom != '' and negotiationDateTo != ''"> -->
+<!--             and trunc_timestamp(lcn.processDate, 'ddd') between date(#{negotiationDateFrom}) and date(#{negotiationDateTo}) -->
+<!--         </if> -->
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and tp.ccbdBranchUnitCode = #{unitcode}
+            </when>
+        </choose>
+        ORDER BY ts.modifiedDate DESC, lcn.documentNumber ASC
+    </select>
+
+    <select id="indemnityInquiry" resultType="hashMap">
+     select
+        tp.ccbdBranchUnitCode as unitCode,
+        i.indemnityNumber,
+        i.referenceNumber,
+        i.shipmentAmount,
+        i.shipmentSequenceNumber,
+        i.indemnityType,
+        tp.amount as originalAmount,
+        tp.cifName,
+        tp.status
+        --ts2.tradeServiceId
+        from Indemnity i
+        inner join
+        --TradeService ts2
+        --on ts2.documentNumber = i.indemnityNumber
+        --join
+        --ServiceInstruction si2
+        --on ts2.serviceinstructionid = si2.serviceinstructionid
+        --inner join
+        TradeProduct tp
+        on tp.documentNumber = i.indemnityNumber
+        --where ts2.serviceType = 'ISSUANCE'
+        <if test="cifName != ''">
+            and UPPER(tp.cifName) like UPPER('%' || #{cifName} || '%')
+        </if>
+        <if test="originalLcAmount != ''">
+            and tp.amount = #{originalLcAmount}
+        </if>
+        <if test="indemnityNumber != ''">
+            and UPPER(i.indemnityNumber) like UPPER('%' || #{indemnityNumber} || '%')
+        </if>
+        <if test="documentNumber != ''">
+            and UPPER(i.referenceNumber) like UPPER('%' || #{documentNumber} || '%')
+        </if>
+        <if test="shipmentNumber != ''">
+            and i.shipmentSequenceNumber = #{shipmentNumber}
+        </if>
+        <if test="status != ''">
+            and UPPER(tp.status) like UPPER('%' || #{status} || '%')
+        </if>
+        <if test="shipmentAmount != ''">
+            and i.shipmentAmount = #{shipmentAmount}
+        </if>
+        <choose>
+            <when test="unitCode != ''">
+                and tp.ccbdBranchUnitCode = #{unitCode}
+            </when>
+            <when test="unitcode != '' and unitcode != '909'">
+                and tp.ccbdBranchUnitCode = #{unitcode}
+            </when>
+        </choose>
+        ORDER BY /*ts2.modifiedDate DESC, */i.processDate DESC, i.indemnityNumber ASC
+    </select>
+
+    <select id="getApprovedAmmendments" resultType="long">
+      SELECT COUNT(*) FROM TRADESERVICE
+        WHERE documentNumber = #{documentNumber}
+         AND status = 'APPROVED'
+        AND SERVICETYPE = 'AMENDMENT'
+    </select>
+    
+    <select id="findTradeServiceByReferenceNumber" resultType="hashMap">
+        select tradeServiceId from TradeService where tradeServiceReferenceNumber = #{tradeServiceReferenceNumber}
+    </select>
+
+    <select id="findLetterOfCreditCriteria" resultType="hashMap">
+      select
+        lc.documentNumber,
+        'LC' as documentClass,
+        lc.documentType,
+        lc.type as documentSubType1,
+        lc.tenor as documentSubType2,
+        lc.documentNumber,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        lc.outstandingBalance,
+        (   select count(*) 
+            from Indemnity i 
+            where i.referenceNumber = lc.documentNumber 
+            and i.indemnityType = 'BG'
+        ) as bgCount,
+        (   select count(ic.ICNUMBER) 
+            from LCNEGOTIATIONDISCREPANCY ic 
+            where ic.documentNumber = lc.documentNumber 
+            and LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN'
+        ) as icCount 
+        from LetterOfCredit lc 
+        inner join TradeProduct tp 
+        on tp.documentNumber = lc.documentNumber 
+        where lc.documentNumber = #{documentNumber}
+    </select>
+
+    <select id="findPaymentStatus" resultType="hashMap">
+        select paymentStatus from TradeService where tradeServiceId = #{tradeServiceId}
+    </select>
+
+    <resultMap id="findAllRelatedLcResultMap" type="hashmap">    
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="IMPORTERNAME" column="importerName" />
+        <result property="EXPORTERNAME" column="exporterName" />
+        <result property="APPLICANTNAME" column="applicantName" />
+        <result property="BENEFICIARYNAME" column="beneficiaryName" />
+        <result property="GENERALDESCRIPTIONOFGOODS" column="generalDescriptionOfGoods" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllRelatedLc" resultMap="findAllRelatedLcResultMap">
+      <!--select
+        lc.documentNumber,
+        lc.importerName,
+        lc.exporterName,
+        cast(lc.generalDescriptionOfGoods as varchar(6500)) as generalDescriptionOfGoods
+      from
+        LetterOfCredit lc
+      inner join
+        TradeService ts
+      on
+        ts.tradeProductNumber = lc.documentNumber
+      and
+        ts.documentClass = 'LC'
+      and
+        ts.status = 'APPROVED'
+      where
+        ts.cifNumber = #{cifNumber}-->
+        select
+        lc.documentNumber,
+        lc.documentType,
+        lc.importerName,
+        lc.exporterName,
+        lc.applicantName,
+        lc.beneficiaryName,
+        lc.generalDescriptionOfGoods
+        from
+        LetterOfCredit lc
+        inner join
+        TradeProduct tp
+        on
+        tp.documentNumber = lc.documentNumber
+        where
+        tp.cifNumber = #{cifNumber}
+    </select>
+
+    <select id="findAllIcNumbers" resultType="hashMap">
+        select icNumber from lcNegotiationDiscrepancy where documentNumber = #{documentNumber}
+            and (
+            LcNegotiationDiscrepancyStatus = 'OPEN'
+            )
+    </select>
+
+    <select id="findNegotiationDiscrepancyByIcNumber" resultType="hashMap">
+        select 
+            negotiationAmount, 
+            negotiationBank, 
+            negotiationBankRefNumber, 
+            senderToReceiverInformation, 
+            CASE
+                WHEN regularAmount != 0 THEN regularAmount
+                ELSE 0
+            END as REGULARAMOUNT,
+            CASE
+                WHEN CASHAMOUNT != 0 THEN CASHAMOUNT
+                ELSE 0
+            END as CASHAMOUNT   
+        from lcNegotiationDiscrepancy where icNumber = #{icNumber}
+    </select>
+
+    <select id="findUsancePeriodByDocumentNumber" resultType="hashMap">
+        select usancePeriod from LetterOfCredit where documentNumber = #{documentNumber}
+    </select>
+
+    <select id="dataEntryInquiry" resultType="hashMap">
+         select
+                ccbdBranchUnitCode as unitCode,
+                tradeServiceId,
+                documentNumber,
+                serviceInstructionId,
+                cifName,
+                status,
+                lastUser,
+                documentClass,
+                documentType,
+                documentSubType1,
+                documentSubType2,
+                serviceType,
+                modifiedDate,
+                tradeProductNumber
+          from
+            TradeService
+          where
+            status not in ('MARV', 'PENDING', 'ABORTED')
+<!--             and (documentClass != 'CDT' and serviceType != 'PAYMENT') -->
+            and (documentClass != 'CDT' )
+          <!--and
+            lastUser is not null-->
+          and serviceType not like '%REVERSAL%'
+
+            <if test="documentNumber != ''">
+                and UPPER(tradeProductNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+            </if>
+            <if test="cifName != ''">
+                and UPPER(cifName) LIKE '%' || UPPER(#{cifName}) || '%'
+            </if>
+            <if test="status != ''">
+                and status = #{status}
+            </if>
+<!--             <if test="documentClass != ''"> -->
+<!--                 and documentClass = #{documentClass} -->
+<!--             </if> -->
+            <if test="documentClass.size() > 0">
+                and documentClass IN 
+                <foreach collection="documentClass" index="index" item="documentItem"
+                    close=")" open="(" separator=",">
+                    #{documentItem}
+                </foreach>
+            </if>
+            <if test="documentType != ''">
+                and documentType = #{documentType}
+            </if>
+            <if test="documentSubType1 != ''">
+                and documentSubType1 = #{documentSubType1}
+            </if>
+            <if test="serviceType != ''">
+                and serviceType LIKE UPPER(#{serviceType})
+            </if>
+            <if test="dateOfTransaction != ''">
+                and date(modifiedDate) = #{dateOfTransaction}
+            </if>
+            <if test="unitCode != ''">
+                and ccbdBranchUnitCode = #{unitCode}
+            </if>
+            ORDER BY modifiedDate DESC, serviceInstructionId ASC
+    </select>
+
+    <select id="findDocumentAgainstAcceptance" resultType="hashMap">
+    select da.documentNumber,
+        da.documentType,
+        da.remittingBank,
+        da.reimbursingBank,
+        --da.processDate,
+        da.remittingBankReferenceNumber,
+        da.currency,
+        da.amount,
+        da.outstandingAmount,
+        da.dateOfBlAirwayBill,
+        da.maturityDate,
+        da.importerCifNumber,
+        da.originalPort,
+        da.importerCbCode,
+        da.importerName,
+        da.importerAddress,
+        da.senderToReceiverInformation,
+        da.beneficiaryName,
+        da.beneficiaryAddress,
+        da.lastTransaction,
+        da.processingUnitCode,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        tp.amount as originalAmount,
+        tp.cifNumber,
+        tp.cifName,
+        tp.accountOfficer,
+        tp.ccbdBranchUnitCode,
+        tp.allocationUnitCode,
+        tp.longName,
+        tp.address1,
+        tp.address2,
+        tp.mainCifNumber,
+        tp.mainCifName,
+        tp.firstName,
+        tp.middleName,
+        tp.lastName,
+        tp.tinNumber,
+        tp.commodityCode,
+        tp.participantCode,
+        tp.officerCode,
+        tp.exceptionCode,
+        tp.participantCode,
+        tp.commodityCode
+        FROM
+        DocumentAgainstAcceptance da
+        inner join TradeProduct tp
+        on tp.documentNumber = da.documentNumber
+            and tp.productType = 'DA'
+  where da.documentNumber = #{documentNumber}
+    </select>
+    <select id="findDocumentAgainstPayment" resultType="hashMap">
+        select dp.documentNumber,
+        dp.documentType,
+        dp.remittingBank,
+        dp.reimbursingBank,
+        --dp.processDate,
+        dp.remittingBankReferenceNumber,
+        dp.currency,
+        dp.amount,
+        dp.outstandingAmount,
+        dp.dateOfBlAirwayBill,
+        dp.maturityDate,
+        dp.importerCifNumber,
+        dp.originalPort,
+        dp.importerCbCode,
+        dp.importerName,
+        dp.importerAddress,
+        dp.senderToReceiverInformation,
+        dp.beneficiaryName,
+        dp.beneficiaryAddress,
+        dp.lastTransaction,
+        dp.processingUnitCode,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        tp.amount as originalAmount,
+        tp.cifNumber,
+        tp.cifName,
+        tp.accountOfficer,
+        tp.ccbdBranchUnitCode,
+        tp.allocationUnitCode,
+        tp.longName,
+        tp.address1,
+        tp.address2,
+        tp.mainCifNumber,
+        tp.mainCifName,
+        tp.firstName,
+        tp.middleName,
+        tp.lastName,
+        tp.tinNumber,
+        tp.officerCode,
+        tp.exceptionCode,
+        tp.participantCode,
+        tp.commodityCode
+        FROM
+        DocumentAgainstPayment dp
+        inner join TradeProduct tp
+        on tp.documentNumber = dp.documentNumber
+            and tp.productType = 'DP'
+  where dp.documentNumber = #{documentNumber}
+    </select>
+    <select id="findOpenAccount" resultType="hashMap">
+        select oa.documentNumber,
+        oa.documentType,
+        oa.remittingBank,
+        oa.reimbursingBank,
+        --oa.processDate,
+        oa.remittingBankReferenceNumber,
+        oa.currency,
+        oa.amount,
+        oa.outstandingAmount,
+        oa.dateOfBlAirwayBill,
+        oa.maturityDate,
+        oa.importerCifNumber,
+        oa.originalPort,
+        oa.importerCbCode,
+        oa.importerName,
+        oa.importerAddress,
+        oa.senderToReceiverInformation,
+        oa.beneficiaryName,
+        oa.beneficiaryAddress,
+        oa.lastTransaction,
+        oa.processingUnitCode,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        tp.amount as originalAmount,
+        tp.cifNumber,
+        tp.cifName,
+        tp.accountOfficer,
+        tp.ccbdBranchUnitCode,
+        tp.allocationUnitCode,
+        tp.longName,
+        tp.address1,
+        tp.address2,
+        tp.mainCifNumber,
+        tp.mainCifName,
+        tp.firstName,
+        tp.middleName,
+        tp.lastName,
+        tp.tinNumber,
+        tp.officerCode,
+        tp.exceptionCode,
+        tp.participantCode,
+        tp.commodityCode
+        FROM
+        OpenAccount oa
+        inner join TradeProduct tp
+        on tp.documentNumber = oa.documentNumber
+            and tp.productType = 'OA'
+  where oa.documentNumber = #{documentNumber}
+    </select>
+    <select id="findDirectRemittance" resultType="hashMap">
+    select dr.documentNumber,
+        dr.documentType,
+        dr.remittingBank,
+        dr.reimbursingBank,
+        --dr.processDate,
+        dr.remittingBankReferenceNumber,
+        dr.currency,
+        dr.amount,
+        dr.outstandingAmount,
+        dr.dateOfBlAirwayBill,
+        dr.maturityDate,
+        dr.importerCifNumber,
+        dr.originalPort,
+        dr.importerCbCode,
+        dr.importerName,
+        dr.importerAddress,
+        dr.senderToReceiverInformation,
+        dr.beneficiaryName,
+        dr.beneficiaryAddress,
+        dr.lastTransaction,
+        dr.processingUnitCode,
+        tp.amount as productAmount,
+        tp.status as productStatus,
+        tp.amount as originalAmount,
+        tp.cifNumber,
+        tp.cifName,
+        tp.accountOfficer,
+        tp.ccbdBranchUnitCode,
+        tp.allocationUnitCode,
+        tp.longName,
+        tp.address1,
+        tp.address2,
+        tp.mainCifNumber,
+        tp.mainCifName,
+        tp.firstName,
+        tp.middleName,
+        tp.lastName,
+        tp.tinNumber,
+        tp.officerCode,
+        tp.exceptionCode,
+        tp.participantCode,
+        tp.commodityCode
+        FROM
+        DirectRemittance dr
+        inner join TradeProduct tp
+        on tp.documentNumber = dr.documentNumber
+            and tp.productType = 'DR'
+  where dr.documentNumber = #{documentNumber}
+    </select>
+
+    <!--refund details to LC amount dropdown-->
+    <select id="findAllTransactionsByDocumentNumber" resultType="hashMap">
+        SELECT tradeServiceId, serviceType, modifiedDate
+        from TradeService where
+        tradeProductNumber = #{documentNumber}
+        and serviceType in ('OPENING', 'AMENDMENT', 'ADJUSTMENT', 'NEGOTIATION')
+    </select>
+
+    <select id="countNumberOfAmendments" resultType="hashMap">
+        select numberOfAmendments from LetterOfCredit where documentNumber = #{documentNumber}
+    </select>
+
+    <resultMap id="findAllExportAdvisingForPaymentResultMap" type="hashmap">    
+        <result property="CCBDBRANCHUNITCODE" column="ccbdBranchUnitCode" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="LCNUMBER" column="lcNumber" />
+        <result property="EXPORTERNAME" column="exporterName" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+        <result property="ISSUINGBANK" column="issuingBank" />
+    </resultMap>
+
+    <select id="findAllExportAdvisingForPayment" resultMap="findAllExportAdvisingForPaymentResultMap">
+        select
+          ts.ccbdBranchUnitCode,
+          ts.tradeServiceId,
+          ts.details,
+          ea.documentNumber,
+          ts.serviceType,
+          ea.lcNumber,
+          ea.exporterName,
+          ts.paymentStatus,
+          ea.issuingBank from exportadvising ea
+        inner join
+          tradeservice ts
+          on ts.documentNumber = ea.documentNumber
+          and ts.status = 'APPROVED'
+        where ea.documentNumber is not null
+        and ts.paymentStatus = 'UNPAID'
+
+        <if test="documentNumber != ''">
+            and UPPER(ea.documentNumber) LIKE '%' || UPPER(#{documentNumber}) || '%'
+        </if>
+
+        <if test="lcNumber != ''">
+            and UPPER(ea.lcNumber) LIKE '%' || UPPER(#{lcNumber}) || '%'
+        </if>
+
+        <if test="exporterName != ''">
+            and UPPER(ea.exporterName) LIKE '%' || UPPER(#{exporterName}) || '%'
+        </if>
+
+        <if test="processDate != ''">
+            and varchar_format(ea.processDate, 'MM/DD/YYYY') = #{processDate}
+        </if>
+
+        <if test="unitCode != ''">
+            and ts.ccbdBranchUnitCode = #{unitCode}
+        </if>
+        
+        order by ea.processDate desc
+
+    </select>
+
+    <select id="findAllExportBills" resultType="hashMap">
+        select
+            eb.documentnumber,
+            tp.cifname,
+            tp.currency,
+            tp.amount,
+            eb.corresbankcode,
+            ts.documentclass,
+            ts.documenttype,
+            tp.status,
+            eb.processdate,
+            eb.settlementdate
+
+          from exportbills eb
+          inner join
+          tradeproduct tp
+          on
+          tp.documentnumber = eb.documentnumber
+          inner join
+          tradeservice ts
+          on ts.documentnumber = eb.documentnumber
+
+        where
+          eb.documentnumber is not null
+
+          <if test="documentNumber != ''">
+            and eb.documentnumber = #{documentNumber}
+          </if>
+
+          <if test="currency != ''">
+            and tp.currency = #{currency}
+          </if>
+
+          <if test="amountFrom != 0 and amountTo == 0">
+            and (tp.amount &gt;= #{amountFrom})
+          </if>
+
+          <if test="amountFrom == 0 and amountTo != 0">
+              and (tp.amount &lt;= #{amountTo})
+          </if>
+
+          <if test="amountFrom != 0 and amountTo != 0">
+              and (tp.amount between #{amountFrom} and #{amountTo})
+          </if>
+
+          <if test="cifName != ''">
+            and tp.cifname = #{cifName}
+          </if>
+
+          <if test="corresBankCode != ''">
+            and eb.corresbankcode #{corresBankCode}
+          </if>
+
+          <if test="serviceType != ''">
+            and ts.servicetype = #{serviceType}
+          </if>
+
+          <if test="transaction != '' and transaction == 'EBP'">
+            and ts.documentclass = 'BP'
+            and ts.documenttype = 'FOREIGN'
+          </if>
+          <if test="transaction != '' and transaction == 'DBP'">
+            and ts.documentclass = 'BP'
+            and ts.documenttype = 'DOMESTIC'
+          </if>
+
+          <if test="transaction != '' and transaction == 'EBC'">
+            and ts.documentclass = 'BC'
+            and ts.documenttype = 'FOREIGN'
+          </if>
+          <if test="transaction != '' and transaction == 'DBC'">
+            and ts.documentclass = 'BC'
+            and ts.documenttype = 'DOMESTIC'
+          </if>
+
+          <if test="status != ''">
+            and tp.status = #{status}
+          </if>
+    </select>
+    
+    <select id="findAllDefaultDocuments" resultType="hashMap">
+        select distinct documentCode, description 
+        from (
+        select
+          rd.documentCode,
+          upper(cast(rd.description as varchar(6500))) as description
+        from
+          RequiredDocument rd
+        where
+          tradeServiceId = #{tradeServiceId}
+        and
+          requiredDocumentType = 'DEFAULT'
+        
+        and   
+          rd.documentCode not in(
+                                    select 
+                                      documentCode
+                                    from 
+                                      LCREQUIREDDOCUMENT
+                                    where 
+                                      documentNumber = #{documentNumber}
+                                    and
+                                      requiredDocumentType = 'DEFAULT'
+                                  )
+
+        union
+
+        select
+          rdr.documentCode,
+          upper(cast(rdr.description as varchar(6500))) as description
+        from
+          RefRequiredDocuments rdr
+        where
+          rdr.documentCode not in( 
+           select distinct documentCode from (
+                                 select
+                                    documentCode
+                                  from
+                                    RequiredDocument
+                                  where
+                                    tradeServiceId = #{tradeServiceId}
+                                  and
+                                    requiredDocumentType = 'DEFAULT'
+    
+                                    union
+            
+                                    select 
+                                      documentCode
+                                    from 
+                                      LCREQUIREDDOCUMENT
+                                    where 
+                                      documentNumber = #{documentNumber}
+                                    and
+                                      requiredDocumentType = 'DEFAULT'
+                                      )
+                                      )
+        and
+          rdr.documentType = #{documentType}
+        
+        union
+            
+        select 
+          ldr.documentCode,
+          upper(cast(ldr.description as varchar(6500))) as description
+        from 
+          LCREQUIREDDOCUMENT ldr
+        where 
+          ldr.documentNumber = #{documentNumber}
+        and
+          ldr.requiredDocumentType = 'DEFAULT')
+    </select>
+    
+    <select id="findAllSavedRequiredDocuments" resultType="hashMap">
+        select distinct documentCode, description from 
+        (select 
+          lrd.documentCode,
+           upper(cast(lrd.description as varchar(6500))) as description
+        from 
+          LcRequiredDocument lrd 
+        where 
+          lrd.documentNumber = #{documentNumber} 
+        and 
+          lrd.requiredDocumentType = 'DEFAULT'
+        
+        union
+        
+        select 
+          rd.documentCode,
+           upper(cast(rd.description as varchar(6500))) as description
+        from
+          RequiredDocument rd
+        where 
+          rd.tradeServiceId = #{tradeServiceId}
+        and 
+          rd.requiredDocumentType = 'DEFAULT'
+        and
+          rd.documentCode not in (select 
+                                    ldr.documentCode
+                                  from 
+                                    LCREQUIREDDOCUMENT ldr
+                                  where 
+                                    ldr.documentNumber = #{documentNumber}
+                                  and
+                                    ldr.requiredDocumentType = 'DEFAULT'
+                                  )
+        )
+    </select>
+    
+     <select id="findAllNewDocuments" resultType="hashMap">
+        select distinct id, description from 
+        (select
+          id,
+          cast(description as varchar(6500)) as description
+        from
+          LcRequiredDocument
+        where
+          documentNumber = #{documentNumber}
+        and
+          requiredDocumentType = 'NEW'
+
+        union
+
+        select
+          id,
+          cast(description as varchar(6500)) as description
+        from
+          RequiredDocument
+        where
+          tradeServiceId = #{tradeServiceId}
+        and
+          requiredDocumentType = 'NEW' 
+        and
+          cast(description as varchar(6500)) not in (select
+                                                        cast(description as varchar(6500))
+                                                     from
+                                                        LcRequiredDocument
+                                                     where
+                                                        documentNumber = #{documentNumber}
+                                                     and
+                                                        requiredDocumentType = 'NEW'
+                                                     )
+        )
+    </select>
+    
+    <select id="findAllSavedAdditionalCondition" resultType="hashMap">
+      select distinct conditionCode, condition from 
+      (select 
+         lac.conditionCode,
+         upper(cast(lac.condition as varchar(6500))) as condition
+       from 
+         LcAdditionalCondition lac 
+       where 
+         lac.documentNumber = #{documentNumber} 
+       and 
+         lac.conditionType = 'DEFAULT'
+        
+       union
+        
+       select 
+         ac.conditionCode,
+          upper(cast(ac.condition as varchar(6500))) as condition
+       from
+         AdditionalCondition ac
+       where 
+         ac.tradeServiceId = #{tradeServiceId}
+       and 
+         ac.conditionType = 'DEFAULT'
+       and
+         ac.conditionCode not in (select 
+                                    conditionCode
+                                  from 
+                                    LcAdditionalCondition 
+                                  where 
+                                    documentNumber = #{documentNumber} 
+                                  and
+                                    conditionType = 'DEFAULT'
+                                 )
+        )
+    </select>
+    
+    <select id="findAllNewAdditionalCondition" resultType="hashMap">
+       select distinct id, condition from
+       (select 
+         id,
+          cast(condition as varchar(6500)) as condition
+        from 
+          LcAdditionalCondition 
+        where 
+          documentNumber = #{documentNumber} 
+       and 
+          conditionType = 'NEW'
+        
+        union
+        
+        select 
+          id,
+           cast(condition as varchar(6500)) as condition
+        from
+          AdditionalCondition 
+        where 
+          tradeServiceId = #{tradeServiceId}
+        and 
+          conditionType = 'NEW'
+        and
+          cast(condition as varchar(6500)) not in (select 
+                                                     cast(condition as varchar(6500))
+                                                   from 
+                                                     LcAdditionalCondition 
+                                                   where 
+                                                     documentNumber = #{documentNumber}
+                                                   and
+                                                     conditionType = 'NEW'
+                                                  )
+       )
+    </select>
+    
+    <select id="findTotalIcAmount" resultType="hashMap">
+        SELECT 
+            CASE 
+                WHEN IC.ICAMOUNT is NULL THEN 0
+                ELSE IC.ICAMOUNT
+            END AS totalIcAmount, 
+            CASE 
+                WHEN IC.ICCASHAMOUNT is NULL THEN 0
+                ELSE IC.ICCASHAMOUNT
+            END AS totalIcCashAmount 
+        FROM (
+            SELECT 
+                SUM(NEGOTIATIONAMOUNT) as ICAMOUNT, 
+                SUM(CASHAMOUNT) as ICCASHAMOUNT 
+            FROM LCNEGOTIATIONDISCREPANCY
+            WHERE DOCUMENTNUMBER = #{documentNumber}
+            AND LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN' 
+            ) IC    
+    </select>
+    
+    <select id="findRegualarAndCashIcAmount" resultType="hashMap">
+        SELECT 
+            CASE 
+                WHEN IC.ICREGULARAMOUNT is NULL THEN 0
+                ELSE IC.ICREGULARAMOUNT
+            END AS TOTALREGULARAMOUNT,
+            CASE 
+                WHEN IC.ICCASHAMOUNT is NULL THEN 0
+                ELSE IC.ICCASHAMOUNT
+            END AS TOTALCASHAMOUNT          
+        FROM (
+            SELECT 
+                SUM(REGULARAMOUNT) as ICREGULARAMOUNT,
+                SUM(CASHAMOUNT) as ICCASHAMOUNT
+            FROM LCNEGOTIATIONDISCREPANCY
+            WHERE DOCUMENTNUMBER = #{documentNumber}
+            AND LCNEGOTIATIONDISCREPANCYSTATUS = 'OPEN' 
+        ) IC    
+    </select>
+    
+    
+</mapper>

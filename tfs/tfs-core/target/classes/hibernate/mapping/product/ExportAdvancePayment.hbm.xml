@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <subclass name="com.ucpb.tfs.domain.product.ExportAdvancePayment" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="EADVPAYMENT" lazy="false">
+
+        <join table="ADVANCEPAYMENT">
+
+            <key column="documentNumber"/>
+
+            <property name="paymentStatus" column="PAYMENT_STATUS" length="19">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.payment.enumTypes.PaymentStatus</param>
+                </type>
+            </property>
+
+            <property name="advancePaymentType" column="ADV_PAYMENT_TYPE" length="6">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AdvancePaymentType</param>
+                </type>
+            </property>
+
+            <property name="cwtFlag" column="WITHCWT" type="boolean"/>
+
+            <property name="exporterCbCode" column="EXPORTERCBCODE" type="string" length="15"/>
+            <property name="exporterName" column="EXPORTERNAME" type="string" length="50"/>
+
+            <property name="importerCbCode" column="IMPORTERCBCODE" type="string" length="15"/>
+            <property name="importerName" column="IMPORTERNAME" type="string" length="50"/>
+
+            <property name="corresBankCode" column="CORRESBANK_CODE" type="string" length="11"/>
+
+            <property name="accountType" column="ACCT_TYPE" length="4">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.AccountType</param>
+                </type>
+            </property>
+
+            <property name="countryCode" column="COUNTRY_CODE" type="string" length="3"/>
+            <property name="shipmentDate" column="SHIP_DATE" type="java.util.Date"/>
+            <property name="creditFacilityCode" column="CREDITFACILITY" length="9">
+                <type name="org.hibernate.type.EnumType">
+                    <param name="type">12</param>
+                    <param name="enumClass">com.ucpb.tfs.domain.product.enums.CreditFacilityCode</param>
+                </type>
+            </property>
+
+            <property name="receivingBank" column="RECIEVINGBANK_CODE" type="string" length="11"/>
+            <property name="sendersReference" column="SENDERS_REF" type="string" length="11"/>
+            <property name="bankOperationCode" column="BANK_OPCODE" type="string" length="16"/>
+            <property name="valueDate" column="VALUE_DATE" type="java.util.Date"/>
+            <property name="orderingCustomerAcctNo" column="ORDR_ACCT_NUMBER" type="string" length="20"/>
+            <property name="orderingCustomerName" column="ORDR_CUSTMR_NAME" type="string" length="50"/>
+            <property name="orderingCustomerAddress" column="ORDR_CUSTMR_ADDRESS" type="string" length="160"/>
+
+            <property name="accountWithInstitution" column="ACCT_WITH_INST" type="string" length="20"/>
+            <property name="accountWithInstitutionNameAddress" column="ACCT_WITH_INST_NAMEADD" type="string" length="160"/>
+
+            <property name="beneficiaryName" column="BENEFICIARY_NAME" type="string" length="50"/>
+            <property name="beneficiaryAddress" column="BENEFICIARY_ADDRESS" type="string" length="160"/>
+            <property name="beneficiaryAcctNo" column="BENEFICIARY_ACCTNO" type="string" length="20"/>
+
+            <property name="detailsOfCharges" column="CHARGES_DETAILS" type="string" length="3"/>
+            <property name="sendersToReceiverInfo" column="SENDER_RECEIVER_INFO" type="string" length="50"/>
+
+            <property name="fundingRefNo" column="FUNDING_REFNO" type="string" length="20"/>
+            <property name="swift" column="SWIFT" type="string" length="20"/>
+            <property name="bank" column="BANK" type="string" length="20"/>
+            <property name="beneficiary" column="BENEFICIARY" type="string" length="50"/>
+            <property name="byByo" column="BY_BYO" type="string" length="50"/>
+
+            <property name="buyerCasaNumber" column="BUYER_CASA_NO" type="string" length="20"/>
+            <property name="buyerName" column="BUYER_NAME" type="string" length="50"/>
+            <property name="buyerAddress" column="BUYER_ADDRESS" type="string" length="160"/>
+
+            <property name="sellerCasaNumber" column="SELLER_CASA_NO" type="string" length="20"/>
+            <property name="sellerName" column="SELLER_NAME" type="string" length="50"/>
+            <property name="sellerAddress" column="SELLER_ADDRESS" type="string" length="160"/>
+
+        </join>
+
+    </subclass>
+    
+</hibernate-mapping>

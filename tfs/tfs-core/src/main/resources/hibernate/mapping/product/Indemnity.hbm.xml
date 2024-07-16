@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <!--<class name="com.ucpb.tfs.domain.product.Indemnity" table="Indemnity">-->
+    <subclass name="com.ucpb.tfs.domain.product.Indemnity" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="INDEMNITY" lazy="false">
+
+        <join table="Indemnity">
+            <key column="indemnityNumber" />
+
+        <!--<composite-id name="indemnityNumber" access="field">-->
+            <!--<key-property name="indemnityNumber" column="indemnityNumber" type="string"/>-->
+        <!--</composite-id>-->
+
+        <!--<discriminator column="indemnityType" type="string"/>-->
+
+        <property name="indemnityType" column="indemnityType" length="2">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.product.enums.IndemnityType</param>
+            </type>
+        </property>
+
+
+        <component name="referenceNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="referenceNumber" length="22"/>
+        </component>
+
+        <property name="transportMedium" column="transportMedium" length="3">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.product.enums.TransportMedium</param>
+            </type>
+        </property>
+
+        <property name="shipmentSequenceNumber" column="shipmentSequenceNumber" type="java.lang.Integer"/>
+        <property name="shipmentCurrency" column="shipmentCurrency" type="string" length="3"/>
+        <property name="shipmentAmount" column="shipmentAmount" type="java.math.BigDecimal"/>
+        <property name="indemnityIssueDate" column="indemnityIssueDate" type="java.util.Date"/>
+        <property name="cwtFlag" column="cwtFlag" type="boolean"/>
+        <property name="blAirwayBillNumber" column="blAirwayBillNumber" type="string" length="30"/>
+        <property name="processDate" column="processDate" type="java.util.Date"/>
+        <property name="blPresented" column="blPresented" type="string" length="10"/>
+        <property name="facilityId" column="facilityId" type="string" length="10"/>
+
+        <property name="cancellationDate" column="cancellationDate" type="java.util.Date"/>
+        <property name="documentReleaseDate" column="documentReleaseDate" type="java.util.Date"/>
+
+        <!--<subclass name="com.ucpb.tfs.domain.product.BankGuarantee" discriminator-value="BG"/>-->
+        <!--<subclass name="com.ucpb.tfs.domain.product.BankEndorsement" discriminator-value="BE"/>-->
+
+
+    <!--</class>-->
+        </join>
+    </subclass>
+</hibernate-mapping>

@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <!--<import resource="classpath*:interface-app-context.xml"/>-->
+    <import resource="classpath*:services.xml"/>
+    <import resource="classpath*:amla/accountlog-mapping.xml"/>
+    <import resource="classpath*:amla/customer-accountlog-mapping.xml"/>
+    <import resource="classpath*:amla/transactionlog-mapping.xml"/>
+    <import resource="classpath*:amla/customerlog-mapping.xml"/>
+    <import resource="generators.xml"/>
+    <import resource="classpath*:batch/jobs.xml"/>
+    <import resource="classpath*:swift/swift-config.xml"/>
+    <import resource="classpath*:swift/message-builder.xml"/>
+    <import resource="classpath*:email/email.xml" />
+	
+    <!--uncomment code below to work on local-->
+	<!--<import resource="classpath*:batch/mock-sibs-jobs.xml"/>-->
+    <!--do not forget to comment out above code before pushing to the repository-->
+    <!--<bean id="casaService" class="com.ucpb.tfs.application.service.CasaServiceImplMock"/>-->
+    <import resource="classpath*:mock-casa-server.xml"/>
+
+
+
+    <bean id="tfsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <!--
+        this is a workaround for propertyplaceholder issue with mybatis-spring
+        http://code.google.com/p/mybatis/issues/detail?id=414&can=1&q=propertyplaceholder&colspec=ID%20Type%20Component%20Status%20Priority%20Version%20Target%20Summary%20Reporter
+    -->
+    <bean id="appProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:tfs.properties</value>
+                <!--&lt;!&ndash;<value>classpath:interface-app.properties</value>&ndash;&gt;-->
+            </list>
+        </property>
+        <property name="ignoreResourceNotFound" value="true"/>
+    </bean>
+
+    <context:property-placeholder location="classpath:tfs.properties" ignore-unresolvable="true" local-override="true"/>
+
+    <bean id="environmentVariableConfiguration" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+        <property name="algorithm" value="PBEWithMD5AndDES"/>
+        <property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD"/>
+    </bean>
+    <bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+        <property name="config" ref="environmentVariableConfiguration"/>
+    </bean>
+    <bean id="encryptedProperties" class="org.jasypt.spring31.xml.encryption.EncryptablePropertiesFactoryBean">
+        <property name="encryptor" ref="configurationEncryptor" />
+        <property name="locations">
+	        <list>
+	            <value>classpath:tfs.properties</value>
+	        </list>
+        </property>
+    </bean>
+
+    <!--<bean id="appProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">-->
+        <!--<property name="locations">-->
+            <!--<list>-->
+                <!--<value>classpath:tfs-marv.properties</value>-->
+            <!--</list>-->
+        <!--</property>-->
+        <!--<property name="ignoreResourceNotFound" value="true"/>-->
+    <!--</bean>-->
+
+    <!--<context:property-placeholder location="classpath:tfs-marv.properties" ignore-unresolvable="true" local-override="true"/>-->
+
+    <context:annotation-config/>
+
+    <!-- these two are use to initialize the event publisher and the event listener registrar -->
+    <bean id="eventPublisher" class="com.incuventure.ddd.infrastructure.events.impl.SimpleEventPublisher"/>
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.EventListenerProcessor"/>
+    <bean class="com.incuventure.cqrs.infrastructure.StandardCommandHandlerProvider"/>
+
+    <!-- RMI services go here -->
+
+
+    <!-- this is for the new API dispatcher -->
+    <bean class="com.incuventure.cqrs.infrastructure.StandardAPICallDispatcher"/>
+    <bean class="com.incuventure.cqrs.infrastructure.StandardAPIHandlerProvider"/>
+
+    <bean id="commandBusService" class="com.incuventure.cqrs.infrastructure.StandardCommandBus"/>
+    <bean id="queryBusService" class="com.incuventure.cqrs.infrastructure.StandardQueryBus"/>
+    <bean id="myQueryBus" class="com.incuventure.cqrs.infrastructure.StandardQueryBus"/>
+    <!--The bean id has to be the same name as the interface since we're just using this from within QueryBus-->
+    <bean id="TokenProvider" class="com.incuventure.cqrs.infrastructure.StandardTokenProvider"/>
+    <!--This provides the values for the select boxes-->
+    <bean id="SelectBoxDataProvider" class="com.ucpb.tfs.infrastructure.query.ReflectionSelectBoxDataProvider"/>
+
+    <!--cif normalization log-->
+    <bean id="cifNormalizationLogService" class="com.ucpb.tfs.application.service.CifNormalizationLogService"/>
+    <bean id="cifNormalizationLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.CifNormalizationLogRepositoryImpl"/>
+
+    <!-- this provides the AD authenticaor -->
+    <!--<bean id="AuthenticationProvider" class="com.ipc.rbac.infrastructure.rest.ADAuthenticationProvider"/>-->
+    <bean id="AuthenticationProvider" class="com.ucpb.tfs.infrastructure.query.TFSAuthenticationProvider"/>
+
+    <!-- TFS2, revised security stuff -->
+    <bean id="adAuth" class="com.ucpb.tfs2.application.service.ADAuthenticationService"/>
+    <bean id="tfsAuth" class="com.ucpb.tfs2.application.service.TFSAuthenticationService"/>
+
+    <!-- provider for userid/password validation, NOTE: this is for user validation not the service for the web -->
+    <bean class="com.ucpb.tfs.application.service.TestAuthenticationProvider"/>
+    <!--<bean class="com.ucpb.tfs.application.service.ADAuthenticationProvider"/>-->
+    <!-- create an auth bean based on what is specified in the properties file -->
+    <!--<bean name="authenticationBean" class="com.ucpb.tfs.utils.MyFactoryBean">-->
+    <!--<property name="targetClass" value="${tfs.authentication.class}"/>-->
+    <!--</bean>-->
+
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="service" ref="commandBusService"/>
+        <property name="serviceInterface" value="com.incuventure.cqrs.command.CommandBus"/>
+        <property name="serviceName" value="commandBusService"/>
+        <property name="registryPort" value="${tfs.rmi.port}"/>
+    </bean>
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="service" ref="queryBusService"/>
+        <property name="serviceInterface" value="com.incuventure.cqrs.query.QueryBus"/>
+        <property name="serviceName" value="queryBusService"/>
+        <property name="registryPort" value="${tfs.rmi.port}"/>
+    </bean>
+
+    <!-- command / event component scanner -->
+    <context:component-scan base-package="com.ucpb.tfs.application.commandHandler"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.instruction.event"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.service.event"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.service.event.charge"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.payment.event"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.report.event"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.routing"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.application.api"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.infrastructure.rest"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs2.infrastructure.rest"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.domain.corresCharges.event"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs2.application.infrastructure"/>
+    <context:component-scan base-package="com.ucpb.tfs2.application.service"></context:component-scan>
+
+    <context:component-scan base-package="com.ucpb.tfs2.infrastructure.rest"></context:component-scan>
+
+    <!-- command / event component scanner -->
+    <context:component-scan base-package="com.ucpb.tfs.domain.product.event"></context:component-scan>
+
+    <context:component-scan base-package="com.ucpb.tfs.utils"/>
+    <context:component-scan base-package="com.ucpb.tfs.domain.payment"/>
+    <context:component-scan base-package="com.ucpb.tfs.domain.cdt.event"/>
+    
+    <context:component-scan base-package="com.ucpb.tfs.domain.email"/>
+    <context:component-scan base-package="com.ucpb.tfs.domain.email.service"/>
+
+    <!-- DataSource: hsqldb file -->
+    <!--destroy-method="close"-->
+    <!--<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" >-->
+    <!--<property name="driverClassName" value="${tfs.jdbc.driverClassName}" />-->
+    <!--<property name="url" value="${tfs.jdbc.url}" />-->
+    <!--<property name="username" value="${tfs.jdbc.username}" />-->
+    <!--<property name="password" value="${tfs.jdbc.password}" />-->
+    <!--</bean>-->
+
+    <!--<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true" />-->
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/accounting</value>
+                <value>classpath:hibernate/mapping/audit</value>
+                <value>classpath:hibernate/mapping/cdt</value>
+                <value>classpath:hibernate/mapping/condition</value>
+                <value>classpath:hibernate/mapping/corresCharges</value>
+                <value>classpath:hibernate/mapping/documents</value>
+                <value>classpath:hibernate/mapping/instruction</value>
+                <value>classpath:hibernate/mapping/letter</value>
+                <value>classpath:hibernate/mapping/mt</value>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/product</value>
+                <value>classpath:hibernate/mapping/rbac</value>
+                <value>classpath:hibernate/mapping/reference</value>
+                <value>classpath:hibernate/mapping/reimbursing</value>
+                <value>classpath:hibernate/mapping/report</value>
+                <value>classpath:hibernate/mapping/routing</value>
+                <value>classpath:hibernate/mapping/security</value>
+                <value>classpath:hibernate/mapping/service</value>
+                <value>classpath:hibernate/mapping/settlementaccount</value>
+                <value>classpath:hibernate/mapping/swift</value>
+                <value>classpath:hibernate/mapping/sysparams</value>
+                <value>classpath:hibernate/mapping/task</value>
+                <value>classpath:hibernate/mapping/casa</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.hbm2ddl.import_files">/bootstrap/databootstrap-db2.sql,/bootstrap/referenceBootstrap.sql,/bootstrap/create-job-history-tables.sql</prop>
+                <!--<prop key="hibernate.hbm2ddl.import_files">${tfs.hibernate.bootstrap}</prop>-->
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">jta</prop>-->
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.connection.pool_size">${hibernate.connection.pool_size}</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.cache.provider_class">org.infrastructure.repositories.hibernate.cache.NoCacheProvider</prop>-->
+                <prop key="hibernate.transaction.jta.platform">
+                    org.hibernate.service.jta.platform.internal.BitronixJtaPlatform
+                </prop>
+
+                <!-- Hibernate Envers configuration (audit logging) -->
+                <!-- http://docs.jboss.org/hibernate/orm/4.0/devguide/en-US/html/ch15.html -->
+                <prop key="org.hibernate.envers.audit_table_suffix">_AUDIT</prop>
+                <prop key="org.hibernate.envers.revision_field_name">REV_ID</prop>
+                <prop key="org.hibernate.envers.revision_type_field_name">REV_TYPE</prop>
+            </props>
+        </property>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+        <!--set false to prevent UnexpectedRollbackException-->
+        <property name="globalRollbackOnParticipationFailure" value="false"/>
+    </bean>
+
+    <!--this one is for CQRS rest with MyBatis-Spring -->
+
+    <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+    <!--<property name="dataSource" ref="myDataSource"/>-->
+    <!--<property name="mapperLocations" value="classpath*:/mybatis/mapping/**/*.xml"/>-->
+    <!--</bean>-->
+    <bean id="myDataSource" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="#{encryptedProperties['tfs.jdbc.driverClassName']}"/>
+        <property name="url" value="#{encryptedProperties['tfs.jdbc.url']}"/>
+        <property name="username" value="#{encryptedProperties['tfs.jdbc.username']}"/>
+        <property name="password" value="#{encryptedProperties['tfs.jdbc.password']}"/>
+        <!--<property name="defaultAutoCommit" value="true"/>-->
+    </bean>
+    
+    <bean id="sqlSessionFactoryAlt" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mybatis/mapping/**/*.xml</value>
+                <value>classpath*:/mappers/batch-process-mapper.xml</value>
+                <value>classpath*:/mappers/sequence-mapper.xml</value>
+                <value>classpath*:/mappers/trade-product-mapper.xml</value>
+                <value>classpath*:/mappers/allocations-mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="finderComponentScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryAlt"/>
+        <property name="basePackage" value="com.ipc.rbac.application.query,
+                                            com.ucpb.tfs.application.query.instruction,
+                                            com.ucpb.tfs.application.query.settlementaccount,
+                                            com.ucpb.tfs.application.query.task,
+                                            com.ucpb.tfs.application.query.service,
+                                            com.ucpb.tfs.application.query.reference,
+                                            com.ucpb.tfs.application.query.routing,
+                                            com.ucpb.tfs.application.query.payment,
+                                            com.ucpb.tfs.application.query.mtmessage,
+                                            com.ucpb.tfs.application.query.documents,
+                                            com.ucpb.tfs.application.query.reimbursing,
+                                            com.ucpb.tfs.application.query.condition,
+                                            com.ucpb.tfs.application.query.letter,
+                                            com.ucpb.tfs.application.query.swift,
+                                            com.ucpb.tfs.application.query2,
+                                            com.ucpb.tfs.report.dw.regen.dao,
+											com.ucpb.tfs.core.batch.process.allocationUnitCode.dao"/>
+
+        <property name="processPropertyPlaceHolders" value="true"/>
+    </bean>
+
+    <bean id="batchProcessDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.dao.BatchProcessDao"/>
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt"/>
+    </bean>
+
+
+    <bean id="serviceInstructionFactory"
+          class="com.ucpb.tfs.domain.instruction.infrastructure.factories.ServiceInstructionFactoryImpl"/>
+
+    <bean id="serviceInstructionRepository"
+          class="com.ucpb.tfs.domain.instruction.infrastructure.repositories.hibernate.HibernateServiceInstructionRepository"/>
+
+    <bean id="tradeServiceRepository"
+          class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+
+    <bean id="tradeProductRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateTradeProductRepository"/>
+
+    <bean id="letterOfCreditRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateLetterOfCreditRepository"/>
+
+    <bean id="productReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateProductReferenceRepository"/>
+
+    <bean id="tradeServiceChargeReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateTradeServiceChargeReferenceRepository"/>
+
+    <bean id="taskRepository"
+          class="com.ucpb.tfs.domain.task.infrastructure.repositories.hibernate.HibernateTaskRepository"/>
+
+    <bean id="etsPaymentRepository"
+          class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernateEtsPaymentRepository"/>
+
+    <bean id="paymentRepository"
+          class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernatePaymentRepository"/>
+
+    <bean id="routeRepository"
+          class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRouteRepository"/>
+
+    <bean id="routingInformationRepository"
+          class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRoutingInformationRepository"/>
+
+    <bean id="userRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateUserRepository"/>
+    <bean id="objectRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateObjectRepository"/>
+    <bean id="permissionRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernatePermissionRepository"/>
+    <bean id="roleRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateRoleRepository"/>
+    <bean id="employeeRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateEmployeeRepository"/>
+    <bean id="positionRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernatePositionRepository"/>	
+    <bean id="designationRepository"
+          class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateDesignationRepository"/>
+	<bean id="BranchUnitRepository"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateBranchUnitRepository" />
+	<bean id="RefRequiredDocuments"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefRequiredDocumentsRepository" />
+	<bean id="RefTransmittalLetter"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefTransmittalLetterRepository" />
+	<bean id="RefAdditionalCondition"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefAdditionalConditionRepository" />
+	<bean id="RefInstructionToBank"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefInstructionToBankRepository" />
+	<bean id="RefFirmLib"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefFirmLibRepository" />
+	<bean id="CutOff"
+		  class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateCutOffRepository" />		  
+	
+    <bean id="chargeRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateChargeRepository"/>
+    <bean id="accountingEventsRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEventRepository"/>
+    <bean id="accountingEntryRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEntryRepository"/>
+    <bean id="accountingEntryActualRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEntryActualRepository"/>
+    <bean id="productServiceAccountingEventTransactionReferenceRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateProductServiceAccountingEventTransactionReferenceRepository"/>
+
+    <bean id="chargeAccountingCodeRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateChargeAccountingCodeRepository"/>
+
+    <bean id="chargeDefaultsReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateChargeDefaultsReferenceRepository"/>
+
+    <bean id="accountingVariablesRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingVariablesRepository"/>
+
+    <bean id="accountingEntryActualVariablesRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateAccountingEntryActualVariablesRepository"/>
+
+    <bean id="profitLossHolderRepository"
+          class="com.ucpb.tfs.domain.accounting.infrastructure.repositories.hibernate.HibernateProfitLossHolderRepository"/>
+
+    <bean id="etsServiceChargeRepository"
+          class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateEtsServiceChargeRepository"/>
+
+    <!-- TFS2 stuff -->
+    <!-- CDT -->
+    <bean id="cdtPaymentRequestRepository"
+          class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateCDTPaymentRequestRepository"/>
+
+    <bean id="cdtReportControlReferenceRepository"
+          class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateCDTReportControlReferenceRepository"/>
+
+    <bean id="cdtPaymentHistoryRepository"
+          class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateCDTPaymentHistoryRepository"/>
+
+    <bean id="cdtRemittanceRepository"
+            class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateCDTRemittanceRepository"/>
+    <bean id="refPas5ClientRepository"
+          class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateRefPas5ClientRepository"/>
+
+    <bean id="chargesParameterRepository"
+        class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateChargesParameterRepository"/>
+
+	<bean id="amlaExpiredLcService" class="com.ucpb.tfs.application.service.AmlaExpiredLcService">
+        <constructor-arg index="0" ref="gltsSequenceRepository"/>
+        <constructor-arg index="1" ref="myDataSource"/>
+        <property name="gltsSequenceRepository" ref="gltsSequenceRepository"/>
+        <property name="ratesService" ref="RatesService"/>
+        <property name="tfsDataSource" ref="myDataSource"/>
+        <property name="transLogRepository" ref="transactionLogRepository"/>
+        <property name="customerAccountLogRepository" ref="customerAccountLogRepository"/>
+        <property name="accountLogRepository" ref="accountLogRepository"/>
+        <property name="accountingEntryActualRepository" ref="accountingEntryActualRepository"/>
+        <property name="tradeProductRepository" ref="tradeProductRepository"/>
+        <property name="tradeServiceRepository" ref="tradeServiceRepository"/>
+        <property name="directory" value="${expired.amla.directory}"/>
+     </bean>
+	
+		  
+    <bean id="cdtService" class="com.ucpb.tfs2.application.service.CDTService"/>
+    <bean id="documentNumberService" class="com.ucpb.tfs2.application.service.DocumentNumberService"/>
+    <bean id="tradeServiceReferenceNumberService"
+          class="com.ucpb.tfs2.application.service.TradeServiceReferenceNumberService"/>
+    <bean id="tradeServiceService" class="com.ucpb.tfs2.application.service.TradeServiceService"/>
+    <bean id="securityService" class="com.ucpb.tfs2.application.service.SecurityService">
+        <!--if no tfs.authenticationProvider set on properties, tfsAuth bean will be used-->
+        <property name="authenticationProvider" ref="${tfs.authenticationProvider:tfsAuth}"/>
+    </bean>
+
+    <bean id="unactedService" class="com.ucpb.tfs2.application.service.UnactedService"/>
+
+    <bean id="paymentService" class="com.ucpb.tfs2.application.service.PaymentService"/>
+
+    <!--ref casa account-->
+    <bean id="refCasaAccountService" class="com.ucpb.tfs.domain.casa.services.RefCasaAccountServiceImpl"/>
+    <bean id="refCasaAccountRepository" class="com.ucpb.tfs.domain.casa.infrasctructure.repositories.HibernateRefCasaAccountRepository"/>
+
+    <!-- import advance -->
+    <bean id="importAdvanceRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateImportAdvanceRepository"/>
+    <bean id="exportAdvanceRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateExportAdvanceRepository"/>
+
+    <bean id="exportAdvisingRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateExportAdvisingRepository"/>
+
+    <bean id="exportBillsRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateExportBillsRepository"/>
+
+    <bean id="rebateRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateRebateRepository"/>
+
+    <bean id="pas5FilesLoaderService" class="com.ucpb.tfs.domain.cdt.services.PAS5FilesLoaderService"/>
+
+
+    <bean id="outgoingMTRepository"
+          class="com.ucpb.tfs.domain.mt.infrastructure.repositories.hibernate.HibernateOutgoingMTRepository"/>
+
+    <!-- this is used when we connect to the database during Spring Context initialization -->
+    <bean id="sharedTransactionTemplate"
+          class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <bean id="settlementAccountRepository"
+          class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateSettlementAccountRepository"/>
+    <bean id="marginalDepositRepository"
+          class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateMarginalDepositRepository"/>
+    <bean id="accountsPayableRepository"
+          class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateAccountsPayableRepository"/>
+    <bean id="accountsReceivableRepository"
+          class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateAccountsReceivableRepository"/>
+
+    <bean id="remarksRepository"
+          class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRemarksRepository"/>
+
+    <bean id="lcNegotiationRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateLCNegotiationRepository"/>
+
+    <bean id="transactionLogRepository"
+          class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateTransactionLogRepository"/>
+    <bean id="customerAccountLogRepository"
+          class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCustomerAccountLogRepository"/>
+    <bean id="accountLogRepository"
+          class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateAccountLogRepository"/>
+    <bean id="customerLogRepository"
+          class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCustomerLogRepository"/>
+    <bean id="valueHolderRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateValueHolderRepository"/>
+
+    <bean id="mtMessageRepository"
+          class="com.ucpb.tfs.domain.mtmessage.infrastructure.repositories.hibernate.HibernateMtMessageRepository"/>
+
+    <bean id="requiredDocumentRepository"
+          class="com.ucpb.tfs.domain.documents.infrastructure.repositories.hibernate.HibernateRequiredDocumentRepository"/>
+    <bean id="requiredDocumentsReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateRequiredDocumentsReferenceRepository"/>
+
+    <bean id="corresChargeAdvanceRepository" class="com.ucpb.tfs.domain.corresCharges.infrastructure.repositories.hibernate.HibernateCorresChargeAdvanceRepository" />
+    <bean id="corresChargeActualRepository" class="com.ucpb.tfs.domain.corresCharges.infrastructure.repositories.hibernate.HibernateCorresChargeActualRepository" />
+
+    <bean id="lcRequiredDocumentRepository"
+          class="com.ucpb.tfs.domain.documents.infrastructure.repositories.hibernate.HibernateLcRequiredDocumentRepository"/>
+
+    <bean id="instructionToBankRepository"
+          class="com.ucpb.tfs.domain.reimbursing.infrastructure.repositories.hibernate.HibernateInstructionToBankRepository"/>
+    <bean id="instructionToBankReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateInstructionToBankReferenceRepository"/>
+
+    <bean id="lcInstructionToBankRepository"
+          class="com.ucpb.tfs.domain.reimbursing.infrastructure.repositories.hibernate.HibernateLcInstructionToBankRepository"/>
+
+    <bean id="additionalConditionRepository"
+          class="com.ucpb.tfs.domain.condition.infrastructure.repositories.hibernate.HibernateAdditionalConditionRepository"/>
+    <bean id="additionalConditionReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateAdditionalConditionReferenceRepository"/>
+
+    <bean id="lcAdditionalConditionRepository"
+          class="com.ucpb.tfs.domain.condition.infrastructure.repositories.hibernate.HibernateLcAdditionalConditionRepository"/>
+
+    <bean id="transmittalLetterRepository"
+          class="com.ucpb.tfs.domain.letter.infrastructure.repositories.hibernate.HibernateTransmittalLetterRepository"/>
+    <bean id="transmittalLetterReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateTransmittalLetterReferenceRepository"/>
+
+    <bean id="documentFormatReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateDocumentFormatReferenceRepository"/>
+
+    <bean id="dailyBalanceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateDailyBalanceRepository"/>
+
+    <bean id="swiftChargeRepository"
+          class="com.ucpb.tfs.domain.swift.infrastructure.repositories.hibernate.HibernateSwiftChargeRepository"/>
+    <bean id="swiftChargeReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateSwiftChargeReferenceRepository"/>
+    <!-- <bean id="simpleSwiftMessageParser" class="com.ucpb.tfs.swift.message.parser.SimpleSwiftMessageParser"/> -->
+	<bean id="simpleSwiftMessageParser" class="com.ucpb.tfs.swift.message.parser.SwiftReportMessageParser"/>
+
+    <bean id="refCustomerRepository"
+          class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefCustomerRepository"/>
+    <bean id="refCustomerService" class="com.ucpb.tfs2.application.service.RefCustomerService"/>
+
+    <bean id="refCountryRepository"
+          class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefCountryRepository"/>
+    <bean id="refCountryService" class="com.ucpb.tfs2.application.service.RefCountryService"/>
+
+    <bean id="refBankRepository"
+          class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefBankRepository"/>
+
+    <bean id="refProductServiceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateProductServiceReferenceRepository"/>
+    <bean id="refProductServiceService" class="com.ucpb.tfs2.application.service.RefProductServiceService"/>
+
+    <bean id="casaTransactionLogRepository"
+          class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCasaTransactionLogRepository"/>
+
+    <bean id="nonLcRepository" class="com.ucpb.tfs.domain.product.HibernateNonLcRepository"/>
+
+    <bean id="refBranchRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateRefBranchRepository"/>
+
+    <!-- <bean id="refChargesDefaultRepository" class="com.ucpb.tfs.domain.sysparams.infrastructure.repositories.hibernate.HibernateRefChargesDefaultRepository" /> -->
+
+    <!-- for payment logs -->
+    <bean id="dailyFundingRepository"
+          class="com.ucpb.tfs.domain.report.infrastructure.repositories.hibernate.HibernateDailyFundingRepository"/>
+
+    <!--for service charge-->
+    <bean id="serviceChargeRepository"
+          class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateServiceChargeRepository" />
+
+	<!-- for lc-negotiation and nonlc-settlement -->
+    <bean id="bookingSettlementRepository"
+          class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateBookingSettlementRepository"/>
+
+    <bean id="attachmentRepository"
+          class="com.ucpb.tfs.domain.attach.infrastructure.repositories.hibernate.HibernateAttachmentRepository"/>
+
+    <!-- these are for the tfs2 services -->
+    <bean id="serviceInstructionService" class="com.ucpb.tfs2.application.service.ServiceInstructionService"/>
+    <bean id="outgoingMTService" class="com.ucpb.tfs2.application.service.OutgoingMTService"/>
+
+    <!-- This will scan our bootstrap application context listeners-->
+    <context:component-scan base-package="com.ucpb.tfs.application.bootstrap"></context:component-scan>
+
+    <!-- Services -->
+    <bean id="chargesService" class="com.ucpb.tfs.application.service.ChargesService"/>
+    <bean id="chargeLookup" class="com.ucpb.tfs.application.bootstrap.ChargesLookup"/>
+    <bean id="accountingLookup" class="com.ucpb.tfs.application.bootstrap.AccountingLookup"/>
+    <bean id="accountingService" class="com.ucpb.tfs.application.service.AccountingService"/>
+    <bean id="conversionService" class="com.ucpb.tfs.application.service.ConversionService">
+        <property name="ratesService" ref="RatesService"/>
+    </bean>
+    <bean id="gltsSequenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateGltsSequenceRepository"/>
+
+    <bean id="mapper" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>dozer/routing.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- _AUDIT regen -->
+    <bean id="auditRegenService" class="com.ucpb.tfs.application.service.AuditRegenService"/>
+
+    <!-- AD Authentication -->
+    <bean id="adAuthenticationProvider"
+          class="com.ucpb.tfs2.application.service.CustomAdAuthenticationProvider">
+        <constructor-arg value="${ldap.domain}"/>
+        <constructor-arg value="#{encryptedProperties['ldap.url']}"/>
+        <constructor-arg value="${ldap.base}"/>        
+        <constructor-arg value="${ldap.directory}"/>
+        <property name="useAuthenticationRequestCredentials" value="true"/>
+        <property name="convertSubErrorCodesToExceptions" value="true"/>
+        <!--<property name="userDetailsContextMapper" ref="tdrUserDetailsContextMapper"/>-->
+    </bean>
+
+    <!-- AD Authentication Branch -->
+    <bean id="adAuthenticationProviderBranch"
+          class="com.ucpb.tfs2.application.service.CustomAdAuthenticationProvider">
+        <constructor-arg value="${ldap.branch.domain}"/>
+        <constructor-arg value="#{encryptedProperties['ldap.branch.url']}"/>        
+        <constructor-arg value="${ldap.branch.base}"/>  
+        <constructor-arg value="${ldap.branch.directory}"/>
+        <property name="useAuthenticationRequestCredentials" value="true"/>
+        <property name="convertSubErrorCodesToExceptions" value="true"/>
+        <!--<property name="userDetailsContextMapper" ref="tdrUserDetailsContextMapper"/>-->
+    </bean>
+
+    <bean id="tdrUserDetailsContextMapper" class="com.ucpb.tfs2.application.service.UserDetailsContextMapperImpl"/>
+
+    <!-- AD Use search -->
+    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource">
+        <property name="url" value="#{encryptedProperties['ldap.url']}"/>
+        <property name="base" value="${ldap.base}"/>
+        <property name="userDn" value="#{encryptedProperties['ldap.userdn']}"/>
+        <property name="password" value="#{encryptedProperties['ldap.password']}"/>
+        <!--<property name="pooled" value="true" />-->
+        <!-- AD Specific Setting for avoiding the partial exception error -->
+        <property name="referral" value="ignore"/>
+    </bean>
+
+    <!-- AD Use search Branch -->
+    <bean id="contextSourceBranch" class="org.springframework.ldap.core.support.LdapContextSource">
+        <property name="url" value="#{encryptedProperties['ldap.branch.url']}"/>
+        <property name="base" value="${ldap.branch.base}"/>
+        <property name="userDn" value="#{encryptedProperties['ldap.branch.userdn']}"/>
+        <property name="password" value="#{encryptedProperties['ldap.branch.password']}"/>
+        <!--<property name="pooled" value="true" />-->
+        <!-- AD Specific Setting for avoiding the partial exception error -->
+        <property name="referral" value="ignore"/>
+    </bean>
+
+    <bean id="transactionLogger" class="com.ucpb.tfs.domain.service.event.AmlaInformationLogger">
+        <property name="transactionLogRepository" ref="transactionLogRepository"/>
+        <property name="accountLogRepository" ref="accountLogRepository"/>
+        <property name="customerAccountLogRepository" ref="customerAccountLogRepository"/>
+        <property name="customerLogRepository" ref="customerLogRepository"/>
+        <property name="transactionLogMappers" ref="transactionLogMappers"/>
+        <property name="accountLogMappers" ref="accountLogMappers"/>
+        <property name="customerAccountLogMappers" ref="customerAccountLogMappers"/>
+        <property name="customerLogMappers" ref="customerLogMappers"/>
+        <property name="conversionService" ref="conversionService"/>
+        <property name="paymentRepository" ref="paymentRepository"/>
+        <property name="customerInformationFileService" ref="CustomerInformationFileService"/>
+        <property name="enabled" value="true"/>
+    </bean>
+
+    <bean id="interfaceDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="#{encryptedProperties['interface.jdbc.driverClassName']}"/>
+        <property name="url" value="#{encryptedProperties['interface.jdbc.url']}"/>
+        <property name="username" value="#{encryptedProperties['interface.jdbc.username']}"/>
+        <property name="password" value="#{encryptedProperties['interface.jdbc.password']}"/>
+    </bean>
+
+    <!--marv.28Jul2013.start - run this at least once if you haven't done so-->
+<!--     <jdbc:initialize-database data-source="interfaceDataSource" enabled="true" ignore-failures="ALL"> -->
+<!--         <jdbc:script location="classpath:mockddl/loans/add-fields-UCDATULNS2-LNFINT.sql" /> -->
+<!--     </jdbc:initialize-database> -->
+<!--     marv.28Jul2013.end -->
+
+<!-- 	<jdbc:initialize-database data-source="interfaceDataSource" enabled="true"> -->
+<!--         <jdbc:script location="classpath:mockddl/functions/create-replace-function.sql"/> -->
+<!--     </jdbc:initialize-database> -->
+    <!--<jdbc:initialize-database data-source="interfaceDataSource" enabled="false" ignore-failures="ALL">-->
+                     <!--&lt;!&ndash;FUNCTIONS and SPs &ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/functions/create-digits-function.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/functions/create-to-date-function.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/functions/create-getCurrentDate-function.sql"/>-->
+
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/create-ucdatpbwc-schema.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/create-ucdatubwc1-schema.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/create-cifmast-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/create-cif-addr-table.sql"/>-->
+        <!--&lt;!&ndash;         UCDATPLNS (FACILITIES) &ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-ucdatplns-schema.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-ucdatulns1-schema.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-facility-accounts-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-facility-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-facility-availment-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-contingent-availment-table-lnfcon.sql"/>-->
+        <!--&lt;!&ndash;         UCPARPCMN (RATES) &ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-ucparucmn1-schema.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-daily-rates-table-jhfxdt.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-rates-definition-table-jhfxpr.sql"/>-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucparpcmn/insert-rates-definition-data.sql"/>&ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/insert-mock-rates-data.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-holiday-table.sql"/>-->
+
+        <!--&lt;!&ndash;         UCDATPLNS (LOANS) &ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-loan-table-lntfint.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatplns/create-loan-exception-table.sql"/>-->
+
+        <!--&lt;!&ndash;  UCPARPCMN (OFFICERS) &ndash;&gt;-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-officers-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/insert-officers-data.sql"/>-->
+
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-jhparl-table.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/create-officers-lnpan4-table.sql"/>-->
+
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/insert-ccbd-data.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucparpcmn/insert-ccbd-unit-data.sql"/>-->
+
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-data.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data2.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data3.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data4.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data5.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-facility-data6.sql"/>-->
+        <!--<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-addr.sql"/>-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/create-cfacct-table.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts2.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts3.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts4.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts5.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts6.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts7.sql"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<jdbc:script location="classpath:mockddl/ucdatpbwc/insert-cif-accounts8.sql"/>&ndash;&gt;-->
+        <!--<jdbc:script location="classpath*:mockddl/ucparpcmn/insert-jhparl-ucpb-groups-data.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucparpcmn/insert-lnpan4-loan-officers-data.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpgld/create-ucdatugld-schema.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpgld/create-gl-mast-table.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpgld/insert-gl-mast-data.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpglk/create-ucdatprbk-schema.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpglk/create-cifaccount-details.sql"/>-->
+        <!--<jdbc:script location="classpath*:mockddl/ucdatpglk/insert-cif-account-details-data.sql"/>-->
+    <!--</jdbc:initialize-database>-->
+
+
+    <bean id="LoanService" class="com.ucpb.tfs.interfaces.services.impl.LoanServiceImpl">
+        <property name="loanRepository" ref="loanRepository"/>
+        <property name="sequenceService" ref="sequenceService"/>
+    </bean>
+
+    <bean id="FacilityService" class="com.ucpb.tfs.interfaces.services.impl.FacilityServiceImpl">
+        <property name="facilityRepository" ref="facilityRepository"/>
+        <property name="ratesService" ref="RatesService"/>
+        <property name="sequenceService" ref="sequenceService"/>
+    </bean>
+
+    <bean id="sequenceService" class="com.ucpb.tfs.interfaces.services.impl.SequenceServiceImpl">
+        <property name="sequenceRepository" ref="sequenceRepository"/>
+    </bean>
+
+    <bean id="sequenceRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.SequenceRepository"/>
+        <property name="sqlSessionFactory" ref="sqlSessionFactoryAlt"/>
+    </bean>
+
+    <bean id="tfsCasaService" class="com.ucpb.tfs2.application.service.casa.CasaService">
+        <!--<property name="username" value="${casa.userId}"/>-->
+        <property name="username" value="#{encryptedProperties['casa.userId']}"/>
+        <!--<property name="password" value="${casa.password}"/>-->
+        <property name="password" value="#{encryptedProperties['casa.password']}"/>
+        <property name="casaService" ref="CasaService"/>
+        <property name="casaTransactionLogRepository" ref="casaTransactionLogRepository"/>
+        <property name="refBranchRepository" ref="refBranchRepository"/>
+        <property name="conversionService" ref="conversionService"/>
+    </bean>
+
+    <bean id="mcoReportPersistenceService" class="com.ucpb.tfs.core.batch.process.McoReportPersistenceService">
+        <constructor-arg name="tfsDataSource" ref="myDataSource"/>
+    </bean>
+	
+    <!-- Branch / Allocation Unit Code service -->
+    <bean id="allocationUnitCodeService" class="com.ucpb.tfs.application.service.AllocationUnitCodeService"/>
+    
+    <bean id="tempDataSource" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="#{encryptedProperties['tfs.jdbc.driverClassName']}"/>
+        <property name="url" value="#{encryptedProperties['tfstemp.jdbc.url']}"/>
+        <property name="username" value="#{encryptedProperties['tfs.jdbc.username']}"/>
+        <property name="password" value="#{encryptedProperties['tfs.jdbc.password']}"/>
+    </bean>
+</beans>

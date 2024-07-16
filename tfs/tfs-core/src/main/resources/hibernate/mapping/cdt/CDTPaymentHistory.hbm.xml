@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.cdt.CDTPaymentHistory" table="CDTPaymentHistory">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="iedieirdNumber" column="IEDIEIRDNO" type="string" length="20"/>
+
+        <property name="dateUploaded" column="DATE_UPLOADED" type="java.util.Date"/>
+
+        <property name="amount" column="AMOUNT" type="java.math.BigDecimal"/>
+
+        <property name="unitCode" column="UNITCODE" type="string" length="3"/>
+    </class>
+
+</hibernate-mapping>

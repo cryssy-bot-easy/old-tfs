@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.cdt.CDTRemittance" table="CDTRemittance">
+
+        <!--<id name="iedieirdNumber" column="IEDIEIRDNO" type="string" length="20"/>-->
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="processDate" column="processDate" type="java.util.Date"/>
+
+        <property name="processingUnitCode" column="processingUnitCode" type="string" length="3"/>
+
+        <property name="transactionCode" column="transactionCode" type="string"/>
+
+        <property name="remittanceDate" column="remittanceDate" type="java.util.Date"/>
+        <property name="collectionFrom" column="collectionFrom" type="java.util.Date"/>
+        <property name="collectionTo" column="collectionTo" type="java.util.Date"/>
+
+        <property name="totalRemitted" column="totalRemitted" type="java.math.BigDecimal"/>
+
+		 <property name="finalAmount" column="finalAmount" type="java.math.BigDecimal"/>
+
+        <property name="paymentRequestType" column="paymentRequestType" length="7">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.PaymentRequestType</param>
+            </type>
+        </property>
+
+    </class>
+
+</hibernate-mapping>

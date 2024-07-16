@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<!-- TFS e-mail -->
+    <bean id="smtpAuthenticator" class="com.ucpb.tfs.domain.email.SmtpAuthenticator">
+    	<constructor-arg value="#{encryptedProperties['mail.smtp.username']}" />
+    	<constructor-arg value="#{encryptedProperties['mail.smtp.password']}" />
+	</bean>
+	
+	<bean id="mailFrom" class="com.ucpb.tfs.domain.email.MailFrom">
+		<property name="from" value="${mail.smtp.from}" />
+	</bean>
+
+	<bean id="mailSession" class="javax.mail.Session" factory-method="getInstance">
+		<constructor-arg>
+			<props>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtp.port">${mail.smtp.socketFactory.port}</prop>
+				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+				<prop key="mail.smtp.ssl.protocolsdd">TLSv1.2</prop>
+				<prop key="mail.smtp.ssl.trust">#{encryptedProperties['mail.smtp.ssl.trust']}</prop>
+				<prop key="mail.smtp.enableNotification">${mail.smtp.enableNotification}</prop>
+				<prop key="mail.smtp.defaultAddress">${mail.smtp.defaultAddress}</prop>
+			</props>
+		</constructor-arg>
+		<constructor-arg ref="smtpAuthenticator" />
+	</bean>
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="#{encryptedProperties['mail.smtp.host']}" />
+		<property name="session" ref="mailSession" />
+	</bean>
+</beans>

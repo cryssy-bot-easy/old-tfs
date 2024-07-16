@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.service.ProductRefundDetail" table="ProductRefundDetail">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="transactionType" column="transactionType" length="50"/>
+
+        <component name="chargeId" class="com.ucpb.tfs.domain.reference.ChargeId">
+            <property name="chargeId" column="chargeId" type="string" length="20"/>
+        </component>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" />
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal" />
+        <property name="defaultAmount" column="defaultAmount" type="java.math.BigDecimal" />
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+        <property name="originalCurrency" column="originalCurrency" type="java.util.Currency" length="3"/>
+
+        <property name="newSpecialRateThirdToUsd" column="newSpecialRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="newSpecialRateThirdToPhp" column="newSpecialRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="newSpecialRateUsdToPhp" column="newSpecialRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="newUrr" column="newUrr" type="java.math.BigDecimal" scale="8"/>
+
+        <property name="refundAmountInDefaultCurrency" column="refundAmountInDefaultCurrency" type="java.math.BigDecimal" />
+        <property name="refundAmountInOriginalCurrency" column="refundAmountInOriginalCurrency" type="java.math.BigDecimal" />
+        <property name="newRefundAmountInOriginalCurrency" column="newRefundAmountInOriginalCurrency" type="java.math.BigDecimal" />
+
+    </class>
+
+</hibernate-mapping>

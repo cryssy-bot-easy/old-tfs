@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/swift-master"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:master="http://www.ucpb.com.ph/tfs/schemas/swift-master"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields" schemaLocation="swift-fields.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-message" schemaLocation="swift-message.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/mt1series" schemaLocation="mt1series.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/mt2series" schemaLocation="mt2series.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/mt4series" schemaLocation="mt4series.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/mt7series" schemaLocation="mt7series.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/mt9series" schemaLocation="mt9series.xsd"/>
+
+
+</xs:schema>

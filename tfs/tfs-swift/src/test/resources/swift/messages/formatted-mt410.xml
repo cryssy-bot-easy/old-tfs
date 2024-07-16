@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:mt410 xmlns:ns3="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+           xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/mt4series">
+    <ns3:basic_header>
+        <ns3:application_identifier/>
+        <ns3:service_identifier/>
+        <ns3:lt_identifier/>
+        <ns3:session_number/>
+        <ns3:sequence_number/>
+    </ns3:basic_header>
+    <ns3:application_header>
+        <ns3:io_identifier/>
+        <ns3:message_type>410</ns3:message_type>
+        <ns3:receiver_address/>
+        <ns3:message_priority/>
+        <ns3:delivery_monitoring/>
+        <ns3:obsolence_period/>
+    </ns3:application_header>
+    <field20 xmlns:ns="http://www.ucpb.com.ph/tfs/schemas/mt4series">THIS</field20>
+    <field21 xmlns:ns="http://www.ucpb.com.ph/tfs/schemas/mt4series">FIELD 21</field21>
+    <field72 xmlns:ns="http://www.ucpb.com.ph/tfs/schemas/mt4series">SENDER'S REFERENCE</field72>
+</ns2:mt410>

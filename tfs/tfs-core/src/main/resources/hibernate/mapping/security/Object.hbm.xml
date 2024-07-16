@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Object" table="Sec_Object">
+
+        <id name="code" column="code" type="string" length="30"/>
+        <property name="description" column="description" type="string" length="100"/>
+
+	</class>
+
+</hibernate-mapping>

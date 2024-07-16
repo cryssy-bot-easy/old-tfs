@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**  PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: created a new Event for AMLA
+	[Created by:] Jonh Henry Alabin
+	[Date deployed:] June 16,2017 
+	Program [Revision] Details: add new event and replace BPNegotiatedEvent to BPNegotiatedPriorBCEvent and BCSettledEvent to BCSettledPriorBCEvent 
+	PROJECT: CORE
+	MEMBER TYPE  : XML
+	Project Name: customer-accountlog-mapping.xml
+ */
+ -->
+ 
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="inheritedNonLCCustmrAcct" abstract="true" class="com.ucpb.tfs.utils.BeanMapper">
+        <constructor-arg name="properties">
+            <util:map>
+                <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                <entry key="dateCreated" value="new java.util.Date()"/>
+                <entry key="customerNumber" value="tradeService?.details?.get('cifNumber') ?: tradeService?.details?.get('importerCifNumber')"/>
+                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+    </bean>
+
+    <bean id="inheritedExportCustmrAcct" abstract="true" class="com.ucpb.tfs.utils.BeanMapper">
+        <constructor-arg name="properties">
+            <util:map>
+                <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                <entry key="dateCreated" value="new java.util.Date()"/>
+                <entry key="customerNumber" value="tradeService?.details?.get('cifNumber') ?: tradeService?.details?.get('exporterCifNumber')"/>
+                <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+    </bean>
+
+    <util:map id="customerAccountLogMappers">
+        <entry key="com.ucpb.tfs.domain.product.event.LetterOfCreditCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCAdjustedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumberTo') ?: tradeService?.details?.get('cifNumberFrom')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCAmendedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCNegotiationCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.tradeProductNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.LCCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvancePaymentCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvancePaymentRefundCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.corresCharges.event.CorresChargeActualApprovedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+<!--
+        <entry key="com.ucpb.tfs.domain.product.event.UALoanAdjustedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.UALoanPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+-->
+
+        <entry key="com.ucpb.tfs.domain.product.event.IndemnityCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+<!--
+        <entry key="com.ucpb.tfs.domain.product.event.IndemnityCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+-->
+
+<!-- Not reportable to AMLA as per Ma'am Juliet 2/8/2014
+        <entry key="com.ucpb.tfs.domain.product.event.RebateCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+-->
+
+        <entry key="com.ucpb.tfs.domain.settlementaccount.event.MarginalDepositUpdatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.APCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.APAppliedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ARCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ARSettledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.CashLcRefundEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.documentNumber?.toString()"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ImportChargesPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + (letterOfCredit != null ? letterOfCredit?.documentNumber?.toString() : tradeService?.details?.get('cifNumber'))"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportChargesPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + (tradeService?.documentNumber?.toString() ?: tradeService?.details?.get('cifNumber'))"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportChargesRefundEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber')"/>
+                        <entry key="accountNumber" value="'TFSS' + (tradeService?.documentNumber?.toString() ?: tradeService?.details?.get('cifNumber'))"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <!--Non-LC DA-->
+        <!-- Commented out; should only log AMLA when Accepted
+        <entry key="com.ucpb.tfs.domain.product.event.DACreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+        -->
+
+        <entry key="com.ucpb.tfs.domain.product.event.DAAcceptedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DASettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DACancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <!--Non-LC DP-->
+        <entry key="com.ucpb.tfs.domain.product.event.DPCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DPSettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DPCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <!--Non-LC DR-->
+        <entry key="com.ucpb.tfs.domain.product.event.DRCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DRSettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.DRCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <!--Non-LC OA-->
+        <entry key="com.ucpb.tfs.domain.product.event.OACreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.OASettlementCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.OACancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedNonLCCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BCNegotiatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BCSettledPriorBCEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BCCancelledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BPNegotiatedPriorBCEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.BPSettledEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingCreatedEvent">
+        	<bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingAmendedEvent">
+        	<bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+        
+        <entry key="com.ucpb.tfs.domain.product.event.ExportAdvisingCancelledEvent">
+        	<bean class="com.ucpb.tfs.utils.BeanMapper" parent="inheritedExportCustmrAcct"/>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.cdt.event.CDTPaymentRequestPaidEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber').trim()"/>
+                        <entry key="accountNumber" value="'TFSS' + cdtPaymentRequest?.iedieirdNumber"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.cdt.event.CDTRefundCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="tradeService?.details?.get('cifNumber').trim()"/>
+                        <entry key="accountNumber" value="'TFSS' + cdtPaymentRequest?.iedieirdNumber"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.product.event.CDTRemittanceCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="dateCreated" value="new java.util.Date()"/>
+                        <entry key="customerNumber" value="'B034786'"/>
+                        <entry key="accountNumber" value="'TFSS' + tradeService?.details?.get('bocAccount')"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerAccount"/>
+            </bean>
+        </entry>
+
+    </util:map>
+
+</beans>

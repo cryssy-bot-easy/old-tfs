@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.settlementaccount.IAccountsReceivableFinder">
+
+    <!-- TODO -->
+    <select id="arMonitoringInquiry" resultType="hashMap">
+        select ar.*,
+        ts.ccbdBranchUnitCode as unitCode
+        from AccountsReceivable ar
+        left join TradeService ts
+        on ar.tradeServiceId = ts.tradeServiceId
+        where ar.settlementAccountNumber is not null
+        <choose>
+        	<when test="referenceNumber != '' and documentNumber != ''">
+        	and (ar.settlementAccountNumber = #{referenceNumber}
+        	or ar.settlementAccountNumber = #{documentNumber})
+        	</when>
+	        <when test="referenceNumber != ''">
+	            and ar.settlementAccountNumber = #{referenceNumber}
+	        </when>
+	        <when test="documentNumber != ''">
+	            and ar.settlementAccountNumber = #{documentNumber}
+	        </when>
+        </choose>
+
+        <if test="cifName != ''">
+            and <![CDATA[(locate(ar.cifname,#{cifName}) <> 0
+            or locate(#{cifName},ar.cifname) <> 0)]]>
+        </if>
+
+        <if test="status != ''">
+            and ar.status = #{status}
+        </if>
+      
+      <choose>
+        <when test="unitCode != ''">
+            and ts.ccbdBranchUnitCode = #{unitCode}
+        </when>
+        <when test="unitcode != '' and unitcode != '909'">
+            and ts.ccbdBranchUnitCode = #{unitcode}
+        </when>
+       </choose>
+      	ORDER BY ar.modifiedDate DESC, ts.serviceInstructionId ASC
+    </select>
+
+
+    <!-- ========================================================================================================== -->
+
+
+    <select id="findAccountsReceivable" resultType="hashMap">
+      select
+        *
+      from
+        AccountsReceivable
+      where
+        id = #{id}
+    </select>
+
+    <!--<select id="findAllAccountsReceivableByCifNumber" resultType="hashMap">-->
+      <!--select -->
+        <!--a.*, -->
+        <!--b.arOutstandingBalance -->
+      <!--from (-->
+        <!--select-->
+          <!--distinct (ar.settlementAccountNumber),-->
+          <!--(select -->
+            <!--count(*) -->
+          <!--from -->
+            <!--AccountsReceivableActivity -->
+          <!--where -->
+            <!--referenceNumber = ar.settlementAccountNumber -->
+          <!--and -->
+            <!--activityType = 'CREDIT') as debitCount-->
+          <!---->
+          <!--from-->
+            <!--AccountsReceivable ar-->
+          <!--inner join-->
+            <!--AccountsReceivableActivity ara-->
+          <!--on-->
+            <!--ara.accountsReceivableId = ar.id-->
+          <!--and-->
+            <!--ara.activityType = 'CREDIT'-->
+          <!--where-->
+            <!--ar.cifNumber = #{cifNumber}-->
+      <!--)a-->
+
+      <!--left join-->
+
+      <!--(select -->
+        <!--arOutstandingBalance,-->
+        <!--settlementAccountNumber -->
+      <!--from -->
+        <!--AccountsReceivable) b-->
+
+      <!--on -->
+        <!--a.settlementAccountNumber = b.settlementAccountNumber-->
+      <!--and a.debitCount = 1-->
+    <!--</select>-->
+
+    <!--<select id="findAllMultipleAccountsReceivable" resultType="hashMap">-->
+      <!--select -->
+        <!--ar.id,-->
+        <!--ar.arOutstandingBalance,-->
+        <!--ar.settlementAccountNumber,-->
+        <!--ara.currency, -->
+        <!--ara.amount,-->
+        <!--ara.referenceType -->
+      <!--from -->
+        <!--AccountsReceivable ar-->
+      <!--inner join -->
+        <!--AccountsReceivableActivity ara-->
+      <!--on-->
+        <!--ara.accountsReceivableId = ar.id-->
+      <!--where -->
+        <!--ara.activityType = 'CREDIT'-->
+      <!--and-->
+        <!--ar.settlementAccountNumber = #{documentNumber}-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash;<select id="getAllCredits" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<select id="getAllDebits" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<select id="getCreditsTotalAmountByCurrency" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber, a.currency, sum(a.amount) as total&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber} and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.currency = #{currency}&ndash;&gt;-->
+        <!--&lt;!&ndash;group by b.settlementAccountNumber, a.currency&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<select id="getDebitsTotalAmountByCurrency" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber, a.currency, sum(a.amount) as total&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber} and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.currency = #{currency}&ndash;&gt;-->
+        <!--&lt;!&ndash;group by b.settlementAccountNumber, a.currency&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<select id="getCreditsAllDistinctCurrencies" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;distinct a.currency&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--&lt;!&ndash;<select id="getDebitsAllDistinctCurrencies" resultType="hashMap">&ndash;&gt;-->
+        <!--&lt;!&ndash;select&ndash;&gt;-->
+            <!--&lt;!&ndash;distinct a.currency&ndash;&gt;-->
+        <!--&lt;!&ndash;from&ndash;&gt;-->
+            <!--&lt;!&ndash;Activity a&ndash;&gt;-->
+        <!--&lt;!&ndash;join&ndash;&gt;-->
+            <!--&lt;!&ndash;SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber&ndash;&gt;-->
+        <!--&lt;!&ndash;where&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountType='AR' and&ndash;&gt;-->
+            <!--&lt;!&ndash;a.activityType='DEBIT' and&ndash;&gt;-->
+            <!--&lt;!&ndash;b.settlementAccountNumber = #{settlementAccountNumber}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+
+    <!--<select id="findAllArByCifNumberAndCurrency" resultType="hashMap">-->
+      <!--select distinct(ar.settlementAccountNumber) from-->
+        <!--accountsReceivable ar-->
+        <!--inner join-->
+        <!--accountsReceivableActivity ara-->
+        <!--on ara.accountsPayableId = ar.id-->
+        <!--where ar.cifNumber = #{cifNumber}-->
+              <!--and ara.currency = #{currency}-->
+              <!--and ara.activityType = 'CREDIT'-->
+              <!--and ara.referenceType != 'UNPAY_AR'-->
+    <!--</select>-->
+
+    <!--<select id="findAllArBySettlementAcctNo" resultType="hashMap">-->
+            <!--SELECT-->
+              <!--ara.id,-->
+              <!--ara.referenceType,-->
+              <!--ara.currency,-->
+              <!--ara.amount-->
+            <!--FROM-->
+                <!--accountsReceivable ar-->
+                <!--INNER JOIN-->
+                <!--accountsReceivableActivity ara-->
+                  <!--ON ara.accountsPayableId = ar.id-->
+            <!--WHERE ar.cifNumber = #{cifNumber}-->
+                  <!--AND ara.currency = #{currency}-->
+                  <!--AND ara.activityType = 'CREDIT'-->
+            <!--AND ar.settlementAccountNumber = #{settlementAccountNumber}-->
+            <!--and ara.referenceType != 'UNPAY_AR'-->
+    <!--</select>-->
+
+    <!--<select id="findAllArById" resultType="hashMap">-->
+        <!--select ara.id, ar.apOutstandingBalance from-->
+          <!--accountsReceivable ar-->
+          <!--inner join-->
+          <!--accountsReceivableActivity ara-->
+          <!--on ara.accountsPayableId = ar.id-->
+          <!--where ar.cifNumber = #{cifNumber}-->
+          <!--and ara.currency = #{currency}-->
+          <!--and ara.activityType = 'CREDIT'-->
+          <!--and ara.id = #{id}-->
+          <!--and ara.referenceType != 'UNPAY_AR'-->
+    <!--</select>-->
+</mapper>

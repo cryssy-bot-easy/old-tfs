@@ -1,0 +1,42 @@
+diff --git a/tfs-batch/src/config/uat-schemas.properties b/tfs-batch/src/config/uat-schemas.properties
+--- a/tfs-batch/src/config/uat-schemas.properties
++++ b/tfs-batch/src/config/uat-schemas.properties
+@@ -13,7 +13,7 @@
+ facility=UCDATULNS1
+ loan=UCDATULNS1
+ officers=UCPARUCMN1
+-gl=UCDATUGLD1
++gl=TFSDB2S
+ 
+ dailyrates=JHFXDTTF
+ #dailyrates=JHFXDT
+diff --git a/tfs-core/pom.xml b/tfs-core/pom.xml
+--- a/tfs-core/pom.xml
++++ b/tfs-core/pom.xml
+@@ -52,7 +52,7 @@
+                             <dependency>
+                                 <groupId>com.ibm.db2.jcc</groupId>
+                                 <artifactId>jcc4</artifactId>
+-                                <version>4.13.127</version>
++                                <version>4.25.13</version>
+                             </dependency>
+                         </dependencies>
+                         <!--<executions>-->
+@@ -105,7 +105,7 @@
+                             <dependency>
+                                 <groupId>com.ibm.db2.jcc</groupId>
+                                 <artifactId>jcc4</artifactId>
+-                                <version>4.13.127</version>
++                                <version>4.25.13</version>
+                             </dependency>
+                         </dependencies>
+                         <!--<executions>-->
+@@ -537,7 +537,7 @@
+        	<dependency>
+               <groupId>com.ibm.db2.jcc</groupId>
+               <artifactId>jcc4</artifactId>
+-              <version>4.13.127</version>
++              <version>4.25.13</version>
+         </dependency>
+ 
+ <!--        <dependency>

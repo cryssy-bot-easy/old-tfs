@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="BaseResultFiles" value="Test_Is_Unsync_Scenario_Unsynched_Data_BaseResult"/>
+<intAttribute key="BaseResultFilesCount" value="1"/>
+<stringAttribute key="RoutineParameter.P_TRADESERVICEID" value="e3d40a86-f4dd-485e-8416-3dca92eaac4e"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="false"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BaselineDesc" value="13/02/2020, 10:09 AM - Run Test: Test_Is_Unsync_Scenario_Unsynched_Data - TFSDB2P.IS_UNSYNC:(VARCHAR(36))"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunScript" value="UPDATE TRADESERVICE&#13;&#10;SET STATUS = 'CHECKED'&#13;&#10;WHERE TRADESERVICEID = 'e3d40a86-f4dd-485e-8416-3dca92eaac4e'"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS2212"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2P"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="true"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="IS_UNSYNC_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="IS_UNSYNC"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2P"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2P.IS_UNSYNC:(VARCHAR(36))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.UserDefinedFunction"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineVersion" value=""/>
+<booleanAttribute key="RunRoutineConfiguration.UseOutputAsBaseline" value="false"/>
+<stringAttribute key="ServiceOptions.Project" value="Trade Finance System"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt707Mapper">
+        <entry value="20" key="#this.get('documentNumber')"/>
+        <entry value="21" key="#this.get('reimbursingBankAccountNumberTo') ?: 'NON-REF'"/>
+        <entry value="23" key="#this.get('documentNumber')"/>
+        <!--<entry value="52A" key="#this.get('52A')"/>-->
+        <entry value="31C" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('issueDate'))"/>
+        <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(new java.util.Date())"/>
+        <entry value="26E" key="(T(java.lang.Integer).parseInt(#this.get('numberOfAmendments')) + 1).toString()"/>
+        <entry value="59" key="(#this.get('exporterNameFrom') ?: '') + ' ' + (#this.get('exporterAddressFrom') ?: '')"/>
+        <entry value="31E" key="#this.get('expiryDateTo') != null ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('expiryDateTo')) : ''"/>
+        <entry value="32B"
+               key="#this.get('amountSwitchDisplay') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountIncrease(#this.get('currency'),#this.get('productAmount'),#this.get('amountTo')) : ''"/>
+        <entry value="33B" key="#this.get('amountSwitchDisplay') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountDecrease(#this.get('currency'),#this.get('productAmount'),#this.get('amountTo')) : ''"/>
+        <entry value="34B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amountTo'))"/>
+        <entry value="39A" key="#this.get('positiveToleranceLimitSwitchDisplay') == 'on' or #this.get('negativeToleranceLimitSwitchDisplay') == 'on' ?
+            T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(#this.get('positiveToleranceLimitTo') ?: #this.get('positiveToleranceLimitFrom'), #this.get('negativeToleranceLimitTo') ?: #this.get('negativeToleranceLimitFrom')) : ''"/>
+        <entry value="39B" key="#this.get('maximumCreditAmountTo')"/>
+        <entry value="44A" key="#this.get('placeOfTakingDispatchOrReceiptTo')"/>
+        <entry value="44E" key="#this.get('portOfLoadingOrDepartureTo')"/>
+        <entry value="44F" key="#this.get('portOfDischargeOrDestinationTo')"/>
+        <entry value="44B" key="#this.get('placeOfFinalDestinationTo')"/>
+        <entry value="44C" key="#this.get('latestShipmentDateTo')"/>
+        <entry value="44F" key="#this.get('portOfDischargeOrDestinationTo')"/>
+        <entry value="79" key="#this.get('narrative')"/>
+        <entry value="72" key="#this.get('senderToReceiverInformationFrom')  "/>
+    </util:map>
+
+</beans>

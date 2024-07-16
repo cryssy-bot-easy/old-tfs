@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.sysparams.RefCountry" table="REF_TFCNTRY">
+        <id name="countryCode" column="CNTRY_CD" type="string" length="3"/>
+        <property name="countryName" column="CNTRY_NAME" type="string" length="25"/>
+        <property name="countryISO" column="CNTRY_ISO" type="string" length="2"/>
+    </class>
+
+</hibernate-mapping>

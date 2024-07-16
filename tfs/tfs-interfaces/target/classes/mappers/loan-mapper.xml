@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    REVISIONS
+    
+    Description: Replaced usage of SIBS schemas into local schema: TFSDB2S
+    Revised by:  Cedrick C. Nungay
+    Date revised:01/25/2024
+-->
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.LoanRepository">
+
+	<resultMap id="loanResultMap" type="com.ucpb.tfs.interfaces.domain.Loan">
+		<!-- <id property="id" column="user_id" /> -->
+		<result property="mainCifNumber" column="AANO" />
+		<result property="facilityCode" column="FCODE" />
+        <result property="facilityId" column="FSEQ"/>
+		<result property="cifNumber" column="CIFNO" />
+		<result property="transactionSequenceNumber" column="TRSEQ" />
+		<result property="pnNumber" column="ACCTNO" />
+		<result property="accountType" column="ACTYPE" />
+		<result property="branchNumber" column="BR#" />
+		<result property="reportingBranch" column="RBR#" />
+		<result property="loanType" column="TYPE" />
+		<result property="currencyType" column="CURTYP" />
+		<result property="shortName" column="SNAME" />
+		<result property="loanTerm" column="TERM" />
+		<result property="loanTermCode" column="TMCODE" />
+		<result property="originalBalance" column="ORGAMT" />
+		<result property="originalLoanDate" column="ORGDT6" />
+		<result property="interestRate" column="RATE" />
+		<result property="paymentAmount" column="PMTAMT" />
+		<result property="loanDate" column="CFPDT" />
+		<result property="drawingLimit" column="DRLIMT" />
+		<result property="maturityDate" column="MATDT6" />
+		<result property="officer" column="OFFCR" />
+		<result property="paymentFrequency" column="FREQ" />
+		<result property="paymentFrequencyCode" column="FRCODE" />
+		<result property="intPaymentFrequency" column="IPFREQ" />
+		<result property="intPaymentFrequencyCode" column="IPCODE" />
+
+		<result property="glBook" column="GLBOOK" />
+		<result property="groupCode" column="GROUP" />
+        <result property="documentNumber" column="TNUMBR"/>
+        <result property="importer" column="TIMPOR"/>
+		<result property="orderAmount" column="TAMTOR" />
+		<result property="orderExpiryDate" column="TEXP6" />
+		<result property="transactionStatus" column="TRSTS" />
+		<result property="unlinkFlag" column="TRUNLINK" />
+		<result property="trustUserId" column="TRUSERID" />
+        <result property="facilityReferenceNumber" column="AFCPNO"/>
+		<result property="creditorCode" column="CRDTCD" javaType="java.lang.Long"/>
+		<result property="paymentCode" column="PMTCOD" />
+
+        <result property="agriAgraTagging" column="RS4FLG" />
+	</resultMap>
+
+	<insert id="insertLoan">
+		CALL TFSDB2S.INQUIRE_LOAN(#{loan.mainCifNumber},#{loan.facilityCode},#{loan.facilityId}
+			,#{loan.transactionSequenceNumber},#{loan.pnNumber},#{loan.branchNumber}
+			,#{loan.reportingBranch},#{loan.currencyType},#{loan.cifNumber},#{loan.loanTerm}
+			,#{loan.loanTermCode},#{loan.originalBalance},#{loan.originalLoanDate}
+			,#{loan.interestRate},#{loan.maturityDate},#{loan.paymentFrequency}
+			,#{loan.paymentFrequencyCode},#{loan.intPaymentFrequency},#{loan.intPaymentFrequencyCode}
+			,#{loan.groupCode},#{loan.documentNumber},#{loan.orderExpiryDate},#{loan.unlinkFlag}
+			,#{loan.trustUserId},#{loan.creditorCode},#{loan.paymentCode},#{overrideFlag},#{loan.agriAgraTagging}
+		)
+	</insert>
+
+	<select id="getLoan" resultType="com.ucpb.tfs.interfaces.domain.Loan"
+		resultMap="loanResultMap">
+		SELECT * FROM TFSDB2S.LNTFINT WHERE ACCTNO =	#{accountNumber}  AND TRSEQ = (SELECT MAX(TRSEQ) FROM TFSDB2S.LNTFINT WHERE ACCTNO = #{accountNumber})
+	</select>
+
+    <select id="getLoanDetails" resultType="hashMap">
+      SELECT * FROM TFSDB2S.LNTFINT WHERE TNUMBR = #{documentNumber}
+        AND TRSEQ = (SELECT MAX(TRSEQ) FROM TFSDB2S.LNTFINT WHERE TNUMBR = #{documentNumber})
+	</select>
+
+	<select id="getLoanBySequenceNumber" resultType="com.ucpb.tfs.interfaces.domain.Loan" resultMap="loanResultMap">
+		CALL TFSDB2S.GET_LOAN_STATUS(#{sequenceNumber})
+	</select>
+	
+	<select id="getLoanErrorRecord" resultType="hashMap">
+		SELECT * FROM TFSDB2S.LNTFEXP WHERE TFSDB2S.LNTFEXP.TRSEQ = #{sequenceNumber}
+	</select>
+
+    <select id="isHoliday" resultType="hashMap">
+        SELECT COUNT(*) FROM TFSDB2S.HOLIDAY WHERE TFSDB2S.HOLIDAY.DATE = #{date}
+    </select>
+
+</mapper>

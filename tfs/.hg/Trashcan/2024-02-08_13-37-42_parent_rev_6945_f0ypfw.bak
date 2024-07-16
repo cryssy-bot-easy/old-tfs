@@ -1,0 +1,403 @@
+diff --git a/tfs-core/btm1.tlog b/tfs-core/btm1.tlog
+new file mode 100644
+index 0000000000000000000000000000000000000000..4526f377129be9fac89f7a72a275d6d847315769
+GIT binary patch
+literal 2097173
+zc%1FQu@L|e5CE_*tY9GnsT8)*8CHWkLuiteR(o7&j<w^-0RR91000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+u00000000000000000000000000000000000000000000000000@Yw-PVFc6w
+
+diff --git a/tfs-core/btm2.tlog b/tfs-core/btm2.tlog
+new file mode 100644
+index 0000000000000000000000000000000000000000..2753052d8c0ef9de27631f9977fe1ba3f17a7e3b
+GIT binary patch
+literal 2097173
+zc%1FQArSx|5CE_jRG<)nPzdfm1dhBQ=z!VQMxSw&y)vE}00000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+t00000000000000000000000000000000000000000000000000pB-}t16BY4
+
+diff --git a/.project b/.project
+new file mode 100644
+--- /dev/null
++++ b/.project
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>tfs</name>
++	<comment></comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.m2e.core.maven2Builder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.m2e.core.maven2Nature</nature>
++	</natures>
++</projectDescription>
+diff --git a/tfs-batch/src/config/uat-schemas.properties b/tfs-batch/src/config/uat-schemas.properties
+--- a/tfs-batch/src/config/uat-schemas.properties
++++ b/tfs-batch/src/config/uat-schemas.properties
+@@ -13,7 +13,7 @@
+ facility=UCDATULNS1
+ loan=UCDATULNS1
+ officers=UCPARUCMN1
+-gl=UCDATUGLD1
++gl=TFSDB2S
+ 
+ dailyrates=JHFXDTTF
+ historicalrates=JHYXDTTF
+diff --git a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/AllocationDao.java b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/AllocationDao.java
+--- a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/AllocationDao.java
++++ b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/AllocationDao.java
+@@ -12,7 +12,7 @@
+ 	/*  PROLOGUE:
+ 	 *	(revision)
+ 		SCR/ER Number: ER# 20160505-030
+-		SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 – only Tenor was amended from sight to usance.
++		SCR/ER Description: 1.  The LC 909-03-929-16-00198-8 was amended last March 18, 2016 ï¿½ only Tenor was amended from sight to usance.
+ 								The AE are okay, debit the contingent for sight and credit to usance. But the DW Allocation reported the LC once 
+ 								and the ADB are not reported separately  for sight and usance.
+ 						2.  Adjustment on Standby LC tagging was not correctly reported in DW
+@@ -27,6 +27,5 @@
+ 
+ 
+ public interface AllocationDao {
+-	
+-	
++
+ 	public BigDecimal getBalance(@Param("documentNumber")String documentNumber, @Param("date") Date date);
+@@ -32,5 +31,4 @@
+ 	public BigDecimal getBalance(@Param("documentNumber")String documentNumber, @Param("date") Date date);
+-	
+ 
+ 	public List<LetterOfCredit> getLcsForReporting(@Param("date") Date date);
+ 	
+diff --git a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/TradeProductDao.java b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/TradeProductDao.java
+--- a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/TradeProductDao.java
++++ b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao/TradeProductDao.java
+@@ -208,7 +208,7 @@
+     
+     public Date getAdjustmentDate(@Param("docNumber") String docNumber);
+     
+-    public Map<String,String> getFacilityInfo(@Param("bgNumber") String bgNumber);
++    public Map<String,String> getFacilityInfo(@Param("c") String bgNumber);
+     
+     public List<CicRecord> getMonthlyCic(@Param("day") String day);
+     
+diff --git a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/AllocationFileService.java b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/AllocationFileService.java
+--- a/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/AllocationFileService.java
++++ b/tfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service/AllocationFileService.java
+@@ -8,6 +8,8 @@
+ 
+ public interface AllocationFileService {
+ 
++    
++
+     public List<AllocationFileRecord> getProductAllocations(Date currentDate, String fxProfitOrLossAccountingCode, String treasuryAllocationCode);
+ 
+     public List<AllocationFileRecord> getProductAverageDailyBalanceRecords(Date currentDate);
+diff --git a/tfs-batch/src/main/resources/mappers/allocations-mapper.xml b/tfs-batch/src/main/resources/mappers/allocations-mapper.xml
+--- a/tfs-batch/src/main/resources/mappers/allocations-mapper.xml
++++ b/tfs-batch/src/main/resources/mappers/allocations-mapper.xml
+@@ -119,7 +119,7 @@
+ 		<result property="documentNumber" column="DOCUMENTNUMBER"/> 
+ 		<result property="glEntryType" column="ENTRYTYPE"/>   
+     </resultMap>
+-	
++    
+     <!-- ALLOCATION -->
+     <select id="getAllocations" resultMap="allocationFileMap">
+         SELECT
+diff --git a/tfs-batch/src/main/resources/mappers/sibs-mapper.xml b/tfs-batch/src/main/resources/mappers/sibs-mapper.xml
+--- a/tfs-batch/src/main/resources/mappers/sibs-mapper.xml
++++ b/tfs-batch/src/main/resources/mappers/sibs-mapper.xml
+@@ -453,6 +453,7 @@
+             #{documentNumber}
+         </foreach>
+ 	</update>
++   
+ 	
+ 	<select id="test" resultType="hashMap">
+         SELECT
+diff --git a/tfs-core/TF_GL_20240201.txt b/tfs-core/TF_GL_20240201.txt
+new file mode 100644
+diff --git a/tfs-core/TF_GL_20240207.txt b/tfs-core/TF_GL_20240207.txt
+new file mode 100644
+diff --git a/tfs-core/pom.xml.rej b/tfs-core/pom.xml.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/pom.xml.rej
+@@ -0,0 +1,29 @@
++--- pom.xml
+++++ pom.xml
++@@ -52,7 +52,7 @@
++                             <dependency>
++                                 <groupId>com.ibm.db2.jcc</groupId>
++                                 <artifactId>jcc4</artifactId>
++-                                <version>4.13.127</version>
+++                                <version>4.25.13</version>
++                             </dependency>
++                         </dependencies>
++                         <!--<executions>-->
++@@ -105,7 +105,7 @@
++                             <dependency>
++                                 <groupId>com.ibm.db2.jcc</groupId>
++                                 <artifactId>jcc4</artifactId>
++-                                <version>4.13.127</version>
+++                                <version>4.25.13</version>
++                             </dependency>
++                         </dependencies>
++                         <!--<executions>-->
++@@ -537,7 +537,7 @@
++        	<dependency>
++               <groupId>com.ibm.db2.jcc</groupId>
++               <artifactId>jcc4</artifactId>
++-              <version>4.13.127</version>
+++              <version>4.25.13</version>
++         </dependency>
++ 
++ <!--        <dependency>
+diff --git a/tfs-core/src/config/uat-schemas.properties b/tfs-core/src/config/uat-schemas.properties
+--- a/tfs-core/src/config/uat-schemas.properties
++++ b/tfs-core/src/config/uat-schemas.properties
+@@ -3,7 +3,7 @@
+ #cfmast=UCDATUBWC2
+ #facility=UCDATULNS2
+ #loan=UCDATULNS2
+-rates=UCPARUCMN
++rates=TFSDB2S
+ #officers=UCPARUCMN2
+ #ccbdbranch=UCPARUCMN2
+ #gl=UCDATUGLD2
+@@ -20,10 +20,10 @@
+ cifAccount=UCDATURBK7
+ 
+ holiday=UCPARUCMN7
+-dailyrates=JHFXDTTF
+-historicalrates=JHYXDTTF
+-ratenames=JHFXPRTF
+-rateunknown=JHFXRTTF
++dailyrates=TFSDB2S
++historicalrates=JHYXDT
++ratenames=JHFXPR
++rateunknown=JHFXRT
+ 
+ 
+ #sibs=UCENVUCMN6
+diff --git a/tfs-core/src/config/uat-schemas.properties.rej b/tfs-core/src/config/uat-schemas.properties.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/config/uat-schemas.properties.rej
+@@ -0,0 +1,62 @@
++--- uat-schemas.properties
+++++ uat-schemas.properties
++@@ -3,9 +3,9 @@
++ #cfmast=UCDATUBWC2
++ #facility=UCDATULNS2
++ #loan=UCDATULNS2
++-rates=UCPARUCMN
+++rates=TFSDB2S
++ #officers=UCPARUCMN2
++ #ccbdbranch=UCPARUCMN2
++ #gl=UCDATUGLD2
++ #cifAccount=UCDATURBK2
++ 
++@@ -7,15 +7,15 @@
++ #officers=UCPARUCMN2
++ #ccbdbranch=UCPARUCMN2
++ #gl=UCDATUGLD2
++ #cifAccount=UCDATURBK2
++ 
++-cif=UCDATUBWC1
++-account=UCDATUBWC2
++-cfmast=UCDATUBWC1
++-facility=UCDATULNS1
++-loan=UCDATULNS1
++-officers=UCPARUCMN1
++-ccbdbranch=UCPARUCMN1
++-gl=UCDATUGLD1
++-cifAccount=UCDATURBK1
+++cif=TFSDB2S
+++account=TFSDB2S
+++cfmast=TFSDB2S
+++facility=TFSDB2S
+++loan=TFSDB2S
+++officers=TFSDB2S
+++ccbdbranch=TFSDB2S
+++gl=TFSDB2S
+++cifAccount=TFSDB2S
++ 
++@@ -21,3 +21,3 @@
++ 
++-dailyrates=JHFXDTTF
+++dailyrates=TFSDB2S
++ #dailyrates=JHFXDT
++@@ -23,7 +23,7 @@
++ #dailyrates=JHFXDT
++-historicalrates=JHYXDTTF
++-ratenames=JHFXPRTF
++-rateunknown=JHFXRTTF
+++historicalrates=JHYXDT
+++ratenames=JHFXPR
+++rateunknown=JHFXRT
++ 
++ 
++ #sibs=UCENVUCMN6
++@@ -27,4 +27,4 @@
++ 
++ 
++ #sibs=UCENVUCMN6
++-sibs=UCENVUCMN1
++\ No newline at end of file
+++sibs=UCENVUCMN7
++\ No newline at end of file
+diff --git a/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy b/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
+--- a/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
++++ b/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
+@@ -177,8 +177,8 @@
+ 	SCR/ER Number: ER# 20180614-030
+ 	SCR/ER Description: Update Allocation Unit Code module of TFS bactch encountered FAILED message during execution.
+ 	[Revised by:] Jesse James Joson
+-	[Date Revised:] 7/13/2018
++	[Date Revised:] 2/23/2024
+ 	Program [Revision] Details: Update method to add the sibsretry parameter to the return value upon execution of Update Allocation Unit Code.
+ 	PROJECT: CORE
+ 	MEMBER TYPE  : Groovy
+ 	Project Name: BatchRestServices
+@@ -181,8 +181,20 @@
+ 	Program [Revision] Details: Update method to add the sibsretry parameter to the return value upon execution of Update Allocation Unit Code.
+ 	PROJECT: CORE
+ 	MEMBER TYPE  : Groovy
+ 	Project Name: BatchRestServices
+- */ 
++ */
++
++ /**  PROLOGUE:
++ * 	(revision)
++	SCR/ER Number:
++	SCR/ER Description:
++	[Revised by:] Crystiann Puso
++	[Date Revised:] 7/13/2018
++	Program [Revision] Details: Added service and functions for Process Cicls and Cicls Report Generator
++	PROJECT: CORE
++	MEMBER TYPE  : Groovy
++	Project Name: BatchRestServices
++ */  
+  
+ @Component
+ @Path("/batch")
+diff --git a/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java b/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
+--- a/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
++++ b/tfs-core/src/main/java/com/ucpb/tfs/core/batch/process/allocationUnitCode/AllocationUnitCodeTasklet.java
+@@ -189,10 +189,6 @@
+ 				throw new IllegalArgumentException("UNABLE TO CONNECT TO SIBS");
+ 
+ 			}
+-      
+-			
+-			
+-       
+ 			if (sibsAllocationUnitCodeRecord != null) {
+         
+ 				String branchUnitCode = (sibsAllocationUnitCodeRecord.getBranchUnitCode() != null) ? sibsAllocationUnitCodeRecord.getBranchUnitCode().trim() : null;
+diff --git a/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java b/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
+--- a/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
++++ b/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
+@@ -17,6 +17,17 @@
+     	PROCESS: Called by another class to call the declared function needed to execute the report
+      */
+ 
++	/*	PROLOGUE:
++	 * 	(revision)
++	  	SCR/ER Number: 
++		SCR/ER Description:
++		[Revised by:] Crystiann Puso
++		[Date revised:] 02/22/2024
++		Program [Revision] Details: add new objects ( Cicls Process and Generate Cicls File ) that will call function in other class
++    	INPUT: Date
++    	OUTPUT: ITD_CICLS_(Date).txt and ITD_REJECT_CICLS_(Date).txt 
++     */
++
+ 	Synchronize_Routing_Status("Synchronize Routing Status","synchronizeRoutingStatus"),
+ 	Abort_Pending_ETS_Reversal("Abort Pending ETS Reversal","abortPendingEtsReversal"),
+ //	Revert_Data_Entry_to_Pending("Revert Data Entry to Pending","revertToPending"),
+diff --git a/tfs-core/src/main/resources/New Text Document.txt b/tfs-core/src/main/resources/New Text Document.txt
+new file mode 100644

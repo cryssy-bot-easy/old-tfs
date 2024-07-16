@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<add:add sum="11" xmlns:add="http://www.topologi.com/add">
+	<add:item>2</add:item>
+	<add:item>4</add:item>
+	<add:item>5</add:item>
+</add:add>

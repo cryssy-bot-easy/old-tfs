@@ -1,0 +1,2 @@
+ REC_NO TRADESERVICEID DOCUMENTNUMBER AFFECTEDTABLE OLDSTATUS SYNCHDATE REMARKS LOGTYPE 
+ ------ -------------- -------------- ------------- --------- --------- ------- ------- 

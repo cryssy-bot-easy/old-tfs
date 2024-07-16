@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="messageFactory" class="com.ucpb.tfs.swift.message.MessageFactory">
+        <constructor-arg name="registry">
+            <map>
+            	<entry key="103" value="com.ucpb.tfs.swift.message.mt1series.MT103"/>
+                <entry key="103Plus" value="com.ucpb.tfs.swift.message.mt1series.MT103Plus"/>
+                <entry key="199" value="com.ucpb.tfs.swift.message.mt1series.MT199"/>
+                <entry key="202" value="com.ucpb.tfs.swift.message.mt2series.MT202"/>
+                <entry key="299" value="com.ucpb.tfs.swift.message.mt2series.MT299"/>
+            	<entry key="400" value="com.ucpb.tfs.swift.message.mt4series.MT400"/>
+            	<entry key="410" value="com.ucpb.tfs.swift.message.mt4series.MT410"/>
+            	<entry key="412" value="com.ucpb.tfs.swift.message.mt4series.MT412"/>
+            	<entry key="499" value="com.ucpb.tfs.swift.message.mt4series.MT499"/>
+                <entry key="700" value="com.ucpb.tfs.swift.message.mt7series.MT700"/>
+                <entry key="701" value="com.ucpb.tfs.swift.message.mt7series.MT701"/>
+                <entry key="707" value="com.ucpb.tfs.swift.message.mt7series.MT707"/>
+                <entry key="708" value="com.ucpb.tfs.swift.message.mt7series.MT708"/>
+                <entry key="730" value="com.ucpb.tfs.swift.message.mt7series.MT730"/>
+                <entry key="740" value="com.ucpb.tfs.swift.message.mt7series.MT740"/>
+                <entry key="742" value="com.ucpb.tfs.swift.message.mt7series.MT742"/>
+                <entry key="747" value="com.ucpb.tfs.swift.message.mt7series.MT747"/>
+                <entry key="750" value="com.ucpb.tfs.swift.message.mt7series.MT750"/>
+                <entry key="752" value="com.ucpb.tfs.swift.message.mt7series.MT752"/>
+                <entry key="760" value="com.ucpb.tfs.swift.message.mt7series.MT760"/>
+                <entry key="767" value="com.ucpb.tfs.swift.message.mt7series.MT767"/>
+                <entry key="799" value="com.ucpb.tfs.swift.message.mt7series.MT799"/>
+                <entry key="999" value="com.ucpb.tfs.swift.message.mt7series.MT999"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+</beans>

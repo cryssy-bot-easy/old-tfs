@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.Charge" table="Charge">
+
+        <composite-id name="chargeId" access="field">
+            <key-property name="chargeId" column="chargeId" type="string" length="50"/>
+        </composite-id>
+
+        <property name="description" column="description" type="string" length="100"/>
+        <property name="link" column="link" type="string" length="100"/>
+        <property name="displayName" column="displayname" type="string" length="100"/>
+        <property name="cilexFlag" column="cilexFlag" type="string" length="1"/>
+
+    </class>
+
+</hibernate-mapping>

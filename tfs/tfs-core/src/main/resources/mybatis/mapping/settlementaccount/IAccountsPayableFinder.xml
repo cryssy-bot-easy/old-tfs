@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.settlementaccount.IAccountsPayableFinder">
+
+    <!-- TODO -->
+    <select id="apMonitoringInquiry" resultType="hashMap">
+      select ap.*,
+      	ts.ccbdBranchUnitCode as unitCode
+		from AccountsPayable ap
+        left join TradeService ts
+        on ap.tradeServiceId = ts.tradeServiceId
+        where ap.settlementAccountNumber is not null
+      <choose>
+      	<when test="referenceNumber != '' and documentNumber != ''">
+      	and (ap.settlementAccountNumber = #{referenceNumber}
+      	or ap.settlementAccountNumber = #{documentNumber})
+      	</when>
+       <when test="referenceNumber != ''">
+           and ap.settlementAccountNumber = #{referenceNumber}
+       </when>
+       <when test="documentNumber != ''">
+           and ap.settlementAccountNumber = #{documentNumber}
+       </when>
+      </choose>
+
+      <if test="cifName != ''">
+          and <![CDATA[(locate(ap.cifname,#{cifName}) <> 0
+          or locate(#{cifName},ap.cifname) <> 0)]]>
+      </if>
+      
+      <if test="natureOfTransaction != ''">
+          and ap.natureOfTransaction = #{natureOfTransaction}
+      </if>
+
+      <if test="status != ''">
+          and ap.status = #{status}
+      </if>
+      
+      <choose>
+        <when test="unitCode != ''">
+            and ts.ccbdBranchUnitCode = #{unitCode}
+        </when>
+        <when test="unitcode != '' and unitcode != '909'">
+            and ts.ccbdBranchUnitCode = #{unitcode}
+        </when>
+       </choose>
+      
+      ORDER BY ap.modifiedDate DESC, ts.serviceInstructionId ASC
+    </select>
+
+
+    <!-- ========================================================================================================== -->
+
+
+    <select id="findAccountsPayable" resultType="hashMap">
+      select
+        *
+      from
+        AccountsPayable
+      where
+        id = #{id}
+    </select>
+
+    <select id="findAllAccountsPayableByCifNumber" resultType="hashMap">
+      select
+        a.*,
+        b.apOutstandingBalance
+      from (
+        select
+          distinct (ap.settlementAccountNumber),
+          (select
+            count(*)
+          from
+            AccountsPayableActivity
+          where
+            referenceNumber = ap.settlementAccountNumber
+          and
+            activityType = 'CREDIT') as creditCount
+
+          from
+            AccountsPayable ap
+          inner join
+            AccountsPayableActivity apa
+          on
+            apa.accountsPayableId = ap.id
+          and
+            apa.activityType = 'CREDIT'
+          where
+            ap.cifNumber = #{cifNumber}
+            and apa.currency = #{currency}
+      )a
+
+      left join
+
+      (select
+        apOutstandingBalance,
+        settlementAccountNumber
+      from
+        AccountsPayable) b
+
+      on
+        a.settlementAccountNumber = b.settlementAccountNumber
+      and a.creditCount = 1
+    </select>
+    
+    <select id="findAllMultipleAccountsPayable" resultType="hashMap">
+      select
+        ap.id,
+        ap.apOutstandingBalance,
+        ap.settlementAccountNumber,
+        apa.currency,
+        apa.amount,
+        apa.referenceType
+      from
+        AccountsPayable ap
+      inner join
+        AccountsPayableActivity apa
+      on
+        apa.accountsPayableId = ap.id
+      where
+        apa.activityType = 'CREDIT'
+      and
+        ap.settlementAccountNumber = #{documentNumber}
+    </select>
+
+
+    <!--<select id="getAllActivity" resultType="hashMap">-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getAllCredits" resultType="hashMap">-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getAllDebits" resultType="hashMap">-->
+        <!--select-->
+            <!--a.amount, a.currency, a.referenceNumber, a.referenceType, a.activityType-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getCreditsTotalAmountByCurrency" resultType="hashMap">-->
+        <!--select-->
+            <!--b.settlementAccountNumber, a.currency, sum(a.amount) as total-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber} and-->
+            <!--a.currency = #{currency}-->
+        <!--group by b.settlementAccountNumber, a.currency-->
+    <!--</select>-->
+
+    <!--<select id="getDebitsTotalAmountByCurrency" resultType="hashMap">-->
+        <!--select-->
+            <!--b.settlementAccountNumber, a.currency, sum(a.amount) as total-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber} and-->
+            <!--a.currency = #{currency}-->
+        <!--group by b.settlementAccountNumber, a.currency-->
+    <!--</select>-->
+
+    <!--<select id="getCreditsAllDistinctCurrencies" resultType="hashMap">-->
+        <!--select-->
+            <!--distinct a.currency-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='CREDIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <!--<select id="getDebitsAllDistinctCurrencies" resultType="hashMap">-->
+        <!--select-->
+            <!--distinct a.currency-->
+        <!--from-->
+            <!--Activity a-->
+        <!--join-->
+            <!--SettlementAccount b on a.settlementAccountNumber = b.settlementAccountNumber-->
+        <!--where-->
+            <!--b.settlementAccountType='AP' and-->
+            <!--a.activityType='DEBIT' and-->
+            <!--b.settlementAccountNumber = #{settlementAccountNumber}-->
+    <!--</select>-->
+
+    <select id="findAllApByCifNumberAndCurrency" resultType="hashMap">
+        select ap.id, ap.settlementaccountnumber, ts.serviceType
+          from AccountsPayable ap
+          inner join
+            TradeService ts
+            on ap.tradeServiceId = ts.tradeServiceId
+        where ap.cifNumber = #{cifNumber}
+        and ap.currency = #{currency}
+        and ap.apOutstandingBalance > 0
+    </select>
+
+    <select id="findAllApBySettlementAcctNo" resultType="hashMap">
+            SELECT
+              apa.id,
+              apa.referenceType,
+              apa.currency,
+              apa.amount
+            FROM
+                accountsPayable ap
+                INNER JOIN
+                accountsPayableActivity apa
+                  ON apa.accountsPayableId = ap.id
+            WHERE ap.cifNumber = #{cifNumber}
+                  AND apa.currency = #{currency}
+                  AND apa.activityType = 'CREDIT'
+            AND ap.settlementAccountNumber = #{settlementAccountNumber}
+            and apa.referenceType != 'UNPAY_AP'
+    </select>
+
+    <select id="findAllApById" resultType="hashMap">
+        select apOutstandingBalance
+          from AccountsPayable
+          where id = #{id}
+    </select>
+
+</mapper>

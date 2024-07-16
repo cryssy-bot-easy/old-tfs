@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.GlMastRepository">
+
+    <resultMap id="glMasterEntryResultMap" type="com.ucpb.tfs.interfaces.domain.GlMasterEntry">
+        <result property="acctNo" column="ACCTNO"/>
+        <result property="gmcTyp" column="GMCTYP"/>
+        <result property="bookCode" column="BOOKCD"/>
+        <result property="title" column="TITLE"/>
+        <result property="shortT" column="SHORTT"/>
+        <result property="acType" column="ACTYPE"/>
+        <result property="branch" column="BRANCH"/>
+        <result property="valPst" column="VALPST"/>
+    </resultMap>
+
+
+    <select id="getEntries" resultType="hashMap">
+		SELECT 
+			gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+			WHERE gl."ACCTNO" = #{code}
+			AND gl."GMCTYP" = #{currency}
+	</select>
+
+    <select id="getEntriesByCurrencyBookCodeAccountingCode" resultType="hashMap">
+		SELECT
+			gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+			WHERE gl."ACCTNO" = #{code}
+			AND gl."GMCTYP" = #{currency}
+			AND gl."BOOKCD" = #{bookCode}
+	</select>
+
+
+
+    <select id="getAllEntries" resultType="hashMap">
+		SELECT
+		    gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+	</select>
+
+    <select id="getEntriesByCurrencyBookCodeLbpAccountingCodeUnitCode" resultType="hashMap">
+		SELECT
+			gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+    		, TFSDB2S.REF_GLMAPPING GM
+		WHERE GL.ACCTNO = GM.ACCOUNTINGCODE
+		    AND GL.BOOKCD = GM.BOOKCODE
+		    AND GL.GMCTYP = GM.BOOKCURRENCY
+		    AND GM.LBP_ACCOUNTINGCODE = #{code}
+			AND gl."GMCTYP" = #{currency}
+			AND gl."BOOKCD" = #{bookCode}
+			AND gl."BRANCH" = #{branch}
+	</select>
+
+    <select id="getEntriesByCurrencyBookCodeAccountingCodeUnitCode" resultType="hashMap">
+		SELECT
+			gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+			WHERE gl."ACCTNO" = #{code}
+			AND gl."GMCTYP" = #{currency}
+			AND gl."BOOKCD" = #{bookCode}
+			AND gl."BRANCH" = #{branch}
+	</select>
+
+    <select id="getEntriesChecking" resultType="hashMap">
+		SELECT
+			gl."ACCTNO" AS ACCT_NO,
+			gl."GMCTYP" AS GMC_TYP,
+			gl."BOOKCD" AS BOOK_CODE,
+			gl."TITLE" AS TITLE,
+			gl."SHORTT" AS SHORT_T,
+			gl."ACTYPE" AS AC_TYPE,
+			gl."BRANCH" AS BRANCH,
+			gl."VALPST" AS VALPST
+		FROM TFSDB2S.GLMAST gl
+			WHERE gl."ACCTNO" = #{code}
+	</select>
+
+</mapper>

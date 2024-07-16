@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozer.sourceforge.net
+          http://dozer.sourceforge.net/schema/beanmapping.xsd">
+
+    <configuration>
+        <custom-converters>
+            <converter type="com.ucpb.tfs.utils.StringToEnumConverter" >
+                <class-a>java.lang.Enum</class-a>
+                <class-b>java.lang.String</class-b>
+            </converter>
+        </custom-converters>
+    </configuration>
+
+  <!--  <mapping>
+        <class-a>java.util.Map</class-a>
+        <class-b>com.ucpb.tfs.domain.routing.RoutingInformation</class-b>
+        <field>
+            <a key="senderId">this</a>
+            <b>sender.userActiveDirectoryId.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a key="senderFirstName">this</a>
+            <b>sender.firstName</b>
+        </field>
+        <field>
+            <a key="senderLastName">this</a>
+            <b>sender.lastName</b>
+        </field>
+
+        <field>
+            <a key="receiverId">this</a>
+            <b>receiver.userActiveDirectoryId.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a key="receiverFirstName">this</a>
+            <b>receiver.firstName</b>
+        </field>
+        <field>
+            <a key="receiverLastName">this</a>
+            <b>receiver.lastName</b>
+        </field>
+
+        <field>
+            <a key="status">this</a>
+            <b>status</b>
+        </field>
+
+        <field>
+            <a key="dateSent">this</a>
+            <b>dateSent</b>
+        </field>
+
+    </mapping>
+-->
+    <mapping type="one-way">
+        <class-a>com.ucpb.tfs.domain.instruction.event.ServiceInstructionCreatedEvent</class-a>
+        <class-b>com.ucpb.tfs.domain.routing.Route</class-b>
+        <field>
+            <a>userActiveDirectoryId</a>
+            <b>sender.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a>serviceInstructionStatus</a>
+            <b>status</b>
+        </field>
+    </mapping>
+
+    <mapping type="one-way">
+        <class-a>com.ucpb.tfs.domain.instruction.event.ServiceInstructionTaggedEvent</class-a>
+        <class-b>com.ucpb.tfs.domain.routing.Route</class-b>
+        <field>
+            <a>userActiveDirectoryId.userActiveDirectoryId</a>
+            <b>sender.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a>serviceInstruction.status</a>
+            <b>status</b>
+        </field>
+    </mapping>
+
+    <mapping type="one-way">
+        <class-a>com.ucpb.tfs.domain.service.event.TradeServiceSavedEvent</class-a>
+        <class-b>com.ucpb.tfs.domain.routing.Route</class-b>
+        <field>
+            <a>userActiveDirectoryId.userActiveDirectoryId</a>
+            <b>sender.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a>tradeServiceStatus</a>
+            <b>status</b>
+        </field>
+    </mapping>
+
+    <mapping>
+        <class-a>com.ucpb.tfs.domain.service.event.TradeServiceTaggedEvent</class-a>
+        <class-b>com.ucpb.tfs.domain.routing.Route</class-b>
+        <field>
+            <a>userActiveDirectoryId.userActiveDirectoryId</a>
+            <b>sender.userActiveDirectoryId</b>
+        </field>
+        <field>
+            <a>tradeServiceStatus</a>
+            <b>status</b>
+        </field>
+    </mapping>
+
+    <mapping>
+        <class-a>com.ucpb.tfs.domain.routing.Remark</class-a>
+        <class-b>com.ucpb.tfs.application.command.AddInstructionsCommand</class-b>
+        <field>
+            <a>message</a>
+            <b key="message">parameterMap</b>
+        </field>
+        <field>
+            <a>remarkId</a>
+            <b key="remarkId">parameterMap</b>
+        </field>
+        <field>
+            <a>user.userActiveDirectoryId</a>
+            <b>userActiveDirectoryId</b>
+        </field>
+    </mapping>
+
+    <mapping>
+        <class-a>com.ucpb.tfs.domain.routing.Remark</class-a>
+        <class-b>com.ucpb.tfs.application.command.UpdateInstructionsCommand</class-b>
+        <field>
+            <a>id</a>
+            <b key="id">parameterMap</b>
+        </field>
+        <field>
+            <a>message</a>
+            <b key="message">parameterMap</b>
+        </field>
+        <field>
+            <a>remarkId</a>
+            <b key="remarkId">parameterMap</b>
+        </field>
+        <field>
+            <a>user.userActiveDirectoryId</a>
+            <b>userActiveDirectoryId</b>
+        </field>
+    </mapping>
+
+</mappings>

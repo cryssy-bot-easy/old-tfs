@@ -1,0 +1,82 @@
+package com.ucpb.tfs.interfaces.repositories;
+
+import com.ucpb.tfs.interfaces.domain.Availment;
+import com.ucpb.tfs.interfaces.domain.Facility;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
+
+/*
+	(revision)
+	SCR/ER Number: ER# 20170109-040
+	SCR/ER Description: Transaction allowed to be created even the facility is expired
+	[Revised by:] Jesse James Joson
+	[Date revised:] 1/17/2017
+	Program [Revision] Details: Check the expiry date of the facility before allowing to amend LC
+	Member Type: Java
+	Project: Core
+	Project Name: FacilityRepository.java
+
+------------------------------------------------------------------------------------------------------
+	Description: 	Removed facility codes as parameter on getFacilitiesByType and
+						getFacilitiesByTypeSearch
+	Revised by: 	Cedrick C. Nungay
+	Date revised:	02/26/2024
+*/
+
+public interface FacilityRepository {
+
+	public List<Map<String,?>> getFacilitiesByCifNumber(@Param("cifNumber") String cifNumber, @Param("expiryDate") String expiryDate);
+	
+	public List<Map<String,Object>> getFacilitiesByCifNumberAndType(@Param("cifNumber")String cifNumber, @Param("expiryDate")String expiryDate, @Param("facilityType")String facilityType);
+
+    public List<Map<String,?>> getFacilitiesForLoan(@Param("cifNumber") String cifNumber, @Param("expiryDate") String expiryDate);
+
+    public int getFacilityAvailmentCount(@Param("documentNumber")String documentNumber);
+
+	public int insertFacilityAvailment(@Param("availment") Availment availment);
+	
+	public int deleteFacilityAvailment(@Param("documentNumber") String documentNumber);
+	
+	public int updateFacilityAvailment(@Param("availment") Availment availment);
+
+    public int updateFacilityAvailmentBalance(@Param ("availment") Availment availment);
+
+    public int updateFacilityAvailmentCif(@Param ("availment") Availment availment);
+
+    public int updateFacilityAvailmentFacilityReferenceNumber(@Param ("availment") Availment availment);
+
+    public Availment getAvailment(@Param("documentNumber") String documentNumber);
+
+    public int insertFacilityBalanceQuery(@Param("facility") Facility Facility, @Param("transactionSequenceNo") Long transactionSequenceNumber);
+
+    public Map<String,Object> getFacilityBalance(@Param("transactionSequenceNo") Long transactionSequenceNumber, @Param("cifNumber") String cifNumber);
+
+	public List<Map<String,?>> getFacilitiesByChildAndMainCifNumber(@Param("cifNumber")String cifNumber, @Param("mainCifNumber")String mainCifNumber,@Param("expiryDate") String expiryDate, @Param("facilityType")String facilityType);
+
+    public List<Map<String,Object>> getFacilitiesByType(@Param("cifNumber")String cifNumber,
+    													@Param("mainCifNumber")String mainCifNumber,
+                                                        @Param("seqNo")String seqNo);
+
+    public List<Map<String,Object>> getFacilitiesByTypeSearch(@Param("cifNumber")String cifNumber,
+    														  @Param("mainCifNumber")String mainCifNumber,
+                                                              @Param("seqNo")String seqNo);
+
+//    public List<Map<String,Object>> getFacilitiesByTypeAndCurrency(@Param("cifNumber")String cifNumber,@Param("currency")String currency,@Param("facilities")String...
+//    facilities);
+    public List<Map<String,Object>> getFacilitiesByTypeAndCurrency(@Param("cifNumber")String cifNumber,
+    															   @Param("mainCifNumber")String mainCifNumber,
+                                                                   @Param("currency")String currency,
+                                                                   @Param("seqNo")String seqNo,
+                                                                   @Param("facilities")String...
+        facilities);
+
+	public List<Map<String, Object>> getFacilitiesByCifAndFacility(@Param("cifNumber")String cifNumber, 
+																   @Param("facilityRefNo")String facilityRefNo,
+																   @Param("facilityType")String facilityType,	
+																   @Param("facilityId")String facilityId);
+
+}
+
+

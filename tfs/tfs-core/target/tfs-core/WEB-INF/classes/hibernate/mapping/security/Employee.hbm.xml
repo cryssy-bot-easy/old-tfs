@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Employee" table="Sec_Employee">
+
+        <composite-id name="userId" access="field">
+            <key-property name="id" column="id" type="string" length="20"/>
+        </composite-id>
+
+        <property name="firstName" column="firstname" type="string" length="50"/>
+        <property name="lastName" column="lastname" type="string" length="50"/>
+        <property name="fullName" column="fullName" type="string" length="100"/>
+        <property name="position" column="position" type="string" length="200"/>
+        <property name="unitCode" column="unitcode" type="string" length="50"/>
+
+        <property name="fullUnitCode" column="fullUnitCode" type="string" length="50"/>
+
+        <property name="email" column="email" type="string" length="50"/>
+
+        <property name="postingAuthority" column="post_auth"  />
+        <property name="postingLimit" column="limit" type="java.math.BigDecimal"/>
+        <property name="level" column="level" type="integer"/>
+        <property name="tellerId" column="tellerId" type="string" length="7"/>
+
+        <property name="suspended" column="suspended" type="java.lang.Boolean" />
+
+
+        <property name="headType" column="headType" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.security.enums.HeadType</param>
+            </type>
+        </property>
+
+        <property name="regionUnitCode" column="regionunitcode" type="string" length="5"/>
+
+        <property name="casaLimit" column="casalimit" type="java.math.BigDecimal"/>
+
+        <component name="designation" access="field" >
+            <property name="id" column="designationId" type="java.lang.Long" />
+        </component>
+        <property name="lastLogin" column="last_login" type="timestamp" />
+
+        <!-- Same length as id -->
+        <property name="updatedByUserId" column="updatedByUserId" type="string" length="20"/>
+
+        <property name="updatedByFullName" column="updatedByFullName" type="string" length="150"/>
+        
+        <property name="receiveEmail" column="RECEIVE_EMAIL" type="java.lang.Boolean" />
+        
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,41 @@
+CREATE OR REPLACE FUNCTION MASTER_LAST_MODIFIED (IN P_DOCUMENTNUMBER  VARCHAR(36)
+                                                ,IN P_SERVICETYPE   VARCHAR(50)
+                                                ,IN P_DOCUMENTCLASS  VARCHAR(30))
+    RETURNS TIMESTAMP
+    NO EXTERNAL ACTION
+F1: BEGIN   
+    DECLARE OUT_DATE TIMESTAMP;
+    -- #######################################################################
+    -- # Return Last Modified Date from Master Table depending on Service Type
+    -- # and Document Type. 
+    -- # Note: (Initially For LC Document Type)
+    -- # Raymund Mallonga 2/13/2020
+    -- #######################################################################  
+    -- # Revisions
+    -- #######################################################################
+    -- # Author: R.Mallonga 4/27/2020
+    -- # Revisions: Added handling for DP
+    
+     IF P_DOCUMENTCLASS = 'LC' THEN
+        IF P_SERVICETYPE = 'NEGOTIATION' THEN
+          SET (OUT_DATE) = (SELECT PROCESSDATE FROM LCNEGOTIATION 
+                          WHERE NEGOTIATIONNUMBER = P_DOCUMENTNUMBER);
+        ELSE
+            SET (OUT_DATE) = (SELECT LASTMODIFIEDDATE FROM LETTEROFCREDIT 
+                          WHERE DOCUMENTNUMBER = P_DOCUMENTNUMBER);
+        END IF;
+        
+     ELSEIF P_DOCUMENTCLASS = 'DP' THEN 
+        SET (OUT_DATE) = (SELECT PROCESSDATE FROM DOCUMENTAGAINSTPAYMENT 
+                          WHERE DOCUMENTNUMBER = P_DOCUMENTNUMBER);
+                          
+     ELSEIF P_DOCUMENTCLASS = 'INDEMNITY' THEN 
+        SET (OUT_DATE) = (SELECT PROCESSDATE FROM INDEMNITY 
+                          WHERE INDEMNITYNUMBER = P_DOCUMENTNUMBER);
+     ELSEIF P_DOCUMENTCLASS IN ('BC', 'BP') THEN 
+        SET (OUT_DATE) = (SELECT PROCESSDATE FROM EXPORTBILLS 
+                          WHERE DOCUMENTNUMBER = P_DOCUMENTNUMBER);
+     END IF;
+             
+    RETURN OUT_DATE;
+END

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.routing.Remark" table="REMARKS">
+        <id name="id" column="id">
+            <generator class="increment"/>
+        </id>
+        <property name="remarkId" column="REMARK_ID" length="36"/>
+        <!--RBAC_User-->
+        <!--<many-to-one name="user" class="com.ipc.rbac.domain.User" column="USER_ID"/>-->
+        <component name="user" class="com.ipc.rbac.domain.User">
+            <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+                <property name="userActiveDirectoryId" column="USER_ID" length="20"/>
+            </component>
+        </component>
+
+        <property name="message" column="message" length="500"/>
+
+        <property name="dateCreated" column="DATE_CREATED" type="java.util.Date" update="true"/>
+
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,30 @@
+	---------------------  Instance Type and Transmission --------------	
+       Original received from SWIFT
+       Priority          : Normal
+       Message Output Reference  : 0856 121121UCPBPHMMAXXX6271109886
+       Correspondent Input Reference     : 1921 121120PNBPHKHHKXXX4117424129
+	--------------------------- Message Header -------------------------	
+       Swift Output                  : FIN 730 Acknowledgement
+       Sender   : PNBPHKHHXXX 
+                  WELLS FARGO BANK, N.A., HONG KONG BRANCH (FORMERLY
+                  HONG KONG HK
+       Receiver : UCPBPHMMXXX 
+                  UNITED COCONUT PLANTERS BANK
+                  MANILA PH
+	--------------------------- Message Text ---------------------------	
+        20: Sender's Reference
+            AD219239
+        21: Receiver's Reference
+            FX56202012006300
+        30: Date of Msg Being Acknowledged
+            121119
+        72: Sender to Receiver Information
+            WE ACK RCPT OF YR A/M CREDIT N HAVE
+            ADVISED IT TO THE BENEF ADDING
+            OUR CONFIRMATION AS PER YR
+            INSTRUCTION THRU DEUTHKHHXXX, RGDS
+            MAUREEN NG (TEAM HEAD-TEAM J)/DW
+	--------------------------- Message Trailer ------------------------	
+       {CHK:9904C723DEF0}
+       {DLM:}
+       PKI Signature: MAC-Equivalent

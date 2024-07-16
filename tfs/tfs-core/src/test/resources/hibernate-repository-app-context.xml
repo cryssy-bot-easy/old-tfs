@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <context:property-placeholder location="classpath:tfs.properties, classpath:interface-app.properties, classpath:batch.properties" ignore-unresolvable="true" local-override="true"/>
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/instruction</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/product</value>
+                <value>classpath:hibernate/mapping/rbac</value>
+                <value>classpath:hibernate/mapping/reference</value>
+                <value>classpath:hibernate/mapping/service</value>
+                <value>classpath:hibernate/mapping/settlementaccount</value>
+                <value>classpath:hibernate/mapping/task</value>
+                <value>classpath:hibernate/mapping/routing</value>
+                <value>classpath:hibernate/mapping/security</value>
+                <value>classpath:hibernate/mapping/audit</value>
+                <value>classpath:hibernate/mapping/swift</value>
+                <value>classpath:hibernate/mapping/accounting</value>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+                <value>classpath:hibernate/mapping/documents</value>
+                <value>classpath:hibernate/mapping/reimbursing</value>
+                <value>classpath:hibernate/mapping/condition</value>
+                <value>classpath:hibernate/mapping/corresCharges</value>
+                <value>classpath:hibernate/mapping/letter</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <!--<prop key="hibernate.hbm2ddl.import_files">/bootstrap/databootstrap.sql,/bootstrap/referenceBootstrap.sql,/bootstrap/create-job-history-tables.sql</prop>-->
+                <prop key="hibernate.hbm2ddl.import_files">${tfs.hibernate.bootstrap}</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">jta</prop>-->
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.cache.provider_class">org.infrastructure.repositories.hibernate.cache.NoCacheProvider</prop>-->
+                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.BitronixJtaPlatform</prop>
+
+                <!-- Hibernate Envers configuration (audit logging) -->
+                <!-- http://docs.jboss.org/hibernate/orm/4.0/devguide/en-US/html/ch15.html -->
+                <prop key="org.hibernate.envers.audit_table_suffix">_AUDIT</prop>
+                <prop key="org.hibernate.envers.revision_field_name">REV_ID</prop>
+                <prop key="org.hibernate.envers.revision_type_field_name">REV_TYPE</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+        <!--set false to prevent UnexpectedRollbackException-->
+        <property name="globalRollbackOnParticipationFailure" value="false" />
+    </bean>
+
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+        <property name="driverClassName" value="${tfs.jdbc.driverClassName}" />
+        <!--<property name="url" value="jdbc:derby://localhost:1527/tfsdb;create=true" />-->
+        <property name="url" value="${tfs.jdbc.url}" />
+        <property name="username" value="${tfs.jdbc.username}" />
+        <property name="password" value="${tfs.jdbc.password}" />
+    </bean>
+
+    <bean id="paymentRepository" class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernatePaymentRepository"/>
+
+    <bean id="tradeServiceRepository"
+          class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="myDataSource"/>
+    </bean>
+</beans>

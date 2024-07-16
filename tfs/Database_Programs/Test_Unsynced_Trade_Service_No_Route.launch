@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="com.ibm.datatools.routines.ui.launchConfigurationType">
+<stringAttribute key="RoutineParameter.P_DATE" value="2020-02-13"/>
+<booleanAttribute key="RunOptions.CollectActuals" value="false"/>
+<booleanAttribute key="RunOptions.CommitChanges" value="false"/>
+<booleanAttribute key="RunOptions.GatherPerformanceInformation" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.AfterRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunScript" value="--- scenario: unsynched data is opening. No Route for &quot;Approved&quot;&#13;&#10;&#13;&#10;--- This should not update since modified date of opening is beyond threshold due to the succeeding ammendment&#13;&#10;UPDATE TRADESERVICE&#13;&#10;SET STATUS = 'CHECKED'&#13;&#10;WHERE TRADESERVICEID= 'dd7c3415-0357-4d81-b1c0-944f3ae004b9';&#13;&#10;&#13;&#10;DELETE FROM ROUTES&#13;&#10;WHERE ROUTINGINFORMATIONID = 'dd7c3415-0357-4d81-b1c0-944f3ae004b9';&#13;&#10;"/>
+<stringAttribute key="RunRoutineConfiguration.BeforeRunStmtTerminator" value=";"/>
+<stringAttribute key="RunRoutineConfiguration.ConnectionProfile" value="TFS2212"/>
+<stringAttribute key="RunRoutineConfiguration.DefaultSchema" value="TFSDB2P"/>
+<booleanAttribute key="RunRoutineConfiguration.EnableComparison" value="false"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineMangledName" value="SYNCHRONIZE_LC_STATUS_DATE_INTEGER_VARCHAR"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineName" value="SYNCHRONIZE_LC_STATUS"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSchema" value="TFSDB2P"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineSignature" value="TFSDB2P.SYNCHRONIZE_LC_STATUS(DATE, INTEGER, VARCHAR(2000))"/>
+<stringAttribute key="RunRoutineConfiguration.RoutineType" value="RunRoutineConfiguration.StoredProcedure"/>
+<stringAttribute key="ServiceOptions.Project" value="Trade Finance System"/>
+<stringAttribute key="testStatus" value="PASS"/>
+</launchConfiguration>

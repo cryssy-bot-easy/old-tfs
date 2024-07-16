@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.cdt.RefPas5Client" table="REFPAS5CLIENT">
+
+        <!--<composite-id name="ccn" access="field">-->
+            <!--<key-property name="ccn" column="CCN" type="string" length="12"/>-->
+        <!--</composite-id>-->
+
+        <id name="agentBankCode" column="AABREFCODE" type="java.lang.String" length="20"/>
+
+        <property name="ccn" column="CCN" type="string" length="13"/>
+
+        <property name="tin" column="TIN" type="java.lang.String" length="14"/>
+
+        <property name="clientName" column="CLIENT" type="java.lang.String" length="100"/>
+
+        <property name="contactPerson" column="CONTACTPERSON" type="java.lang.String" length="100"/>
+        <property name="phoneNumber" column="PHONENO" type="java.lang.String" length="60"/> <!-- 52 -->
+        <property name="email" column="EMAIL" type="java.lang.String" length="300"/> <!-- 125 -->
+        
+        <property name="rmbmEmail" column="RM_BM_EMAIL" type="java.lang.String" length="300"/> 
+
+		<property name="branchEmail" column="BRANCH_EMAIL" type="java.lang.String" length="300"/>
+
+        <property name="defaultBankCharge" column="BANKCHARGEDEFAULT" type="java.math.BigDecimal"/>
+
+        <property name="registrationDate" column="REGISTRATION_DATE" type="java.util.Date"/>
+
+        <property name="cifNumber" column="CIFNO" type="java.lang.String" length="8"/>
+        <property name="cifName" column="CIFNAME" type="java.lang.String" length="100"/>
+        <property name="accountOfficer" column="ACCOUNTOFFICER" type="string" length="100"/>
+        <property name="ccbdBranchUnitCode" column="BRANCHUNITCODE" type="string" length="10"/>
+
+		<property name="allocationUnitCode" column="ALLOCATIONUNITCODE" type="string" length="5"/>
+		
+        <property name="feeSharing" column="FEESHARING" type="boolean"/>
+
+        <property name="casaAccountNumber" column="DEFAULTACCOUNT" type="java.lang.String" length="60"/> <!-- 52 -->
+        <!--<property name="autoDebitAuthority" column="AUTODEBIT" type="boolean"/>-->
+        <property name="autoDebitAuthority" column="AUTODEBITAUTHORITY" length="14">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.AutoDebit</param>
+            </type>
+        </property>
+
+        <property name="specialInstruction" column="SPECIALINSTRUCTION" type="string" length="200"/>
+
+        <property name="uploadedBy" column="UPLOADED_BY" type="string" length="6"/>
+
+        <property name="unitCode" column="UNIT_CODE" type="string" length="3"/>
+        
+        <property name="exceptionCode" column="EXCEPTIONCODE" type="string" length="2"/>
+        
+         <property name="officerCode" column="OFFICERCODE" type="string" length="3"/>
+        
+    </class>
+
+</hibernate-mapping>

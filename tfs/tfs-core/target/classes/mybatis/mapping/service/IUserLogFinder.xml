@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ucpb.tfs.application.query.service.IUserLogFinder" >
+	<select id="findUsersToLogout" resultType="hashMap">
+		SELECT SU.ID,SU.LAST_LOGIN,SU.LAST_LOGOUT,SU.ISLOGGEDIN,SE.FULLNAME,SE.UNITCODE 
+		FROM SEC_USER SU 
+		INNER JOIN SEC_EMPLOYEE SE ON SU.ID=SE.ID
+		<where>
+			<if test="userId != ''">
+				UPPER(SU.ID) LIKE '%' || UPPER(#{userId}) || '%'
+			</if>
+			<if test="loginStatus != ''">
+				<if test="loginStatus == 1">
+					AND SU.ISLOGGEDIN = 1
+				</if>
+				<if test="loginStatus == 0">
+					AND SU.ISLOGGEDIN = 0
+				</if>
+			</if>
+		</where>
+		ORDER BY SU.LAST_LOGIN DESC
+	</select>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:mt103 xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/mt1series"
+           xmlns:ns3="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+           type="103">
+    <ns3:basic_header>
+        <ns3:application_identifier>F</ns3:application_identifier>
+        <ns3:service_identifier>01</ns3:service_identifier>
+        <ns3:lt_identifier>UCPBPHM0AXXX</ns3:lt_identifier>
+        <ns3:session_number>0000</ns3:session_number>
+        <ns3:sequence_number>000000</ns3:sequence_number>
+    </ns3:basic_header>
+    <ns3:application_header>
+        <ns3:io_identifier>I</ns3:io_identifier>
+        <ns3:message_type>103</ns3:message_type>
+        <ns3:receiver_address>
+            <ns3:bank_identifier_code>ASASASAS</ns3:bank_identifier_code>
+            <ns3:branch_code>XXX</ns3:branch_code>
+        </ns3:receiver_address>
+        <ns3:message_priority>N</ns3:message_priority>
+    </ns3:application_header>
+    <field20 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">9090792813000019</field20>
+    <field23B xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">SPRI</field23B>
+    <field23E xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">SDVA</field23E>
+    <field26T xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">A00</field26T>
+    <field32A xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">130225USD121561724,</field32A>
+    <field33B xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">USD121561724,</field33B>
+    <field50K xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">JJED PHILIPPINES INC
+        3F JJED BLDG.,
+        54 P. CRUZ
+        STREET
+        MANDALUYONG CITY
+    </field50K>
+    <field51A xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">ABNAAEADSHJ</field51A>
+    <field53B xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">/32080923802832</field53B>
+    <field59 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">/ACCOUNTFIELD
+        BENEF NAME
+        BENEF ADDRESS
+    </field59>
+    <field70 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">/ANSI/ENVELOPE</field70>
+    <field71A xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">SHA</field71A>
+    <field71F xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">PHP121212,</field71F>
+    <field77B xmlns="http://www.ucpb.com.ph/tfs/schemas/mt1series">REPORTING</field77B>
+</ns2:mt103>

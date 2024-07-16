@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt752Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="field20" key="#this.get('documentNumber')"/>
+                <entry value="field21" key="#this.get('negotiatingBanksReferenceNumber')"/>
+                <entry value="field23" key="#this.get('furtherIdentification')"/>
+                <!-- convert to swift date -->
+                <entry value="field30" key="#this.get('valueDate')"/>
+                <!-- todo: add currency and swift parsing (negotiationCurrency)-->
+                <entry value="field32B" key="#this.get('negotiationAmount')"/>
+                <!-- todo : format to swift format -->
+                <entry value="field71B" key="#this.get('discrepancyFeeCharge')"/>
+                <!-- todo : format to swift amount -->
+                <entry value="field33A" key="#this.get('netAmount')"/>
+                <entry value="field53A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('senderCorrespondentIdentifierCode'),#this.get('sendersCorrespondentLocation'),#this.get('sendersCorrespondentNameAndAddress'))"/>
+                <entry value="field54A" key="T(com.ucpb.tfs.util.SwiftUtil).chooseNotEmpty(#this.get('receiversCorrespondentIdentifierCode'),#this.get('receiversCorrespondentLocation'),#this.get('receiversCorrespondentNameAndAddress'))"/>
+                <entry value="field72" key="#this.get('senderToReceiverInformation')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT752"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    
+    <!--<subclass name="com.ucpb.tfs.domain.product.Rebate" extends="com.ucpb.tfs.domain.product.TradeProduct" discriminator-value="REBATE" lazy="false">-->
+    <class name="com.ucpb.tfs.domain.product.Rebate" table="Rebate">
+
+            <!--<composite-id name="documentNumber" access="field">-->
+                <!--<key-property name="documentNumber" column="documentNumber" type="string" length="21"/>-->
+            <!--</composite-id>-->
+
+            <id name="id" column="id" length="36">
+                <generator class="org.hibernate.id.UUIDHexGenerator"/>
+            </id>
+
+            <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+                <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+            </component>
+
+            <property name="cifNumber" column="cifNumber" type="string" length="10"/>
+            <property name="cifName" column="cifName" type="string" length="100"/>
+
+            <property name="accountOfficer" column="accountOfficer" type="string" length="100"/>
+            <property name="ccbdBranchUnitCode" column="ccbdBranchUnitCode" type="string" length="10"/>
+
+            <property name="amount" column="amount" type="java.math.BigDecimal" />
+
+            <property name="currency" column="currency" type="java.util.Currency" length="3" />
+
+
+            <property name="processDate" column="processDate" type="java.util.Date" />
+            <property name="corresBankCode" column="corresBankCode" type="string" length="20" />
+            <property name="accountType" column="accountType" type="string" length="4" />
+            <property name="depositoryAccountNumber" column="depositoryAccountNumber" type="string" length="20" />
+            <property name="glCode" column="glCode" type="string" length="20" />
+            <property name="countryCode" column="countryCode" type="string" length="20" />
+            <property name="beneficiary" column="beneficiary" type="string" length="4" />
+            <property name="beneficiaryTin" column="beneficiaryTin" type="string" length="20" />
+            <property name="particulars" column="particulars" type="string" length="350" />
+
+            <property name="tranCode" column="tranCode" type="string" length="3" />
+    </class>
+    
+</hibernate-mapping>

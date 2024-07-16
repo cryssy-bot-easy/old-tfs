@@ -1,0 +1,1696 @@
+diff --git a/tfs-core/pom.xml.rej b/tfs-core/pom.xml.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/pom.xml.rej
+@@ -0,0 +1,29 @@
++--- pom.xml
+++++ pom.xml
++@@ -52,7 +52,7 @@
++                             <dependency>
++                                 <groupId>com.ibm.db2.jcc</groupId>
++                                 <artifactId>jcc4</artifactId>
++-                                <version>4.13.127</version>
+++                                <version>4.25.13</version>
++                             </dependency>
++                         </dependencies>
++                         <!--<executions>-->
++@@ -105,7 +105,7 @@
++                             <dependency>
++                                 <groupId>com.ibm.db2.jcc</groupId>
++                                 <artifactId>jcc4</artifactId>
++-                                <version>4.13.127</version>
+++                                <version>4.25.13</version>
++                             </dependency>
++                         </dependencies>
++                         <!--<executions>-->
++@@ -537,7 +537,7 @@
++        	<dependency>
++               <groupId>com.ibm.db2.jcc</groupId>
++               <artifactId>jcc4</artifactId>
++-              <version>4.13.127</version>
+++              <version>4.25.13</version>
++         </dependency>
++ 
++ <!--        <dependency>
+diff --git a/tfs-core/src/config/uat-schemas.properties.rej b/tfs-core/src/config/uat-schemas.properties.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/config/uat-schemas.properties.rej
+@@ -0,0 +1,62 @@
++--- uat-schemas.properties
+++++ uat-schemas.properties
++@@ -3,9 +3,9 @@
++ #cfmast=UCDATUBWC2
++ #facility=UCDATULNS2
++ #loan=UCDATULNS2
++-rates=UCPARUCMN
+++rates=TFSDB2S
++ #officers=UCPARUCMN2
++ #ccbdbranch=UCPARUCMN2
++ #gl=UCDATUGLD2
++ #cifAccount=UCDATURBK2
++ 
++@@ -7,15 +7,15 @@
++ #officers=UCPARUCMN2
++ #ccbdbranch=UCPARUCMN2
++ #gl=UCDATUGLD2
++ #cifAccount=UCDATURBK2
++ 
++-cif=UCDATUBWC1
++-account=UCDATUBWC2
++-cfmast=UCDATUBWC1
++-facility=UCDATULNS1
++-loan=UCDATULNS1
++-officers=UCPARUCMN1
++-ccbdbranch=UCPARUCMN1
++-gl=UCDATUGLD1
++-cifAccount=UCDATURBK1
+++cif=TFSDB2S
+++account=TFSDB2S
+++cfmast=TFSDB2S
+++facility=TFSDB2S
+++loan=TFSDB2S
+++officers=TFSDB2S
+++ccbdbranch=TFSDB2S
+++gl=TFSDB2S
+++cifAccount=TFSDB2S
++ 
++@@ -21,3 +21,3 @@
++ 
++-dailyrates=JHFXDTTF
+++dailyrates=TFSDB2S
++ #dailyrates=JHFXDT
++@@ -23,7 +23,7 @@
++ #dailyrates=JHFXDT
++-historicalrates=JHYXDTTF
++-ratenames=JHFXPRTF
++-rateunknown=JHFXRTTF
+++historicalrates=JHYXDT
+++ratenames=JHFXPR
+++rateunknown=JHFXRT
++ 
++ 
++ #sibs=UCENVUCMN6
++@@ -27,4 +27,4 @@
++ 
++ 
++ #sibs=UCENVUCMN6
++-sibs=UCENVUCMN1
++\ No newline at end of file
+++sibs=UCENVUCMN7
++\ No newline at end of file
+diff --git a/tfs-core/src/main/resources/Untitled-1fffff.ini b/tfs-core/src/main/resources/Untitled-1fffff.ini
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/main/resources/Untitled-1fffff.ini
+@@ -0,0 +1,338 @@
++diff --git a/tfs-core/src/main/resources/tfs.properties b/tfs-core/src/main/resources/tfs.properties
++--- a/tfs-core/src/main/resources/tfs.properties
+++++ b/tfs-core/src/main/resources/tfs.properties
++@@ -24,5 +24,11 @@
++ # DB2 settings
++ hibernate.dialect=org.hibernate.dialect.DB2Dialect
++ tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++-tfs.jdbc.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
+++tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+++tfs.jdbc.autoReconnect=true
+++
+++
+++# DEV DB
+++tfs.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
+++# tfs.jdbc.url=jdbc:db2://172.22.0.92:50000/TFSSIT
++ tfs.jdbc.username=tfsdb2c
++@@ -28,5 +34,12 @@
++ tfs.jdbc.username=tfsdb2c
++-tfs.jdbc.password=abc123
++-tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+++tfs.jdbc.password=tfs*0*dssZvuLK
+++# DEV DB
+++quartz.database.url=jdbc:db2://172.22.0.92:50000/TFS2212
+++quartz.database.user=tfsdb2c
+++quartz.database.password=tfs*0*dssZvuLK
+++
+++# DB2 settings
+++# Prod properties # tfs.jdbc.url=jdbc:db2://130.130.0.78:50000/TFSIPCD3
+++
++ 
++ interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++@@ -31,4 +44,6 @@
++ 
++ interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++-interface.jdbc.url=jdbc:db2://130.130.2.164:50000/UCICBSD1
+++# Prod properties # interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
+++# interface.jdbc.url=jdbc:db2://10.80.80.165:50000/UCICBSD1
+++interface.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++ interface.jdbc.username=tfsdb2c
++@@ -34,4 +49,7 @@
++ interface.jdbc.username=tfsdb2c
++-interface.jdbc.password=abc123
+++# Prod properties # interface.jdbc.password=tfsdb2c
+++interface.jdbc.password=tfs*0*dssZvuLK
+++# interface.jdbc.password=abc123
+++interface.jdbc.autoReconnect=true
++ 
++ #SIBS - casa gateway configurations
++@@ -36,3 +54,4 @@
++ 
++ #SIBS - casa gateway configurations
+++# casa.gateway.host=130.130.2.225
++ casa.gateway.host=130.130.2.225
++@@ -38,4 +57,14 @@
++ casa.gateway.host=130.130.2.225
++-#casa.gateway.port=36115
++-casa.gateway.port=31115
+++# casa.gateway.host=172.22.0.170
+++# U6
+++casa.gateway.port=36115	
+++# U2
+++# casa.gateway.port=32115
+++# U1
+++# casa.gateway.port=31115
+++# unavailable port
+++# casa.gateway.port=99999
+++# casa.gateway.so.timeout=1
+++# casa.gateway.request.timeout=1
+++# casa.gateway.reply.timeout=1
++ casa.gateway.so.timeout=120000
++@@ -41,6 +70,6 @@
++ casa.gateway.so.timeout=120000
++-casa.gateway.request.timeout=65000
++-casa.gateway.reply.timeout=65000
+++casa.gateway.request.timeout=120000
+++casa.gateway.reply.timeout=120000
++ casa.message.encoding=CP1047
++ casa.userId=TFSCASA
++ casa.password=ipc123$
++@@ -44,6 +73,9 @@
++ casa.message.encoding=CP1047
++ casa.userId=TFSCASA
++ casa.password=ipc123$
+++
+++casa.accounts.input.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS
+++casa.accounts.backup.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS_BACKUP
++ #interface db configurations
++ #interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++ #interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
++@@ -61,6 +93,9 @@
++ # TSD
++ ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
++ ldap.base=dc=ucpb8,dc=com
++-ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
++-ldap.password=P@ssw0rd1
+++# Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
+++ldap.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=UCPB8,DC=COM
+++# ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
+++# ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
+++ldap.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ ldap.domain=ucpb8.com
++@@ -66,3 +101,21 @@
++ ldap.domain=ucpb8.com
+++ldap.directory=UCPB8
+++
+++# ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
+++# ldap.base=dc=ucpb8,dc=com
+++# # Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
+++# ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
+++# # ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
+++# # ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
+++# ldap.password=Q@WvE6R7Pp2U4ZY8Z0sFKm16iyvOMi
+++# ldap.domain=ucpb8.com
+++
+++# ---Prod properties 
+++# ldap.branch.url=ldap://ADPW08IBL01.UCPB8.COM:389
+++# ldap.branch.base=dc=ucpb8,dc=com
+++# ldap.branch.userdn=UID=TFSYSPRO,DC=UCPB8,DC=COM
+++# ldap.branch.password=P@ssw0rd1$
+++# ldap.branch.domain=ucpb8.com
+++# ---Prod properties 
++ 
++ # BRANCH
++@@ -67,7 +120,8 @@
++ 
++ # BRANCH
++-ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++ldap.branch.url=ldap://bepcsw16vm01.branch.ucpb8.com:389
++ ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++@@ -73,4 +127,5 @@
++ ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++-ldap.branch.userdn=CN=TFS Test Branch ID,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
++-ldap.branch.password=P@ssw0rd2
+++ldap.branch.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=BRANCH,DC=UCPB8,DC=COM
+++# ldap.branch.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse	
+++ldap.branch.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ ldap.branch.domain=branch.ucpb8.com
++@@ -76,4 +131,29 @@
++ ldap.branch.domain=branch.ucpb8.com
+++ldap.branch.directory=BRANCH
+++
+++
+++#tfs.authenticationProvider=adAuth
+++#
+++##TSD
+++#ldap.url=ldap://ADPW08IBL02.UCPB8.COM:389
+++#ldap.base=dc=ucpb8,dc=com
+++#ldap.userdn=CN=TFSPSU,CN=Users,DC=UCPB8,DC=COM
+++#ldap.password=psuprod@456
+++#ldap.domain=ucpb8.com
+++#
+++##BRANCH
+++#ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++#ldap.branch.base=dc=branch,dc=ucpb8,dc=com
+++#ldap.branch.userdn=CN=TFSPSU,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
+++#ldap.branch.password=psuprod@456
+++#ldap.branch.domain=branch.ucpb8.com
+++
+++
+++
+++
++ 
++ 
++ 
++@@ -109,7 +189,9 @@
++ #swift message header configurations
++ swift.app.identifier=F
++ swift.service.identifier=01
++-swift.lt.identifier=UCPBPHM0AXXX
+++# swift.lt.identifier=UCPBPHM0AXXX
+++# swift.lt.identifier=UCPBPHMMAXXX
+++swift.lt.identifier=TLBPHMM0AXXX
++ swift.session.number=0000
++ swift.sequence.number=000000
++ swift.io.identifier=I
++@@ -157,10 +239,7 @@
++ quartz.table.prefix=QRTZ_
++ jdbc.driver=com.ibm.db2.jcc.DB2Driver
++ jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
++-quartz.database.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
++-quartz.database.user=tfsdb2c
++-quartz.database.password=abc123
++ quartz.database.max.conn=5
++ quartz.isclustered=false
++ 
++ 
++@@ -163,7 +242,8 @@
++ quartz.database.max.conn=5
++ quartz.isclustered=false
++ 
++ 
+++
++ #job schedules
++ #tradeservice.report.trigger=0 30 * * * ?
++ #tradeservice.report.trigger=0 0 21 * * ?
++@@ -179,9 +259,8 @@
++ gl.movement.directory=/opt/tfs/INTERFACE_FILES
++ gl.movement.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++ 
++-expired.amla.directory=/opt/tfs/INTERFACE_FILES/
++ cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++ 
++ #amla output directories
++ amla.directory=/opt/tfs/INTERFACE_FILES
++ amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++@@ -183,7 +262,8 @@
++ cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++ 
++ #amla output directories
++ amla.directory=/opt/tfs/INTERFACE_FILES
++ amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
+++expired.amla.directory=/opt/tfs/INTERFACE_FILES
++ 
++ #datawarehouse output directories
++@@ -188,4 +268,4 @@
++ 
++ #datawarehouse output directories
++-dw.directory=/opt/tfs/INTERFACE_FILESsaan description
+++dw.directory=/opt/tfs/INTERFACE_FILES
++ dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++@@ -191,3 +271,3 @@
++ dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++-dw.batch.directory=/opt/tfs/INTERFACE_FILESsaan description
+++dw.batch.directory=/opt/tfs/BATCH_REPORT_FILES
++ 
++@@ -193,11 +273,4 @@
++ 
++-batch.rma.directory=/opt/tfs/SWIFT/RMAFile
++-batch.bic.directory=/opt/tfs/SWIFT/BICFile/
++-batch.bic.filename.all=FI.txt
++-batch.bic.filename.delta=FIDELTA.txt
++-
++-batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
++-batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
++ #datawarehouse output directories
++ #dw.movement.directory=outputReports
++ #dw.allocation.directory=outputReports
++@@ -206,5 +279,4 @@
++ #dw.gl.param.directory=outputReports
++ #dw.cbr.param.directory=outputReports
++ #dw.report.directory=outputReports
++-tfs.check.multiple.login=true
++ 
++@@ -210,2 +282,25 @@
++ 
+++batch.rma.directory=/opt/tfs/SWIFT/RMAFile
+++batch.bic.directory=/opt/tfs/SWIFT/BICFile/
+++
+++batch.bic.filename.all=FI.txt
+++batch.bic.filename.delta=FIDELTA.txt
+++
+++batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
+++batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
+++
+++
+++tfs.check.multiple.login=false
+++
+++# mail.smtp.auth=true
+++# mail.smtp.host=EXPNLBMLA.ucpb8.com
+++# mail.smtp.socketFactory.port=587
+++# mail.smtp.from=tfsdevteam@ucpb.com
+++# mail.smtp.username=tfsdevteam
+++# mail.smtp.password=pass@word8
+++# mail.smtp.starttls.enable=true
+++# mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
+++# mail.smtp.enableNotification=false
+++
+++# TEST PROTECTION 25 LBPTRADEFINANCE
++ mail.smtp.auth=true
++@@ -211,5 +306,7 @@
++ mail.smtp.auth=true
++-mail.smtp.host=EXPNLBMLA.ucpb8.com
++-mail.smtp.socketFactory.port=587
++-mail.smtp.from=tfsdevteam@ucpb.com
+++mail.smtp.host=landbank-com.mail.protection.outlook.com
+++mail.smtp.socketFactory.port=25
+++# mail.smtp.from=mferrer@landbank.com
+++# mail.smtp.from=hrumbaoa@landbank.com
+++# mail.smtp.from=tfstest@landbank.com
++ mail.smtp.username=tfsdevteam
++@@ -215,3 +312,5 @@
++ mail.smtp.username=tfsdevteam
++-mail.smtp.password=pass@word9
+++mail.smtp.password=password@15
+++# mail.smtp.username=tfsdevteam
+++# mail.smtp.password=password@15
++ mail.smtp.starttls.enable=true
++@@ -217,2 +316,39 @@
++ mail.smtp.starttls.enable=true
++-mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
+++mail.smtp.ssl.trust=landbank-com.mail.protection.outlook.com
+++mail.smtp.enableNotification=false
+++# mail.smtp.enableNotification=true
+++# mail.smtp.host=smtp.office365.com
+++# mail.smtp.socketFactory.port=587
+++mail.smtp.from=lbptradefinance@landbank.com
+++
+++
+++#mail.smtp.host=130.130.9.128
+++#mail.smtp.host=lbpmail1.corp.landbank.com
+++#mail.smtp.host=smtp.office365.com
+++# mail.smtp.from=ucpb_trade_finance@ucpb.com
+++#mail.smtp.ssl.trust=130.130.9.128
+++#mail.smtp.ssl.trust=lbpmail1.corp.landbank.com
+++#mail.smtp.ssl.trust=smtp.office365.com
+++
+++#CIC directories
+++cic.file.name=FCN
+++cic.file.format=.txt
+++cic.directory=/opt/tfs/INTERFACE_FILES/CIC/
+++cic.backup.directory=/opt/tfs/INTERFACE_FILES/CIC_Backup/
+++
+++# Used for purging Accounts
+++tfstemp.jdbc.url=jdbc:db2://130.130.2.164:50000/TFSIPCD4
+++#tfstemp.jdbc.username=tfsdb2c
+++#tfstemp.jdbc.password=abc123
+++tfs.prod.schema=TFSDB2C
+++
+++purging.major.retention=2
+++purging.major.term=YEAR
+++purging.minor.retention=2
+++purging.minor.term=MONTH
+++purging.thread.sleep=10000
+++
+++tfs.cdt.default.bookingunit=100
+++itrs.batch.directory=/opt/tfs/ITRS/
+++
+++swift.regex.directory=/opt/tfs/SWIFT/regex.prt
+diff --git a/.project b/.project
+new file mode 100644
+--- /dev/null
++++ b/.project
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>tfs</name>
++	<comment></comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.m2e.core.maven2Builder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.m2e.core.maven2Nature</nature>
++	</natures>
++</projectDescription>
+diff --git a/tfs-batch/src/config/uat-schemas.properties b/tfs-batch/src/config/uat-schemas.properties
+--- a/tfs-batch/src/config/uat-schemas.properties
++++ b/tfs-batch/src/config/uat-schemas.properties
+@@ -13,7 +13,7 @@
+ facility=UCDATULNS1
+ loan=UCDATULNS1
+ officers=UCPARUCMN1
+-gl=UCDATUGLD1
++gl=TFSDB2S
+ 
+ dailyrates=JHFXDTTF
+ historicalrates=JHYXDTTF
+diff --git a/tfs-core/TF_GL_20240201.txt b/tfs-core/TF_GL_20240201.txt
+new file mode 100644
+diff --git a/tfs-core/TF_GL_20240207.txt b/tfs-core/TF_GL_20240207.txt
+new file mode 100644
+diff --git a/tfs-core/btm1.tlog b/tfs-core/btm1.tlog
+new file mode 100644
+index 0000000000000000000000000000000000000000..4526f377129be9fac89f7a72a275d6d847315769
+GIT binary patch
+literal 2097173
+zc%1FQu@L|e5CE_*tY9GnsT8)*8CHWkLuiteR(o7&j<w^-0RR91000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+u00000000000000000000000000000000000000000000000000@Yw-PVFc6w
+
+diff --git a/tfs-core/btm2.tlog b/tfs-core/btm2.tlog
+new file mode 100644
+index 0000000000000000000000000000000000000000..2753052d8c0ef9de27631f9977fe1ba3f17a7e3b
+GIT binary patch
+literal 2097173
+zc%1FQArSx|5CE_jRG<)nPzdfm1dhBQ=z!VQMxSw&y)vE}00000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+z00000000000000000000000000000000000000000000000000000000000000000
+t00000000000000000000000000000000000000000000000000pB-}t16BY4
+
+diff --git a/tfs-core/src/config/uat-schemas.properties b/tfs-core/src/config/uat-schemas.properties
+--- a/tfs-core/src/config/uat-schemas.properties
++++ b/tfs-core/src/config/uat-schemas.properties
+@@ -3,7 +3,7 @@
+ #cfmast=UCDATUBWC2
+ #facility=UCDATULNS2
+ #loan=UCDATULNS2
+-rates=UCPARUCMN
++rates=TFSDB2S
+ #officers=UCPARUCMN2
+ #ccbdbranch=UCPARUCMN2
+ #gl=UCDATUGLD2
+@@ -20,10 +20,10 @@
+ cifAccount=UCDATURBK7
+ 
+ holiday=UCPARUCMN7
+-dailyrates=JHFXDTTF
+-historicalrates=JHYXDTTF
+-ratenames=JHFXPRTF
+-rateunknown=JHFXRTTF
++dailyrates=TFSDB2S
++historicalrates=JHYXDT
++ratenames=JHFXPR
++rateunknown=JHFXRT
+ 
+ 
+ #sibs=UCENVUCMN6
+diff --git a/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy b/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
+--- a/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
++++ b/tfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest/BatchRestServices.groovy
+@@ -340,9 +340,8 @@
+     private static final SimpleDateFormat DATE_FORMATTER_DESC = new SimpleDateFormat(DATE_FORMAT_DESC);
+ 	private static final SimpleDateFormat DATE_FORMATTER_BATCH_CONTROLLER = new SimpleDateFormat(DATE_FORMAT_BATCH_CONTROLLER);
+ 
+-    private static final String GL_PARAMETER_FILE_SQL = "SELECT DISTINCT GLCODE, RECORDTYPE FROM GL_ENTRY_TYPES";
+     private static final String DW_PARAMETER_FILE_SQL = "SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR'";
+     private static final String CBR_PARAMETER_FILE_SQL = "SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR1' ORDER BY FIELD, PRODUCTID";
+ 
+ 	private static final String SYNCHRONIZE_ROUTING_STATUS = "{CALL SYNCHRONIZE_LC_STATUS(?,?,?)}";
+ 
+@@ -344,8 +343,13 @@
+     private static final String DW_PARAMETER_FILE_SQL = "SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR'";
+     private static final String CBR_PARAMETER_FILE_SQL = "SELECT * FROM DW_REFERENCE WHERE REF_TYPE = 'CBR1' ORDER BY FIELD, PRODUCTID";
+ 
+ 	private static final String SYNCHRONIZE_ROUTING_STATUS = "{CALL SYNCHRONIZE_LC_STATUS(?,?,?)}";
+ 
++
++	private static final String GL_PARAMETER_FILE_SQL = "SELECT DISTINCT GLCODE, RECORDTYPE FROM GL_ENTRY_TYPES";
++
++	private static final String PUSO_CFMAST_SQL = "SELECT CFSNME, CFOFFR, CFNA1, CFNA1A, CFRESD, CFBIRD, CFBIR6 FROM CFMAST";
++
+     //TODO MOVE THIS QUERIES PROPERTIES INTO PROPERTIES FILE
+ 
+ 
+@@ -2211,6 +2215,49 @@
+         return Response.status(200).entity(result).build();
+     }
+ 	
++	@GET
++    @Produces(MediaType.APPLICATION_JSON)
++    @Path("/pusoPogi")
++    public Response pusoPogi(@Context UriInfo allUri, String postRequestBody) {
++         println "\n etooo reqq bodyyyyyyyyy" + postRequestBody
++		 println "\n etooo all uriiiiiiiiii" + allUri
++
++		MultivaluedMap<String, String> parameters = allUri.getQueryParameters();
++        String onlineReportDate = parameters?.getFirst(REPORT_DATE)?.toString();
++
++		println "\n parammmmmmmsssss" + onlineReportDate
++
++     	println "\n parammmmm 1111" 
++        Gson gson = new Gson()
++        // Map returnMap = new HashMap();
++		// Map formDetails = gson.fromJson(postRequestBody, Map.class);
++
++        String result="";
++		String[] arrayResult;
++		//String[] documentNumbers = tradeServiceRepository.getDocumentNumbersOfUnapprovedEts(DATE_FORMATTER.parse(onlineReportDate))
++
++
++			println "pusssssssssssssss1111111111" + documentNumbers
++			
++
++		try{
++	       // glParameterFileJob.execute(PUSO_CFMAST_SQL,DATE_FORMATTER_BATCH_CONTROLLER.parse(onlineReportDate));
++			println "\n--- END (SUCCESS): Puso Pogiiii:" + DateUtil.convertToTimeString(new Date()) + "---"
++
++			println "\n ---- arayyyyyyyyyyyy" + arrayResult
++	        return Response.status(200).entity(gson.toJson([success : true,name:'Puso Pogi'])).build();
++		}catch(Exception e){
++			System.err.println("Parameter: "+ e.getCause()?.getMessage())
++			println "\n--- END (FAILED): GL Parameter, TIME:" + DateUtil.convertToTimeString(new Date()) + "---"
++			return Response.status(200).entity(gson.toJson([success : false])).build();
++		}
++        
++        // format return data as json
++       // result = gson.toJson(returnMap);
++	   	// result = gson.toJson(returnMap)
++   		// println "\n--- Cryssyyyyy poggiiiiiii ditooo naa enddddd"  + "---"
++    //    return Response.status(200).entity(result).build();
++    }
+ 	
+ 	@GET
+ 	@Produces(MediaType.APPLICATION_JSON)
+@@ -2235,7 +2282,7 @@
+ //			def fileMatcher = ~/(?i).*\.txt/
+ 			FileInputStream fis = null
+ 			boolean fileExist = false
+-			
++
+ 			File refBankFile = new File(appProperties.object.getProperty('batch.bic.directory') + appProperties.object.getProperty('batch.bic.filename.all'))
+ 			
+ 			if(refBankFile == null){
+diff --git a/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java b/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
+--- a/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
++++ b/tfs-core/src/main/java/com/ucpb/tfs/report/enums/DailyBatchInterface.java
+@@ -34,6 +34,7 @@
+ 	Balance("Balance","balance"),
+ 	Tag_As_Pending("Tag As Pending","tagAsPending"),
+ 	GL_Parameter("GL Parameter","params"),
++	PUSO_POGI("pusoPogi ","pusoPogi"),
+ 	Allocation_File("Allocation File","allocation"),
+ 	Master_Exception_Report("Master Exception Report","masterException"),
+ 	Allocation_Exception_Report("Allocation Exception Report","allocationException");
+diff --git a/tfs-core/src/main/resources/New Text Document.txt b/tfs-core/src/main/resources/New Text Document.txt
+new file mode 100644
+diff --git a/tfs-core/src/main/resources/batch/amla-jobs.xml b/tfs-core/src/main/resources/batch/amla-jobs.xml
+--- a/tfs-core/src/main/resources/batch/amla-jobs.xml
++++ b/tfs-core/src/main/resources/batch/amla-jobs.xml
+@@ -112,6 +112,7 @@
+         <constructor-arg name="query" value="
+             select * from ACCOUNTLOG WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)  or BATCHFLAG = 1
+         "/>
++        
+         <property name="mapper">
+             <bean class="com.ucpb.tfs.batch.util.SpelEvaluatingStringArrayRowMapper">
+                 <constructor-arg name="rowMapping">
+diff --git a/tfs-core/src/main/resources/batch/job-details.xml b/tfs-core/src/main/resources/batch/job-details.xml
+--- a/tfs-core/src/main/resources/batch/job-details.xml
++++ b/tfs-core/src/main/resources/batch/job-details.xml
+@@ -166,9 +166,6 @@
+         </property>
+     </bean>
+ 
+-
+-
+-
+     <bean name="tradeServiceExpireTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+         <property name="jobDetail" ref="tradeServiceExpireJobDetail"/>
+         <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+diff --git a/tfs-core/src/main/resources/tfs-backup.properties b/tfs-core/src/main/resources/tfs-backup.properties
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/main/resources/tfs-backup.properties
+@@ -0,0 +1,238 @@
++# RMI port
++tfs.rmi.port=1099
++
++# hibernate settings
++hibernate.hbm2ddl.auto=update
++hibernate.show_sql=true
++
++hibernate.connection.pool_size=10
++
++
++# Derby settings
++# hibernate.dialect=org.hibernate.dialect.DerbyTenSevenDialect
++# tfs.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
++# tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
++# tfs.jdbc.username=tfs
++# tfs.jdbc.password=tfs
++# tfs.hibernate.bootstrap=/bootstrap/databootstrap.sql
++
++# interface.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
++# interface.jdbc.url=jdbc:derby://localhost:1527/silverlakedb;create=true
++# interface.jdbc.username=tfs
++# interface.jdbc.password=tfs
++
++# DB2 settings
++# # # # hibernate.dialect=org.hibernate.dialect.DB2Dialect
++# # # # tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++# # # # tfs.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++# # # # tfs.jdbc.username=tfsdb2c
++# # # # tfs.jdbc.password=tfs*0*dssZvuLK
++# # # # tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
++
++# # # # interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++# # # # interface.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++# # # # interface.jdbc.username=tfsdb2c
++# # # # interface.jdbc.password=tfs*0*dssZvuLK
++hibernate.dialect=org.hibernate.dialect.DB2Dialect
++tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++tfs.jdbc.url=jdbc:db2://localhost:25000/TFS_OLD
++tfs.jdbc.username=tfsdb2c
++tfs.jdbc.password=Jaylomar_28
++tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
++
++interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++interface.jdbc.url=jdbc:db2://localhost:25000/TFS_OLD
++interface.jdbc.username=tfsdb2c
++interface.jdbc.password=Jaylomar_28
++
++#SIBS - casa gateway configurations
++casa.gateway.host=130.130.2.225
++#casa.gateway.port=36115
++casa.gateway.port=31115
++casa.gateway.so.timeout=120000
++casa.gateway.request.timeout=65000
++casa.gateway.reply.timeout=65000
++casa.message.encoding=CP1047
++casa.userId=TFSCASA
++casa.password=ipc123$
++#interface db configurations
++#interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++#interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
++#interface.jdbc.username=tfsdb2c
++#interface.jdbc.password=tfsdb2c
++
++#ldap.url=ldap://192.168.1.101:389
++#ldap.base=dc=ucpb,dc=com
++#ldap.userdn=CN=administrator,CN=Users,DC=ucpb,DC=com
++#ldap.password=password$1
++#ldap.domain=ucpb.com
++
++#tfs.authenticationProvider=adAuth
++
++# TSD
++ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
++ldap.base=dc=ucpb8,dc=com
++ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
++ldap.password=P@ssw0rd1
++ldap.domain=ucpb8.com
++
++# BRANCH
++ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
++ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
++ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
++ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++ldap.branch.userdn=CN=TFS Test Branch ID,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
++ldap.branch.password=P@ssw0rd2
++ldap.branch.domain=branch.ucpb8.com
++
++
++
++# TEST BRANCH
++#ldap.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++#ldap.base=dc=branch,dc=ucpb8,dc=com
++#ldap.userdn=CN=tfstestbranchid,DC=BRANCH,DC=UCPB8,DC=COM
++#ldap.password=P@ssw0rd1
++#ldap.domain=branch.ucpb8.com
++
++
++#amla properties
++#amla.poll.frequency=0/6 * * * * ?
++#amla.poll.frequency=0 15 23 ? * *
++#amla.poll.frequency=0/6 * * * * ?
++amla.poll.frequency=0 0 12 * * ?
++amla.max.rows=2000
++amla.output.directory=src/test/resources/amla/processed
++amla.account.output.directory=src/test/resources/amla/processed
++amla.transaction.output.directory=src/test/resources/amla/processed
++amla.customeraccount.output.directory=src/test/resources/amla/processed
++amla.report.delimiter=|
++
++
++
++#tfs.db.username=tfs
++#tfs.db.password=tfs
++#tfs.db.url=jdbc:oracle:thin:@10.133.154.59:1521:DPRMODS
++#tfs.db.driver=org.apache.derby.jdbc.ClientDriver
++
++#tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
++
++#swift message header configurations
++swift.app.identifier=F
++swift.service.identifier=01
++swift.lt.identifier=UCPBPHM0AXXX
++swift.session.number=0000
++swift.sequence.number=000000
++swift.io.identifier=I
++swift.message.priority=000
++swift.delivery.monitoring=0000
++swift.obsolence.period=N
++
++#swift output file directory
++#swift.output.directory=src/test/resources
++swift.output.directory=/opt/tfs/SWIFT/outgoing/OutgoingToSwift
++swift.output.directory.backup=/opt/tfs/SWIFT/outgoing/OutgoingToSwift_backup
++swift.output.validate=false
++#swift.input.directory.invalid=src/test/resources/invalid
++swift.input.directory.invalid=/opt/tfs/SWIFT/incoming/Invalid
++swift.input.directory.valid=/opt/tfs/SWIFT/incoming/Valid
++#swift.input.directory=src/test/resources/input
++swift.input.directory=/opt/tfs/SWIFT/incoming/IncomingFromSwift
++#5 minutes -> 5 Seconds
++swift.input.poll.frequency=5000
++swift.validation.source=/swift/schemas/swift-master.xsd
++swift.transformation.source=/swift/formatter/swift-format.xsl
++swift.schematron.source=/swift/schematron/compiled/swift-master.xsl
++
++#amla transaction codes
++amla.lc.open=LCOPN
++amla.lc.adjustment=LCOPN
++amla.lc.amendment=LCAMD
++amla.lc.nego=LCNEG
++amla.lc.cancel=LCOPN
++amla.nonlc.nego=NONEG
++amla.duties=CDUTF
++amla.export.nego=EXNEG
++amla.export.settlement=EXSET
++amla.export.advising=EXADV
++amla.export.adv.amendment=EXAMD
++amla.nonlc.settlement=NOSET
++amla.ip=LCOPN
++amla.md=LCOPN
++amla.refund=LCOPN
++amla.corres.charge=LCOPN
++
++
++#QUARTZ - job CONFIGURATIONS#
++# # # # jdbc.jobstore=org.quartz.impl.jdbcjobstore.JobStoreTX
++# # # # quartz.table.prefix=QRTZ_
++# # # # jdbc.driver=com.ibm.db2.jcc.DB2Driver
++# # # # jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
++# # # # quartz.database.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
++# # # # quartz.database.user=tfsdb2c
++# # # # quartz.database.password=abc123
++# # # # quartz.database.max.conn=5
++# # # # quartz.isclustered=false
++jdbc.jobstore=org.quartz.impl.jdbcjobstore.JobStoreTX
++quartz.table.prefix=QRTZ_
++jdbc.driver=com.ibm.db2.jcc.DB2Driver
++jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
++quartz.database.url=jdbc:db2://localhost:25000/TFSDB2S
++quartz.database.user=tfsdb2c
++quartz.database.password=Jaylomar_28
++quartz.database.max.conn=5
++quartz.isclustered=false
++
++
++#job schedules
++#tradeservice.report.trigger=0 30 * * * ?
++#tradeservice.report.trigger=0 0 21 * * ?
++tradeservice.report.trigger=0 0 0 1 1 ? 2099
++
++#trade service revert
++#tradeservice.revert.trigger=0 30 * * * ?
++tradeservice.revert.trigger=0 0 12 * * ?
++
++
++#general ledger output directory
++#gl.output.directory=outputReports
++gl.movement.directory=/opt/tfs/INTERFACE_FILES
++gl.movement.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++
++expired.amla.directory=/opt/tfs/INTERFACE_FILES/
++cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++
++#amla output directories
++amla.directory=/opt/tfs/INTERFACE_FILES
++amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++
++#datawarehouse output directories
++dw.directory=/opt/tfs/INTERFACE_FILESsaan description
++dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++dw.batch.directory=/opt/tfs/INTERFACE_FILESsaan description
++
++batch.rma.directory=/opt/tfs/SWIFT/RMAFile
++batch.bic.directory=/opt/tfs/SWIFT/BICFile/
++batch.bic.filename.all=FI.txt
++batch.bic.filename.delta=FIDELTA.txt
++
++batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
++batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
++#datawarehouse output directories
++#dw.movement.directory=outputReports
++#dw.allocation.directory=outputReports
++#dw.master.directory=outputReports
++#dw.para1.directory=outputReports
++#dw.gl.param.directory=outputReports
++#dw.cbr.param.directory=outputReports
++#dw.report.directory=outputReports
++tfs.check.multiple.login=true
++
++mail.smtp.auth=true
++mail.smtp.host=EXPNLBMLA.ucpb8.com
++mail.smtp.socketFactory.port=587
++mail.smtp.from=tfsdevteam@ucpb.com
++mail.smtp.username=tfsdevteam
++mail.smtp.password=pass@word9
++mail.smtp.starttls.enable=true
++mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
+diff --git a/tfs-core/src/main/resources/tfs.properties b/tfs-core/src/main/resources/tfs.properties
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/main/resources/tfs.properties
+@@ -0,0 +1,354 @@
++# RMI port
++tfs.rmi.port=1099
++
++# hibernate settings
++hibernate.hbm2ddl.auto=update
++hibernate.show_sql=true
++
++hibernate.connection.pool_size=10
++
++
++# Derby settings
++# hibernate.dialect=org.hibernate.dialect.DerbyTenSevenDialect
++# tfs.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
++# tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
++# tfs.jdbc.username=tfs
++# tfs.jdbc.password=tfs
++# tfs.hibernate.bootstrap=/bootstrap/databootstrap.sql
++
++# interface.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
++# interface.jdbc.url=jdbc:derby://localhost:1527/silverlakedb;create=true
++# interface.jdbc.username=tfs
++# interface.jdbc.password=tfs
++
++# DB2 settings
++hibernate.dialect=org.hibernate.dialect.DB2Dialect
++tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
++tfs.jdbc.autoReconnect=true
++
++
++# DEV DB
++tfs.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++# tfs.jdbc.url=jdbc:db2://172.22.0.92:50000/TFSSIT
++tfs.jdbc.username=tfsdb2c
++tfs.jdbc.password=tfs*0*dssZvuLK
++# DEV DB
++quartz.database.url=jdbc:db2://172.22.0.92:50000/TFS2212
++quartz.database.user=tfsdb2c
++quartz.database.password=tfs*0*dssZvuLK
++
++# DB2 settings
++# Prod properties # tfs.jdbc.url=jdbc:db2://130.130.0.78:50000/TFSIPCD3
++
++
++interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++# Prod properties # interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
++# interface.jdbc.url=jdbc:db2://10.80.80.165:50000/UCICBSD1
++interface.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++interface.jdbc.username=tfsdb2c
++# Prod properties # interface.jdbc.password=tfsdb2c
++interface.jdbc.password=tfs*0*dssZvuLK
++# interface.jdbc.password=abc123
++interface.jdbc.autoReconnect=true
++
++#SIBS - casa gateway configurations
++# casa.gateway.host=130.130.2.225
++casa.gateway.host=130.130.2.225
++# casa.gateway.host=172.22.0.170
++# U6
++casa.gateway.port=36115	
++# U2
++# casa.gateway.port=32115
++# U1
++# casa.gateway.port=31115
++# unavailable port
++# casa.gateway.port=99999
++# casa.gateway.so.timeout=1
++# casa.gateway.request.timeout=1
++# casa.gateway.reply.timeout=1
++casa.gateway.so.timeout=120000
++casa.gateway.request.timeout=120000
++casa.gateway.reply.timeout=120000
++casa.message.encoding=CP1047
++casa.userId=TFSCASA
++casa.password=ipc123$
++
++casa.accounts.input.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS
++casa.accounts.backup.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS_BACKUP
++#interface db configurations
++#interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++#interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
++#interface.jdbc.username=tfsdb2c
++#interface.jdbc.password=tfsdb2c
++
++#ldap.url=ldap://192.168.1.101:389
++#ldap.base=dc=ucpb,dc=com
++#ldap.userdn=CN=administrator,CN=Users,DC=ucpb,DC=com
++#ldap.password=password$1
++#ldap.domain=ucpb.com
++
++#tfs.authenticationProvider=adAuth
++
++# TSD
++ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
++ldap.base=dc=ucpb8,dc=com
++# Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
++ldap.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=UCPB8,DC=COM
++# ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
++# ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
++ldap.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ldap.domain=ucpb8.com
++ldap.directory=UCPB8
++
++# ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
++# ldap.base=dc=ucpb8,dc=com
++# # Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
++# ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
++# # ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
++# # ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
++# ldap.password=Q@WvE6R7Pp2U4ZY8Z0sFKm16iyvOMi
++# ldap.domain=ucpb8.com
++
++# ---Prod properties 
++# ldap.branch.url=ldap://ADPW08IBL01.UCPB8.COM:389
++# ldap.branch.base=dc=ucpb8,dc=com
++# ldap.branch.userdn=UID=TFSYSPRO,DC=UCPB8,DC=COM
++# ldap.branch.password=P@ssw0rd1$
++# ldap.branch.domain=ucpb8.com
++# ---Prod properties 
++
++# BRANCH
++# ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++# ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
++# ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
++# ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
++ldap.branch.url=ldap://bepcsw16vm01.branch.ucpb8.com:389
++ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++ldap.branch.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=BRANCH,DC=UCPB8,DC=COM
++# ldap.branch.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse	
++ldap.branch.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ldap.branch.domain=branch.ucpb8.com
++ldap.branch.directory=BRANCH
++
++
++#tfs.authenticationProvider=adAuth
++#
++##TSD
++#ldap.url=ldap://ADPW08IBL02.UCPB8.COM:389
++#ldap.base=dc=ucpb8,dc=com
++#ldap.userdn=CN=TFSPSU,CN=Users,DC=UCPB8,DC=COM
++#ldap.password=psuprod@456
++#ldap.domain=ucpb8.com
++#
++##BRANCH
++#ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++#ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
++#ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
++#ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
++#ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++#ldap.branch.userdn=CN=TFSPSU,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
++#ldap.branch.password=psuprod@456
++#ldap.branch.domain=branch.ucpb8.com
++
++
++
++
++
++
++
++# TEST BRANCH
++#ldap.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++#ldap.base=dc=branch,dc=ucpb8,dc=com
++#ldap.userdn=CN=tfstestbranchid,DC=BRANCH,DC=UCPB8,DC=COM
++#ldap.password=P@ssw0rd1
++#ldap.domain=branch.ucpb8.com
++
++
++#amla properties
++#amla.poll.frequency=0/6 * * * * ?
++#amla.poll.frequency=0 15 23 ? * *
++#amla.poll.frequency=0/6 * * * * ?
++amla.poll.frequency=0 0 12 * * ?
++amla.max.rows=2000
++amla.output.directory=src/test/resources/amla/processed
++amla.account.output.directory=src/test/resources/amla/processed
++amla.transaction.output.directory=src/test/resources/amla/processed
++amla.customeraccount.output.directory=src/test/resources/amla/processed
++amla.report.delimiter=|
++
++
++
++#tfs.db.username=tfs
++#tfs.db.password=tfs
++#tfs.db.url=jdbc:oracle:thin:@10.133.154.59:1521:DPRMODS
++#tfs.db.driver=org.apache.derby.jdbc.ClientDriver
++
++#tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
++
++#swift message header configurations
++swift.app.identifier=F
++swift.service.identifier=01
++# swift.lt.identifier=UCPBPHM0AXXX
++# swift.lt.identifier=UCPBPHMMAXXX
++swift.lt.identifier=TLBPHMM0AXXX
++swift.session.number=0000
++swift.sequence.number=000000
++swift.io.identifier=I
++swift.message.priority=000
++swift.delivery.monitoring=0000
++swift.obsolence.period=N
++
++#swift output file directory
++#swift.output.directory=src/test/resources
++swift.output.directory=/opt/tfs/SWIFT/outgoing/OutgoingToSwift
++swift.output.directory.backup=/opt/tfs/SWIFT/outgoing/OutgoingToSwift_backup
++swift.output.validate=false
++#swift.input.directory.invalid=src/test/resources/invalid
++swift.input.directory.invalid=/opt/tfs/SWIFT/incoming/Invalid
++swift.input.directory.valid=/opt/tfs/SWIFT/incoming/Valid
++#swift.input.directory=src/test/resources/input
++swift.input.directory=/opt/tfs/SWIFT/incoming/IncomingFromSwift
++#5 minutes -> 5 Seconds
++swift.input.poll.frequency=5000
++swift.validation.source=/swift/schemas/swift-master.xsd
++swift.transformation.source=/swift/formatter/swift-format.xsl
++swift.schematron.source=/swift/schematron/compiled/swift-master.xsl
++
++#amla transaction codes
++amla.lc.open=LCOPN
++amla.lc.adjustment=LCOPN
++amla.lc.amendment=LCAMD
++amla.lc.nego=LCNEG
++amla.lc.cancel=LCOPN
++amla.nonlc.nego=NONEG
++amla.duties=CDUTF
++amla.export.nego=EXNEG
++amla.export.settlement=EXSET
++amla.export.advising=EXADV
++amla.export.adv.amendment=EXAMD
++amla.nonlc.settlement=NOSET
++amla.ip=LCOPN
++amla.md=LCOPN
++amla.refund=LCOPN
++amla.corres.charge=LCOPN
++
++
++#QUARTZ - job CONFIGURATIONS#
++jdbc.jobstore=org.quartz.impl.jdbcjobstore.JobStoreTX
++quartz.table.prefix=QRTZ_
++jdbc.driver=com.ibm.db2.jcc.DB2Driver
++jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
++quartz.database.max.conn=5
++quartz.isclustered=false
++
++
++
++#job schedules
++#tradeservice.report.trigger=0 30 * * * ?
++#tradeservice.report.trigger=0 0 21 * * ?
++tradeservice.report.trigger=0 0 0 1 1 ? 2099
++
++#trade service revert
++#tradeservice.revert.trigger=0 30 * * * ?
++tradeservice.revert.trigger=0 0 12 * * ?
++
++
++#general ledger output directory
++#gl.output.directory=outputReports
++gl.movement.directory=/opt/tfs/INTERFACE_FILES
++gl.movement.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++
++cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++
++#amla output directories
++amla.directory=/opt/tfs/INTERFACE_FILES
++amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++expired.amla.directory=/opt/tfs/INTERFACE_FILES
++
++#datawarehouse output directories
++dw.directory=/opt/tfs/INTERFACE_FILES
++dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++dw.batch.directory=/opt/tfs/BATCH_REPORT_FILES
++
++#datawarehouse output directories
++#dw.movement.directory=outputReports
++#dw.allocation.directory=outputReports
++#dw.master.directory=outputReports
++#dw.para1.directory=outputReports
++#dw.gl.param.directory=outputReports
++#dw.cbr.param.directory=outputReports
++#dw.report.directory=outputReports
++
++batch.rma.directory=/opt/tfs/SWIFT/RMAFile
++batch.bic.directory=/opt/tfs/SWIFT/BICFile/
++
++batch.bic.filename.all=FI.txt
++batch.bic.filename.delta=FIDELTA.txt
++
++batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
++batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
++
++
++tfs.check.multiple.login=false
++
++# mail.smtp.auth=true
++# mail.smtp.host=EXPNLBMLA.ucpb8.com
++# mail.smtp.socketFactory.port=587
++# mail.smtp.from=tfsdevteam@ucpb.com
++# mail.smtp.username=tfsdevteam
++# mail.smtp.password=pass@word8
++# mail.smtp.starttls.enable=true
++# mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
++# mail.smtp.enableNotification=false
++
++# TEST PROTECTION 25 LBPTRADEFINANCE
++mail.smtp.auth=true
++mail.smtp.host=landbank-com.mail.protection.outlook.com
++mail.smtp.socketFactory.port=25
++# mail.smtp.from=mferrer@landbank.com
++# mail.smtp.from=hrumbaoa@landbank.com
++# mail.smtp.from=tfstest@landbank.com
++mail.smtp.username=tfsdevteam
++mail.smtp.password=password@15
++# mail.smtp.username=tfsdevteam
++# mail.smtp.password=password@15
++mail.smtp.starttls.enable=true
++mail.smtp.ssl.trust=landbank-com.mail.protection.outlook.com
++mail.smtp.enableNotification=false
++# mail.smtp.enableNotification=true
++# mail.smtp.host=smtp.office365.com
++# mail.smtp.socketFactory.port=587
++mail.smtp.from=lbptradefinance@landbank.com
++
++
++#mail.smtp.host=130.130.9.128
++#mail.smtp.host=lbpmail1.corp.landbank.com
++#mail.smtp.host=smtp.office365.com
++# mail.smtp.from=ucpb_trade_finance@ucpb.com
++#mail.smtp.ssl.trust=130.130.9.128
++#mail.smtp.ssl.trust=lbpmail1.corp.landbank.com
++#mail.smtp.ssl.trust=smtp.office365.com
++
++#CIC directories
++cic.file.name=FCN
++cic.file.format=.txt
++cic.directory=/opt/tfs/INTERFACE_FILES/CIC/
++cic.backup.directory=/opt/tfs/INTERFACE_FILES/CIC_Backup/
++
++# Used for purging Accounts
++tfstemp.jdbc.url=jdbc:db2://130.130.2.164:50000/TFSIPCD4
++#tfstemp.jdbc.username=tfsdb2c
++#tfstemp.jdbc.password=abc123
++tfs.prod.schema=TFSDB2C
++
++purging.major.retention=2
++purging.major.term=YEAR
++purging.minor.retention=2
++purging.minor.term=MONTH
++purging.thread.sleep=10000
++
++tfs.cdt.default.bookingunit=100
++itrs.batch.directory=/opt/tfs/ITRS/
++
++swift.regex.directory=/opt/tfs/SWIFT/regex.prt
+diff --git a/tfs-core/src/main/resources/tfs.properties.rej b/tfs-core/src/main/resources/tfs.properties.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-core/src/main/resources/tfs.properties.rej
+@@ -0,0 +1,337 @@
++--- tfs.properties
+++++ tfs.properties
++@@ -24,5 +24,11 @@
++ # DB2 settings
++ hibernate.dialect=org.hibernate.dialect.DB2Dialect
++ tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++-tfs.jdbc.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
+++tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+++tfs.jdbc.autoReconnect=true
+++
+++
+++# DEV DB
+++tfs.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
+++# tfs.jdbc.url=jdbc:db2://172.22.0.92:50000/TFSSIT
++ tfs.jdbc.username=tfsdb2c
++@@ -28,5 +34,12 @@
++ tfs.jdbc.username=tfsdb2c
++-tfs.jdbc.password=abc123
++-tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+++tfs.jdbc.password=tfs*0*dssZvuLK
+++# DEV DB
+++quartz.database.url=jdbc:db2://172.22.0.92:50000/TFS2212
+++quartz.database.user=tfsdb2c
+++quartz.database.password=tfs*0*dssZvuLK
+++
+++# DB2 settings
+++# Prod properties # tfs.jdbc.url=jdbc:db2://130.130.0.78:50000/TFSIPCD3
+++
++ 
++ interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++@@ -31,4 +44,6 @@
++ 
++ interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++-interface.jdbc.url=jdbc:db2://130.130.2.164:50000/UCICBSD1
+++# Prod properties # interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
+++# interface.jdbc.url=jdbc:db2://10.80.80.165:50000/UCICBSD1
+++interface.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
++ interface.jdbc.username=tfsdb2c
++@@ -34,4 +49,7 @@
++ interface.jdbc.username=tfsdb2c
++-interface.jdbc.password=abc123
+++# Prod properties # interface.jdbc.password=tfsdb2c
+++interface.jdbc.password=tfs*0*dssZvuLK
+++# interface.jdbc.password=abc123
+++interface.jdbc.autoReconnect=true
++ 
++ #SIBS - casa gateway configurations
++@@ -36,3 +54,4 @@
++ 
++ #SIBS - casa gateway configurations
+++# casa.gateway.host=130.130.2.225
++ casa.gateway.host=130.130.2.225
++@@ -38,4 +57,14 @@
++ casa.gateway.host=130.130.2.225
++-#casa.gateway.port=36115
++-casa.gateway.port=31115
+++# casa.gateway.host=172.22.0.170
+++# U6
+++casa.gateway.port=36115	
+++# U2
+++# casa.gateway.port=32115
+++# U1
+++# casa.gateway.port=31115
+++# unavailable port
+++# casa.gateway.port=99999
+++# casa.gateway.so.timeout=1
+++# casa.gateway.request.timeout=1
+++# casa.gateway.reply.timeout=1
++ casa.gateway.so.timeout=120000
++@@ -41,6 +70,6 @@
++ casa.gateway.so.timeout=120000
++-casa.gateway.request.timeout=65000
++-casa.gateway.reply.timeout=65000
+++casa.gateway.request.timeout=120000
+++casa.gateway.reply.timeout=120000
++ casa.message.encoding=CP1047
++ casa.userId=TFSCASA
++ casa.password=ipc123$
++@@ -44,6 +73,9 @@
++ casa.message.encoding=CP1047
++ casa.userId=TFSCASA
++ casa.password=ipc123$
+++
+++casa.accounts.input.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS
+++casa.accounts.backup.directory=/opt/tfs/INTERFACE_FILES/CASA_ACCOUNTS_BACKUP
++ #interface db configurations
++ #interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
++ #interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
++@@ -61,6 +93,9 @@
++ # TSD
++ ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
++ ldap.base=dc=ucpb8,dc=com
++-ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
++-ldap.password=P@ssw0rd1
+++# Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
+++ldap.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=UCPB8,DC=COM
+++# ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
+++# ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
+++ldap.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ ldap.domain=ucpb8.com
++@@ -66,3 +101,21 @@
++ ldap.domain=ucpb8.com
+++ldap.directory=UCPB8
+++
+++# ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
+++# ldap.base=dc=ucpb8,dc=com
+++# # Prod properties # ldap.userdn=CN=tsdtst6,CN=TFS Test ID,DC=UCPB8,DC=COM
+++# ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
+++# # ldap.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse
+++# # ldap.password=TwidOFjLkYSBpiU@24hq0oXOIHH4Rz
+++# ldap.password=Q@WvE6R7Pp2U4ZY8Z0sFKm16iyvOMi
+++# ldap.domain=ucpb8.com
+++
+++# ---Prod properties 
+++# ldap.branch.url=ldap://ADPW08IBL01.UCPB8.COM:389
+++# ldap.branch.base=dc=ucpb8,dc=com
+++# ldap.branch.userdn=UID=TFSYSPRO,DC=UCPB8,DC=COM
+++# ldap.branch.password=P@ssw0rd1$
+++# ldap.branch.domain=ucpb8.com
+++# ---Prod properties 
++ 
++ # BRANCH
++@@ -67,7 +120,8 @@
++ 
++ # BRANCH
++-ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
++-ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
+++# ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++ldap.branch.url=ldap://bepcsw16vm01.branch.ucpb8.com:389
++ ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++@@ -73,4 +127,5 @@
++ ldap.branch.base=dc=branch,dc=ucpb8,dc=com
++-ldap.branch.userdn=CN=TFS Test Branch ID,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
++-ldap.branch.password=P@ssw0rd2
+++ldap.branch.userdn=CN=TFSPSU,OU=Service Accounts,OU=Company,DC=BRANCH,DC=UCPB8,DC=COM
+++# ldap.branch.password=g2t0G1L2nnz@VxfCKAUtd02jrvvQse	
+++ldap.branch.password=lhCmlHTh2EmIksRjJf32g0ep8YGyh@
++ ldap.branch.domain=branch.ucpb8.com
++@@ -76,4 +131,29 @@
++ ldap.branch.domain=branch.ucpb8.com
+++ldap.branch.directory=BRANCH
+++
+++
+++#tfs.authenticationProvider=adAuth
+++#
+++##TSD
+++#ldap.url=ldap://ADPW08IBL02.UCPB8.COM:389
+++#ldap.base=dc=ucpb8,dc=com
+++#ldap.userdn=CN=TFSPSU,CN=Users,DC=UCPB8,DC=COM
+++#ldap.password=psuprod@456
+++#ldap.domain=ucpb8.com
+++#
+++##BRANCH
+++#ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
+++#ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+++#ldap.branch.base=dc=branch,dc=ucpb8,dc=com
+++#ldap.branch.userdn=CN=TFSPSU,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
+++#ldap.branch.password=psuprod@456
+++#ldap.branch.domain=branch.ucpb8.com
+++
+++
+++
+++
++ 
++ 
++ 
++@@ -109,7 +189,9 @@
++ #swift message header configurations
++ swift.app.identifier=F
++ swift.service.identifier=01
++-swift.lt.identifier=UCPBPHM0AXXX
+++# swift.lt.identifier=UCPBPHM0AXXX
+++# swift.lt.identifier=UCPBPHMMAXXX
+++swift.lt.identifier=TLBPHMM0AXXX
++ swift.session.number=0000
++ swift.sequence.number=000000
++ swift.io.identifier=I
++@@ -157,10 +239,7 @@
++ quartz.table.prefix=QRTZ_
++ jdbc.driver=com.ibm.db2.jcc.DB2Driver
++ jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
++-quartz.database.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
++-quartz.database.user=tfsdb2c
++-quartz.database.password=abc123
++ quartz.database.max.conn=5
++ quartz.isclustered=false
++ 
++ 
++@@ -163,7 +242,8 @@
++ quartz.database.max.conn=5
++ quartz.isclustered=false
++ 
++ 
+++
++ #job schedules
++ #tradeservice.report.trigger=0 30 * * * ?
++ #tradeservice.report.trigger=0 0 21 * * ?
++@@ -179,9 +259,8 @@
++ gl.movement.directory=/opt/tfs/INTERFACE_FILES
++ gl.movement.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++ 
++-expired.amla.directory=/opt/tfs/INTERFACE_FILES/
++ cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++ 
++ #amla output directories
++ amla.directory=/opt/tfs/INTERFACE_FILES
++ amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++@@ -183,7 +262,8 @@
++ cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
++ 
++ #amla output directories
++ amla.directory=/opt/tfs/INTERFACE_FILES
++ amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
+++expired.amla.directory=/opt/tfs/INTERFACE_FILES
++ 
++ #datawarehouse output directories
++@@ -188,4 +268,4 @@
++ 
++ #datawarehouse output directories
++-dw.directory=/opt/tfs/INTERFACE_FILESsaan description
+++dw.directory=/opt/tfs/INTERFACE_FILES
++ dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++@@ -191,3 +271,3 @@
++ dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
++-dw.batch.directory=/opt/tfs/INTERFACE_FILESsaan description
+++dw.batch.directory=/opt/tfs/BATCH_REPORT_FILES
++ 
++@@ -193,11 +273,4 @@
++ 
++-batch.rma.directory=/opt/tfs/SWIFT/RMAFile
++-batch.bic.directory=/opt/tfs/SWIFT/BICFile/
++-batch.bic.filename.all=FI.txt
++-batch.bic.filename.delta=FIDELTA.txt
++-
++-batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
++-batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
++ #datawarehouse output directories
++ #dw.movement.directory=outputReports
++ #dw.allocation.directory=outputReports
++@@ -206,5 +279,4 @@
++ #dw.gl.param.directory=outputReports
++ #dw.cbr.param.directory=outputReports
++ #dw.report.directory=outputReports
++-tfs.check.multiple.login=true
++ 
++@@ -210,2 +282,25 @@
++ 
+++batch.rma.directory=/opt/tfs/SWIFT/RMAFile
+++batch.bic.directory=/opt/tfs/SWIFT/BICFile/
+++
+++batch.bic.filename.all=FI.txt
+++batch.bic.filename.delta=FIDELTA.txt
+++
+++batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
+++batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
+++
+++
+++tfs.check.multiple.login=false
+++
+++# mail.smtp.auth=true
+++# mail.smtp.host=EXPNLBMLA.ucpb8.com
+++# mail.smtp.socketFactory.port=587
+++# mail.smtp.from=tfsdevteam@ucpb.com
+++# mail.smtp.username=tfsdevteam
+++# mail.smtp.password=pass@word8
+++# mail.smtp.starttls.enable=true
+++# mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
+++# mail.smtp.enableNotification=false
+++
+++# TEST PROTECTION 25 LBPTRADEFINANCE
++ mail.smtp.auth=true
++@@ -211,5 +306,7 @@
++ mail.smtp.auth=true
++-mail.smtp.host=EXPNLBMLA.ucpb8.com
++-mail.smtp.socketFactory.port=587
++-mail.smtp.from=tfsdevteam@ucpb.com
+++mail.smtp.host=landbank-com.mail.protection.outlook.com
+++mail.smtp.socketFactory.port=25
+++# mail.smtp.from=mferrer@landbank.com
+++# mail.smtp.from=hrumbaoa@landbank.com
+++# mail.smtp.from=tfstest@landbank.com
++ mail.smtp.username=tfsdevteam
++@@ -215,3 +312,5 @@
++ mail.smtp.username=tfsdevteam
++-mail.smtp.password=pass@word9
+++mail.smtp.password=password@15
+++# mail.smtp.username=tfsdevteam
+++# mail.smtp.password=password@15
++ mail.smtp.starttls.enable=true
++@@ -217,2 +316,39 @@
++ mail.smtp.starttls.enable=true
++-mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com
+++mail.smtp.ssl.trust=landbank-com.mail.protection.outlook.com
+++mail.smtp.enableNotification=false
+++# mail.smtp.enableNotification=true
+++# mail.smtp.host=smtp.office365.com
+++# mail.smtp.socketFactory.port=587
+++mail.smtp.from=lbptradefinance@landbank.com
+++
+++
+++#mail.smtp.host=130.130.9.128
+++#mail.smtp.host=lbpmail1.corp.landbank.com
+++#mail.smtp.host=smtp.office365.com
+++# mail.smtp.from=ucpb_trade_finance@ucpb.com
+++#mail.smtp.ssl.trust=130.130.9.128
+++#mail.smtp.ssl.trust=lbpmail1.corp.landbank.com
+++#mail.smtp.ssl.trust=smtp.office365.com
+++
+++#CIC directories
+++cic.file.name=FCN
+++cic.file.format=.txt
+++cic.directory=/opt/tfs/INTERFACE_FILES/CIC/
+++cic.backup.directory=/opt/tfs/INTERFACE_FILES/CIC_Backup/
+++
+++# Used for purging Accounts
+++tfstemp.jdbc.url=jdbc:db2://130.130.2.164:50000/TFSIPCD4
+++#tfstemp.jdbc.username=tfsdb2c
+++#tfstemp.jdbc.password=abc123
+++tfs.prod.schema=TFSDB2C
+++
+++purging.major.retention=2
+++purging.major.term=YEAR
+++purging.minor.retention=2
+++purging.minor.term=MONTH
+++purging.thread.sleep=10000
+++
+++tfs.cdt.default.bookingunit=100
+++itrs.batch.directory=/opt/tfs/ITRS/
+++
+++swift.regex.directory=/opt/tfs/SWIFT/regex.prt
+diff --git a/tfs-interfaces/src/config/uat-schemas.properties b/tfs-interfaces/src/config/uat-schemas.properties
+--- a/tfs-interfaces/src/config/uat-schemas.properties
++++ b/tfs-interfaces/src/config/uat-schemas.properties
+@@ -17,7 +17,7 @@
+ officers=UCPARUCMN7
+ ccbd=UCPARUCMN7
+ holiday=UCPARUCMN7
+-gl=UCDATUGLD7
++gl=TFSDB2S
+ 
+ 
+ dailyrates=JHFXDTTF
+diff --git a/tfs-interfaces/src/config/uat-schemas.properties.rej b/tfs-interfaces/src/config/uat-schemas.properties.rej
+new file mode 100644
+--- /dev/null
++++ b/tfs-interfaces/src/config/uat-schemas.properties.rej
+@@ -0,0 +1,11 @@
++--- uat-schemas.properties
+++++ uat-schemas.properties
++@@ -17,7 +17,7 @@
++ officers=UCPARUCMN1
++ ccbd=UCPARUCMN1
++ holiday=UCPARUCMN1
++-gl=UCDATUGLD1
+++gl=TFSDB2S
++ 
++ 
++ dailyrates=JHFXDTTF

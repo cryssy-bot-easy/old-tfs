@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt701Mapper">
+        <entry value="27" key="details.get('sequenceOrder')"/>
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','') ?: ''"/>
+        <entry value="45A" key="details.get('generalDescriptionOfGoods')"/>
+        <entry value="46A" key="details.get('requiredDocument')"/>
+        <entry value="47A" key="details.get('additionalCondition')"/>
+        <entry value="49G" key="T(com.ucpb.tfs.util.SwiftUtil).formatConditions(details?.get('specialPaymentConditionsForBeneficiary'))"/>
+        <entry value="49H" key="T(com.ucpb.tfs.util.SwiftUtil).formatConditions(details?.get('specialPaymentConditionsForReceivingBank'))"/>        
+    </util:map>
+
+</beans>

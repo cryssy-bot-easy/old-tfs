@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="springJob" class="org.springframework.scheduling.quartz.JobDetailBean" abstract="true">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+    </bean>
+
+    <bean id="transactionLogGeneratorJobDetail" parent="springJob">
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="transactionLogGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+
+
+    <bean id="accountLogGeneratorJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="accountLogGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="customerAccountLogGeneratorJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.ucpb.tfs.batch.job.ApplicationContextAwareQuartzJob"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobBeanName" value="customerAccountLogGeneratorJob"/>
+            </map>
+        </property>
+    </bean>
+
+
+
+    <bean id="transactionLogGeneratorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="transactionLogGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="accountLogGeneratorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="accountLogGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+    <bean id="customerAccountLogGeneratorJobTriger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="customerAccountLogGeneratorJobDetail"/>
+        <property name="cronExpression" value="${tradeservice.report.trigger}"/>
+    </bean>
+
+</beans>

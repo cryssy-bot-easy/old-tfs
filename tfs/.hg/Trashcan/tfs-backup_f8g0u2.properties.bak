@@ -1,0 +1,238 @@
+# RMI port
+tfs.rmi.port=1099
+
+# hibernate settings
+hibernate.hbm2ddl.auto=update
+hibernate.show_sql=true
+
+hibernate.connection.pool_size=10
+
+
+# Derby settings
+# hibernate.dialect=org.hibernate.dialect.DerbyTenSevenDialect
+# tfs.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
+# tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
+# tfs.jdbc.username=tfs
+# tfs.jdbc.password=tfs
+# tfs.hibernate.bootstrap=/bootstrap/databootstrap.sql
+
+# interface.jdbc.driverClassName=org.apache.derby.jdbc.ClientDriver
+# interface.jdbc.url=jdbc:derby://localhost:1527/silverlakedb;create=true
+# interface.jdbc.username=tfs
+# interface.jdbc.password=tfs
+
+# DB2 settings
+# # # # hibernate.dialect=org.hibernate.dialect.DB2Dialect
+# # # # tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
+# # # # tfs.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
+# # # # tfs.jdbc.username=tfsdb2c
+# # # # tfs.jdbc.password=tfs*0*dssZvuLK
+# # # # tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+
+# # # # interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
+# # # # interface.jdbc.url=jdbc:db2://10.80.80.165:50000/TFS2212
+# # # # interface.jdbc.username=tfsdb2c
+# # # # interface.jdbc.password=tfs*0*dssZvuLK
+hibernate.dialect=org.hibernate.dialect.DB2Dialect
+tfs.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
+tfs.jdbc.url=jdbc:db2://localhost:25000/TFS_OLD
+tfs.jdbc.username=tfsdb2c
+tfs.jdbc.password=Jaylomar_28
+tfs.hibernate.bootstrap=/bootstrap/databootstrap-db2.sql
+
+interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
+interface.jdbc.url=jdbc:db2://localhost:25000/TFS_OLD
+interface.jdbc.username=tfsdb2c
+interface.jdbc.password=Jaylomar_28
+
+#SIBS - casa gateway configurations
+casa.gateway.host=130.130.2.225
+#casa.gateway.port=36115
+casa.gateway.port=31115
+casa.gateway.so.timeout=120000
+casa.gateway.request.timeout=65000
+casa.gateway.reply.timeout=65000
+casa.message.encoding=CP1047
+casa.userId=TFSCASA
+casa.password=ipc123$
+#interface db configurations
+#interface.jdbc.driverClassName=com.ibm.db2.jcc.DB2Driver
+#interface.jdbc.url=jdbc:db2://130.130.0.78:50000/UCICBSD1
+#interface.jdbc.username=tfsdb2c
+#interface.jdbc.password=tfsdb2c
+
+#ldap.url=ldap://192.168.1.101:389
+#ldap.base=dc=ucpb,dc=com
+#ldap.userdn=CN=administrator,CN=Users,DC=ucpb,DC=com
+#ldap.password=password$1
+#ldap.domain=ucpb.com
+
+#tfs.authenticationProvider=adAuth
+
+# TSD
+ldap.url=ldap://ADPW08IBL01.UCPB8.COM:389
+ldap.base=dc=ucpb8,dc=com
+ldap.userdn=CN=Letty C. Mejos,OU=TFS Test ID,DC=UCPB8,DC=COM
+ldap.password=P@ssw0rd1
+ldap.domain=ucpb8.com
+
+# BRANCH
+ldap.branch.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+ldap.branch.url=ldap://ADPW08IBL04.BRANCH.UCPB8.COM:389
+ldap.branch.url=ldap://ADPW08IBL05.BRANCH.UCPB8.COM:389
+ldap.branch.url=ldap://ADPW08IBL06.BRANCH.UCPB8.COM:389
+ldap.branch.base=dc=branch,dc=ucpb8,dc=com
+ldap.branch.userdn=CN=TFS Test Branch ID,CN=Users,DC=BRANCH,DC=UCPB8,DC=COM
+ldap.branch.password=P@ssw0rd2
+ldap.branch.domain=branch.ucpb8.com
+
+
+
+# TEST BRANCH
+#ldap.url=ldap://ADPW08IBL03.BRANCH.UCPB8.COM:389
+#ldap.base=dc=branch,dc=ucpb8,dc=com
+#ldap.userdn=CN=tfstestbranchid,DC=BRANCH,DC=UCPB8,DC=COM
+#ldap.password=P@ssw0rd1
+#ldap.domain=branch.ucpb8.com
+
+
+#amla properties
+#amla.poll.frequency=0/6 * * * * ?
+#amla.poll.frequency=0 15 23 ? * *
+#amla.poll.frequency=0/6 * * * * ?
+amla.poll.frequency=0 0 12 * * ?
+amla.max.rows=2000
+amla.output.directory=src/test/resources/amla/processed
+amla.account.output.directory=src/test/resources/amla/processed
+amla.transaction.output.directory=src/test/resources/amla/processed
+amla.customeraccount.output.directory=src/test/resources/amla/processed
+amla.report.delimiter=|
+
+
+
+#tfs.db.username=tfs
+#tfs.db.password=tfs
+#tfs.db.url=jdbc:oracle:thin:@10.133.154.59:1521:DPRMODS
+#tfs.db.driver=org.apache.derby.jdbc.ClientDriver
+
+#tfs.jdbc.url=jdbc:derby://localhost:1527/tfsdb;create=true
+
+#swift message header configurations
+swift.app.identifier=F
+swift.service.identifier=01
+swift.lt.identifier=UCPBPHM0AXXX
+swift.session.number=0000
+swift.sequence.number=000000
+swift.io.identifier=I
+swift.message.priority=000
+swift.delivery.monitoring=0000
+swift.obsolence.period=N
+
+#swift output file directory
+#swift.output.directory=src/test/resources
+swift.output.directory=/opt/tfs/SWIFT/outgoing/OutgoingToSwift
+swift.output.directory.backup=/opt/tfs/SWIFT/outgoing/OutgoingToSwift_backup
+swift.output.validate=false
+#swift.input.directory.invalid=src/test/resources/invalid
+swift.input.directory.invalid=/opt/tfs/SWIFT/incoming/Invalid
+swift.input.directory.valid=/opt/tfs/SWIFT/incoming/Valid
+#swift.input.directory=src/test/resources/input
+swift.input.directory=/opt/tfs/SWIFT/incoming/IncomingFromSwift
+#5 minutes -> 5 Seconds
+swift.input.poll.frequency=5000
+swift.validation.source=/swift/schemas/swift-master.xsd
+swift.transformation.source=/swift/formatter/swift-format.xsl
+swift.schematron.source=/swift/schematron/compiled/swift-master.xsl
+
+#amla transaction codes
+amla.lc.open=LCOPN
+amla.lc.adjustment=LCOPN
+amla.lc.amendment=LCAMD
+amla.lc.nego=LCNEG
+amla.lc.cancel=LCOPN
+amla.nonlc.nego=NONEG
+amla.duties=CDUTF
+amla.export.nego=EXNEG
+amla.export.settlement=EXSET
+amla.export.advising=EXADV
+amla.export.adv.amendment=EXAMD
+amla.nonlc.settlement=NOSET
+amla.ip=LCOPN
+amla.md=LCOPN
+amla.refund=LCOPN
+amla.corres.charge=LCOPN
+
+
+#QUARTZ - job CONFIGURATIONS#
+# # # # jdbc.jobstore=org.quartz.impl.jdbcjobstore.JobStoreTX
+# # # # quartz.table.prefix=QRTZ_
+# # # # jdbc.driver=com.ibm.db2.jcc.DB2Driver
+# # # # jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
+# # # # quartz.database.url=jdbc:db2://130.130.2.164:50000/TFSIPCD6
+# # # # quartz.database.user=tfsdb2c
+# # # # quartz.database.password=abc123
+# # # # quartz.database.max.conn=5
+# # # # quartz.isclustered=false
+jdbc.jobstore=org.quartz.impl.jdbcjobstore.JobStoreTX
+quartz.table.prefix=QRTZ_
+jdbc.driver=com.ibm.db2.jcc.DB2Driver
+jdbc.driver.delegate=org.quartz.impl.jdbcjobstore.DB2v8Delegate
+quartz.database.url=jdbc:db2://localhost:25000/TFSDB2S
+quartz.database.user=tfsdb2c
+quartz.database.password=Jaylomar_28
+quartz.database.max.conn=5
+quartz.isclustered=false
+
+
+#job schedules
+#tradeservice.report.trigger=0 30 * * * ?
+#tradeservice.report.trigger=0 0 21 * * ?
+tradeservice.report.trigger=0 0 0 1 1 ? 2099
+
+#trade service revert
+#tradeservice.revert.trigger=0 30 * * * ?
+tradeservice.revert.trigger=0 0 12 * * ?
+
+
+#general ledger output directory
+#gl.output.directory=outputReports
+gl.movement.directory=/opt/tfs/INTERFACE_FILES
+gl.movement.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
+
+expired.amla.directory=/opt/tfs/INTERFACE_FILES/
+cif.purging.directory=/opt/tfs/INTERFACE_FILES/TFCFACCS.csv
+
+#amla output directories
+amla.directory=/opt/tfs/INTERFACE_FILES
+amla.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
+
+#datawarehouse output directories
+dw.directory=/opt/tfs/INTERFACE_FILESsaan description
+dw.directory.backup=/opt/tfs/INTERFACE_FILES_BACKUP
+dw.batch.directory=/opt/tfs/INTERFACE_FILESsaan description
+
+batch.rma.directory=/opt/tfs/SWIFT/RMAFile
+batch.bic.directory=/opt/tfs/SWIFT/BICFile/
+batch.bic.filename.all=FI.txt
+batch.bic.filename.delta=FIDELTA.txt
+
+batch.rma.backup.directory=/opt/tfs/SWIFT/backup/RMA/
+batch.bic.backup.directory=/opt/tfs/SWIFT/backup/BIC/
+#datawarehouse output directories
+#dw.movement.directory=outputReports
+#dw.allocation.directory=outputReports
+#dw.master.directory=outputReports
+#dw.para1.directory=outputReports
+#dw.gl.param.directory=outputReports
+#dw.cbr.param.directory=outputReports
+#dw.report.directory=outputReports
+tfs.check.multiple.login=true
+
+mail.smtp.auth=true
+mail.smtp.host=EXPNLBMLA.ucpb8.com
+mail.smtp.socketFactory.port=587
+mail.smtp.from=tfsdevteam@ucpb.com
+mail.smtp.username=tfsdevteam
+mail.smtp.password=pass@word9
+mail.smtp.starttls.enable=true
+mail.smtp.ssl.trust=EXPNLBMLA.ucpb8.com

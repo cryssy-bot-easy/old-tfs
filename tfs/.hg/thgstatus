@@ -1,0 +1,17 @@
+mDatabase_Programs/CIF Interface
+mDatabase_Programs/Loans and Facility Interface
+mtfs-batch/src/main/java/com/ucpb/tfs/batch/job
+mtfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw
+mtfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/dao
+mtfs-batch/src/main/java/com/ucpb/tfs/batch/report/dw/service
+mtfs-batch/src/main/resources/mappers
+atfs-core
+mtfs-core/src/config
+mtfs-core/src/main/groovy/com/ucpb/tfs2/infrastructure/rest
+mtfs-core/src/main/java/com/ucpb/tfs/domain/payment
+atfs-core/src/main/resources
+mtfs-core/src/test/resources/cdt
+mtfs-interfaces/src/config
+mtfs-interfaces/src/main/java/com/ucpb/tfs/interfaces/repositories
+mtfs-interfaces/src/main/java/com/ucpb/tfs/interfaces/services/impl
+mtfs-interfaces/src/main/resources/mappers

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.InstructionToBankReference" table="RefInstructionToBank" abstract="true">
+
+        <id column="id" name="id">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="instructionToBankCode" class="com.ucpb.tfs.domain.reimbursing.InstructionToBankCode" access="field">
+            <property name="instructionToBankCode" column="instructionToBankCode" type="string" length="10"/>
+        </component>
+
+        <property name="instruction" column="instruction" type="string" length="1000"/>
+
+    </class>
+
+</hibernate-mapping>

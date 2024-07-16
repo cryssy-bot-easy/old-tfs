@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:file="http://www.springframework.org/schema/integration/file"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+	    http://www.springframework.org/schema/integration/file	http://www.springframework.org/schema/integration/file/spring-integration-file-2.0.xsd">
+	
+	<int:channel id="jdbcRequestChannel" />
+    <int:channel id="accountLogRequestChannel" />
+    <int:channel id="customerAccountRequestChannel" />
+
+
+    <int:channel id="fileWriteChannel" />
+    <int:channel id="accountLogWriteChannel" />
+    <int:channel id="customerAccountWriteChannel" />
+
+
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="myDataSource" />
+	</bean>
+
+	<bean id="transactionRowMapper" class="com.ucpb.tfs.interfaces.domain.mapper.StringRowMapper">
+		<constructor-arg name="columnMapping" ref="columnMapping"/>
+        <property name="delimiter" value="${amla.report.delimiter}"/>
+	</bean>
+
+    <bean id="accountLogMapper" class="com.ucpb.tfs.interfaces.domain.mapper.StringRowMapper">
+        <constructor-arg name="columnMapping" ref="accountLogMapping"/>
+        <property name="delimiter" value="${amla.report.delimiter}"/>
+    </bean>
+
+    <bean id="customerAccountMapper" class="com.ucpb.tfs.interfaces.domain.mapper.StringRowMapper">
+        <constructor-arg name="columnMapping" ref="customerAccountMapping"/>
+        <property name="delimiter" value="${amla.report.delimiter}"/>
+    </bean>
+
+
+    <int:poller id="reportPoller" cron="${amla.poll.frequency}">
+		<int:transactional transaction-manager="transactionManager" />
+	</int:poller>
+	
+	<int-jdbc:inbound-channel-adapter
+		data-source="myDataSource"
+		query="select * from TRANSACTIONLOG WHERE DAYOFYEAR(TXNDATE) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(TXNDATE) = YEAR(CURRENT_TIMESTAMP)"
+		row-mapper="transactionRowMapper" channel="jdbcRequestChannel">
+ 		<int:poller ref="reportPoller"/>
+	</int-jdbc:inbound-channel-adapter>
+
+    <int-jdbc:inbound-channel-adapter  id="accountlogReportPoller"
+            data-source="myDataSource"
+            query="select * from ACCOUNTLOG WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)"
+            row-mapper="accountLogMapper" channel="accountLogRequestChannel">
+        <int:poller ref="reportPoller"/>
+    </int-jdbc:inbound-channel-adapter>
+
+
+    <int-jdbc:inbound-channel-adapter  id="customerAccountPoller"
+                                       data-source="myDataSource"
+                                       query="select * from CUSTOMERACCOUNT WHERE DAYOFYEAR(DATE_CREATED) = DAYOFYEAR(CURRENT_TIMESTAMP) AND YEAR(DATE_CREATED) = YEAR(CURRENT_TIMESTAMP)"
+                                       row-mapper="accountLogMapper" channel="customerAccountRequestChannel">
+        <int:poller ref="reportPoller"/>
+    </int-jdbc:inbound-channel-adapter>
+
+
+
+    <int:transformer method="transform" input-channel="jdbcRequestChannel" output-channel="fileWriteChannel">
+		<bean class="com.ucpb.tfs.interfaces.domain.transformer.ListToStringTransformer"/>
+	</int:transformer>
+
+    <int:transformer method="transform" input-channel="accountLogRequestChannel" output-channel="accountLogWriteChannel">
+        <bean class="com.ucpb.tfs.interfaces.domain.transformer.ListToStringTransformer"/>
+    </int:transformer>
+
+
+    <int:transformer method="transform" input-channel="customerAccountRequestChannel" output-channel="customerAccountWriteChannel">
+        <bean class="com.ucpb.tfs.interfaces.domain.transformer.ListToStringTransformer"/>
+    </int:transformer>
+
+
+
+    <file:outbound-channel-adapter directory="${amla.transaction.output.directory}" channel="fileWriteChannel" filename-generator-expression="'TRN76.txt'"/>
+    <file:outbound-channel-adapter id="accountLogFileDirectory" directory="${amla.account.output.directory}" channel="accountLogWriteChannel"
+                                   filename-generator-expression="'ACC71.txt'"/>
+    <file:outbound-channel-adapter id="customerAccountLogFileDirectory" directory="${amla.customeraccount.output.directory}" channel="customerAccountWriteChannel"
+                                   filename-generator-expression="'CAC71.txt'"/>
+
+
+
+    <util:list id="columnMapping">
+    	<!--<value>ID</value>-->
+        <value>TXNDATE</value>
+        <value>TXNREFERENCENUMBER</value>
+        <value>DEALNUMBER</value>
+        <value>TRANSACTIONTYPECODE</value>
+        <value>TRANSACTIONSUBTYPE</value>
+        <value>TRANSACTIONMODE</value>
+        <value>TRANSACTIONAMOUNT</value>
+
+        <value>DEBIT_CREDIT_FLAG</value>
+        <value>DIRECTION</value>
+        <value>BRANCHCODE</value>
+        <value>ACCOUNTNUMBER</value>
+        <value>SETTLEMENTCURRENCY</value>
+
+
+        <value>EXCHANGERATE</value>
+        <value>SETTLEMENTAMOUNT</value>
+        <value>PURPOSE</value>
+        <value>CPACCOUNTNO</value>
+        <value>CPNAME1</value>
+        <value>CPNAME2</value>
+        <value>CPNAME3</value>
+
+        <value>CPINSTITUTION</value>
+        <value>CPINSTITUTIONCOUNTRY</value>
+        <value>CP_ADDRESS1</value>
+        <value>CP_ADDRESS2</value>
+        <value>CP_ADDRESS3</value>
+
+
+
+        <value>CORRESPONDENTBANKNAME</value>
+        <value>CORRESPONDENTCOUNTRYCODE</value>
+        <value>CORRESPONDENTADDRESS1</value>
+        <value>CORRESPONDENTADDRESS2</value>
+        <value>CORRESPONDENTADDRESS3</value>
+
+        <value>INTRINSTITUTIONNAME</value>
+        <value>INTRINSTITUTIONCOUNTRY</value>
+        <value>INTRINSTITUTIONADDR1</value>
+        <value>INTRINSTITUTIONADDR2</value>
+        <value>INTRINSTITUTIONADDR3</value>
+
+
+        <value>BENEFICIARYNAME1</value>
+        <value>BENEFICIARYNAME2</value>
+        <value>BENEFICIARYNAME3</value>
+        <value>BENEFICIARYADDR1</value>
+        <value>BENEFICIARYADDR2</value>
+        <value>BENEFICIARYADDR3</value>
+
+        <value>BENEFICIARYCOUNTRY</value>
+        <value>PRODUCTTYPE</value>
+
+        <value>PRODUCTOWNERNAME1</value>
+        <value>PRODUCTOWNERNAME2</value>
+        <value>PRODUCTOWNERNAME3</value>
+        <value>PRODUCTOWNERADDR1</value>
+        <value>PRODUCTOWNERADDR2</value>
+        <value>PRODUCTOWNERADDR3</value>
+        <value>INCEPTIONDATE</value>
+
+        <value>MATURITYDATE</value>
+
+        <value>NARRATION</value>
+        <value>REMARKS</value>
+        <value>NATURE</value>
+        <value>FUNDSSOURCE</value>
+        <value>CERTIFIEDDOCUMENTS</value>
+        <value>INPUTDATE</value>
+
+        <value>REGULARDOCUMENTS</value>
+        <value>SRC_TXNTYPE</value>
+        <value>PAYMENTMODE</value>
+    </util:list>
+
+
+    <util:list id="accountLogMapping">
+        <value>ACCOUNTNUMBER</value>
+        <value>ACCOUNTTYPE</value>
+        <value>INITIALDEPOSIT</value>
+        <value>ACCOUNTPURPOSE</value>
+        <value>MONTHLYESTTXNCOUNT</value>
+        <value>MONTHLYESTTXNVOLUME</value>
+        <value>TRANSACTIONTYPES</value>
+        <value>BRANCHCODE</value>
+        <value>OPENINGDATE</value>
+        <value>CLOSINGDATE</value>
+        <value>RISKSCORE</value>
+        <value>ACCOUNTBALANCE</value>
+        <value>APPLICATIONCODE</value>
+        <value>STATUS</value>
+        <value>ACCOUNTCURRENCY</value>
+        <value>PAYROLLTAG</value>
+    </util:list>
+
+    <util:list id="customerAccountMapping">
+        <value>ACCOUNTNUMBER</value>
+        <value>CUSTOMER_NUMBER</value>
+    </util:list>
+
+</beans>

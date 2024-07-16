@@ -1,0 +1,172 @@
+diff --git a/Database_Programs/Loans and Facility Interface/GET_BALANCE.sql b/Database_Programs/Loans and Facility Interface/GET_BALANCE.sql
+--- a/Database_Programs/Loans and Facility Interface/GET_BALANCE.sql	
++++ b/Database_Programs/Loans and Facility Interface/GET_BALANCE.sql	
+@@ -21,9 +21,8 @@
+     DECLARE V_UNPAID_LOANS DECIMAL(15, 2);
+     DECLARE V_TYPE_OF_CREDIT CHAR(1);
+ 
+-    -- RETRIEVE FACILITY BALANCE LIMIT ON LNAPPF
+-    SET (V_FACILITY_LIMIT, V_AFCPNO, V_TYPE_OF_CREDIT) =
++        SET (V_FACILITY_LIMIT, V_AFCPNO, V_TYPE_OF_CREDIT) =
+         (SELECT A.AFFAMT, A.AFCPNO, B.LKREVL
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B WHERE A.AFFCDE = B.LKFCOD AND A.AFCIF# = P_CIFNUMBER
+             AND A.AFFCDE = P_FACILITY_CODE AND A.AFSEQ = P_FACILITY_ID);
+ 
+@@ -26,9 +25,8 @@
+         (SELECT A.AFFAMT, A.AFCPNO, B.LKREVL
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B WHERE A.AFFCDE = B.LKFCOD AND A.AFCIF# = P_CIFNUMBER
+             AND A.AFFCDE = P_FACILITY_CODE AND A.AFSEQ = P_FACILITY_ID);
+ 
+-    -- IF REVOLVING
+-    IF V_TYPE_OF_CREDIT = 'R' THEN
+-        SET V_OUTSTANDING_AVAILMENT = COALESCE((SELECT SUM(TOSBAL_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO), 0);
++        IF V_TYPE_OF_CREDIT = 'R' THEN
++        SET V_OUTSTANDING_AVAILMENT = COALESCE((SELECT SUM(TOSBAL_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO AND CIFNO = P_CIFNUMBER), 0);
+ 
+         SET V_UNPAID_LOANS = (
+@@ -33,9 +31,4 @@
+ 
+         SET V_UNPAID_LOANS = (
+---            WITH LATEST_PER_LOAN AS (SELECT ACCTNO, MAX(TRSEQ) TRSEQ
+---                    FROM TFSDB2S.LNTFINT
+---                    GROUP BY ACCTNO),
+---                COUNT_PER_LOAN AS (SELECT ACCTNO, COUNT(*) CNT FROM TFSDB2S.LNTFINT GROUP BY ACCTNO),
+---                ACTIVE_LOAN AS (SELECT A.* FROM LATEST_PER_LOAN A, COUNT_PER_LOAN B WHERE A.ACCTNO = B.ACCTNO AND 1 = MOD(CNT, 2))
+             SELECT SUM(A.LORGAMT) - SUM(A.LPMTAMT)
+             FROM TFSDB2S.LNTFINT A
+@@ -40,7 +33,6 @@
+             SELECT SUM(A.LORGAMT) - SUM(A.LPMTAMT)
+             FROM TFSDB2S.LNTFINT A
+-            -- RETRIEVAL OF ACTIVE LOAN THAT HAS NO REVERSAL
+-            INNER JOIN (
++                        INNER JOIN (
+                  SELECT X.* FROM (SELECT ACCTNO, MAX(TRSEQ) TRSEQ 
+                  FROM TFSDB2S.LNTFINT GROUP BY ACCTNO) X
+                      , (SELECT ACCTNO, COUNT(*) CNT FROM TFSDB2S.LNTFINT GROUP BY ACCTNO) Y
+@@ -48,8 +40,8 @@
+             ) B
+             ON A.ACCTNO = B.ACCTNO
+                 AND A.TRSEQ = B.TRSEQ
+-            WHERE A.TNUMBR IN (SELECT DISTINCT ACCTNO FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO)
++            WHERE A.ACCTNO IN (SELECT DISTINCT ACCTNO FROM TFSDB2S.LNTFINT WHERE CIFNO = P_CIFNUMBER)
+                 AND A.LOAN_STATUS = 'UNPAID');
+         
+         SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - (V_OUTSTANDING_AVAILMENT + COALESCE(V_UNPAID_LOANS, 0));
+     ELSE
+@@ -52,7 +44,6 @@
+                 AND A.LOAN_STATUS = 'UNPAID');
+         
+         SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - (V_OUTSTANDING_AVAILMENT + COALESCE(V_UNPAID_LOANS, 0));
+     ELSE
+-    -- IF NON REVOLVING
+-        SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - COALESCE((SELECT SUM(ORGLMT_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO), 0);
++            SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - COALESCE((SELECT SUM(ORGLMT_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO), 0);
+     END IF;
+@@ -58,3 +49,4 @@
+     END IF;
++    
+     RETURN V_OUTSTANDING_BAL;
+ END P1@
+diff --git a/Database_Programs/Loans and Facility Interface/GET_CICLS.sql b/Database_Programs/Loans and Facility Interface/GET_CICLS.sql
+--- a/Database_Programs/Loans and Facility Interface/GET_CICLS.sql	
++++ b/Database_Programs/Loans and Facility Interface/GET_CICLS.sql	
+@@ -12,5 +12,4 @@
+ --######################################################################################################
+ P1: BEGIN
+     DECLARE C_CICLS CURSOR WITH RETURN FOR
+-        WITH IRR_RATES AS (SELECT JFXDCD, JFXDCR FROM TFSDB2S.JHFXDT WHERE JFXDBC = 'PHP' AND JFXDRN = 3)
+         SELECT A.CIFNO AS "CLIENT_NUMBER",
+@@ -16,9 +15,23 @@
+         SELECT A.CIFNO AS "CLIENT_NUMBER",
+-            CASE WHEN B.CFINDI = 'Y'
+-                THEN COALESCE(TRIM(B.CFNA1A), '') || ' ' || COALESCE(TRIM(B.CFNA1B),'') || ' ' || COALESCE(TRIM(B.CFNA1), '')
+-                WHEN B.CFINDI = 'N' THEN B.CL_NAME ELSE ''
+-            END AS "CLIENT_NAME",
++            CASE WHEN CFINDI = 'Y' 
++                            THEN COALESCE(TRIM(B.CFNA1A), '') || ' ' ||
++                                    CASE WHEN B.CFNA1B = '' THEN
++                                        COALESCE(TRIM(B.CFNA1), '')
++                                    ELSE
++                                        COALESCE(TRIM(B.CFNA1B),'')  || ' ' || COALESCE(TRIM(B.CFNA1), '')
++                                    END
++                    WHEN CFINDI = 'N'
++                            THEN COALESCE(CL_NAME,
++                                    COALESCE(TRIM(B.CFNA1A), '') || ' ' ||
++                                    CASE WHEN CFNA1B = '' THEN
++                                        COALESCE(TRIM(B.CFNA1), '')
++                                    ELSE
++                                        COALESCE(TRIM(B.CFNA1B),'')  || ' ' || COALESCE(TRIM(B.CFNA1), '')
++                                    END
++                                    )
++                ELSE ''
++                END AS CLIENT_NAME,
+             TRIM(B.CFTINN) AS "TIN_NUMBER",
+             '0' AS TRAN_TYPE,
+             A.CREATED_DATE PROCESS_DATE,
+             C.CICLS_PRODUCT_CODE,
+@@ -21,9 +34,9 @@
+             TRIM(B.CFTINN) AS "TIN_NUMBER",
+             '0' AS TRAN_TYPE,
+             A.CREATED_DATE PROCESS_DATE,
+             C.CICLS_PRODUCT_CODE,
+-            A.ORGLMT_IRR AS "APPROVED_AMOUNT",
+-            A.TOSBAL_IRR AS "OUTSTANDING_CURRENT",
++            COALESCE(A.ORGLMT_IRR, 0) AS "APPROVED_AMOUNT",
++            COALESCE(A.TOSBAL_IRR, 0) AS "OUTSTANDING_CURRENT",
+             0 AS "OUTSTANDING_PAST_DUE"
+         FROM TFSDB2S.LNCLST_CICLS A
+         LEFT JOIN TFSDB2S.CFMAST B
+@@ -32,4 +45,5 @@
+             ON A.PRODUCT_ID = C.PROD_ID
+         LEFT JOIN TFSDB2S.LNAPPF D
+             ON A.AFCPNO = D.AFCPNO
++            
+         UNION ALL
+@@ -35,8 +49,13 @@
+         UNION ALL
+-        SELECT A.CIFNO, B.CFSNME SHORTNAME, B.CFTINN, '0', A.CREATED_DATE, C.CICLS_PRODUCT_CODE
+-             , A.LORGAMT
+-             , A.LPMTAMT
+-             , A.OUTSTANDING_PAST_DUE
++
++        SELECT A.CIFNO
++             , B.CFSNME SHORTNAME
++             , B.CFTINN, '0'
++             , A.CREATED_DATE
++             , C.CICLS_PRODUCT_CODE
++             , COALESCE(A.LORGAMT, 0)
++             , COALESCE(A.LPMTAMT, 0)
++             , COALESCE(A.OUTSTANDING_PAST_DUE, 0)
+         FROM TFSDB2S.LNTFINT_CICLS A
+         INNER JOIN TFSDB2S.CFMAST B
+             ON A.CIFNO = B.CFCIF#
+@@ -46,6 +65,9 @@
+             ON A.ACCTNO = D.PNNUMBER
+         LEFT JOIN TFSDB2S.LNAPPF E
+             ON D.FACILITYREFERENCENUMBER = E.AFCPNO
++        WHERE C.CICLS_PRODUCT_CODE <> '300'
++        OR C.CICLS_PRODUCT_CODE <> ''
++   	    OR C.CICLS_PRODUCT_CODE IS NOT NULL
+         ;
+ 
+     OPEN C_CICLS;
+diff --git a/Database_Programs/Loans and Facility Interface/INQUIRE_CONTINGENT.sql b/Database_Programs/Loans and Facility Interface/INQUIRE_CONTINGENT.sql
+--- a/Database_Programs/Loans and Facility Interface/INQUIRE_CONTINGENT.sql	
++++ b/Database_Programs/Loans and Facility Interface/INQUIRE_CONTINGENT.sql	
+@@ -1,4 +1,4 @@
+---<SCRIPTOPTIONS STATEMENTTERMINATOR="@">
++--<ScriptOptions statementTerminator="@">
+ CREATE OR REPLACE PROCEDURE TFSDB2S.INQUIRE_CONTIGENT(IN P_CIFNUMBER VARCHAR(7)
+     , IN P_DOCUMENTNUMBER VARCHAR(21), IN P_ORIGINALAMOUNT DECIMAL(19, 2)
+     , IN P_OUTSTANDINGBALANCE DECIMAL(19, 2), IN P_TRANSACTIONDATE DECIMAL(6 , 0)
+@@ -31,8 +31,8 @@
+        ON C.DOCUMENTCLASS = D.MOP_PRODUCT
+           AND C.SERVICETYPE = D.SERVICE_TYPE
+        WHERE REPLACE(B.TRADEPRODUCTNUMBER, '-', '') = P_DOCUMENTNUMBER);
+-    SET V_IRR_RATE = (SELECT JFXDCR FROM TFSDB2S.JHFXDT
+-        WHERE JFXDBC = 'PHP' AND JFXDCD = P_CURRENCYCODE AND JFXDRN = 3);
++    SET V_IRR_RATE = CASE WHEN P_CURRENCYCODE = 'PHP' THEN 1 ELSE (SELECT JFXDCR FROM TFSDB2S.JHFXDT
++        WHERE JFXDBC = 'PHP' AND JFXDCD = P_CURRENCYCODE AND JFXDRN = 3) END;
+     SET V_CLIENT_NAME = (SELECT CFSNME FROM TFSDB2S.CFMAST WHERE CFCIF# = P_CIFNUMBER);
+ 
+     INSERT INTO TFSDB2S.LNCLST(SYSCOD, CIFNO, ACCTNO, ORGLMT, TOSBAL, PRODUCT

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.documents.DocumentsEnclosed" table="DocumentsEnclosed" abstract="true">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <property name="documentName" column="documentName" type="java.lang.String" length="500"/>
+
+        <property name="original1" column="original1" type="java.lang.String" length="50"/>
+        <property name="original2" column="original2" type="java.lang.String" length="50"/>
+        <property name="duplicate1" column="duplicate1" type="java.lang.String" length="50"/>
+        <property name="duplicate2" column="duplicate2" type="java.lang.String" length="50"/>
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.task.ITaskFinder">
+
+    <select id="findTask" resultType="hashMap">
+        select count(taskReferenceNumber) as records from Task where taskReferenceNumber = #{taskReferenceNumber}
+    </select>
+    
+    <resultMap id="findAllLcBranchTasksResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllLcBranchTasks" resultMap="findAllLcBranchTasksResultMap">
+        select si.serviceInstructionId, t.taskStatus, si.details from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS' and
+        (t.taskStatus != 'APPROVED' and
+        t.taskStatus != 'MARV')
+        and ts.documentClass = 'LC'
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+        
+    <resultMap id="findAllLcBranchTasksByStatusResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllLcBranchTasksByStatus" resultMap="findAllLcBranchTasksByStatusResultMap">
+        select si.serviceInstructionId, t.taskStatus, si.details from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS' and
+         (
+        t.taskStatus IN
+            <foreach item="item" collection="inclusiveStatus"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+         and
+        t.taskStatus != 'MARV'
+        )
+        and ts.documentClass = 'LC'
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+    
+    <resultMap id="findAllLcBranchTasksByUserResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+    </resultMap>
+    
+    <select id="findAllLcBranchTasksByUser" resultMap="findAllLcBranchTasksByUserResultMap">
+        select si.serviceInstructionId, t.taskStatus,
+        si.details,
+        ts.amount, ts.currency
+        from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS'
+        and ucase(t.taskowner) = ucase(#{userid})
+        and (ts.documentClass in ('LC','INDEMNITY')
+        and ts.serviceType != 'REFUND')
+
+        <if test="userrole == 'BRM'">
+            and
+            (
+            t.taskStatus IN ('PENDING', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'BRO'">
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED')
+            )
+        </if>
+        and si.status != 'PURGED'
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllLcMainTasksResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="SIDETAILS" column="sidetails" javaType="string" jdbcType="CLOB"/>
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="TSDETAILS" column="tsdetails" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+    </resultMap>
+    
+    <select id="findAllLcMainTasks" resultMap="findAllLcMainTasksResultMap">
+                select
+          si.serviceInstructionId,
+          si.details as sidetails,
+          t.taskStatus,
+          ts.documentNumber,
+          ts.tradeServiceId,
+          ts.cifNumber,
+          ts.cifName,
+          ts.documentType,
+          ts.documentClass,
+          ts.documentSubType1,
+          ts.documentSubType2,
+          ts.tradeServiceReferenceNumber,
+          ts.details as tsdetails,
+            ts.amount,
+            ts.currency
+        from
+          task t
+        inner join
+          TradeService ts
+        on
+         t.taskReferenceNumber = ts.tradeServiceId
+        left join
+          ServiceInstruction si
+        on
+          si.serviceInstructionId = ts.serviceInstructionId
+        where
+          t.taskReferenceType = 'DATA_ENTRY'
+        and
+          (t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')
+        and
+          (ts.documentClass = 'LC' or ts.documentClass = 'INDEMNITY')
+          order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+    
+    <resultMap id="findAllLcMainTasksByStatusResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="SIDETAILS" column="sidetails"  javaType="string" jdbcType="CLOB"/>
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="TSDETAILS" column="tsdetails"  javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+    </resultMap>
+
+    <select id="findAllLcMainTasksByStatus" resultMap="findAllLcMainTasksByStatusResultMap">
+          select
+          si.serviceInstructionId,
+          si.details as sidetails,
+          t.taskStatus,
+          ts.documentNumber,
+          ts.tradeServiceId,
+          ts.cifNumber,
+          ts.cifName,
+          ts.documentType,
+          ts.documentClass,
+          ts.documentSubType1,
+          ts.documentSubType2,
+          ts.tradeServiceReferenceNumber,
+          ts.details as tsdetails,
+          ts.amount
+        from
+          task t
+        inner join
+          TradeService ts
+        on
+         t.taskReferenceNumber = ts.tradeServiceId
+        left join
+          ServiceInstruction si
+        on
+          si.serviceInstructionId = ts.serviceInstructionId
+        where
+          t.taskReferenceType = 'DATA_ENTRY'
+        and
+        (
+        t.taskStatus IN
+        <foreach item="item" collection="inclusiveStatus"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+          t.taskStatus != 'MARV'
+        )
+        and
+          (ts.documentClass = 'LC' or ts.documentClass = 'INDEMNITY')
+          order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllLcMainTasksByUserResultMap" type="hashmap">    
+      <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+      <result property="SIDETAILS" column="sidetails" javaType="string" jdbcType="CLOB"/>
+      <result property="TASKSTATUS" column="taskStatus" />
+      <result property="DOCUMENTNUMBER" column="documentNumber" />
+      <result property="TRADEPRODUCTNUMBER" column="tradeProductNumber" />
+      <result property="TRADESERVICEID" column="tradeServiceId" />
+      <result property="CIFNUMBER" column="cifNumber" />
+      <result property="CIFNAME" column="cifName" />
+      <result property="DOCUMENTTYPE" column="documentType" />
+      <result property="DOCUMENTCLASS" column="documentClass" />
+      <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+      <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+      <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+      <result property="TSDETAILS" column="tsdetails" javaType="string" jdbcType="CLOB"/>
+      <result property="AMOUNT" column="amount" />
+      <result property="CURRENCY" column="currency" />
+    </resultMap>
+
+    <select id="findAllLcMainTasksByUser" resultMap="findAllLcMainTasksByUserResultMap">
+        <!-- No Draft LC's in TSD LC Unacted Screen 
+        select
+        si.serviceInstructionId,
+        cast(si.details as varchar(30000)) as sidetails,
+        t.taskStatus,
+        ts.documentNumber,
+        ts.tradeProductNumber,
+        ts.tradeServiceId,
+        ts.cifNumber,
+        ts.cifName,
+        ts.documentType,
+        ts.documentClass,
+        ts.documentSubType1,
+        ts.documentSubType2,
+        ts.tradeServiceReferenceNumber,
+        cast(ts.30000)) as tsdetails,
+        ts.amount, ts.currency
+        from
+        task t
+        inner join
+        TradeService ts
+        on
+        t.taskReferenceNumber = ts.tradeServiceId
+        left join
+        ServiceInstruction si
+        on
+        si.serviceInstructionId = ts.serviceInstructionId
+        where
+            t.taskReferenceType = 'DATA_ENTRY'
+            and
+            (ts.documentClass in ('LC', 'INDEMNITY')
+            and ts.serviceType != 'REFUND')
+        
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+                (
+                    t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED')
+                )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED')
+            )
+            and ts.status != 'FOR_REVERSAL'
+        </if>
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+        -->
+        
+        <!-- Draft LC's Included for TSD LC Unacted Screen -->
+        select
+        si.serviceInstructionId,
+        si.details as sidetails,
+        t.taskStatus,
+        ts.documentNumber,
+        ts.tradeProductNumber,
+        ts.tradeServiceId,
+        ts.cifNumber,
+        ts.cifName,
+        ts.documentType,
+        ts.documentClass,
+        ts.documentSubType1,
+        ts.documentSubType2,
+        ts.tradeServiceReferenceNumber,
+        ts.details as tsdetails,
+        ts.amount, ts.currency
+        from
+        task t
+        inner join
+        TradeService ts
+        on
+        t.taskReferenceNumber = ts.tradeServiceId
+        left join
+        ServiceInstruction si
+        on
+        si.serviceInstructionId = ts.serviceInstructionId
+        where
+        <if test="userrole == 'TSDM'">
+            ts.SERVICEINSTRUCTIONID in (
+                select tsa.SERVICEINSTRUCTIONID from tradeservice tsa 
+                left join ServiceInstruction sia on sia.serviceInstructionId = tsa.serviceInstructionId 
+                inner join Task ta on ta.taskReferenceNumber = tsa.tradeServiceId 
+                where tsa.documentClass in ('LC', 'INDEMNITY') 
+                and  sia.status not in ('PURGED', 'ABORTED','CHECKED','PREPARED') 
+                and  tsa.Status in ('PENDING', 'RETURNED')
+                
+                union   
+                
+                select tb.TASKREFERENCENUMBER from task tb 
+                left join tradeservice tsb on tb.TASKREFERENCENUMBER = tsb.SERVICEINSTRUCTIONID 
+                left join ServiceInstruction sia on sia.serviceInstructionId = tsb.serviceInstructionId 
+                where TASKREFERENCETYPE = 'ETS' 
+                and  sia.status not in ('PURGED', 'ABORTED','CHECKED','PREPARED') 
+                and TASKSTATUS in ('PENDING', 'PREPARED', 'CHECKED', 'RETURNED') 
+                and tsb.DOCUMENTCLASS in ('LC', 'INDEMNITY') 
+                and tsb.serviceType = 'OPENING'
+                
+                union
+                
+                select tsa.SERVICEINSTRUCTIONID from tradeservice tsa
+                inner join Task ta on ta.taskReferenceNumber = tsa.tradeServiceId 
+                where ta.TASKREFERENCETYPE = 'DATA_ENTRY'
+                and ta.TASKSTATUS like 'RETURNED'
+                and tsa.documentClass in ('LC', 'INDEMNITY') 
+            ) OR (
+                TS.SERVICEINSTRUCTIONID IS NULL AND TS.STATUS IN ('PENDING','RETURNED') AND TS.DOCUMENTCLASS IN ('LC','INDEMNITY')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            t.taskReferenceType = 'DATA_ENTRY'
+            and
+            (ts.documentClass in ('LC', 'INDEMNITY')
+            and ts.serviceType != 'REFUND')
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED')
+            )
+            and ts.status != 'FOR_REVERSAL'
+        </if>
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllAuxillaryBranchTasksResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllAuxillaryBranchTasks" resultMap="findAllAuxillaryBranchTasksResultMap">
+          select si.serviceInstructionId, t.taskStatus, si.details from Task t
+                inner join ServiceInstruction si
+          on si.serviceInstructionId = t.taskReferenceNumber
+                inner join TradeService ts
+          on ts.serviceInstructionId = si.serviceInstructionId
+          where t.taskReferenceType = 'ETS' and
+                (t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')
+          and ts.documentClass not in ('LC',
+          'DA',
+          'DP',
+          'DR',
+          'OA',
+          'INDEMNITY',
+          'BP',
+          'BC')
+          order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllAuxillaryBranchTasksByUserResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllAuxillaryBranchTasksByUser" resultMap="findAllAuxillaryBranchTasksByUserResultMap">
+          select si.serviceInstructionId, t.taskStatus,
+          si.details
+          from Task t
+                inner join ServiceInstruction si
+          on si.serviceInstructionId = t.taskReferenceNumber
+                inner join TradeService ts
+          on ts.serviceInstructionId = si.serviceInstructionId
+          where t.taskReferenceType = 'ETS'
+                <!--(t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')-->
+          and ((ts.documentClass not in ('LC',
+        'DA',
+        'DP',
+        'DR',
+        'OA',
+        'INDEMNITY',
+        'IMPORT_ADVANCE',
+        'EXPORT_ADVANCE',
+        'EXPORT_ADVISING',
+        'BC',
+        'BP')) or (ts.documentClass IN ('DA','DP','DR','OA','LC') and ts.serviceType = 'REFUND'))
+          and ucase(t.taskowner) = ucase(#{userid})
+        <if test="userrole == 'BRM'">
+            and
+            (
+            t.taskStatus IN ('PENDING', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'BRO'">
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED')
+            )
+        </if>
+        and si.status != 'PURGED'
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllAuxillaryMainTasksResultMap" type="hashmap">    
+        <result property="TASKREFERENCENUMBER" column="taskReferenceNumber" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="CURRENCY" column="currency" />
+        <result property="AMOUNT" column="amount" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+    </resultMap>
+
+    <select id="findAllAuxillaryMainTasks" resultMap="findAllAuxillaryMainTasksResultMap">
+          select t.taskReferenceNumber, t.taskStatus, ts.details, ts.documentNumber,
+                ts.tradeServiceId, ts.serviceInstructionId, ts.cifNumber, ts.cifName, ts.currency, ts.amount,
+                ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.tradeServiceReferenceNumber
+          from task t
+                  inner join TradeService ts
+            on t.taskReferenceNumber = ts.tradeServiceId
+          where t.taskReferenceType = 'DATA_ENTRY' and
+                (t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')
+          and ts.documentClass not in ('LC', 'DA', 'DP', 'DR', 'OA', 'INDEMNITY')
+          order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllAuxillaryMainTasksByUserResultMap" type="hashmap">    
+        <result property="TASKREFERENCENUMBER" column="taskReferenceNumber" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="CURRENCY" column="currency" />
+        <result property="AMOUNT" column="amount" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+    </resultMap>
+
+    <select id="findAllAuxillaryMainTasksByUser" resultMap="findAllAuxillaryMainTasksByUserResultMap">
+          select t.taskReferenceNumber, t.taskStatus, ts.details, ts.documentNumber,
+                ts.tradeServiceId, ts.serviceInstructionId, ts.cifNumber, ts.cifName, ts.currency, ts.amount,
+                ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.tradeServiceReferenceNumber
+          from task t
+                  inner join TradeService ts
+            on t.taskReferenceNumber = ts.tradeServiceId
+          where t.taskReferenceType = 'DATA_ENTRY'
+          and ((ts.documentClass not in ('LC',
+        'DA',
+        'DP',
+        'DR',
+        'OA',
+        'INDEMNITY',
+        'IMPORT_ADVANCE',
+        'EXPORT_ADVANCE',
+        'EXPORT_ADVISING',
+        'BC',
+        'BP')) or (ts.documentClass IN ('DA','DP','DR','OA','LC') and ts.serviceType = 'REFUND'))
+
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+            (
+            t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED', 'FOR_REVERSAL')
+            )
+        </if>
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <select id="findAllIncomingMtTsd" resultType="hashMap">
+      <!--select-->
+        <!--id,-->
+        <!--documentNumber,-->
+        <!--dateReceived,-->
+        <!--mtType,-->
+        <!--userActiveDirectoryId,-->
+        <!--mtStatus,-->
+        <!--messageClass-->
+      <!--from-->
+        <!--MtMessage-->
+        <!--where-->
+        <!--&lt;!&ndash;mtStatus not in ('PREPARED', 'DONE', 'RETURNED')&ndash;&gt;-->
+        <!--mtStatus not in ('DONE', 'RETURNED')-->
+        <!--and-->
+        <!--messageClass = 'INCOMING' or messageClass = 'CONFIRMATION'-->
+
+        select
+        mt.id,
+        mt.documentNumber,
+        mt.dateReceived,
+        mt.mtType,
+        emp.fullName,
+        mt.mtStatus,
+        mt.messageClass
+        from
+        MtMessage mt
+        left join
+        Sec_Employee emp
+        on emp.id = mt.userActiveDirectoryId
+        where
+        mt.mtStatus not in ('DONE', 'RETURNED')
+        and
+        mt.messageClass in ('INCOMING', 'CONFIRMATION')
+        
+      <!-- OLD -->
+      <!-- select
+        id,
+        documentNumber,
+        dateReceived,
+        mtType,
+        instruction
+      from
+        MtMessage
+      where
+        mtStatus not in ('PREPARED', 'DONE', 'RETURNED')
+      and
+        messageClass = 'INCOMING' or messageClass = 'CONFIRMATION'
+        -->
+        
+        <!--mtDirection = 'INCOMING'-->
+    </select>
+
+    <select id="findAllIncomingMtRouted" resultType="hashMap">
+      select
+        id,
+        documentNumber,
+        dateReceived,
+        mtType,
+        instruction,
+        messageClass
+      from
+        MtMessage
+        where
+        mtStatus = 'PREPARED'
+        and
+        messageClass = 'INCOMING' or messageClass = 'CONFIRMATION'
+        order by dateReceived desc 
+      <!-- OLD -->
+      <!-- select
+        id,
+        documentNumber,
+        dateReceived,
+        mtType,
+        userActiveDirectoryId,
+        mtStatus
+      from
+        MtMessage
+      where
+        mtStatus = 'PREPARED'
+      and
+        messageClass = 'INCOMING' or messageClass = 'CONFIRMATION'
+      -->
+      
+        <!--mtDirection = 'INCOMING'-->
+    </select>
+
+    <select id="findAllOutgoingMt" resultType="hashMap">
+      select
+        mm.id,
+        ts.TRADEPRODUCTNUMBER,
+        mm.mtType,
+        ts.modifiedDate,
+        mm.mtStatus
+      from
+        MtMessage mm
+      inner join
+        TradeService ts
+      on
+        ts.tradeServiceId = mm.tradeServiceId
+      and
+        ts.status in ('APPROVED', 'POSTED','PRE_APPROVED', 'POST_APPROVED')
+      where
+      <!--
+        mtStatus in ('NEW', 'UPDATED')
+      and
+      -->
+        messageClass = 'OUTGOING'
+      order by ts.modifiedDate desc, mm.documentNumber asc
+    </select>
+    
+    <select id="findAllOutgoingMtByStatus" resultType="hashMap">
+      select
+        mm.id,
+        ts.TRADEPRODUCTNUMBER,
+        mm.mtType,
+        ts.createdDate,
+        mm.mtStatus
+      from
+        MtMessage mm
+      inner join
+        TradeService ts
+      on
+        ts.tradeServiceId = mm.tradeServiceId
+      and
+        ts.status in ('APPROVED', 'POSTED','PRE_APPROVED', 'POST_APPROVED')
+      where
+        messageClass = 'OUTGOING' and mtStatus = #{status}
+      order by ts.createdDate desc, mm.documentNumber asc
+    </select>
+
+    <resultMap id="findAllNonLcBranchTasksResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+    
+    <select id="findAllNonLcBranchTasks" resultMap="findAllNonLcBranchTasksResultMap">
+        select si.serviceInstructionId, t.taskStatus, si.details from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS' and
+        (t.taskStatus != 'APPROVED' and
+        t.taskStatus != 'MARV')
+        and ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllNonLcBranchTasksByStatusResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllNonLcBranchTasksByStatus" resultMap="findAllNonLcBranchTasksByStatusResultMap">
+        select si.serviceInstructionId, t.taskStatus, si.details from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS' and
+         (
+        t.taskStatus IN
+            <foreach item="item" collection="inclusiveStatus"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+         and
+        t.taskStatus != 'MARV'
+        )
+        and ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllNonLcBranchTasksByUserResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+    </resultMap>
+
+    <select id="findAllNonLcBranchTasksByUser" resultMap="findAllNonLcBranchTasksByUserResultMap">
+        select si.serviceInstructionId, t.taskStatus,
+        si.details,
+        ts.amount, ts.currency
+        from Task t
+        inner join ServiceInstruction si
+        on si.serviceInstructionId = t.taskReferenceNumber
+        inner join TradeService ts
+        on ts.serviceInstructionId = si.serviceInstructionId
+        where t.taskReferenceType = 'ETS'
+        <!--and t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED', 'PREPARED', 'CHECKED')-->
+        <if test="userrole == 'BRM'">
+            and
+            (
+            t.taskStatus IN ('PENDING', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'BRO'">
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED')
+            )
+        </if>
+        and ucase(t.taskowner) = ucase(#{userid})
+        and ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+        and upper(ts.serviceType) != 'REFUND'
+        and si.status != 'PURGED'
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllNonLcMainTasksResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="SIDETAILS" column="sidetails" javaType="string" jdbcType="CLOB"/>
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="TSDETAILS" column="tsdetails" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+    </resultMap>
+
+    <select id="findAllNonLcMainTasks" resultMap="findAllNonLcMainTasksResultMap">
+                select
+          si.serviceInstructionId,
+          si.details as sidetails,
+          t.taskStatus,
+          ts.documentNumber,
+          ts.tradeServiceId,
+          ts.cifNumber,
+          ts.cifName,
+          ts.documentType,
+          ts.documentClass,
+          ts.documentSubType1,
+          ts.documentSubType2,
+          ts.tradeServiceReferenceNumber,
+          ts.details as tsdetails,
+            ts.amount,
+            ts.currency
+        from
+          task t
+        inner join
+          TradeService ts
+        on
+         t.taskReferenceNumber = ts.tradeServiceId
+        left join
+          ServiceInstruction si
+        on
+          si.serviceInstructionId = ts.serviceInstructionId
+        where
+          t.taskReferenceType = 'DATA_ENTRY'
+        and
+          (t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')
+        and
+          ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+          order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllNonLcMainTasksByStatusResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="SIDETAILS" column="sidetails" javaType="string" jdbcType="CLOB"/>
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="TSDETAILS" column="tsdetails" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+    </resultMap>
+
+    <select id="findAllNonLcMainTasksByStatus" resultMap="findAllNonLcMainTasksByStatusResultMap">
+          select
+          si.serviceInstructionId,
+          si.details as sidetails,
+          t.taskStatus,
+          ts.documentNumber,
+          ts.tradeServiceId,
+          ts.cifNumber,
+          ts.cifName,
+          ts.documentType,
+          ts.documentClass,
+          ts.documentSubType1,
+          ts.documentSubType2,
+          ts.tradeServiceReferenceNumber,
+          ts.details as tsdetails,
+          ts.amount
+        from
+          task t
+        inner join
+          TradeService ts
+        on
+         t.taskReferenceNumber = ts.tradeServiceId
+        left join
+          ServiceInstruction si
+        on
+          si.serviceInstructionId = ts.serviceInstructionId
+        where
+          t.taskReferenceType = 'DATA_ENTRY'
+        and
+        (
+        t.taskStatus IN
+        <foreach item="item" collection="inclusiveStatus"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+          t.taskStatus != 'MARV'
+        )
+        and
+          ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+          order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllNonLcMainTasksByUserResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="SIDETAILS" column="sidetails" javaType="string" jdbcType="CLOB"/>
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+        <result property="TSDETAILS" column="tsdetails" javaType="string" jdbcType="CLOB"/>
+        <result property="AMOUNT" column="amount" />
+        <result property="CURRENCY" column="currency" />
+    </resultMap>
+
+    <select id="findAllNonLcMainTasksByUser" resultMap="findAllNonLcMainTasksByUserResultMap">
+        select
+        si.serviceInstructionId,
+        si.details as sidetails,
+        t.taskStatus,
+        ts.documentNumber,
+        ts.tradeServiceId,
+        ts.cifNumber,
+        ts.cifName,
+        ts.documentType,
+        ts.documentClass,
+        ts.documentSubType1,
+        ts.documentSubType2,
+        ts.tradeServiceReferenceNumber,
+        ts.details as tsdetails,
+        ts.amount, ts.currency
+        from
+        task t
+        inner join
+        TradeService ts
+        on
+        t.taskReferenceNumber = ts.tradeServiceId
+        left join
+        ServiceInstruction si
+        on
+        si.serviceInstructionId = ts.serviceInstructionId
+        where
+        t.taskReferenceType = 'DATA_ENTRY'
+        and
+        ts.documentClass in ('DA', 'DP', 'OA', 'DR')
+        AND upper(ts.serviceType) != 'REFUND'
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+            (
+            t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED','FOR_REVERSAL')
+            )
+        </if>
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllCashAdvanceBranchTasksByUserResultMap" type="hashmap">    
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="SERVICETYPE" column="serviceType" />
+    </resultMap>
+
+    <select id="findAllCashAdvanceBranchTasksByUser" resultMap="findAllCashAdvanceBranchTasksByUserResultMap">
+        select si.serviceInstructionId, t.taskStatus,
+          si.details,
+          ts.documentClass, ts.documentType, ts.documentSubType1, ts.documentSubType2, ts.serviceType
+          from Task t
+                inner join ServiceInstruction si
+          on si.serviceInstructionId = t.taskReferenceNumber
+                inner join TradeService ts
+          on ts.serviceInstructionId = si.serviceInstructionId
+          where t.taskReferenceType = 'ETS'
+                <!--(t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')-->
+          and ts.documentClass in ('IMPORT_ADVANCE', 'EXPORT_ADVANCE')
+          and ucase(t.taskowner) = ucase(#{userid})
+        <if test="userrole == 'BRM'">
+            and
+            (
+            t.taskStatus IN ('PENDING', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'BRO'">
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED')
+            )
+        </if>
+        and si.status != 'PURGED'
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllCashAdvanceMainTasksByUserResultMap" type="hashmap">    
+        <result property="TASKREFERENCENUMBER" column="taskReferenceNumber" />
+        <result property="TASKSTATUS" column="taskStatus" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="CURRENCY" column="currency" />
+        <result property="AMOUNT" column="amount" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTSUBTYPE1" column="documentSubType1" />
+        <result property="DOCUMENTSUBTYPE2" column="documentSubType2" />
+        <result property="TRADESERVICEREFERENCENUMBER" column="tradeServiceReferenceNumber" />
+    </resultMap>
+
+    <select id="findAllCashAdvanceMainTasksByUser" resultMap="findAllCashAdvanceMainTasksByUserResultMap">
+        select t.taskReferenceNumber, t.taskStatus, ts.details, ts.documentNumber,
+                ts.tradeServiceId, ts.serviceInstructionId, ts.cifNumber, ts.cifName, ts.currency, ts.amount,
+                ts.serviceType, ts.documentType, ts.documentClass, ts.documentSubType1, ts.documentSubType2, ts.tradeServiceReferenceNumber
+          from task t
+                  inner join TradeService ts
+            on t.taskReferenceNumber = ts.tradeServiceId
+          where t.taskReferenceType = 'DATA_ENTRY'
+          and ts.documentClass in ('IMPORT_ADVANCE', 'EXPORT_ADVANCE')
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+            (
+            t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED')
+            )
+        </if>
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllExportAdvisingByUserResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeserviceid" />
+        <result property="DOCUMENTNUMBER" column="documentnumber" />
+        <result property="CIFNAME" column="cifname" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+        <result property="SERVICETYPE" column="servicetype" />
+        <result property="DOCUMENTSUBTYPE1" column="documentsubtype1" />
+        <result property="PAYMENTSTATUS" column="paymentStatus" />
+    </resultMap>
+
+    <select id="findAllExportAdvisingByUser" resultMap="findAllExportAdvisingByUserResultMap">
+        select
+          ts.tradeserviceid,
+          ts.documentnumber,
+          ts.cifname,
+          ts.details,
+          ts.servicetype,
+          ts.documentsubtype1,
+          ts.paymentStatus          
+          from
+            tradeservice ts
+          inner join
+              task t
+              on t.taskreferencenumber = ts.tradeserviceid
+
+          where ucase(t.taskowner) = ucase(#{userid})
+          and ts.documentClass = 'EXPORT_ADVISING'
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+            (
+            t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED')
+            )
+        </if>
+
+          order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllExportBillsBranchByUserResultMap" type="hashmap">    
+        <result property="TRADESERVICEID" column="tradeServiceId" />
+        <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+        <result property="DOCUMENTNUMBER" column="documentNumber" />
+        <result property="CIFNUMBER" column="cifNumber" />
+        <result property="CIFNAME" column="cifName" />
+        <result property="SERVICETYPE" column="serviceType" />
+        <result property="DOCUMENTCLASS" column="documentClass" />
+        <result property="DOCUMENTTYPE" column="documentType" />
+        <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllExportBillsBranchByUser" resultMap="findAllExportBillsBranchByUserResultMap">
+        select
+          ts.tradeServiceId,
+          si.serviceInstructionId,
+          ts.documentNumber,
+          ts.cifNumber,
+          ts.cifName,
+          ts.serviceType,
+          ts.documentClass,
+          ts.documentType,
+          si.details
+        from
+            serviceInstruction si
+            inner join
+            tradeService ts
+              on
+                ts.serviceInstructionId = si.serviceInstructionid
+            inner join
+            task t
+              on
+                t.taskReferenceNumber = ts.serviceInstructionId
+
+        where
+          ucase(t.taskowner) = ucase(#{userid})
+          and
+          ts.documentClass in ('BP', 'BC')
+          and t.taskReferenceType = 'ETS'
+          <!--(t.taskStatus != 'APPROVED' and t.taskStatus != 'MARV')-->
+        <if test="userrole == 'BRM'">
+            and
+            (
+            t.taskStatus IN ('PENDING', 'RETURNED', 'FOR_REVERSAL')
+            )
+        </if>
+        <if test="userrole == 'BRO'">
+            and
+            (
+            t.taskStatus IN ('PREPARED', 'CHECKED')
+            )
+        </if>
+        and si.status != 'PURGED'
+        order by ts.modifiedDate desc, si.serviceInstructionId ASC
+    </select>
+
+    <resultMap id="findAllExportBillsTsdByUserResultMap" type="hashmap">    
+      <result property="TRADESERVICEID" column="tradeServiceId" />
+      <result property="SERVICEINSTRUCTIONID" column="serviceInstructionId" />
+      <result property="DOCUMENTNUMBER" column="documentNumber" />
+      <result property="CIFNUMBER" column="cifNumber" />
+      <result property="CIFNAME" column="cifName" />
+      <result property="SERVICETYPE" column="serviceType" />
+      <result property="DOCUMENTCLASS" column="documentClass" />
+      <result property="DOCUMENTTYPE" column="documentType" />
+      <result property="DETAILS" column="details" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllExportBillsTsdByUser" resultMap="findAllExportBillsTsdByUserResultMap">
+        select
+          ts.tradeServiceId,
+          ts.serviceInstructionId,
+          ts.documentNumber,
+          ts.cifNumber,
+          ts.cifName,
+          ts.serviceType,
+          ts.documentClass,
+          ts.documentType,
+          ts.details
+        from
+            tradeService ts
+            inner join
+            task t
+              on
+                t.taskReferenceNumber = ts.tradeServiceId
+
+        where
+        ts.documentClass in ('BP', 'BC')
+        and t.taskReferenceType = 'DATA_ENTRY'
+        <if test="userrole == 'TSDM'">
+            and ucase(t.taskowner) in ('TSD', ucase(#{userid}))
+            and
+            (
+            t.taskStatus IN ('PENDING', 'DRAFT', 'RETURNED')
+            )
+        </if>
+        <if test="userrole == 'TSDO'">
+            and ucase(t.taskowner) = ucase(#{userid})
+            and
+            (
+              t.taskStatus IN ('PREPARED', 'CHECKED', 'APPROVED', 'PRE_APPROVED', 'POSTED')
+            )
+        </if>
+        order by ts.modifiedDate desc, ts.serviceInstructionId ASC
+    </select>
+
+</mapper>

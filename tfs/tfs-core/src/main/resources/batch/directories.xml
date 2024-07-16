@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-file="http://www.springframework.org/schema/integration/file"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+       http://www.springframework.org/schema/integration/file   http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+
+    <!-- DW and GL channels -->
+    <!--
+    <int:channel id="datawarehouseOutputChannel"/>
+    <int:channel id="glAllocationsOutputChannel"/>
+    -->
+    <int:publish-subscribe-channel id="glMovementOutputChannel"/>
+    <int:publish-subscribe-channel id="glisOutputChannel"/>
+    <int:publish-subscribe-channel id="ciclsOutputChannel"/>
+    <int:publish-subscribe-channel id="dwGlOutputChannel"/>
+    <int:publish-subscribe-channel id="glAllocationsOutputChannel"/>
+    <int:publish-subscribe-channel id="glMasterOutputChannel"/>
+    <int:publish-subscribe-channel id="glParameterOutputChannel"/>
+    <int:publish-subscribe-channel id="parameterOutputChannel"/>
+    <int:publish-subscribe-channel id="cbrParameterOutputChannel"/>
+    <int:publish-subscribe-channel id="glAllocationsExcelOutputChannel"/>
+    <int:publish-subscribe-channel id="glMasterExcelOutputChannel"/>
+
+    <!-- AMLA Channels -->
+    <!--
+    <int:channel id="transactionLogChannel"/>
+    <int:channel id="accountLogChannel"/>
+    <int:channel id="customerAccountLogChannel"/>
+    <int:channel id="textReportOutputChannel"/>
+    -->
+    <int:publish-subscribe-channel id="transactionLogChannel"/>
+    <int:publish-subscribe-channel id="accountLogChannel"/>
+    <int:publish-subscribe-channel id="customerAccountLogChannel"/>
+    <int:publish-subscribe-channel id="synchronizeRoutingStatusLogChannel"/>
+    <int:publish-subscribe-channel id="customerLogChannel"/>
+    <int:publish-subscribe-channel id="amlaTotalsChannel"/>
+
+    <int:publish-subscribe-channel id="textReportOutputChannel"/>
+
+    <int-file:outbound-channel-adapter id="glMovementOutputDirectory"
+                                       directory="${gl.movement.directory}"
+                                       channel="glMovementOutputChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('TFGLMVMT')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="glisOutputDirectory"
+                                       directory="${gl.movement.directory}"
+                                       channel="glisOutputChannel"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="ciclsOutputDirectory"
+                                       directory="${cicls.directory}"
+                                       channel="ciclsOutputChannel"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="glMovementOutputDirectoryBackup"
+                                       directory="${gl.movement.directory.backup}"
+                                       channel="glMovementOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="glMovementOutputDirectoryDataWarehouse"
+                                       directory="${dw.directory}"
+                                       channel="glMovementOutputChannel"
+                                       filename-generator-expression="headers['dwfilename']"
+                                       delete-source-files="true"/>
+
+
+    <int-file:outbound-channel-adapter id="dwGlOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="dwGlOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="dwGlOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="dwGlOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="glAllocationsOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="glAllocationsOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="glAllocationsOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="glAllocationsOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+                                       
+    <int-file:outbound-channel-adapter id="glAllocationsExcelOutputDirectory"
+                                       directory="${dw.batch.directory}"
+                                       channel="glAllocationsExcelOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+                                       
+    <int-file:outbound-channel-adapter id="glMasterOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="glMasterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+                                       
+    <int-file:outbound-channel-adapter id="glMasterExcelOutputDirectory"
+                                       directory="${dw.batch.directory}"
+                                       channel="glMasterExcelOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="glMasterOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="glMasterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="glParameterOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="glParameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="glParameterOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="glParameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="parameterOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="parameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="parameterOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="parameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="cbrParameterOutputDirectory"
+                                       directory="${dw.directory}"
+                                       channel="cbrParameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="cbrParameterOutputDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="cbrParameterOutputChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <!-- Adapters above were using datawarehouseOutputChannel (except glAllocationsOutputChannel) -->
+    <!-- before the backup channels were added. -->
+
+    <int-file:outbound-channel-adapter id="testReportDirectory"
+                                       directory="${dw.directory}"
+                                       channel="textReportOutputChannel"
+                                       filename-generator-expression="'TXT' + new java.util.Date().getTime() + '.txt'"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="testReportDirectoryBackup"
+                                       directory="${dw.directory.backup}"
+                                       channel="textReportOutputChannel"
+                                       filename-generator-expression="'TXT' + new java.util.Date().getTime() + '.txt'"
+                                       delete-source-files="true"/>
+
+    <!-- AMLA output files -->
+
+    <int-file:outbound-channel-adapter id="transactionLogOutputDirectory"
+                                       directory="${amla.directory}"
+                                       channel="transactionLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('TRN71')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="transactionLogOutputDirectoryBackup"
+                                       directory="${amla.directory.backup}"
+                                       channel="transactionLogChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="accountLogOutputDirectory"
+                                       directory="${amla.directory}"
+                                       channel="accountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('ACC71')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="accountLogOutputDirectoryBackup"
+                                       directory="${amla.directory.backup}"
+                                       channel="accountLogChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="customerAccountLogDirectory"
+                                       directory="${amla.directory}"
+                                       channel="customerAccountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('CAC71')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="customerAccountLogDirectoryBackup"
+                                       directory="${amla.directory.backup}"
+                                       channel="customerAccountLogChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+                                       
+    <int-file:outbound-channel-adapter id="synchronizeRoutingStatusLoggDirectory"
+                                       directory="${dw.batch.directory}/PATCHING/"
+                                       channel="synchronizeRoutingStatusLogChannel"
+                                       filename-generator-expression="headers['filename']"                                                                        
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="customerLogDirectory"
+                                       directory="${amla.directory}"
+                                       channel="customerLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('CST71')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="customerLogDirectoryBackup"
+                                       directory="${amla.directory.backup}"
+                                       channel="customerLogChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="amlaTotalsDirectory"
+                                       directory="${amla.directory}"
+                                       channel="amlaTotalsChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('TOT71')"
+                                       delete-source-files="false"/>
+
+    <int-file:outbound-channel-adapter id="amlaTotalsDirectoryBackup"
+                                       directory="${amla.directory.backup}"
+                                       channel="amlaTotalsChannel"
+                                       filename-generator-expression="headers['filename']"
+                                       delete-source-files="true"/>
+
+    <!--
+        <int-file:outbound-channel-adapter id="transactionLogOutputDirectory"
+                                       directory="${dw.para1.directory}"
+                                       channel="transactionLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('TRN71','txt')"
+                                       delete-source-files="true"/>
+
+        <int-file:outbound-channel-adapter id="transactionLogOutputDirectoryBackup"
+                                       directory="${dw.para1.directory.backup}"
+                                       channel="transactionLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('TRN71','txt')"
+                                       delete-source-files="true"/>
+
+        <int-file:outbound-channel-adapter id="accountLogOutputDirectory"
+                                       directory="${dw.gl.param.directory}"
+                                       channel="accountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('ACC71','txt')"
+                                       delete-source-files="true"/>
+
+        <int-file:outbound-channel-adapter id="accountLogOutputDirectoryBackup"
+                                       directory="${dw.gl.param.directory.backup}"
+                                       channel="accountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('ACC71','txt')"
+                                       delete-source-files="true"/>
+
+        <int-file:outbound-channel-adapter id="customerAccountLogDirectory"
+                                       directory="${dw.cbr.param.directory}"
+                                       channel="customerAccountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('CAC71','txt')"
+                                       delete-source-files="true"/>
+
+        <int-file:outbound-channel-adapter id="customerAccountLogDirectoryBackup"
+                                       directory="${dw.cbr.param.directory.backup}"
+                                       channel="customerAccountLogChannel"
+                                       filename-generator-expression="T(com.ucpb.tfs.batch.util.FilenameGenerator).generate('CAC71','txt')"
+                                       delete-source-files="true"/>
+    -->
+
+</beans>

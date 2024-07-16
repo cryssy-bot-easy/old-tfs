@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns5:mt700 xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/mt1series" xmlns:ns4="http://www.ucpb.com.ph/tfs/schemas/mt4series" xmlns:ns3="http://www.ucpb.com.ph/tfs/schemas/mt2series" xmlns:ns5="http://www.ucpb.com.ph/tfs/schemas/mt7series" xmlns:ns6="http://www.ucpb.com.ph/tfs/schemas/swift-message"><ns6:basic_header>
+<ns6:application_identifier>F</ns6:application_identifier>
+<ns6:service_identifier>01</ns6:service_identifier>
+<ns6:lt_identifier>UCPBPHM0AXXX</ns6:lt_identifier>
+<ns6:session_number>0000</ns6:session_number>
+<ns6:sequence_number>000000</ns6:sequence_number>
+</ns6:basic_header><ns6:application_header>
+<ns6:io_identifier>I</ns6:io_identifier>
+<ns6:message_type>700</ns6:message_type>
+<ns6:receiver_address>ABBLBDDH004XXX</ns6:receiver_address>
+<ns6:message_priority></ns6:message_priority>
+<ns6:delivery_monitoring></ns6:delivery_monitoring>
+<ns6:obsolence_period>N</ns6:obsolence_period>
+</ns6:application_header><ns6:user_header/><ns6:message_block/><ns6:tags>
+<ns6:tag>
+    <tagName>27</tagName>
+    <value>1/1</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>40A</tagName>
+    <value>REVOCABLE</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>20</tagName>
+    <value>90901113000012</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>31C</tagName>
+    <value>130201</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>40E</tagName>
+    <value>OTHR</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>31D</tagName>
+    <value>130228 IN 127</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>50</tagName>
+    <value>MARSMAN DRYSDALE MEDMOLAVE BLDG.2231 DON CHINO ROCES AVE.</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>59</tagName>
+    <value>STEEL CORP. PHILSTEEL TOWER,140AMORSOLO ST., LEGASPIVILLAGE, MAKATI</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>32B</tagName>
+    <value>USD123456,00</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>39A</tagName>
+    <value>10/10</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>39B</tagName>
+    <value>NOT EXCEEDING</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>39C</tagName>
+    <value>ADDITIONAL AMOUNTS COVERED</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>41A</tagName>
+    <value>IDENTIFIER CODEBY NEGOTIATION</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>42C</tagName>
+    <value>DRAFT AT SIGHT</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>42A</tagName>
+    <value>ABBLBDDH004</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>43P</tagName>
+    <value>ALLOWED</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>43T</tagName>
+    <value>ALLOWED</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>44A</tagName>
+    <value>PLACE IN CHARGE</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>44B</tagName>
+    <value>FINAL DESTINATION</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>44E</tagName>
+    <value>DEPARTURE</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>44F</tagName>
+    <value>ARRIVAL</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>44C</tagName>
+    <value>130228</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>45A</tagName>
+    <value>DESC OF GOODS AND SERVICES</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>49</tagName>
+    <value>MAY ADD</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>57B</tagName>
+    <value>ADVISER THROUGH BANK LOCATION</value>
+</ns6:tag>
+<ns6:tag>
+    <tagName>72</tagName>
+    <value>SENDER TO RECEIVER INFO</value>
+</ns6:tag>
+</ns6:tags>
+</ns5:mt700>

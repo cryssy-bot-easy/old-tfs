@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="mt750Mapper" class="com.ucpb.tfs.util.BeanMapper">
+        <property name="trimStrings" value="true"/>
+        <constructor-arg name="properties">
+            <util:map>
+                <entry value="field20" key="#this.get('20')"/>
+                <entry value="field21" key="#this.get('21')"/>
+                <entry value="field32B" key="#this.get('32B')"/>
+                <entry value="field33B" key="#this.get('33B')"/>
+                <entry value="field71B" key="#this.get('71B')"/>
+                <entry value="field34B" key="#this.get('34B')"/>
+                <entry value="field57A" key="#this.get('57A')"/>
+                <entry value="field72" key="#this.get('72')"/>
+                <entry value="field77J" key="#this.get('77J')"/>
+            </util:map>
+        </constructor-arg>
+        <constructor-arg name="targetClass" value="com.ucpb.tfs.swift.message.MT750"/>
+    </bean>
+
+</beans>

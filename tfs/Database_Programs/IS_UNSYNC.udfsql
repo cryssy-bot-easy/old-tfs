@@ -1,0 +1,32 @@
+CREATE OR REPLACE FUNCTION IS_UNSYNC (IN  P_TRADESERVICEID VARCHAR(36))
+	RETURNS CHAR(1)
+    NO EXTERNAL ACTION
+F1: BEGIN 
+    -- ######################################################################
+    -- # Checks if Trade Service is Not Synchronized with its related tables
+    -- # (TRADESERVICE, ROUTES, TASK)
+    -- # 
+    -- # Raymund Mallonga 2/12/2020
+    -- #
+    -- ######################################################################
+    DECLARE cnt_route INTEGER DEFAULT 0;
+    DECLARE cnt_task  INTEGER DEFAULT 0;
+    DECLARE cnt_ts    INTEGER DEFAULT 0;
+    DECLARE v_prevailing_status VARCHAR(20);
+    
+    SET v_prevailing_status = COALESCE(GET_PREVAILING_STATUS(P_TRADESERVICEID),'APPROVED');
+    
+    SET cnt_route = CASE WHEN COALESCE(( SELECT COUNT(*)
+                      FROM ROUTES WHERE ROUTINGINFORMATIONID = P_TRADESERVICEID
+                      AND  STATUS = v_prevailing_status),0) > 0 THEN 1 ELSE 0 END;
+
+    SET cnt_task =  COALESCE(( SELECT COUNT(*)
+                      FROM TASK WHERE TASKSTATUS = v_prevailing_status AND 
+                      TASKREFERENCENUMBER = P_TRADESERVICEID),0);
+    
+    SET cnt_ts   =  COALESCE(( SELECT COUNT(*)
+                      FROM TRADESERVICE WHERE STATUS = v_prevailing_status AND 
+                      TRADESERVICEID = P_TRADESERVICEID),0);
+    
+    RETURN CASE WHEN (cnt_route + cnt_task + cnt_ts) = 3 THEN 'N' ELSE 'Y' END;
+END

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd">
+
+	<import resource="classpath:gateway-config.xml"/>
+    <import resource="classpath*:mock-casa-server.xml"/>
+
+
+	<bean id="applicationProperties" class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
+		<description>
+		This property configuration bean is given an ID, so that service contexts
+		can use it for any property values that need to be defined.
+		</description>
+		<property name="location" value="test-application.properties" />
+	</bean>
+
+	<bean id="casaService" class="com.ucpb.tfs.interfaces.services.impl.CasaServiceImpl">
+		<constructor-arg name="casaGateway" ref="casaGateway"/>
+	</bean>
+	
+<!--&lt;!&ndash; Mock TCP Server Configuration &ndash;&gt;-->
+	<!--<int:channel id="mockServerChanel"/>-->
+	<!--<int:channel id="mockServerReplyChannel"/>-->
+	<!--<int:channel id="errorChannel"/>-->
+
+	<!--<int-ip:tcp-connection-factory id="silverlakeConnectionFactory"	type="server" pool-size="5" port="${casa.gateway.port}"-->
+		<!--deserializer="casaSerializer" serializer="stringSerializer" single-use="true"/>-->
+	<!---->
+	<!--<int-ip:tcp-inbound-gateway id="silverlakeGateway"-->
+		<!--connection-factory="silverlakeConnectionFactory"-->
+		<!--request-channel="mockServerChanel"-->
+		<!--reply-channel="mockServerReplyChannel"-->
+		<!--error-channel="errorChannel"/>-->
+	<!---->
+	<!--<int:service-activator input-channel="mockServerChanel"-->
+		<!--ref="silverlakeService"-->
+		<!--output-channel="mockServerReplyChannel"-->
+		<!--method="process"/>-->
+	<!---->
+	<!--<bean id="stringSerializer" class="com.ucpb.tfs.interfaces.gateway.serializer.StringSerializer"/>-->
+	<!---->
+	<!--<bean id="silverlakeService" class="com.ucpb.tfs.interfaces.silverlake.SilverlakeService"/>-->
+	<!---->
+	<!--<int:transformer id="errorHandler"-->
+		<!--input-channel="errorChannel"-->
+		<!--expression="payload.failedMessage.payload + ':' + payload.cause.message"/>-->
+
+</beans>

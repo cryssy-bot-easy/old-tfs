@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ipc.rbac.application.query.permission.IPermissionFinder">
+
+	<select id="findPermission" resultType="hashMap" parameterType="int">
+      select * from RBAC_AuthorityType where Type = 'PERMISSION' and Id = #{permissionId}
+    </select> 
+    
+	<select id="findAllPermissionsByName" resultType="hashMap">
+      select * from RBAC_AuthorityType where Type = 'PERMISSION' and Name like #{permissionName}
+    </select> 
+    
+    <select id="findAllPermissions" resultType="hashMap">
+      select * from RBAC_AuthorityType where Type = 'PERMISSION'
+    </select>
+    
+</mapper>

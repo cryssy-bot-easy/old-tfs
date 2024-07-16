@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <jdbc:embedded-database id="myDataSource" type="DERBY">
+
+    </jdbc:embedded-database>
+
+    <import resource="classpath:interface-app-context.xml"/>
+
+    <!--     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> -->
+    <!--         <property name="dataSource" ref="dataSource"/> -->
+    <!--         <property name="mapperLocations" value="classpath*:/mappers/*.xml"/> -->
+    <!--     </bean> -->
+
+    <bean id="interfaceDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver" />
+        <property name="url" value="jdbc:derby://localhost:1527/silverlakedb;create=true" />
+        <property name="username" value="tfsdb2c" />
+        <property name="password" value="tfsdb2c" />
+    </bean>
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="interfaceDataSource"/>
+    </bean>
+
+    <bean id="applicationProperties" class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
+        <description>
+            This property configuration bean is given an ID, so that service contexts
+            can use it for any property values that need to be defined.
+        </description>
+        <property name="location" value="classpath:interface-application.properties" />
+    </bean>
+
+    <bean id="ratesService" class="com.ucpb.tfs.interfaces.services.impl.RatesServiceImpl">
+        <property name="ratesRepository" ref="ratesRepository"/>
+    </bean>
+
+</beans>

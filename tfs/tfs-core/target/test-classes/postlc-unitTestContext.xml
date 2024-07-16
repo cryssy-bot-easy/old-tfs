@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <context:annotation-config/>
+
+    <bean id="tfsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="myDataSource"/>
+    </bean>
+
+    <!--
+        this is a workaround for propertyplaceholder issue with mybatis-spring
+        http://code.google.com/p/mybatis/issues/detail?id=414&can=1&q=propertyplaceholder&colspec=ID%20Type%20Component%20Status%20Priority%20Version%20Target%20Summary%20Reporter
+    -->
+    <bean id="appProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:postlc-unittest.properties</value>
+            </list>
+        </property>
+        <property name="ignoreResourceNotFound" value="true"/>
+    </bean>
+
+    <context:property-placeholder location="classpath:postlc-unittest.properties" ignore-unresolvable="true" local-override="true"/>
+
+    <!--<bean id="appProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">-->
+        <!--<property name="locations">-->
+            <!--<list>-->
+                <!--<value>classpath:postlc-unittest-marv.properties</value>-->
+            <!--</list>-->
+        <!--</property>-->
+        <!--<property name="ignoreResourceNotFound" value="true"/>-->
+    <!--</bean>-->
+
+    <!--<context:property-placeholder location="classpath:postlc-unittest-marv.properties" ignore-unresolvable="true" local-override="true"/>-->
+
+    <!--destroy-method="close"-->
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+        <property name="driverClassName" value="${tfs.jdbc.driverClassName}" />
+        <property name="url" value="${tfs.jdbc.url}" />
+        <property name="username" value="${tfs.jdbc.username}" />
+        <property name="password" value="${tfs.jdbc.password}" />
+    </bean>
+
+    <!--<bean class="com.incuventure.ddd.infrastructure.events.impl.SimpleEventPublisher" />-->
+    <!--<bean class="com.incuventure.ddd.infrastructure.events.impl.EventListenerProcessor" />-->
+    <!--<bean class="com.incuventure.cqrs.infrastructure.StandardCommandHandlerProvider" />-->
+
+    <!--<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true" />-->
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/cdt</value>
+                <value>classpath:hibernate/mapping/mt</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/security</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.hbm2ddl.import_files">${tfs.hibernate.bootstrap}</prop>
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <prop key="hibernate.transaction.jta.platform">org.hibernate.service.jta.platform.internal.BitronixJtaPlatform</prop>
+
+                <!-- Hibernate Envers configuration (audit logging) -->
+                <!-- http://docs.jboss.org/hibernate/orm/4.0/devguide/en-US/html/ch15.html -->
+                <prop key="org.hibernate.envers.audit_table_suffix">_AUDIT</prop>
+                <prop key="org.hibernate.envers.revision_field_name">REV_ID</prop>
+                <prop key="org.hibernate.envers.revision_type_field_name">REV_TYPE</prop>
+            </props>
+        </property>
+    </bean>
+    <tx:annotation-driven/>
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+        <!--set false to prevent UnexpectedRollbackException-->
+        <property name="globalRollbackOnParticipationFailure" value="false" />
+    </bean>
+
+    <!-- for security services -->
+    <bean id="userRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateUserRepository"/>
+    <bean id="roleRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateRoleRepository"/>
+    <bean id="employeeRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateEmployeeRepository"/>
+
+
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.SimpleEventPublisher" />
+
+    <bean id="cdtPaymentRequestRepository" class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateCDTPaymentRequestRepository"/>
+    <bean id="refPas5ClientRepository" class="com.ucpb.tfs.domain.cdt.infrastructure.repositories.hibernate.HibernateRefPas5ClientRepository"/>
+
+    <bean id="pas5FilesLoaderService" class="com.ucpb.tfs.domain.cdt.services.PAS5FilesLoaderService"/>
+
+    <bean id="outgoingMTRepository" class="com.ucpb.tfs.domain.mt.infrastructure.repositories.hibernate.HibernateOutgoingMTRepository"/>
+
+    <bean id="paymentRepository" class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernatePaymentRepository"/>
+    <bean id="tradeServiceRepository" class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+
+    <!-- Services -->
+    <bean id="outgoingMTService" class="com.ucpb.tfs2.application.service.OutgoingMTService"/>
+    <bean id="paymentService" class="com.ucpb.tfs2.application.service.PaymentService"/>
+    <bean id="unactedService" class="com.ucpb.tfs2.application.service.UnactedService"/>
+    <bean id="securityService2" class="com.ucpb.tfs2.application.service.SecurityService"/>
+
+
+
+    <!-- for doc num generation -->
+    <bean id="tradeProductRepository" class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateTradeProductRepository"/>
+
+
+    <!-- AD Authentication -->
+    <bean id="adAuthenticationProvider"
+          class="org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider">
+        <constructor-arg value="ucpb.com" />
+        <constructor-arg value="ldap://192.168.1.146" />
+        <property name="useAuthenticationRequestCredentials" value="true" />
+        <property name="convertSubErrorCodesToExceptions" value="true" />
+    </bean>
+
+    <context:component-scan base-package="com.ucpb.tfs2.security"/>
+
+    <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource">
+        <property name="url" value="ldap://192.168.1.146:389" />
+        <property name="base" value="dc=ucpb,dc=com" />
+        <property name="userDn" value="CN=administrator,CN=Users,DC=ucpb,DC=com " />
+        <!--<property name="anonymousReadOnly" value="true"/>-->
+        <property name="password" value="password$1" />
+        <!--<property name="pooled" value="true" />-->
+        <!-- AD Specific Setting for avoiding the partial exception error -->
+        <property name="referral" value="follow" />
+    </bean>
+
+
+    <!-- for authentication testing -->
+    <!--<bean class="com.ucpb.tfs.application.service.TestAuthenticationProvider"/>-->
+    <bean class="com.ucpb.tfs.application.service.ADAuthenticationProvider"/>
+
+    <!-- Mybatis config for finder test -->
+    <bean id="dataSourceMyBatis" class="org.apache.ibatis.datasource.pooled.PooledDataSource">
+        <property name="driver" value="#{appProperties['tfs.jdbc.driverClassName']}"/>
+        <property name="url" value="#{appProperties['tfs.jdbc.url']}"/>
+        <property name="username" value="#{appProperties['tfs.jdbc.username']}"/>
+        <property name="password" value="#{appProperties['tfs.jdbc.password']}"/>
+    </bean>
+
+    <bean id="sqlSessionFactoryAlt" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceMyBatis"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mybatis/mapping/**/*.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="finderComponentScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryAlt"/>
+        <property name="basePackage" value="com.ucpb.tfs.application.query2"/>
+
+        <property name="processPropertyPlaceHolders" value="true"/>
+    </bean>
+
+</beans>

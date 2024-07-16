@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.audit.TransactionLog" table="TransactionLog">
+    	<!--<id column="id" type="java.lang.Long">-->
+	       <!--<generator class="increment" />-->
+    	<!--</id>-->
+    	<id column="txnReferenceNumber" name="transactionReferenceNumber" type="java.lang.String" length="20">
+            <!--<generator class="com.ucpb.tfs.domain.service.utils.ReferenceNumberGenerator"/>-->
+    	</id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <property name="transactionDate" column="txnDate" type="java.util.Date"/>
+        <property name="dealNumber" column="dealNumber" type="string" length="50"/>
+        <property name="transactionTypeCode" column="transactionTypeCode" type="string" length="50"/>
+        <property name="transactionSubtype" column="transactionSubtype" type="string" length="50"/>
+        <property name="transactionMode" column="transactionMode" type="string" length="50"/>
+		<property name="transactionAmount" column="transactionAmount" type="java.math.BigDecimal" precision="20" scale="2"/>
+
+        <property name="transactionType" column="debit_credit_flag" length="8">
+            <!--<type name="org.hibernate.type.EnumType">-->
+                <!--<param name="enumClass">com.ucpb.tfs.domain.audit.TransactionType</param>-->
+                <!--<param name="identifierMethod">getCode</param>-->
+                <!--<param name="valueOfMethod">getTransactionTypeByCode</param>-->
+                <!--<param name="type">12</param>-->
+            <!--</type>-->
+        </property>
+
+        <property name="direction" column="direction" length="8">
+			<!--<type name="org.hibernate.type.EnumType">-->
+	        	<!--<param name="enumClass">com.ucpb.tfs.domain.audit.Direction</param>-->
+	        	<!--<param name="type">12</param>-->
+	      	<!--</type>-->
+		</property>
+		
+		
+		<property name="branchCode" column="branchCode" type="string" length="50"/>
+		<property name="accountNumber" column="accountNumber" type="string" length="50"/>
+		<property name="settlementCurrency" column="settlementCurrency" length="3"/>
+		
+		<property name="exchangeRate" column="exchangeRate" type="java.math.BigDecimal" precision="31" scale="8"/>
+		<property name="settlementAmount" column="settlementAmount" type="java.math.BigDecimal" precision="20" scale="2"/>
+		<property name="purpose" column="purpose" type="string" length="50"/>
+			
+		<component name="counterparty" class="com.ucpb.tfs.domain.audit.Counterparty">
+			<property name="accountNo" column="cpAccountNo" type="string" length="50"/>
+			<property name="name1" column="cpName1" type="string" length="50"/>
+			<property name="name2" column="cpName2" type="string" length="50"/>
+			<property name="name3" column="cpName3" type="string" length="50"/>
+            <component name="address" class="com.ucpb.tfs.domain.audit.Address">
+                <property name="address1" column="cp_address1" type="string" length="350"/>
+                <property name="address2" column="cp_address2" type="string" length="350"/>
+                <property name="address3" column="cp_address3" type="string" length="350"/>
+            </component>
+
+			
+			<component name="institution" class="com.ucpb.tfs.domain.audit.Institution">
+				<property name="name" column="cpInstitution" type="string" length="50"/>
+				<property name="country" column="cpInstitutionCountry" type="string" length="50"/>
+			</component>
+		</component>
+
+		<component name="correspondentBank" class="com.ucpb.tfs.domain.audit.Bank">
+			<property name="name" column="correspondentBankName" type="string" length="50"/>
+			<property name="countryCode" column="correspondentCountryCode" type="string" length="50"/>
+			<component name="address" class="com.ucpb.tfs.domain.audit.Address">
+				<property name="address1" column="correspondentAddress1" type="string" length="350"/>
+				<property name="address2" column="correspondentAddress2" type="string" length="350"/>
+				<property name="address3" column="correspondentAddress3" type="string" length="350"/>
+			</component>
+		</component>
+
+		<component name="intermediatoryInstitution" class="com.ucpb.tfs.domain.audit.Institution">
+			<property name="name" column="intrInstitutionName" type="string" length="50"/>
+			<property name="country" column="intrInstitutionCountry" type="string" length="50"/>
+            <component name="address" class="com.ucpb.tfs.domain.audit.Address">
+                <property name="address1" column="intrInstitutionAddr1" type="string" length="350"/>
+                <property name="address2" column="intrInstitutionAddr2" type="string" length="350"/>
+                <property name="address3" column="intrInstitutionAddr3" type="string" length="350"/>
+            </component>
+        </component>
+	
+		<component name="beneficiary" class="com.ucpb.tfs.domain.audit.Beneficiary">
+			<property name="name1" column="beneficiaryName1" type="string" length="50"/>
+			<property name="name2" column="beneficiaryName2" type="string" length="50"/>
+			<property name="name3" column="beneficiaryName3" type="string" length="50"/>
+
+			<property name="country" column="beneficiaryCountry"/>
+			<component name="address" class="com.ucpb.tfs.domain.audit.Address">
+				<property name="address1" column="beneficiaryAddr1" type="string" length="350"/>
+				<property name="address2" column="beneficiaryAddr2" type="string" length="350"/>
+				<property name="address3" column="beneficiaryAddr3" type="string" length="350"/>
+			</component>
+		</component>
+	
+		
+		<property name="productType" column="productType"/>
+
+        <component name="productOwner" class="com.ucpb.tfs.domain.audit.ProductOwner">
+            <property name="name1" column="productOwnerName1" type="string" length="50"/>
+            <property name="name2" column="productOwnerName2" type="string" length="50"/>
+            <property name="name3" column="productOwnerName3" type="string" length="50"/>
+            <component name="address" class="com.ucpb.tfs.domain.audit.Address">
+                <property name="address1" column="productOwnerAddr1" type="string" length="350"/>
+                <property name="address2" column="productOwnerAddr2" type="string" length="350"/>
+                <property name="address3" column="productOwnerAddr3" type="string" length="350"/>
+            </component>
+        </component>
+
+
+		<property name="inceptionDate" column="inceptionDate" type="java.util.Date"/>
+		<property name="maturityDate" column="maturityDate" type="java.util.Date"/>
+		<property name="narration" column="narration" type="string" length="50"/>
+		<property name="remarks" column="remarks" type="string" length="50"/>
+		<property name="nature" column="nature" type="string" length="50"/>
+		<property name="fundsSource" column="fundsSource" type="string" length="50"/>
+
+		<property name="certifiedDocuments" column="certifiedDocuments" type="string" length="50"/>
+		<property name="inputDate" column="inputDate" type="java.util.Date"/>
+        <property name="regularDocuments" column="regularDocuments" type="string" length="50"/>
+		<property name="transactionCode" column="transactionCode" type="string" length="50"/>
+		<property name="paymentMode" column="paymentMode" type="string" length="50"/>
+
+        <property name="cifBirthday" column="cifBirthday" type="date"/>
+        
+        <property name="beneficiaryAccountNo" column="beneficiaryAccountNo" type="string" length="50"/>
+		
+		<property name="batchFlag" column="batchFlag" type="integer"/>
+
+		
+    </class>
+
+</hibernate-mapping>

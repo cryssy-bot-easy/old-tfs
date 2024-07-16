@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.mtmessage.IMtMessageFinder">
+
+    <select id="findMtMessage" resultType="hashMap">
+        select
+          id,
+          tradeservicereferencenumber,
+          documentNumber,
+          mtStatus,
+          dateReceived,
+          mtType,
+          cast(message as varchar(10000)) as message,
+          instruction,
+          useractivedirectoryId,
+          modifiedDate,
+          mtDirection,
+          messageClass,
+          tradeServiceId
+        from mtMessage
+        where id= #{id}
+
+    </select>
+
+</mapper>

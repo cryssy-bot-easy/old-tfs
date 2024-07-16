@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+	<class name="com.ucpb.tfs.domain.security.Designation" table="SEC_DESIGNATION">
+
+        <id column="id" type="java.lang.Long" name="id">
+            <generator class="increment" />
+        </id>
+
+        <property name="description" column="description" type="string" length="100"/>
+        <property name="level" column="level" type="java.lang.Long"/>
+    </class>
+
+</hibernate-mapping>

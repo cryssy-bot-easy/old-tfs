@@ -1,0 +1,60 @@
+--<ScriptOptions statementTerminator="@">
+CREATE OR REPLACE FUNCTION TFSDB2S.GET_BALANCE(IN P_CIFNUMBER CHAR(20)
+                                            , IN P_FACILITY_CODE CHAR(3)
+                                            , IN P_FACILITY_ID DECIMAL(11))
+RETURNS  DECIMAL(15, 2)
+NO EXTERNAL ACTION
+--######################################################################################################
+--# Description:    Function that returns available balance of the facility
+--# Created by:     Cedrick C. Nungay 
+--# Date created:   02/22/2024
+--######################################################################################################
+--# Input:  P_CIFNUMBER     :   CIF Number
+--#         P_FACILITY_CODE :   Facility code
+--#         P_FACILITY_ID   :   Facility ID
+--######################################################################################################
+P1: BEGIN
+    DECLARE V_FACILITY_LIMIT DECIMAL(15, 2);
+    DECLARE V_AFCPNO CHAR(20);
+    DECLARE V_OUTSTANDING_BAL DECIMAL(15, 2);
+    DECLARE V_OUTSTANDING_AVAILMENT DECIMAL(15, 2);
+    DECLARE V_UNPAID_LOANS DECIMAL(15, 2);
+    DECLARE V_TYPE_OF_CREDIT CHAR(1);
+
+    -- RETRIEVE FACILITY BALANCE LIMIT ON LNAPPF
+    SET (V_FACILITY_LIMIT, V_AFCPNO, V_TYPE_OF_CREDIT) =
+        (SELECT A.AFFAMT, A.AFCPNO, B.LKREVL
+        FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B WHERE A.AFFCDE = B.LKFCOD AND A.AFCIF# = P_CIFNUMBER
+            AND A.AFFCDE = P_FACILITY_CODE AND A.AFSEQ = P_FACILITY_ID);
+
+    -- IF REVOLVING
+    IF V_TYPE_OF_CREDIT = 'R' THEN
+        SET V_OUTSTANDING_AVAILMENT = COALESCE((SELECT SUM(TOSBAL_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO), 0);
+
+        SET V_UNPAID_LOANS = (
+--            WITH LATEST_PER_LOAN AS (SELECT ACCTNO, MAX(TRSEQ) TRSEQ
+--                    FROM TFSDB2S.LNTFINT
+--                    GROUP BY ACCTNO),
+--                COUNT_PER_LOAN AS (SELECT ACCTNO, COUNT(*) CNT FROM TFSDB2S.LNTFINT GROUP BY ACCTNO),
+--                ACTIVE_LOAN AS (SELECT A.* FROM LATEST_PER_LOAN A, COUNT_PER_LOAN B WHERE A.ACCTNO = B.ACCTNO AND 1 = MOD(CNT, 2))
+            SELECT SUM(A.LORGAMT) - SUM(A.LPMTAMT)
+            FROM TFSDB2S.LNTFINT A
+            -- RETRIEVAL OF ACTIVE LOAN THAT HAS NO REVERSAL
+            INNER JOIN (
+                 SELECT X.* FROM (SELECT ACCTNO, MAX(TRSEQ) TRSEQ 
+                 FROM TFSDB2S.LNTFINT GROUP BY ACCTNO) X
+                     , (SELECT ACCTNO, COUNT(*) CNT FROM TFSDB2S.LNTFINT GROUP BY ACCTNO) Y
+                 WHERE X.ACCTNO = Y.ACCTNO AND 1 = MOD(CNT, 2)
+            ) B
+            ON A.ACCTNO = B.ACCTNO
+                AND A.TRSEQ = B.TRSEQ
+            WHERE A.TNUMBR IN (SELECT DISTINCT ACCTNO FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO)
+                AND A.LOAN_STATUS = 'UNPAID');
+        
+        SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - (V_OUTSTANDING_AVAILMENT + COALESCE(V_UNPAID_LOANS, 0));
+    ELSE
+    -- IF NON REVOLVING
+        SET V_OUTSTANDING_BAL = V_FACILITY_LIMIT - COALESCE((SELECT SUM(ORGLMT_IRR) FROM TFSDB2S.LNCLST WHERE AFCPNO = V_AFCPNO), 0);
+    END IF;
+    RETURN V_OUTSTANDING_BAL;
+END P1@

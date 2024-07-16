@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.cdt.CDTPaymentRequest" table="CDTPaymentRequest">
+
+        <!--<composite-id name="iedieirdNumber" access="field">-->
+            <!--<key-property name="iedieirdNumber" column="IEDIEIRDNO" type="string" length="36"/>-->
+        <!--</composite-id>-->
+
+        <id name="iedieirdNumber" column="IEDIEIRDNO" type="string" length="20"/>
+
+        <property name="pchcDateReceived" column="PCHC_RCV_DATE" type="java.util.Date"/>
+
+        <property name="agentBankCode" column="AABREFCODE" type="java.lang.String" length="20"/>
+
+        <property name="clientName" column="CLIENT_NAME" type="java.lang.String" length="100"/>
+
+        <property name="amount" column="AMOUNT" type="java.math.BigDecimal"/>
+
+        <property name="amountCollected" column="AMOUNTCOLLECTED" type="java.math.BigDecimal"/>
+
+        <property name="e2mAmountCollected" column="E2MAMOUNTCOLLECTED" type="java.math.BigDecimal"/>
+
+        <property name="paymentRequestType" column="REQ_TYPE" length="7">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.PaymentRequestType</param>
+            </type>
+        </property>
+
+        <!--<property name="e2mStatus" column="E2MSTATUS" length="15">-->
+            <!--<type name="org.hibernate.type.EnumType">-->
+                <!--<param name="type">12</param>-->
+                <!--<param name="enumClass">com.ucpb.tfs.domain.cdt.enums.E2MStatus</param>-->
+            <!--</type>-->
+        <!--</property>-->
+        <property name="e2mStatus" column="E2MSTATUS" type="java.lang.String" length="15"/>
+
+        <property name="status" column="STATUS" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.CDTStatus</param>
+            </type>
+        </property>
+
+        <property name="finalDutyAmount" column="FINALDUTYAMT" type="java.math.BigDecimal"/>
+
+        <property name="finalTaxAmount" column="FINALTAXAMT" type="java.math.BigDecimal"/>
+
+        <property name="finalCharges" column="FINALCHARGES" type="java.math.BigDecimal"/>
+
+        <property name="ipf" column="IPF" type="java.math.BigDecimal"/>
+
+        <property name="dateUploaded" column="UPLOAD_DATE" type="java.util.Date"/>
+
+        <property name="dateAbandoned" column="ABANDONED_DATE" type="java.util.Date"/>
+
+        <property name="datePaid" column="DATEPAID" type="java.util.Date"/>
+
+        <property name="datePaymentHistoryUploaded" column="HIS_UPLOAD_DATE" type="java.util.Date"/>
+
+        <property name="transactionReferenceNumber" column="TX_REF" type="java.lang.String" length="40"/>
+
+        <property name="paymentReferenceNumber" column="PAYMENT_REF" type="java.lang.String" length="40"/>
+
+        <property name="documentNumber" column="DOCNUMBER" type="java.lang.String" length="30"/>
+
+        <property name="emailed" column="EMAILED" type="boolean"/>
+
+        <property name="dutiesAndTaxesRemittedDate" column="DUTIESTAX_REMITDATE" type="java.util.Date"/>
+        <property name="IPFRemittedDate" column="IPF_REMITDATE" type="java.util.Date"/>
+
+        <property name="dateSent" column="DATE_SENT" type="java.util.Date"/>
+
+        <property name="bankCharge" column="BANKCHARGE" type="java.math.BigDecimal"/>
+
+        <property name="collectionLine" column="COLL_LINE" length="1">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.CollectionLine</param>
+            </type>
+        </property>
+
+        <property name="collectionAgencyCode" column="COLL_AGENCY_CODE" type="java.lang.String" length="10"/>
+        <property name="unitCode" column="UNITCODE" type="java.lang.String" length="10"/>
+        <property name="allocationUnitCode" column="ALLOC_UNIT_CODE" type="java.lang.String" length="5"/>
+
+        <property name="collectionType" column="COLL_TYPE" length="4">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.CollectionType</param>
+            </type>
+        </property>
+
+        <property name="collectionChannel" column="COLL_CHANNEL" length="3">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.CollectionChannel</param>
+            </type>
+        </property>
+
+        <property name="transactionTypeCode" column="TRAN_TYPE_CODE" length="3">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.cdt.enums.TransactionTypeCode</param>
+            </type>
+        </property>
+
+        <property name="paymentHistoryTotal" column="PAYMENTHISTORYTOTAL" type="java.math.BigDecimal"/>
+
+        <property name="cifNumber" column="CIFNO" type="java.lang.String" length="10" />
+
+        <property name="transactionCode" column="TRCODE" type="java.lang.String" length="3" />
+
+        <property name="isRemitted" column="IS_REMITTED" type="boolean"/>
+
+        <property name="dateRemitted" column="DATE_REMITTED" type="java.util.Date"/>
+        
+        <property name="dateRefunded" column="DATE_REFUNDED" type="java.util.Date"/>
+        
+        <property name="forRefundDate" column="FOR_REFUND_DATE" type="java.util.Date"/>
+        
+        <property name="branchUnitCode" column="BRANCHUNITCODE" type="java.lang.String" length="10"/>
+        
+      <!--  <property name="pchcConfirmationDate" column="CONFIRMATION_DATE" type="java.util.Date"/>-->
+        
+        <property name="exceptionCode" column="EXCEPTIONCODE" type="string" length="2"/>
+        
+         <property name="officerCode" column="OFFICERCODE" type="string" length="3"/>
+         
+          <property name="confDate" column="CONFIRMATION_DATE" type="java.util.Date"/>
+   
+   		<set name="emailNotifs" table="EMAIL_NOTIF" cascade="save-update, all-delete-orphan" lazy="false">
+            <key>
+                <column name="IEDIEIRDNO" not-null="true" />
+            </key>
+            <one-to-many class="com.ucpb.tfs.domain.cdt.EmailNotif"/>
+        </set>
+
+        <property name="importersEmail" column="IMPORTER_EMAIL" type="java.lang.String" length="300"/>
+
+        <property name="rmbmEmail" column="RMBM_EMAIL" type="java.lang.String" length="300"/> 
+
+        <property name="branchEmail" column="BRANCH_EMAIL" type="java.lang.String" length="300"/>
+    </class>
+    
+    
+
+</hibernate-mapping>

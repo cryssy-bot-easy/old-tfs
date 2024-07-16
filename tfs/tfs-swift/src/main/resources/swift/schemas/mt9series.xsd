@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        targetNamespace="http://www.ucpb.com.ph/tfs/schemas/mt9series"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:mt9="http://www.ucpb.com.ph/tfs/schemas/mt9series"
+        xmlns:mt="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+        xmlns:swift="http://www.ucpb.com.ph/tfs/schemas/swift-fields"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-fields" schemaLocation="swift-fields.xsd"/>
+    <xs:import namespace="http://www.ucpb.com.ph/tfs/schemas/swift-message" schemaLocation="swift-message.xsd"/>
+
+	<xs:complexType name="mt999">
+        <xs:complexContent>
+            <xs:extension base="mt:SwiftMessage">
+                <xs:sequence>
+                	<xs:element name="field20" type="swift:field20" minOccurs="1"/>
+                	<xs:element name="field21" type="swift:field21" minOccurs="0"/>
+                	<xs:element name="field79" type="swift:field79" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="mt999" type="mt9:mt999"/>
+
+</xs:schema>

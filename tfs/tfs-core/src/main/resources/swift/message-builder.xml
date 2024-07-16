@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Description:   Added MT707 -->
+<!-- Modified by:   Cedrick C. Nungay -->
+<!-- Date Modified: 09/18/18 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="classpath*:swift/messages/mt103.xml"/>
+    <import resource="classpath*:swift/messages/mt103plus.xml"/>
+    <import resource="classpath*:swift/messages/mt199.xml"/>
+    <import resource="classpath*:swift/messages/mt202.xml"/>
+    <import resource="classpath*:swift/messages/mt299.xml"/>
+    <import resource="classpath*:swift/messages/mt400.xml"/>
+    <import resource="classpath*:swift/messages/mt410.xml"/>
+    <import resource="classpath*:swift/messages/mt412.xml"/>
+    <import resource="classpath*:swift/messages/mt499.xml"/>
+    <import resource="classpath*:swift/messages/mt700.xml"/>
+    <import resource="classpath*:swift/messages/mt701.xml"/>
+    <import resource="classpath*:swift/messages/mt707.xml"/>
+    <import resource="classpath*:swift/messages/mt708.xml"/>
+    <import resource="classpath*:swift/messages/mt730.xml"/>
+    <import resource="classpath*:swift/messages/mt734.xml"/>
+    <import resource="classpath*:swift/messages/mt740.xml"/>
+    <import resource="classpath*:swift/messages/mt742.xml"/>
+    <import resource="classpath*:swift/messages/mt747.xml"/>
+    <import resource="classpath*:swift/messages/mt750.xml"/>
+    <import resource="classpath*:swift/messages/mt752.xml"/>
+    <import resource="classpath*:swift/messages/mt759.xml"/>
+    <import resource="classpath*:swift/messages/mt760.xml"/>
+    <import resource="classpath*:swift/messages/mt767.xml"/>
+    <import resource="classpath*:swift/messages/mt799.xml"/>
+    <import resource="classpath*:swift/messages/mt999.xml"/>
+    
+
+    <bean id="swiftMessageBuilder" class="com.ucpb.tfs.swift.message.builder.SwiftMessageBuilder">
+        <property name="builders">
+            <list>
+                <bean id="basicHeaderBuilder" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingBasicHeaderBuilder">
+                    <constructor-arg name="mapping">
+                        <map>
+                            <entry value="applicationIdentifier" key="'${swift.app.identifier}'"/>
+                            <entry value="serviceIndentifier" key="'${swift.service.identifier}'"/>
+                            <entry value="ltIdentifier" key="'${swift.lt.identifier}'"/>
+                            <entry value="sessionNumber" key="'${swift.session.number}'"/>
+                            <entry value="sequenceNumber" key="'${swift.sequence.number}'"/>
+                        </map>
+                    </constructor-arg>
+                </bean>
+                <bean id="applicationHeaderBuilder" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingApplicationHeaderBuilder">
+                    <constructor-arg name="headerMapping">
+                        <map>
+                            <entry value="ioIdentifier" key="'${swift.io.identifier}'"/>
+                            <!--<entry key="applicationHeader.messageType" value="#this.get('messageType')"/>-->
+                            <!--<entry value="receiverAddress" key="'XXX'"/>-->
+                            <!--<entry value="messagePriority" key="'${swift.message.priority}'"/>-->
+                            <!--<entry value="deliveryMonitoring" key="'${swift.delivery.monitoring}'"/>-->
+                            <entry value="messagePriority" key="'${swift.obsolence.period}'"/>
+                        </map>
+                    </constructor-arg>
+                </bean>
+                <bean id="messageBlockFactory" class="com.ucpb.tfs.swift.message.builder.MessageBlockFactory">
+                    <constructor-arg name="builders">
+                        <map>
+                            <!-- Place message mappings here -->
+                            <entry key="103" value-ref="mt103Mapper"/>
+                            <entry key="103Plus" value-ref="mt103PlusMapper"/>
+                            <entry key="199" value-ref="mt199Mapper"/>
+                            <entry key="202" value-ref="mt202Mapper"/>
+                            <entry key="299" value-ref="mt299Mapper"/>
+                            <entry key="400" value-ref="mt400Mapper"/>
+                            <entry key="410" value-ref="mt410Mapper"/>
+                            <entry key="412" value-ref="mt412Mapper"/>
+                            <entry key="499" value-ref="mt499Mapper"/>
+                            <entry key="700" value-ref="mt700Mapper"/>
+                            <entry key="701" value-ref="mt701Mapper"/>
+                            <entry key="707" value-ref="mt707Mapper"/>
+                            <entry key="708" value-ref="mt708Mapper"/>
+                            <entry key="730" value-ref="mt730Mapper"/>
+                            <entry key="734" value-ref="mt734Mapper"/>
+                            <entry key="740" value-ref="mt740Mapper"/>
+                            <entry key="742" value-ref="mt742Mapper"/>
+                            <entry key="747" value-ref="mt747Mapper"/>
+                            <entry key="750" value-ref="mt750Mapper"/>
+                            <entry key="752" value-ref="mt752Mapper"/>
+                            <entry key="759" value-ref="mt759Mapper"/>
+                            <entry key="760" value-ref="mt760Mapper"/>
+                            <entry key="767" value-ref="mt767Mapper"/>
+                            <entry key="799" value-ref="mt799Mapper"/>
+                            <entry key="999" value-ref="mt999Mapper"/>
+                        </map>
+                    </constructor-arg>
+                </bean>
+                <bean id="userHeaderBuilder" class="com.ucpb.tfs.swift.message.builder.SpelEvaluatingUserHeaderBuilder" >
+                    <constructor-arg name="headerMappings">
+                        <map>
+                            <entry key="103Plus">
+                                <map>
+                                    <entry key="119" value="'STP'"/>
+                                </map>
+                            </entry>
+                            <entry key="103">
+                                <map>
+                                    <entry key="T(com.ucpb.tfs.utils.SwiftPhilPassUtils).evaluateHeader(details?.get('tradeServiceId'),'103')" value="'BSP'"/>
+                                    <entry key="'121'" value="T(com.ucpb.tfs.utils.SwiftPhilPassUtils).returnTradeServiceId(tradeServiceId, details?.get('tradeServiceId'))"/>
+                                </map>
+                            </entry>
+                            <entry key="202">
+                                <map>
+                                    <entry key="'121'" value="T(com.ucpb.tfs.utils.SwiftPhilPassUtils).returnTradeServiceId(tradeServiceId, details?.get('tradeServiceId'))"/>
+                                </map>
+                            </entry>
+<!--                             <entry key="documentType.toString().equals('DOMESTIC') ? T(com.ucpb.tfs.utils.SwiftPhilPassUtils).evaluate(details?.get('tradeServiceId'),'202') : ''"> -->
+<!--                                 <map> -->
+<!--                                     <entry key="202" value="'BSP'"/> -->
+<!--                                 </map> -->
+<!--                             </entry> -->
+                        </map>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="destinationMapping">
+            <map>
+                <!-- Map destinations here -->
+
+                <entry key="103" value="T(org.apache.commons.lang.StringUtils).isEmpty(details.get('reimbursingBank')) ? (details.get('receivingBank') ?: (details.get('destinationBank') ?: (details.get('corresBankCode') ?: details.get('reimbursingBankCode')) )) : details.get('reimbursingBank')"/>
+                <entry key="103Plus" value="details.get('receivingBank')"/>
+                <entry key="199" value="details.get('advisingBank')"/>
+                <entry key="202" value="details.get('reimbursingBankMt202') == null ? details.get('reimbursingBank') : details.get('reimbursingBankMt202')"/>
+                <entry key="299" value="details.get('advisingBank')"/>
+                <entry key="400" value="details?.get('remittingBank')"/>
+                <entry key="410" value="details.get('remittingBank')"/>
+                <entry key="412" value="details.get('remittingBank')"/>
+                <entry key="499" value="details.get('advisingBank')"/>
+                <entry key="700" value="details.get('destinationBank')"/>
+                <entry key="701" value="details.get('destinationBank')"/>
+                <entry key="707" value="details.get('out707flag') == '707O' ?  details.get('destinationBank')  : details.get('destinationBankTo') ?: details.get('destinationBankFrom')"/>                
+                <entry key="708" value="details.get('destinationBankTo') == null or details.get('destinationBankTo') == '' ? details.get('destinationBankFrom') : details.get('destinationBankTo')"/>
+                <entry key="730" value="details.get('issuingBank')"/>
+                <entry key="734" value="details.get('negotiationBank')"/>
+                <entry key="740" value="details.get('reimbursingBankIdentifierCode') ?: details.get('destinationBank')"/>
+                <entry key="742" value="details.get('reimbursingBank') ?: details.get('reimbursingBankCode')"/>
+                <entry key="747" value="details.get('reimbursingBankIdentifierCodeTo') ?: details.get('reimbursingBankIdentifierCode') "/>
+                <entry key="750" value="details.get('negotiationBank')"/>
+                <entry key="752" value="details.get('negotiatingBank') == null ? (details.get('reimbursingBank') ?: details.get('reimbursingBankMt752')) : details.get('negotiatingBank')"/>
+                <entry key="759" value="details.get('destinationBank')"/>
+                <entry key="760" value="details.get('destinationBank')"/>
+                <entry key="767" value="details.get('destinationBank')"/>
+                <entry key="799" value="details.get('issuingBank') ?: details.get('advisingBank')"/>
+                <entry key="999" value="details.get('advisingBank')"/>
+            </map>
+        </property>
+        <property name="splitterFactory" ref="splitter"/>
+    </bean>
+
+
+    <bean id="splitter" class="com.ucpb.tfs.swift.message.splitter.SplitterFactory">
+        <constructor-arg name="registry">
+            <util:map>
+                <entry key="com.ucpb.tfs.swift.message.mt7series.MT700"
+                       value="com.ucpb.tfs.swift.message.splitter.MT700Splitter"/>
+                <entry key="700"
+                       value="com.ucpb.tfs.swift.message.splitter.MT700Splitter"/>
+            </util:map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="swiftPhilPassUtils" class="com.ucpb.tfs.utils.SwiftPhilPassUtils">
+        <constructor-arg ref="paymentRepository"/>
+        <constructor-arg ref="tradeServiceRepository"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    REVISIONS
+    
+    Description: Replaced usage of SIBS schemas into local schema: TFSDB2S
+    Revised by:  Cedrick C. Nungay
+    Date revised:01/25/2024
+-->
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.FacilityRepository">
+
+	<resultMap id="facilityResultMap" type="com.ucpb.tfs.interfaces.domain.Facility">
+	  <result property="facilityType" column="AFFCDE"/>
+	  <result property="facilityId" column="AFSEQ"/>
+	  <result property="expiryDate" column="AFEXP6"/>
+	  <result property="currency" column="AFCUR"/>
+	  <result property="facilityReferenceNumber" column="AFCPNO"/>
+  	  <result property="limit" column="AFFAMT"/>
+	</resultMap>
+
+    <resultMap id="availmentResultMap" type="com.ucpb.tfs.interfaces.domain.Availment">
+        <result property="cifNumber" column="CIFNO"/>
+        <result property="documentNumber" column="ACCTNO"/>
+        <result property="originalAmount" column="ORGLMT"/>
+        <result property="outstandingBalance" column="TOSBAL"/>
+        <!--<result property="transactionDate" column="DATE"/>-->
+        <result property="productCode" column="PRODUCT"/>
+        <result property="phpAmount" column="LORGAM"/>
+        <result property="phpOutstandingBalance" column="TLOSBAL"/>
+        <result property="currencyCode" column="CURTYP"/>
+        <result property="assetLiabilityFlag" column="ALFLG"/>
+        <result property="statusDescription" column="STADSC"/>
+        <result property="facilityReferenceNumber" column="AFCPNO"/>
+    </resultMap>
+
+	<select id="getFacilitiesByCifNumber" resultType="hashMap">
+		SELECT 
+			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
+		FROM TFSDB2S.LNAPPF facility , TFSDB2S.LNPARK B
+			WHERE facility."AFCIF#" = #{cifNumber}
+	        AND facility.AFFCDE = B.LKFCOD
+	        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+<!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+			AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
+			<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+            ORDER BY facility.AFSEQ DESC
+	</select>
+	
+	<select id="getFacilitiesByCifNumberAndType" resultType="hashMap">
+		SELECT 
+			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
+		FROM TFSDB2S.LNAPPF facility, TFSDB2S.LNPARK B
+			WHERE facility."AFCIF#" = #{cifNumber}
+	        AND facility.AFFCDE = B.LKFCOD
+	        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+<!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+			<!-- AND facility."AFFCDE" = #{facilityType} -->
+			AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
+			<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+            ORDER BY facility.AFSEQ DESC
+	</select>
+
+    <select id="getFacilitiesForLoan" resultType="hashMap">
+        SELECT
+        facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+        facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
+        FROM TFSDB2S.LNAPPF facility, TFSDB2S.LNPARK B
+        WHERE facility."AFCIF#" = #{cifNumber}
+        AND facility.AFFCDE = B.LKFCOD
+        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+<!--         	AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+       <!--  AND facility."AFFCDE" IN ('FBE','FBF','FDB','FDT','FD1','FD2','FD3','FD4','FD5','FE1','FE2','FFB','FFT','FF1','FF2','FF3','FF5','FTF'
+          ,'F1E','F1F','F2E','F2F','F3F','F3G','F3I','F3K','F3S','F3U','F3Y','F3Z','F5F','LLC') -->
+        AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
+		<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+        ORDER BY facility.AFSEQ DESC
+    </select>
+
+    <select id="getFacilitiesByType" resultType="hashMap">
+        SELECT
+            A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID, A.AFEXP6 AS EXPIRY_DATE,
+            A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
+        FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+        WHERE A.AFFCDE = B.LKFCOD
+    	AND A."AFCIF#" = #{cifNumber}
+		AND A.AFAPNO = #{mainCifNumber}
+        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+        <if test="seqNo != ''">
+            AND A.AFSEQ = #{seqNo}
+        </if>
+        ORDER BY A.AFSEQ DESC
+    </select>
+
+    <select id="getFacilitiesByTypeSearch" resultType="hashMap">
+        SELECT
+        A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
+        FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+        WHERE A.AFFCDE = B.LKFCOD
+    	AND A."AFCIF#" = #{cifNumber}
+        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+        <if test="seqNo != ''">
+           AND (#{seqNo} = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(#{seqNo}) || '%' OR A.AFCUR LIKE '%' || UCASE(#{seqNo}) || '%')
+        </if>
+        ORDER BY A.AFSEQ DESC
+    </select>
+
+    <select id="getFacilitiesByTypeAndCurrency" resultType="hashMap">
+        SELECT
+        A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
+        FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+        WHERE A.AFFCDE = B.LKFCOD
+        AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+    	AND A."AFCIF#" = #{cifNumber}
+        <!-- AND A.AFCUR LIKE #{currency}  -remove this parameter to get facilities that currency is PHP --> 
+        AND to_date(digits(A.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
+        <if test="seqNo != ''">
+            AND (COALESCE(#{seqNo}, '') = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%' OR A.AFCUR LIKE '%' || UCASE(COALESCE(#{seqNo}, '')) || '%')
+        </if>
+		<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+        ORDER BY A.AFSEQ DESC
+    </select>
+
+	<update id="deleteFacilityAvailment">
+		UPDATE TFSDB2S.LNCLST
+			SET
+                 TOSBAL = 0,
+				 TLOSBAL = 0,
+				 STADSC = 'CANCELLED'
+		 WHERE ACCTNO = #{documentNumber}
+	</update>
+	
+	<insert id="insertFacilityAvailment">
+		CALL TFSDB2S.INQUIRE_CONTIGENT(#{availment.cifNumber}, #{availment.documentNumber}
+			, #{availment.originalAmount}, #{availment.outstandingBalance}
+			, #{availment.transactionDate}, #{availment.transactionTime}
+			, #{availment.phpAmount}, #{availment.phpOutstandingBalance}
+			, #{availment.currencyCode}, 'A', #{availment.statusDescription}
+			, #{availment.facilityReferenceNumber})
+	</insert>
+
+	 <select id="checkContingentExists" resultType="Integer">
+        CALL TFSDB2S.GET_CONTINGENT_COUNT(#{availment.documentNumber})
+    </select>
+
+    <!-- <insert id="insertUpdateFacilityAvailment">
+		CALL TFSDB2S.INQUIRE_CONTIGENT(#{availment.cifNumber}, #{availment.documentNumber}
+			, #{availment.originalAmount}, #{availment.outstandingBalance}
+			, #{availment.transactionDate}, #{availment.transactionTime}
+			, #{availment.phpAmount}, #{availment.phpOutstandingBalance}
+			, #{availment.currencyCode}, 'A', #{availment.statusDescription}
+			, #{availment.facilityReferenceNumber})
+	</insert> -->
+            
+	<select id="getFacilityAvailmentCount" resultType="Integer">
+		SELECT COUNT(*) FROM TFSDB2S.LNCLST WHERE ACCTNO = #{documentNumber}
+	</select>
+	
+	<update id="updateFacilityAvailment">
+		<!-- This is the update for rerouting  -->
+         CALL TFSDB2S.UPDATE_CONTINGENT(#{availment.cifNumber}
+                    , #{availment.originalAmount}
+                    , #{availment.outstandingBalance}
+                    , #{availment.transactionDate}
+                    , #{availment.transactionTime}
+                    , #{availment.phpAmount}
+                    , #{availment.phpOutstandingBalance}
+                    , #{availment.currencyCode}
+                    , UPPER(#{availment.statusDescription})
+                    , #{availment.facilityReferenceNumber}
+                    , #{availment.documentNumber})
+	</update>
+
+    <update id="updateFacilityAvailmentBalance">
+		UPDATE TFSDB2S.LNCLST
+			SET
+				 TOSBAL = #{availment.outstandingBalance},
+				 DATE = #{availment.transactionDate},
+				 TIME = #{availment.transactionTime},
+				 TLOSBAL = #{availment.phpOutstandingBalance},
+				 STADSC = #{availment.statusDescription}
+		 WHERE ACCTNO = #{availment.documentNumber}
+	</update>
+
+    <update id="updateFacilityAvailmentCif">
+        UPDATE TFSDB2S.LNCLST
+            SET
+                CIFNO = #{availment.cifNumber},
+                DATE = #{availment.transactionDate},
+                TIME = #{availment.transactionTime},
+                STADSC = #{availment.statusDescription}
+        WHERE ACCTNO = #{availment.documentNumber}
+    </update>
+
+    <update id="updateFacilityAvailmentFacilityReferenceNumber">
+        UPDATE TFSDB2S.LNCLST
+            SET
+                AFCPNO = #{availment.facilityReferenceNumber},
+                DATE = #{availment.transactionDate},
+                TIME = #{availment.transactionTime},
+                STADSC = #{availment.statusDescription}
+        WHERE ACCTNO = #{availment.documentNumber}
+    </update>
+
+    <select id="getAvailment" resultMap="availmentResultMap">
+		SELECT *
+		FROM TFSDB2S.LNCLST
+	    WHERE ACCTNO = #{documentNumber}
+	</select>
+	
+	
+	<select id="getFacilitiesByChildAndMainCifNumber" resultType="hashMap">
+		SELECT 
+			facility."AFCIF#",facility.AFFCDE,facility.AFSEQ,facility.AFEXP6,facility.AFCUR,
+			facility.AFFAMT
+		FROM TFSDB2S.LNAPPF facility 
+			WHERE facility."AFCIF#" = #{cifNumber}
+<!--			AND to_date(digits(facility.AFEXP6), 'mmddyy') > CURRENT_DATE    -->
+       	  		AND facility.AFAPNO = #{mainCifNumber}
+		  	  	AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
+				<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+              ORDER BY facility.AFSEQ DESC
+	</select>
+
+	<insert id="insertFacilityBalanceQuery">
+		CALL TFSDB2S.INQUIRE_BALANCE(
+			#{facility.cifNumber},#{facility.facilityType},#{facility.facilityId},#{transactionSequenceNo}
+		)
+	</insert>
+
+
+    <select id="getFacilityBalance" resultType="hashMap">
+		SELECT
+	      AANO AS CIF_NUMBER,
+		  FCODE AS FACILITY_TYPE,
+  	      FSEQ AS FACILITY_ID,
+	      TRSEQ AS TRANSACTION_SEQUENCE,
+		  AVLAMT AS FACILITY_BALANCE,
+		  TRSTS AS REQUEST_STATUS,
+		  TRERR AS ERROR_MESSAGE,
+          TOCUR AS CURRENCY
+		FROM TFSDB2S.LNTFCON FACILITY_BALANCE
+			WHERE FACILITY_BALANCE.TRSEQ = #{transactionSequenceNo}
+	</select>
+	
+	<select id="getFacilitiesByCifAndFacility" resultType="hashMap">
+		SELECT 
+			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
+		FROM TFSDB2S.LNAPPF facility 
+			WHERE facility."AFCIF#" = #{cifNumber}
+			AND facility."AFCPNO" = #{facilityRefNo}
+			AND facility."AFFCDE" = #{facilityType}
+			AND facility."AFSEQ" = #{facilityId}
+            ORDER BY facility.AFSEQ DESC
+	</select>
+
+</mapper>

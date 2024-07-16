@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+		
+	<int:channel id="casaRequestChannel"/>
+	<int:channel id="casaResponseChannel"/>
+
+	<!-- CasaGateway config -->
+	<int:gateway id="casaGateway" 
+			service-interface="com.ucpb.tfs.interfaces.gateway.CasaGateway">
+		<int:method name="sendCasaRequest" request-channel="casaRequestChannel" reply-channel="casaResponseChannel" />
+	</int:gateway>
+	
+	<bean id="casaSerializer" class="com.ucpb.tfs.interfaces.gateway.serializer.CasaSerializer">
+		<property name="casaHeaderDeserializer" ref="casaHeaderDeserializer"/>
+	</bean>
+	
+	<bean id="casaHeaderDeserializer" class="com.ucpb.tfs.interfaces.gateway.serializer.CasaHeaderDeserializer"/>
+	
+	<int-ip:tcp-connection-factory id="casaConnectionFactory"
+		host="#{encryptedProperties['casa.gateway.host']}" port="${casa.gateway.port}" type="client"
+		single-use="true" pool-size="5" so-timeout="${casa.gateway.so.timeout}"
+		serializer="casaSerializer" deserializer="casaSerializer" />
+	
+	<int-ip:tcp-outbound-gateway
+		connection-factory="casaConnectionFactory"
+		request-channel="casaRequestChannel" reply-channel="casaResponseChannel"
+		request-timeout="${casa.gateway.request.timeout}"
+		reply-timeout="${casa.gateway.reply.timeout}"/>
+
+</beans>

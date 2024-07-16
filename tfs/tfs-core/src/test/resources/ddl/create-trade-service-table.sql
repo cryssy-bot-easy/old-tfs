@@ -1,0 +1,22 @@
+create table TRADESERVICE (
+  TRADESERVICEID varchar(255) not null,
+  SERVICEINSTRUCTIONID varchar(255),
+  DOCUMENTNUMBER varchar(255),
+  STATUS varchar(255),
+  PROCESSID bigint,
+  CHARGESCURRENCY varchar(255),
+  AMOUNT numeric(19, 2),
+  DEFAULTAMOUNT numeric(19, 2),
+  CURRENCY varchar(255),
+  CIFNUMBER varchar(255),
+  CIFNAME varchar(255),
+  SERVICETYPE varchar(255),
+  DOCUMENTTYPE varchar(255),
+  DOCUMENTCLASS varchar(255),
+  DOCUMENTSUBTYPE1 varchar(255),
+  DOCUMENTSUBTYPE2 varchar(255),
+  USERACTIVEDIRECTORYID varchar(255),
+  CREATEDDATE timestamp,
+  MODIFIEDDATE timestamp,
+  primary key (tradeserviceid)
+);

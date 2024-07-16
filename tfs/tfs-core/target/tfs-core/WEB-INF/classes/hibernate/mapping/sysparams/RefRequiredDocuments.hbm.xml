@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+    <class name="com.ucpb.tfs.domain.sysparams.RefRequiredDocuments" table="REFREQUIREDDOCUMENTS">
+        <id name="id" column="ID" type="java.lang.Long">
+            <generator class="increment"/>
+        </id>
+        <property name="documentCode" column="DOCUMENTCODE" type="string" length="21"/>
+        <property name="description" column="DESCRIPTION" type="string" length="1000"/>
+        <property name="documentType" column="DOCUMENTTYPE" type="string" length="15"/>
+    </class>
+</hibernate-mapping>

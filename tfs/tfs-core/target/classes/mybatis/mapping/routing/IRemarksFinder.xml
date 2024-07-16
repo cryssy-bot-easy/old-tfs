@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.routing.IRemarksFinder">
+
+    <select id="findAllRemarksByRemarkId" resultType="hashMap">
+        select
+          r.id,
+          ucase(r.user_id) as user_id,
+          r.message,
+          r.date_created,
+          (e.firstName || ' ' ||  e.lastName) as fullName
+          from remarks r
+        inner join
+        sec_employee e
+        on ucase(e.id) = ucase(r.user_id)
+        where r.remark_id in
+        <foreach collection="remarkId" index="index" item="r_id"
+        	close=")" open="(" separator=",">
+        	#{r_id}
+        </foreach>
+        order by date_created desc
+    </select>
+
+
+</mapper>

@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.corresCharges.CorresChargeActual" table="CorresChargeActual">
+
+        <id name="id" column="id" type="long">
+            <generator class="increment"/>
+        </id>
+
+        <!-- TradeServiceId of PAYMENT -->
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <component name="documentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+            <property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </component>
+
+        <property name="status" column="status" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.corresCharges.enumTypes.CorresChargeStatus</param>
+            </type>
+        </property>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" precision="19" scale="2"/>
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+
+        <property name="specialRateThirdToUsd" column="specialRateThirdToUsd" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateThirdToPhp" column="specialRateThirdToPhp" type="java.math.BigDecimal" precision="19" scale="4" />
+        <property name="specialRateUrr" column="specialRateUrr" type="java.math.BigDecimal" precision="19" scale="4" />
+
+        <property name="paidDate" column="paidDate" type="java.util.Date"/>
+
+        <property name="createdDate" column="createdDate" type="java.util.Date"/>
+
+        <!--mt202 details-->
+        <component name="mt202Details" class="com.ucpb.tfs.domain.corresCharges.Mt202Details">
+            <component name="mtDcumentNumber" class="com.ucpb.tfs.domain.product.DocumentNumber">
+                <property name="documentNumber" column="mtDocumentNumber" type="string" length="21"/>
+            </component>
+
+            <property name="remittingBankReferenceNumber" column="remittingBankReferenceNumber" type="string" length="20"/>
+
+            <property name="timeIndicationCode" column="timeIndicationCode" type="string" length="7"/>
+            <property name="timeIndication" column="timeIndication" type="string" length="18"/>
+
+            <property name="transactionDate" column="transactionDate" type="java.util.Date" />
+            <property name="settlementCurrency" column="settlementCurrency" type="java.util.Currency" length="3"/>
+            <property name="settlementAmount" column="settlementAmount" type="java.math.BigDecimal" precision="19" scale="2"/>
+
+            <property name="orderingBankFlag" column="orderingBankFlag" type="string" length="11"/>
+            <property name="orderingBankCode" column="orderingBankCode" type="string" length="11"/>
+            <property name="orderingBankNameAndAddress" column="orderingBankNameAndAddress" type="string" length="144"/>
+
+            <property name="sendersCorrespondentFlag" column="sendersCorrespondentFlag" type="string" length="1"/>
+            <property name="sendersCorrespondentCode" column="sendersCorrespondentCode" type="string" length="11"/>
+            <property name="sendersCorrespondentPartyIdentifier" column="sendersCorrespondentPartyIdentifier" type="string" length="20"/>
+            <property name="sendersCorrespondentNameAndAddress" column="sendersCorrespondentNameAndAddress" type="string" length="144"/>
+
+            <property name="receiversCorrespondentFlag" column="receiversCorrespondentFlag" type="string" length="1"/>
+            <property name="receiversCorrespondentCode" column="receiversCorrespondentCode" type="string" length="11"/>
+            <property name="receiversCorrespondentPartyIdentifier" column="receiversCorrespondentPartyIdentifier" type="string" length="20"/>
+            <property name="recieversCorrespondentLocation" column="recieversCorrespondentLocation" type="string" length="144"/>
+            <property name="receiversCorrespondentNameAndAddress" column="receiversCorrespondentNameAndAddress" type="string" length="144"/>
+
+            <property name="accountWithBankFlag" column="accountWithBankFlag" type="string" length="1"/>
+            <property name="accountWithBankCode" column="accountWithBankCode" type="string" length="37"/>
+            <property name="accountWithBankPartyIdentifier" column="accountWithBankPartyIdentifier" type="string" length="20"/>
+            <property name="accountWithBankLocation" column="accountWithBankLocation" type="string" length="144"/>
+            <property name="accountWithBankNameAndAddress" column="accountWithBankNameAndAddress" type="string" length="144"/>
+
+            <property name="beneficiaryBankFlag" column="beneficiaryBankFlag" type="string" length="1"/>
+            <property name="beneficiaryBankCode" column="beneficiaryBankCode" type="string" length="11"/>
+            <property name="beneficiaryBankNameAndAddress" column="beneficiaryBankNameAndAddress" type="string" length="144"/>
+
+            <property name="senderToReceiverInformation" column="senderToReceiverInformation" type="string" length="100"/>
+        </component>
+    </class>
+
+</hibernate-mapping>

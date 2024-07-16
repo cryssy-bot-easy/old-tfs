@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="customerLogMappers">
+        <entry key="com.ucpb.tfs.domain.reference.event.CustomerCreatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="customerType" value="refCustomer?.customerType"/>
+                        <entry key="firstName" value="refCustomer?.cifLongName"/>
+                        <entry key="middleName" value="refCustomer?.cifLongNameA"/>
+                        <entry key="lastName" value="refCustomer?.cifLongNameB"/>
+
+                        <entry key="gender" value="refCustomer?.gender"/>
+                        <entry key="dateOfBirth" value="(T(com.ucpb.tfs.utils.AmlaLoggingUtil).checkCustomer(refCustomer?.customerType).equals('1')) ? refCustomer?.clientBirthday : null"/>
+                        <entry key="placeOfBirth" value="(T(com.ucpb.tfs.utils.AmlaLoggingUtil).checkCustomer(refCustomer?.customerType).equals('1')) ? (refCustomer?.customerType?.equals('302') ? refCustomer?.placeOfBirth : '-') : 'NA'"/>
+
+                        <entry key="maritalStatus" value="'302'.equals(refCustomer?.customerType) ? refCustomer?.maritalStatus : '-'"/>
+
+                        <!--Mandatory ?-->
+                        <!--<entry key="nationality" value="refCustomer?.nationality"/>-->
+
+                        <entry key="nationOfBirth" value="refCustomer?.nationOfBirth ?: 'PH'"/>
+
+                        <entry key="businessAddress.address1" value="refCustomer?.clientAddress1" />
+                        <entry key="businessAddress.address2" value="refCustomer?.clientAddress2" />
+                        <entry key="businessAddress.address3" value="refCustomer?.clientAddress3" />
+                        <entry key="businessAddress.address4" value="refCustomer?.clientAddress4" />
+                        <entry key="businessAddress.zipCode" value="refCustomer?.clientZipCode" />
+
+                        <entry key="permanentAddress.address1" value="refCustomer?.homeAddress1" />
+                        <entry key="permanentAddress.address2" value="refCustomer?.homeAddress2" />
+                        <entry key="permanentAddress.address3" value="refCustomer?.homeAddress3" />
+                        <entry key="permanentAddress.address4" value="refCustomer?.homeAddress4" />
+                        <entry key="permanentAddress.zipCode" value="refCustomer?.homeZipCode" />
+
+                        <entry key="occupation" value="refCustomer?.occupation ?: 'NA'"/>
+                        <entry key="natureOfBusiness" value="refCustomer?.natureOfBusiness ?: 'NA'"/>
+
+                        <entry key="monthlyIncome" value="refCustomer?.monthlyIncome ?: T(java.math.BigDecimal).ZERO"/>
+                        <entry key="annualIncome" value="refCustomer?.annualIncome ?: T(java.math.BigDecimal).ZERO"/>
+                        <entry key="financialStatus" value="refCustomer?.financialStatus ?: T(java.math.BigDecimal).ZERO"/>
+
+                        <entry key="individualOrCorporate" value="'302'.equals(refCustomer?.customerType) ? 'I' : 'C'"/>
+
+                        <entry key="residencePhoneNumber" value="refCustomer?.residencePhoneNumber ?: 'NA'"/>
+                        <entry key="officePhoneNumber" value="refCustomer?.officePhoneNumber ?: 'NA'"/>
+                        <entry key="mobileNumber" value="refCustomer?.mobileNumber ?: 'NA'"/>
+
+                        <entry key="natureOfWork" value="refCustomer?.natureOfWork ?: 'NA'"/>
+
+                        <entry key="natureOfSelfEmployment" value="refCustomer?.natureOfSelfEmployment ?: 'NA'"/>
+                        <entry key="sourceOfFunds" value="refCustomer?.sourceOfFunds ?: 'NA'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerLog"/>
+            </bean>
+        </entry>
+
+        <entry key="com.ucpb.tfs.domain.reference.event.CustomerUpdatedEvent">
+            <bean class="com.ucpb.tfs.utils.BeanMapper">
+                <constructor-arg name="properties">
+                    <util:map>
+                        <entry key="tradeServiceId" value="tradeService?.tradeServiceId"/>
+                        <entry key="customerType" value="refCustomer?.customerType"/>
+                        <entry key="firstName" value="refCustomer?.cifLongName"/>
+                        <entry key="middleName" value="refCustomer?.cifLongNameA"/>
+                        <entry key="lastName" value="refCustomer?.cifLongNameB"/>
+
+                        <entry key="gender" value="refCustomer?.gender"/>
+                        <entry key="dateOfBirth" value="(T(com.ucpb.tfs.utils.AmlaLoggingUtil).checkCustomer(refCustomer?.customerType).equals('1')) ? refCustomer?.clientBirthday : null"/>
+                        <entry key="placeOfBirth" value="(T(com.ucpb.tfs.utils.AmlaLoggingUtil).checkCustomer(refCustomer?.customerType).equals('1')) ? (refCustomer?.customerType?.equals('302') ? refCustomer?.placeOfBirth : '-') : 'NA'"/>
+
+                        <entry key="maritalStatus" value="'302'.equals(refCustomer?.customerType) ? refCustomer?.maritalStatus : '-'"/>
+
+                        <!--Mandatory ?-->
+                        <!--<entry key="nationality" value=""/>-->
+
+                        <entry key="nationOfBirth" value="refCustomer?.nationOfBirth ?: '204'"/>
+
+                        <entry key="businessAddress.address1" value="refCustomer?.clientAddress1" />
+                        <entry key="businessAddress.address2" value="refCustomer?.clientAddress2" />
+                        <entry key="businessAddress.address3" value="refCustomer?.clientAddress3" />
+                        <entry key="businessAddress.address4" value="refCustomer?.clientAddress4" />
+                        <entry key="businessAddress.zipCode" value="refCustomer?.clientZipCode" />
+
+                        <entry key="permanentAddress.address1" value="refCustomer?.homeAddress1" />
+                        <entry key="permanentAddress.address2" value="refCustomer?.homeAddress2" />
+                        <entry key="permanentAddress.address3" value="refCustomer?.homeAddress3" />
+                        <entry key="permanentAddress.address4" value="refCustomer?.homeAddress4" />
+                        <entry key="permanentAddress.zipCode" value="refCustomer?.homeZipCode" />
+
+                        <entry key="occupation" value="refCustomer?.occupation ?: 'NA'"/>
+                        <entry key="natureOfBusiness" value="refCustomer?.natureOfBusiness ?: 'NA'"/>
+
+                        <entry key="monthlyIncome" value="refCustomer?.monthlyIncome ?: T(java.math.BigDecimal).ZERO"/>
+                        <entry key="annualIncome" value="refCustomer?.annualIncome ?: T(java.math.BigDecimal).ZERO"/>
+                        <entry key="financialStatus" value="refCustomer?.financialStatus ?: T(java.math.BigDecimal).ZERO"/>
+
+                        <entry key="individualOrCorporate" value="'302'.equals(refCustomer?.customerType) ? 'I' : 'C'"/>
+
+                        <entry key="residencePhoneNumber" value="refCustomer?.residencePhoneNumber ?: 'NA'"/>
+                        <entry key="officePhoneNumber" value="refCustomer?.officePhoneNumber ?: 'NA'"/>
+                        <entry key="mobileNumber" value="refCustomer?.mobileNumber ?: 'NA'"/>
+
+                        <entry key="natureOfWork" value="refCustomer?.natureOfWork ?: 'NA'"/>
+
+                        <entry key="natureOfSelfEmployment" value="refCustomer?.natureOfSelfEmployment ?: 'NA'"/>
+                        <entry key="sourceOfFunds" value="refCustomer?.sourceOfFunds ?: 'NA'"/>
+                    </util:map>
+                </constructor-arg>
+                <constructor-arg name="targetClass" value="com.ucpb.tfs.domain.audit.CustomerLog"/>
+            </bean>
+        </entry>
+    </util:map>
+
+</beans>

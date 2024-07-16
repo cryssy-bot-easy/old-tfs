@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- DataSource: hsqldb file -->
+    <!--destroy-method="close"-->
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+        <!--
+        <property name="driverClassName" value="com.ibm.db2.jcc.DB2Driver" />
+        <property name="url" value="jdbc:db2://localhost:50000/tfsdb" />
+        <property name="username" value="db2admin" />
+        <property name="password" value="db2admin" />
+        -->
+
+<!--
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:mem:.;shutdown=false;sql.enforce_size=false" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+-->
+        <!--
+        <property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver" />
+        <property name="url" value="jdbc:derby://localhost:1527/tfsdb;create=true" />
+        <property name="username" value="tfs" />
+        <property name="password" value="tfs" />
+        -->
+
+
+        <!--<property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDriver" />-->
+        <!--<property name="url" value="jdbc:derby:tfsdb;create=true" />-->
+
+    </bean>
+
+<!--    <jdbc:embedded-database id="myDataSource" type="HSQL"> -->
+<!--     </jdbc:embedded-database> -->
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/instruction</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/product</value>
+                <value>classpath:hibernate/mapping/rbac</value>
+                <value>classpath:hibernate/mapping/reference</value>
+                <value>classpath:hibernate/mapping/service</value>
+                <value>classpath:hibernate/mapping/settlementaccount</value>
+                <value>classpath:hibernate/mapping/task</value>
+                <value>classpath:hibernate/mapping/routing</value>
+                <value>classpath:hibernate/mapping/security</value>
+                <value>classpath:hibernate/mapping/audit</value>
+                <value>classpath:hibernate/mapping/swift</value>
+                <value>classpath:hibernate/mapping/accounting</value>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <!-- <prop key="hibernate.dialect">org.hibernate.dialect.DB2Dialect</prop> -->
+                <prop key="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</prop>
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>-->
+                <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
+                <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
+                <prop key="hibernate.show_sql">false</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">jta</prop>-->
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <prop key="hibernate.hbm2ddl.import_files">/databootstrap.sql</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.cache.provider_class">org.infrastructure.repositories.hibernate.cache.NoCacheProvider</prop>-->
+            </props>
+        </property>
+    </bean>
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+    </bean>
+
+    <!-- these two are use to initialize the event publisher and the event listener registrar -->
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.SimpleEventPublisher" />
+    <bean class="com.incuventure.ddd.infrastructure.events.impl.EventListenerProcessor" />
+
+    <bean class="com.incuventure.cqrs.infrastructure.StandardCommandHandlerProvider" />
+    <bean class="com.incuventure.cqrs.infrastructure.StandardCommandBus" />
+    <bean id="queryBusService" class="com.incuventure.cqrs.infrastructure.StandardQueryBus"/>
+    <bean id="TokenProvider" class="com.incuventure.cqrs.infrastructure.StandardTokenProvider"/>
+    <!--This provides the values for the select boxes-->
+    <bean id="SelectBoxDataProvider" class="com.ucpb.tfs.infrastructure.query.ReflectionSelectBoxDataProvider"/>
+
+    <!-- Beans for RBAC testing -->
+    <bean id="authorityRepository" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernateAuthorityRepository"/>
+    <bean id="authorityTypeRepository" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernateAuthorityTypeRepository"/>
+    <bean id="authorizationRepository" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernateAuthorizationRepository"/>
+
+    <bean id="permissionFactory" class="com.ipc.rbac.domain.PermissionFactory"/>
+    <bean id="permissionRepositoryPermission" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernatePermissionRepository"/>
+    <bean id="roleFactory" class="com.ipc.rbac.domain.RoleFactory"/>
+    <bean id="roleRepository" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernateRoleRepository"/>
+    <bean id="userFactory" class="com.ipc.rbac.domain.UserFactory"/>
+    <bean id="userRepositoryUser" class="com.ipc.rbac.domain.infrastructure.repositories.hibernate.HibernateUserRepository"/>
+    <bean id="authorization" class="com.ipc.rbac.domain.AuthorizationFactory"/>
+
+    <bean id="serviceInstructionFactory" class="com.ucpb.tfs.domain.instruction.infrastructure.factories.ServiceInstructionFactoryImpl"/>
+    <bean id="serviceInstructionRepository" class="com.ucpb.tfs.domain.instruction.infrastructure.repositories.hibernate.HibernateServiceInstructionRepository"/>
+
+    <!-- this is incorrectly spelled, only used by memory repo -->
+    <bean id="tradeServiceChargeRespository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.TradeServiceChargeMemoryRepository"/>
+
+    <bean id="tradeProductRepository" class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateTradeProductRepository"/>
+
+    <bean id="tradeServiceRepository" class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+
+    <bean id="productReferenceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateProductReferenceRepository"/>
+    <bean id="tradeServiceChargeReferenceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateTradeServiceChargeReferenceRepository"/>
+
+    <bean id="paymentRepository" class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernatePaymentRepository"/>
+   
+    <bean id="settlementAccountRepository" class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateSettlementAccountRepository"/>
+    <bean id="marginalDepositRepository" class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateMarginalDepositRepository"/>
+    <bean id="accountsPayableRepository" class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateAccountsPayableRepository"/>
+    <bean id="accountsReceivableRepository" class="com.ucpb.tfs.domain.settlementaccount.infrastructure.repositories.hibernate.HibernateAccountsReceivableRepository"/>
+
+    <bean id="userRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateUserRepository"/>
+    <bean id="objectRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateObjectRepository"/>
+    <bean id="permissionRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernatePermissionRepository"/>
+    <bean id="employeeRepository" class="com.ucpb.tfs.domain.security.infrastructure.repositories.hibernate.HibernateEmployeeRepository"/>
+
+    <bean id="lcNegotiationRepository" class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateLCNegotiationRepository"/>
+
+    <bean id="transactionLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateTransactionLogRepository"/>
+    <bean id="customerAccountLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCustomerAccountLogRepository"/>
+    <bean id="accountLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateAccountLogRepository"/>
+    <bean id="remarksRepository" class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRemarksRepository"/>
+
+    <bean id="valueHolderRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateValueHolderRepository" />
+    <bean id="mtMessageRepository" class="com.ucpb.tfs.domain.mtmessage.infrastructure.repositories.hibernate.HibernateMtMessageRepository"/>
+
+    <!-- Services -->
+    <bean id="chargesService" class="com.ucpb.tfs.application.service.ChargesService"/>
+    <bean id="chargeLookup" class="com.ucpb.tfs.application.bootstrap.ChargesLookup"/>
+    <bean id="accountingLookup" class="com.ucpb.tfs.application.bootstrap.AccountingLookup"/>
+    <bean id="accountingService" class="com.ucpb.tfs.application.service.AccountingService"/>
+
+    <!-- this one is for CQRS rest with MyBatis-Spring -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <!-- <property name="mapperLocations" value="classpath*:/mybatis/mapping/rbac/*.xml"/> -->
+        <property name="mapperLocations" value="classpath*:/mybatis/mapping/**/*.xml"/>
+    </bean>
+
+    <bean id="finderComponentScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--<property name="basePackage" value="com.incuventure.tests.queries"/>-->
+        <!--<property name="sqlSessionFactory" ref="sqlSessionFactory"/>-->
+        <!-- <property name="basePackage" value="com.ipc.rbac.application.rest" /> -->
+        <property name="basePackage" value="com.ipc.rbac.application.query,com.ucpb.tfs.application.query.instruction,com.ucpb.tfs.application.query.task,com.ucpb.tfs.application.query.service"/>
+        <!-- <property name="basePackage" value="com.ucpb.tfs.application.rest.instruction" /> -->
+        <!--<property name="basePackage" value="com"/>-->
+    </bean>
+
+    <context:component-scan base-package="com.ipc.rbac.application.command"></context:component-scan>
+    <context:component-scan base-package="com.ipc.rbac.application.commandhandler"></context:component-scan>
+
+
+    <context:component-scan base-package="com.ucpb.tfs.application.command.instruction"></context:component-scan>
+    <context:component-scan base-package="com.ucpb.tfs.application.commandHandler"></context:component-scan>
+
+
+    <bean id="sharedTransactionTemplate"
+         class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!-- This will scan our bootstrap application context listeners-->
+    <context:component-scan base-package="com.ucpb.tfs.application.bootstrap"></context:component-scan>
+    <bean id="chargesLookup" class="com.ucpb.tfs.application.bootstrap.ChargesLookup"/>
+
+    <!--
+    <context:component-scan base-package="com.incuventure.tests.commands"></context:component-scan>
+    <context:component-scan base-package="com.incuventure.tests.events"></context:component-scan>
+    -->
+
+    <bean id="mapper" class="org.dozer.DozerBeanMapper">
+        <property name="mappingFiles">
+            <list>
+                <value>dozer/routing.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <context:annotation-config/>
+
+</beans>

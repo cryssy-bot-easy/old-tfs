@@ -1,0 +1,29 @@
+--- pom.xml
++++ pom.xml
+@@ -52,7 +52,7 @@
+                             <dependency>
+                                 <groupId>com.ibm.db2.jcc</groupId>
+                                 <artifactId>jcc4</artifactId>
+-                                <version>4.13.127</version>
++                                <version>4.25.13</version>
+                             </dependency>
+                         </dependencies>
+                         <!--<executions>-->
+@@ -105,7 +105,7 @@
+                             <dependency>
+                                 <groupId>com.ibm.db2.jcc</groupId>
+                                 <artifactId>jcc4</artifactId>
+-                                <version>4.13.127</version>
++                                <version>4.25.13</version>
+                             </dependency>
+                         </dependencies>
+                         <!--<executions>-->
+@@ -537,7 +537,7 @@
+        	<dependency>
+               <groupId>com.ibm.db2.jcc</groupId>
+               <artifactId>jcc4</artifactId>
+-              <version>4.13.127</version>
++              <version>4.25.13</version>
+         </dependency>
+ 
+ <!--        <dependency>

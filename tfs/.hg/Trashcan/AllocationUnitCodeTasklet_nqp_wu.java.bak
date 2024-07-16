@@ -1,0 +1,294 @@
+package com.ucpb.tfs.core.batch.process.allocationUnitCode;
+
+import com.google.gson.Gson;
+import com.ucpb.tfs.application.service.AllocationUnitCodeService;
+import com.ucpb.tfs.batch.allocationUnitCode.SibsAllocationUnitCodeRecord;
+import com.ucpb.tfs.batch.report.dw.dao.SilverlakeDao;
+import com.ucpb.tfs.core.batch.process.allocationUnitCode.dao.AllocationUnitCodeDao;
+import com.ucpb.tfs.domain.payment.casa.parser.exception.InvalidAccountNumberFormatException;
+import com.ucpb.tfs.interfaces.gateway.CasaResponse;
+import com.ucpb.tfs.interfaces.services.ServiceException;
+import com.ucpb.tfs.interfaces.services.exception.MessageTimeoutException;
+import com.ucpb.tfs2.application.service.casa.exception.CasaServiceException;
+
+import org.jfree.util.Log;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * User: IPCVal
+ */
+ 
+ 
+ /*	PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: 20150820-072
+	SCR/ER Description: To catch duplication in CIF, write in a file named CIFList.txt all CIF to update.
+	[Revised by:] Jesse James Joson
+	[Date revised:] 10/13/2015
+	Program [Revision] Details: Create a text file to see what CIF number failed to update.
+	PROJECT: CORE
+	MEMBER TYPE  : JAVA
+	Project Name: AllocationUnitCodeTasklet
+
+ */
+
+/*	PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: 20151020-067
+	SCR/ER Description: Failed in UI due to catching of error for removeLogin().
+	[Revised by:] Jesse James Joson
+	[Date revised:] 11/11/2015
+	Program [Revision] Details: Remove the try catch, and made the program stop if error was encounter
+	PROJECT: CORE
+	MEMBER TYPE  : JAVA
+	Project Name: AllocationUnitCodeTasklet
+
+ */
+ 
+ /** PROLOGUE:
+ * 	(revision)
+	SCR/ER Number: ER# 20180614-030
+	SCR/ER Description: Update Allocation Unit Code module of TFS bactch encountered FAILED message during execution.
+	[Revised by:] Jesse James Joson
+	[Date revised:] 7/13/2018
+	Program [Revision] Details: Handle the return of the select on SIBS if Null or multiple records on LNPAN4.
+	PROJECT: CORE
+	MEMBER TYPE  : JAVA
+	Project Name: AllocationUnitCodeTasklet
+
+ */
+
+/** PROLOGUE:
+* 	(revision)
+	SCR/ER Number: 
+	SCR/ER Description: 172 Segment Linux Migration
+	[Revised by:] Raymund Mallonga
+	[Date revised:] 10/30/2019
+	Program [Revision] Details: Remove unused import com.ibm.db2.jcc.am.io that is is causing error when compiled using
+	the new db2 driver.
+	PROJECT: CORE
+	MEMBER TYPE  : JAVA
+	Project Name: AllocationUnitCodeTasklet
+
+*/
+
+ 
+public class AllocationUnitCodeTasklet implements Tasklet {
+
+	private String directory = "/opt/tfs/INTERFACE_FILES/CIFList.txt";
+	
+    // Two database connections: one for SIBS, one for TFS
+    private SilverlakeDao silverlakeDao;
+    private AllocationUnitCodeDao allocationUnitCodeDao;
+
+	@Autowired
+    private AllocationUnitCodeService allocationUnitCode;
+	
+    public void setSilverlakeDao(SilverlakeDao silverlakeDao) {
+        this.silverlakeDao = silverlakeDao;
+    }
+
+    public void setAllocationUnitCodeDao(AllocationUnitCodeDao allocationUnitCodeDao) {
+        this.allocationUnitCodeDao = allocationUnitCodeDao;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
+    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
+		
+        // Below is the most optimized way in getting data from a database (SIBS) then using this data to update
+        // another database (TFS). If you have a more optimized version please let me know.
+
+        // Use MyBatis for convenience because we won't be loading everything.
+        // Also rolls back in the same connection.
+
+        Map<String, Object> params = chunkContext.getStepContext().getJobParameters();
+        String jobParamCifNumber = params.get("cifNumber") != null ? params.get("cifNumber").toString() : null;
+        System.out.println("job param id = " + params.get("idUnique"));
+        System.out.println("job param cifNumber = " + jobParamCifNumber);
+
+        Gson gson = new Gson();
+
+        // Get all active, distinct CIF Numbers first from TFS
+
+        List<TfsAllocationUnitCodeRecord> tfsAllocationUnitCodeRecords = allocationUnitCodeDao.getAllActiveDistinctCifNumbers(jobParamCifNumber);
+        System.out.println("\ntfsAllocationUnitCodeRecords.size() = " + tfsAllocationUnitCodeRecords.size() + "\n");
+
+        // Process each
+		PrintWriter writer = null;
+    	String toPrint;
+    	File file = new File(directory);
+		file.createNewFile();
+    	
+    	writer = new PrintWriter(new FileWriter(file));
+        //int i = 0;
+        for (TfsAllocationUnitCodeRecord tfsAllocationUnitCodeRecord : tfsAllocationUnitCodeRecords) {
+			toPrint = "";
+			
+			
+            String cifNumber = tfsAllocationUnitCodeRecord.getCifNumber();
+
+			toPrint = cifNumber;
+			
+            /*
+             * For each cifNumber:
+             * 1. Get other details from SIBS
+             * 2. Update TradeProduct for each Product (subclasses of TradeProduct)
+             * 3. Update TradeService
+             * 4. Update ServiceInstruction of TradeService
+             *
+             * UPDATE 9/23/2014 - As per discussion with Ma'am Juliet, we will not anymore update pending transactions,
+             *                    so only do steps 1 and 2 above. But the code for steps 3 and 4 will be retained but
+             *                    commented-out for reference.
+             */
+
+			
+			// Print CIF number First.
+			System.out.println("====CIF to process: " + cifNumber + " - " + new Date() + " ====");
+			
+			
+
+            // 1. Get other details from SIBS
+		
+			List<SibsAllocationUnitCodeRecord> sibsAllocationUnitCodeRecords = null;
+			SibsAllocationUnitCodeRecord sibsAllocationUnitCodeRecord = null;
+			 
+
+								
+			int selfTimer = 0;	
+			boolean tryConn = true;
+			Log.debug("Connecting to SIBS...");
+			
+	
+			try{		     
+				sibsAllocationUnitCodeRecords = silverlakeDao.getSibsAllocationUnitCodeDetails(cifNumber);
+				if(sibsAllocationUnitCodeRecords == null || sibsAllocationUnitCodeRecords.size() == 0 ||
+						sibsAllocationUnitCodeRecords.size()>1){
+					System.out.println("CIF doesnt comply with requirements: " + cifNumber);
+					continue;
+				} else if (sibsAllocationUnitCodeRecords.size() == 1) {
+					sibsAllocationUnitCodeRecord = sibsAllocationUnitCodeRecords.get(0);
+				}
+
+			}catch(Exception e) {					  
+				throw new IllegalArgumentException("UNABLE TO CONNECT TO SIBS");
+
+			}
+			if (sibsAllocationUnitCodeRecord != null) {
+        
+				String branchUnitCode = (sibsAllocationUnitCodeRecord.getBranchUnitCode() != null) ? sibsAllocationUnitCodeRecord.getBranchUnitCode().trim() : null;
+				String allocationUnitCode = (sibsAllocationUnitCodeRecord.getAllocationUnitCode() != null) ? sibsAllocationUnitCodeRecord.getAllocationUnitCode().trim() : null;
+				String officerCode = (sibsAllocationUnitCodeRecord.getOfficerCode() != null) ? sibsAllocationUnitCodeRecord.getOfficerCode().trim() : null;
+				String officerName = (sibsAllocationUnitCodeRecord.getOfficerName() != null) ? sibsAllocationUnitCodeRecord.getOfficerName().trim() : null;
+				String errorCode = (sibsAllocationUnitCodeRecord.getErrorCode() != null) ? sibsAllocationUnitCodeRecord.getErrorCode().trim() : null;
+
+				System.out.print("cifNumber = " + cifNumber + ", ");
+				System.out.print("branchUnitCode = " + branchUnitCode + ", ");
+				System.out.print("allocationUnitCode = " + allocationUnitCode + ", ");
+				System.out.print("officerCode = " + officerCode + ", ");
+				System.out.print("officerName = " + officerName + ", ");
+				System.out.print("errorCode = " + errorCode + "\n");
+
+				// If exception / error code is C1, it means the CIF is not found in SIBS, so skip processing for this CIF
+				if (errorCode.equals("C1")) {
+					System.out.println("Exception code is C1: CIF " + cifNumber + " not found in SIBS. Skipping processing for this CIF...\n");
+					continue;
+				}
+
+				tfsAllocationUnitCodeRecord.setBranchUnitCode(branchUnitCode);
+				tfsAllocationUnitCodeRecord.setAllocationUnitCode(allocationUnitCode);
+				tfsAllocationUnitCodeRecord.setOfficerCode(officerCode);
+				tfsAllocationUnitCodeRecord.setOfficerName(officerName);
+				tfsAllocationUnitCodeRecord.setErrorCode(errorCode);
+
+
+				// 2. Update TradeProduct for each Product (subclasses of TradeProduct)
+
+				// LC
+				int updatedLc = allocationUnitCodeDao.updateTradeProductLc(tfsAllocationUnitCodeRecord);
+				System.out.println("LC records updated = " + updatedLc);
+
+				// Indemnity
+				int updatedIndemnity = allocationUnitCodeDao.updateTradeProductIndemnity(tfsAllocationUnitCodeRecord);
+				System.out.println("Indemnity records updated = " + updatedIndemnity);
+
+				// Non-LC
+				int updatedNonLc = allocationUnitCodeDao.updateTradeProductNonLc(tfsAllocationUnitCodeRecord);
+				System.out.println("Non-LC records updated = " + updatedNonLc);
+
+				// Export Advising
+				int updatedExportAdvising = allocationUnitCodeDao.updateTradeProductExportAdvising(tfsAllocationUnitCodeRecord);
+				System.out.println("Export Advising records updated = " + updatedExportAdvising);
+
+				// Export Bills
+				int updatedExportBills = allocationUnitCodeDao.updateTradeProductExportBills(tfsAllocationUnitCodeRecord);
+				System.out.println("Export Bills records updated = " + updatedExportBills);
+
+				// Import Advance Payment
+				int updatedIAdv = allocationUnitCodeDao.updateTradeProductImportAdvancePayment(tfsAllocationUnitCodeRecord);
+				System.out.println("Import Advance Payment records updated = " + updatedIAdv);
+
+				// Export Advance Payment
+				int updatedEAdv = allocationUnitCodeDao.updateTradeProductExportAdvancePayment(tfsAllocationUnitCodeRecord);
+				System.out.println("Export Advance Payment records updated = " + updatedEAdv);
+
+				// MD
+				int updatedMarginalDeposit = allocationUnitCodeDao.updateMarginalDeposit(tfsAllocationUnitCodeRecord);
+				System.out.println("MD records updated = " + updatedMarginalDeposit);
+
+				// AP
+				int updatedAccountsPayable = allocationUnitCodeDao.updateAccountsPayable(tfsAllocationUnitCodeRecord);
+				System.out.println("AP records updated = " + updatedAccountsPayable);
+
+				// AR
+				int updatedAccountsReceivable = allocationUnitCodeDao.updateAccountsReceivable(tfsAllocationUnitCodeRecord);
+				System.out.println("AR records updated = " + updatedAccountsReceivable);
+
+				/* This should not be included because this comes after-the-fact
+	            // Rebate
+	            int updatedRebate = allocationUnitCodeDao.updateRebate(tfsAllocationUnitCodeRecord);
+	            System.out.println("Rebate records updated = " + updatedRebate);
+				 */
+
+				// RefPas5Client
+				int updatedRefPas5client = allocationUnitCodeDao.updateRefPas5Client(tfsAllocationUnitCodeRecord);
+				System.out.println("RefPas5Client records updated = " + updatedRefPas5client + "\n");
+
+				toPrint = toPrint + ",SUCCESS";
+
+			} else {
+				toPrint = toPrint + ",FAILED";
+			}
+
+			writer.print(toPrint);
+
+			StringBuilder sb = new StringBuilder();
+			sb.append((char)13);
+			sb.append((char)10);
+			String crlf = sb.toString();
+
+			writer.print(crlf);
+			writer.flush();
+		}
+
+		writer.close();
+		writer.flush();
+
+		return RepeatStatus.FINISHED;
+	}
+}

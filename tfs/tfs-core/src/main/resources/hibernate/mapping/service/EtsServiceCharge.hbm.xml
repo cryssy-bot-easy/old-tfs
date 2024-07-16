@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.service.EtsServiceCharge" table="EtsServiceCharge">
+
+        <id column="id" name="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <component name="chargeId" class="com.ucpb.tfs.domain.reference.ChargeId">
+            <property name="chargeId" column="chargeId" type="string" length="20"/>
+        </component>
+
+        <!-- amount is assumed as PESO -->
+        <property name="amount" column="amount" type="java.math.BigDecimal" />
+        <property name="originalAmount" column="originalAmount" type="java.math.BigDecimal" />
+
+        <property name="defaultAmount" column="defaultAmount" type="java.math.BigDecimal" />
+        <property name="defaultPesoAmount" column="defaultPesoAmount" type="java.math.BigDecimal" />
+        <property name="nocwtAmount" column="nocwtAmount" type="java.math.BigDecimal" />
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3"/>
+        <property name="originalCurrency" column="originalCurrency" type="java.util.Currency" length="3"/>
+        <property name="overridenFlag" column="overridenFlag" type="string" length="1"/>
+
+
+    </class>
+
+</hibernate-mapping>

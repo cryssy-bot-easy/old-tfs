@@ -1,0 +1,104 @@
+CREATE OR REPLACE PROCEDURE REROUTE_TRADESERVICE (IN  P_DOC_NUM VARCHAR(50),
+                                                  IN  P_TARGET_USER VARCHAR(20),
+                                                  OUT P_RETVAL INTEGER,
+                                                  OUT P_MESSAGE VARCHAR(2000))
+P1: BEGIN
+    -- #######################################################################
+    -- # Returns count of tables created by TFSDB2C and like VARNAME
+    ---# Return Values: 0 - Success with patch.
+    -- #                1 - Fail. Unhandled Error.
+    -- #                2 - Parameter Exception
+    -- #######################################################################
+    DECLARE SQLSTATE CHAR(5) DEFAULT '00000';
+    DECLARE SQLCODE INT DEFAULT 0;
+    DECLARE V_MESSAGE VARCHAR(2000);
+    DECLARE v_ts_id ANCHOR DATA TYPE TO TRADESERVICE.TRADESERVICEID;
+    DECLARE v_row_cnt INTEGER DEFAULT 0;
+    DECLARE v_routes_max BIGINT;
+    DECLARE v_diff_user CHAR(1) DEFAULT 'Y';
+    DECLARE v_timestamp TIMESTAMP;
+    DECLARE c_missing_params CONDITION FOR SQLSTATE '7I002';
+    DECLARE c_record_not_updated CONDITION FOR SQLSTATE '7I004';
+    DECLARE EXIT HANDLER FOR c_record_not_updated
+        ROLLBACK;
+    DECLARE EXIT HANDLER FOR c_missing_params
+    	BEGIN
+        SET P_RETVAL  = 2;
+        END;
+   	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+        SET P_RETVAL  = 1;
+        GET DIAGNOSTICS EXCEPTION 1 P_MESSAGE = MESSAGE_TEXT;
+        ROLLBACK;
+        END;       
+
+    SET P_MESSAGE = 'No record(s) processed';
+    IF P_DOC_NUM IS NULL 
+    OR P_TARGET_USER IS NULL THEN
+        SET P_MESSAGE = 'Provide complete input parameters.';
+        SIGNAL c_missing_params;
+    END IF;
+
+    
+    IF NOT EXISTS (SELECT 1 FROM SEC_EMPLOYEE WHERE UPPER(ID) = UPPER(P_TARGET_USER)) THEN
+        SET P_MESSAGE = 'Approver ID ' ||UPPER(P_TARGET_USER)|| ' does not exist.';
+        SIGNAL c_missing_params;
+    END IF;
+    
+    SET v_timestamp = CURRENT TIMESTAMP;
+    
+    SET v_row_cnt = (SELECT COUNT(*)  FROM TRADESERVICE 
+                   WHERE STATUS IN ('PREPARED','CHECKED') 
+                   AND TRIM(DOCUMENTNUMBER) = TRIM(P_DOC_NUM));
+    
+    IF EXISTS (SELECT 1 FROM TRADESERVICE WHERE STATUS IN ('PREPARED','CHECKED') 
+                   AND TRIM(DOCUMENTNUMBER) = TRIM(P_DOC_NUM)
+                        AND UPPER(USERACTIVEDIRECTORYID) = UPPER(P_TARGET_USER) 
+                        AND USERACTIVEDIRECTORYID != 'NA') THEN
+        SET P_MESSAGE = 'Approver ID '||UPPER(P_TARGET_USER)||' is already updated.';
+        SIGNAL c_missing_params;
+    END IF;
+    
+
+    IF v_row_cnt = 0 then
+        SET P_MESSAGE = 'Doc No. '||P_DOC_NUM||' does not exist.';
+        SIGNAL c_missing_params;
+    ELSE
+    
+      FOR v1 AS
+      c1 CURSOR FOR
+        SELECT TRADESERVICEID
+        FROM TRADESERVICE WHERE TRIM(DOCUMENTNUMBER) = TRIM(P_DOC_NUM)
+        AND  STATUS IN ('PREPARED','CHECKED') DO
+        
+		UPDATE TRADESERVICE
+		SET USERACTIVEDIRECTORYID = UPPER(P_TARGET_USER)
+		, MODIFIEDDATE = v_timestamp
+		WHERE TRADESERVICEID = v1.TRADESERVICEID;
+		
+       -- IF v_row_cnt = 0 THEN
+         --   SET P_MESSAGE = 'Trade Service Table not updated.';
+          --  SET P_RETVAL  = 1;
+          --  SIGNAL c_record_not_updated;
+        --END IF;
+		
+		UPDATE TASK 
+		SET TASKOWNER  = UPPER(P_TARGET_USER) 
+		, MODIFIEDDATE = v_timestamp
+		WHERE TASKSTATUS IN ('PREPARED','CHECKED') 
+		AND TASKREFERENCENUMBER = v1.TRADESERVICEID;
+		    
+		SET v_routes_max = (SELECT MAX(ID) FROM ROUTES WHERE ROUTINGINFORMATIONID = v1.TRADESERVICEID);
+    	--- note verify if this needs to re-route to very first record/status or just
+    	--  reroute the most recent record.
+    	UPDATE ROUTES
+    	SET RECEIVERACTIVEDIRECTORYID = UPPER(P_TARGET_USER)
+    	  , DATESENT = v_timestamp
+    	WHERE ID = v_routes_max;
+    	
+        END FOR;
+    
+        SET P_RETVAL = 0;
+        SET P_MESSAGE = 'Document No. '||P_DOC_NUM||' re-routed to '||P_TARGET_USER;
+    END IF;
+END P1

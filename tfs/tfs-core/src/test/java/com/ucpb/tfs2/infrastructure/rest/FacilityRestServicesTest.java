@@ -1,0 +1,230 @@
+package com.ucpb.tfs2.infrastructure.rest;
+
+import com.google.gson.Gson;
+import com.ucpb.tfs.domain.instruction.ServiceInstruction;
+import com.ucpb.tfs.domain.instruction.ServiceInstructionId;
+import com.ucpb.tfs.domain.instruction.ServiceInstructionRepository;
+import com.ucpb.tfs.domain.service.TradeService;
+import com.ucpb.tfs.domain.service.TradeServiceId;
+import com.ucpb.tfs.domain.service.TradeServiceRepository;
+import com.ucpb.tfs.interfaces.domain.Facility;
+import com.ucpb.tfs.interfaces.services.FacilityService;
+import com.ucpb.tfs.interfaces.services.RatesService;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+
+/**
+ */
+@RunWith(MockitoJUnitRunner.class)
+public class FacilityRestServicesTest {
+
+    @MockitoAnnotations.Mock
+    private TradeServiceRepository tradeServiceRepository;
+
+    @MockitoAnnotations.Mock
+    private FacilityService facilityService;
+
+    @MockitoAnnotations.Mock
+    private RatesService ratesService;
+
+    @MockitoAnnotations.Mock
+    private ServiceInstructionRepository serviceInstructionRepository;
+
+    @InjectMocks
+    private FacilityRestServices facilityRestServices;
+
+    private TradeService tradeService;
+
+    private ServiceInstruction ets;
+
+    private static final Gson GSON = new Gson();
+
+
+    @Before
+    public void setup(){
+        tradeService = mock(TradeService.class);
+    }
+
+
+    @Test
+    public void successfullyInsertBalanceQueryForValidEts(){
+        ets = mock(ServiceInstruction.class);
+        Map<String,Object> details = new HashMap<String,Object>();
+        details.put("mainCifNumber","MAIN");
+        details.put("facilityId","1");
+        details.put("facilityType","FCN");
+        when(ets.getDetails()).thenReturn(details);
+
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'etsNumber':'etsNumber'}";
+
+
+//        when(tradeServiceRepository.load(new TradeServiceId("tradeServiceId"))).thenReturn(tradeService);
+        when(serviceInstructionRepository.load(new ServiceInstructionId("etsNumber"))).thenReturn(ets);
+        when(facilityService.insertFacilityBalanceQuery(any(Facility.class))).thenReturn(Long.valueOf(100));
+
+
+        Response response = facilityRestServices.insertFacilityBalanceQuery(allUri, postRequestBody);
+
+        verify(facilityService).insertFacilityBalanceQuery(any(Facility.class));
+
+        assertEquals(200, response.getStatus());
+        System.out.println(response.getEntity().toString());
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("success",responseData.get("status"));
+        assertEquals(Double.valueOf("100"),responseData.get("transactionSequenceNumber"));
+    }
+
+    @Test
+    public void successfullyRetrieveBalanceUsingValidTransactionSequenceNumber(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','etsNumber':'etsNumber'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","Y");
+        facility.put("FACILITY_BALANCE",new BigDecimal("99999999.12"));
+        facility.put("CURRENCY","PHP");
+
+        when(tradeService.getProductChargeCurrency()).thenReturn(Currency.getInstance("HKD"));
+        when(tradeService.getProductChargeAmount()).thenReturn(new BigDecimal("1213141"));
+        when(tradeServiceRepository.load(new ServiceInstructionId("etsNumber"))).thenReturn(tradeService);
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+        when(ratesService.getConversionRateByType("HKD","PHP",3)).thenReturn(new BigDecimal("7.21"));
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("success",responseData.get("status"));
+        assertEquals("99999999.12",responseData.get("balance").toString());
+        assertEquals("true",responseData.get("isBalanceSufficient").toString());
+    }
+
+    @Test
+    public void balanceSufficientIfEqualToTransactionAmount(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','tradeServiceId':'TRADE-SERVICE-ID'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","Y");
+        facility.put("FACILITY_BALANCE",new BigDecimal("99999999.99"));
+        facility.put("CURRENCY","PHP");
+
+        when(tradeService.getProductChargeCurrency()).thenReturn(Currency.getInstance("HKD"));
+        when(tradeService.getProductChargeAmount()).thenReturn(new BigDecimal("1.11"));
+        when(tradeServiceRepository.load(new TradeServiceId("TRADE-SERVICE-ID"))).thenReturn(tradeService);
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+        when(ratesService.getConversionRateByType("HKD","PHP",3)).thenReturn(new BigDecimal("9"));
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("success",responseData.get("status"));
+        assertEquals("99999999.99",responseData.get("balance").toString());
+        assertEquals("true",responseData.get("isBalanceSufficient").toString());
+    }
+
+    @Test
+    public void doNotConvertIfProductCurrencyIsEqualToFacilityCurrency(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','tradeServiceId':'TRADE-SERVICE-ID'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","Y");
+        facility.put("FACILITY_BALANCE",new BigDecimal("99999999.99"));
+        facility.put("CURRENCY","HKD");
+
+        when(tradeService.getProductChargeCurrency()).thenReturn(Currency.getInstance("HKD"));
+        when(tradeService.getProductChargeAmount()).thenReturn(new BigDecimal("99999999999999"));
+        when(tradeServiceRepository.load(new TradeServiceId("TRADE-SERVICE-ID"))).thenReturn(tradeService);
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+
+        verify(ratesService,never()).getConversionRateByType(anyString(),anyString(),anyInt());
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("success",responseData.get("status"));
+        assertEquals("99999999.99",responseData.get("balance").toString());
+        assertEquals("false",responseData.get("isBalanceSufficient").toString());
+    }
+
+    @Test
+    public void balanceInsufficientAfterConversion(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','tradeServiceId':'TRADE-SERVICE-ID'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","Y");
+        facility.put("FACILITY_BALANCE",new BigDecimal("1.12"));
+        facility.put("CURRENCY","PHP");
+
+        when(tradeService.getProductChargeCurrency()).thenReturn(Currency.getInstance("HKD"));
+        when(tradeService.getProductChargeAmount()).thenReturn(new BigDecimal("1213141"));
+        when(tradeServiceRepository.load(new TradeServiceId("TRADE-SERVICE-ID"))).thenReturn(tradeService);
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+        when(ratesService.getConversionRateByType("HKD","PHP",3)).thenReturn(new BigDecimal("7.21"));
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("success",responseData.get("status"));
+        assertEquals("1.12",responseData.get("balance").toString());
+        assertEquals("false",responseData.get("isBalanceSufficient").toString());
+    }
+
+    @Test
+    public void returnPendingStatusForEmptySibsResponse(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','tradeServiceId':'TRADESERVICEID'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","");
+
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("pending",responseData.get("status"));
+    }
+
+
+    @Test
+    public void returnRejectedStatusForUnknownStatusCode(){
+        UriInfo allUri = mock(UriInfo.class);
+        String postRequestBody = "{'transactionSequenceNumber':'121','tradeServiceId' : 'TRADE SERVICE ID'}";
+
+        Map<String,Object> facility = new HashMap<String,Object>();
+        facility.put("REQUEST_STATUS","UNKNOWN");
+
+        when(facilityService.getFacilityBalance(121L)).thenReturn(facility);
+
+        Response response = facilityRestServices.getFacilityBalance(allUri,postRequestBody);
+
+        Map<String,Object> responseData = GSON.fromJson(response.getEntity().toString(),Map.class);
+        assertEquals("rejected",responseData.get("status"));
+    }
+
+
+
+}

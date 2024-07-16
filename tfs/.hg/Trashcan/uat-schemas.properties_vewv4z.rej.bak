@@ -1,0 +1,62 @@
+--- uat-schemas.properties
++++ uat-schemas.properties
+@@ -3,9 +3,9 @@
+ #cfmast=UCDATUBWC2
+ #facility=UCDATULNS2
+ #loan=UCDATULNS2
+-rates=UCPARUCMN
++rates=TFSDB2S
+ #officers=UCPARUCMN2
+ #ccbdbranch=UCPARUCMN2
+ #gl=UCDATUGLD2
+ #cifAccount=UCDATURBK2
+ 
+@@ -7,15 +7,15 @@
+ #officers=UCPARUCMN2
+ #ccbdbranch=UCPARUCMN2
+ #gl=UCDATUGLD2
+ #cifAccount=UCDATURBK2
+ 
+-cif=UCDATUBWC1
+-account=UCDATUBWC2
+-cfmast=UCDATUBWC1
+-facility=UCDATULNS1
+-loan=UCDATULNS1
+-officers=UCPARUCMN1
+-ccbdbranch=UCPARUCMN1
+-gl=UCDATUGLD1
+-cifAccount=UCDATURBK1
++cif=TFSDB2S
++account=TFSDB2S
++cfmast=TFSDB2S
++facility=TFSDB2S
++loan=TFSDB2S
++officers=TFSDB2S
++ccbdbranch=TFSDB2S
++gl=TFSDB2S
++cifAccount=TFSDB2S
+ 
+@@ -21,3 +21,3 @@
+ 
+-dailyrates=JHFXDTTF
++dailyrates=TFSDB2S
+ #dailyrates=JHFXDT
+@@ -23,7 +23,7 @@
+ #dailyrates=JHFXDT
+-historicalrates=JHYXDTTF
+-ratenames=JHFXPRTF
+-rateunknown=JHFXRTTF
++historicalrates=JHYXDT
++ratenames=JHFXPR
++rateunknown=JHFXRT
+ 
+ 
+ #sibs=UCENVUCMN6
+@@ -27,4 +27,4 @@
+ 
+ 
+ #sibs=UCENVUCMN6
+-sibs=UCENVUCMN1
+\ No newline at end of file
++sibs=UCENVUCMN7
+\ No newline at end of file

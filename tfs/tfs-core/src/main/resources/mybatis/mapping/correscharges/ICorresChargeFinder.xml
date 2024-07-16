@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query2.CorresChargeFinder">
+
+    <select id="findCorresCharges" resultType="hashMap">
+        select
+            cc.documentNumber,
+            tp.cifName,
+            cc.lastPaidDate,
+            cc.outstandingBalance
+        from corresChargeAdvance cc
+        join tradeProduct tp
+            on cc.documentNumber = tp.documentNumber
+        <if test="documentNumber != ''">
+            where cc.documentNumber = #{documentNumber}
+        </if>
+    </select>
+
+    <select id="findCorresChargeByDocumentNumber" resultType="hashMap">
+        select
+          ts.cifNumber,
+          ts.cifName,
+          ts.accountOfficer,
+          ts.ccbdBranchUnitCode,
+          cc.documentNumber,
+          cc.outstandingBalance
+          from
+            TradeService ts
+
+          inner join
+              CorresCharge cc
+          on
+              cc.documentNumber = ts.documentNumber
+          where
+              cc.documentNumber = #{documentNumber}
+    </select>
+
+</mapper>

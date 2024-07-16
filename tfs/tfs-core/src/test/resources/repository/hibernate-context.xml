@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <jdbc:embedded-database id="dataSource" type="DERBY">
+        <!--<jdbc:script location="classpath:ddl/create-document-number-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-rbac-user-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-service-instruction-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-routing-info-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-trade-service-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-transaction-log-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-account-log-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-reference-number-sequence.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-swiftmessage-log-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-ref-corresbank-table.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/insert-corres-bank-data.sql"/>-->
+        <!--<jdbc:script location="classpath:ddl/create-casa-transactionlog-table.sql"/>-->
+    </jdbc:embedded-database>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="mySessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:hibernate/mapping/instruction</value>
+                <value>classpath:hibernate/mapping/payment</value>
+                <value>classpath:hibernate/mapping/product</value>
+                <value>classpath:hibernate/mapping/rbac</value>
+                <value>classpath:hibernate/mapping/reference</value>
+                <value>classpath:hibernate/mapping/service</value>
+                <value>classpath:hibernate/mapping/settlementaccount</value>
+                <value>classpath:hibernate/mapping/task</value>
+                <value>classpath:hibernate/mapping/routing</value>
+                <value>classpath:hibernate/mapping/security</value>
+                <value>classpath:hibernate/mapping/audit</value>
+                <value>classpath:hibernate/mapping/swift</value>
+                <value>classpath:hibernate/mapping/accounting</value>
+                <value>classpath:hibernate/mapping/mtmessage</value>
+                <value>classpath:hibernate/mapping/documents</value>
+                <value>classpath:hibernate/mapping/reimbursing</value>
+                <value>classpath:hibernate/mapping/condition</value>
+                <value>classpath:hibernate/mapping/corresCharges</value>
+                <value>classpath:hibernate/mapping/letter</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <!-- <prop key="hibernate.dialect">org.hibernate.dialect.DB2Dialect</prop> -->
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</prop>-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">jta</prop>-->
+                <!--<prop key="infrastructure.repositories.hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <!--<prop key="infrastructure.repositories.hibernate.cache.provider_class">org.infrastructure.repositories.hibernate.cache.NoCacheProvider</prop>-->
+            </props>
+        </property>
+    </bean>
+
+
+    <!-- Transaction management -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mySessionFactory"/>
+    </bean>
+
+    <bean id="auditLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateTransactionLogRepository"/>
+    <bean id="tradeProductRepository" class="com.ucpb.tfs.domain.product.infrastructure.repositories.hibernate.HibernateTradeProductRepository"/>
+    <bean id="accountLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateAccountLogRepository"/>
+    <bean id="routingInformationRepository" class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRoutingInformationRepository"/>
+    <bean id="serviceInstructionRepository" class="com.ucpb.tfs.domain.instruction.infrastructure.repositories.hibernate.HibernateServiceInstructionRepository"/>
+    <bean id="remarksRepository" class="com.ucpb.tfs.domain.routing.infrastructure.repositories.hibernate.HibernateRemarksRepository"/>
+    <bean id="customerAccountLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCustomerAccountLogRepository"/>
+    <bean id="tradeServiceRepository" class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateTradeServiceRepository"/>
+    <bean id="paymentRepository" class="com.ucpb.tfs.domain.payment.infrastructure.repositories.hibernate.HibernatePaymentRepository"/>
+    <bean id="dailyBalanceRepository" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateDailyBalanceRepository"/>
+
+    <bean id="correspondentBankRepositoryTest" class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateCorrespondentBankRepository"/>
+
+    <bean id="casaTransactionLogRepository" class="com.ucpb.tfs.domain.audit.infrastructure.repositories.HibernateCasaTransactionLogRepository"/>
+
+    <bean id="chargeDefaultsReferenceRepository"
+          class="com.ucpb.tfs.domain.reference.infrastructure.repositories.hibernate.HibernateChargeDefaultsReferenceRepository"/>
+    <bean id="chargesParameterRepository" class="com.ucpb.tfs.domain.service.infrastructure.repositories.hibernate.HibernateChargesParameterRepository"/>
+
+
+</beans>

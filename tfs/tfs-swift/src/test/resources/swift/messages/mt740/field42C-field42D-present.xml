@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:mt740 xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/swift-message"
+           xmlns:ns3="http://www.ucpb.com.ph/tfs/schemas/mt7series"
+           type="740">
+   <ns2:basic_header>
+      <ns2:application_identifier>F</ns2:application_identifier>
+      <ns2:service_identifier>01</ns2:service_identifier>
+      <ns2:lt_identifier>UCPBPHM0AXXX</ns2:lt_identifier>
+      <ns2:session_number>0000</ns2:session_number>
+      <ns2:sequence_number>000000</ns2:sequence_number>
+   </ns2:basic_header>
+   <ns2:application_header>
+      <ns2:io_identifier>I</ns2:io_identifier>
+      <ns2:message_type>740</ns2:message_type>
+      <ns2:receiver_address>
+         <ns2:bank_identifier_code>ADBNCNBJ</ns2:bank_identifier_code>
+         <ns2:branch_code>UYL</ns2:branch_code>
+      </ns2:receiver_address>
+      <ns2:message_priority>N</ns2:message_priority>
+   </ns2:application_header>
+   <field20 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">90901113000012</field20>
+   <field25 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">2000191131873</field25>
+   <field40F xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">UCP</field40F>
+   <field31D xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">130313 IN 30</field31D>
+   <field59 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">COTABATO TIMBERLAND 2281 PASONG TAMO EXT.
+MAKATI, M.M.</field59>
+   <field32B xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">USD111111111,</field32B>
+   <field39A xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">10/10</field39A>
+   <field39C xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">546897465</field39C>
+   <field41D xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">AMRONL2A BY PAYMENT</field41D>
+   <field42C xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">ASDF</field42C>
+   <field42D xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">AGRICULTURAL DEVELOPMENT BANK OF CHINA, THE</field42D>
+   <field72 xmlns="http://www.ucpb.com.ph/tfs/schemas/mt7series">PPO</field72>
+</ns3:mt740>

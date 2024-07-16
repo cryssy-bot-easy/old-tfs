@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:SwiftMessage xmlns:ns2="http://www.ucpb.com.ph/tfs/schemas/swift-message">
+    <ns2:basic_header>
+        <ns2:application_identifier>F</ns2:application_identifier>
+        <ns2:service_identifier>01</ns2:service_identifier>
+        <ns2:lt_identifier>UCPBPHMOAXXX</ns2:lt_identifier>
+        <ns2:session_number>0000</ns2:session_number>
+        <ns2:sequence_number>000000</ns2:sequence_number>
+    </ns2:basic_header>
+    <ns2:application_header>
+        <ns2:io_identifier>I</ns2:io_identifier>
+        <ns2:message_type>202</ns2:message_type>
+        <ns2:receiver_address>
+            <ns2:bank_identifier_code>ASBAXASA</ns2:bank_identifier_code>
+            <ns2:branch_code>XXX</ns2:branch_code>
+        </ns2:receiver_address>
+        <ns2:message_priority>S</ns2:message_priority>
+        <ns2:delivery_monitoring>1</ns2:delivery_monitoring>
+        <ns2:obsolescence_period>003</ns2:obsolescence_period>
+    </ns2:application_header>
+</ns2:SwiftMessage>

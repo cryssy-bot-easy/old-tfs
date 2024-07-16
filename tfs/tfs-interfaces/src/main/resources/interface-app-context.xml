@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<import resource="classpath*:services.xml"/>
+    <import resource="classpath*:amla-config.xml"/>
+    <import resource="classpath*:parser-config.xml"/>
+
+
+    <!--    <jdbc:embedded-database id="tfsDataSource" type="HSQL"> -->
+<!--    		<jdbc:script location="classpath:ddl/tfsipcd/create-transaction-sequence.sql"/> -->
+<!--    </jdbc:embedded-database> -->
+    <!--<bean id="applicationProperties" class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">-->
+        <!--<description>-->
+            <!--This property configuration bean is given an ID, so that service contexts-->
+            <!--can use it for any property values that need to be defined.-->
+        <!--</description>-->
+        <!--<property name="location" value="classpath:interface-application.properties" />-->
+    <!--</bean>-->
+
+</beans>

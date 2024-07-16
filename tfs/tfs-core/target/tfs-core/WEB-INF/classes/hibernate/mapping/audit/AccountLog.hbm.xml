@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.audit.AccountLog" table="AccountLog">
+    	<id column="id" type="java.lang.Long" name="id">
+	       <generator class="increment" />
+    	</id>
+
+        <component name="tradeServiceId" class="com.ucpb.tfs.domain.service.TradeServiceId">
+            <property name="tradeServiceId" column="tradeServiceId" type="string" length="36"/>
+        </component>
+
+        <property name="dateCreated" column="date_created"/>
+
+        <property name="accountNumber" column="accountNumber"/>
+        <property name="accountType" column="accountType"/>
+        <property name="initialDeposit" column="initialDeposit" type="java.math.BigDecimal"/>
+
+        <property name="accountPurpose" column="accountPurpose"/>
+
+        <property name="monthlyEstimatedTransactionCount" column="monthlyEstimatedTransactionCount" type="java.lang.Integer"/>
+        <property name="monthlyEstimatedTransactionVolume" column="monthlyEstimatedTransactionVolume" type="java.lang.Integer"/>
+
+		<property name="transactionTypes" column="transactionTypes" />
+		
+		<property name="branchCode" column="branchCode"/>
+	    <property name="openingDate" column="openingDate" type="java.util.Date"/>
+        <property name="closingDate" column="closingDate" type="java.util.Date"/>
+        <property name="riskScore" column="riskScore"/> 
+        <property name="accountBalance" column="accountBalance" type="java.math.BigDecimal"/>
+   		<property name="applicationCode" column="applicationCode" />
+        <property name="status" column="status"/>
+   		<property name="accountCurrency" column="accountCurrency" />
+   		<property name="payRollTag" column="payRollTag" />
+
+        <property name="accountTag" column="accountTag" type="string" length="3"/>
+		
+		<property name="batchFlag" column="batchFlag" type="integer"/>
+    </class>
+
+
+
+</hibernate-mapping>

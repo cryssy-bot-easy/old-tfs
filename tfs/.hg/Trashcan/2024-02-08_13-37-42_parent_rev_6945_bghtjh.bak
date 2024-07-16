@@ -1,0 +1,12 @@
+diff --git a/tfs-batch/src/config/uat-schemas.properties b/tfs-batch/src/config/uat-schemas.properties
+--- a/tfs-batch/src/config/uat-schemas.properties
++++ b/tfs-batch/src/config/uat-schemas.properties
+@@ -13,7 +13,7 @@
+ facility=UCDATULNS1
+ loan=UCDATULNS1
+ officers=UCPARUCMN1
+-gl=UCDATUGLD1
++gl=TFSDB2S
+ 
+ dailyrates=JHFXDTTF
+ #dailyrates=JHFXDT

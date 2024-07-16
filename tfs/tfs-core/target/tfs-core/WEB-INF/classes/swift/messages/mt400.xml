@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt400Mapper">
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+        <entry value="21" key="details.get('remittingBankReferenceNumber')"/>
+        <!-- the spaces are intentionally inserted for the tag 32A mapping. this is to prevent
+            the duplication of the hashmap keys (the spel) -->
+        <entry value="32A" key=" T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('processDate'),details?.get('currency'),details?.get('productAmount')) "/>
+        <entry value="33A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('processDate'),details?.get('currency'),details?.get('productAmount'))"/>
+        <entry value="52A" key="details?.get('orderingBankFlagMt400') == 'A' ? details?.get('bankIdentifierCodeMt400') : ''"/>
+        <entry value="52D" key="details?.get('orderingBankFlagMt400') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('bankNameAndAddressMt400')) : ''"/>
+        <entry value="53A" key="details?.get('sendersCorrespondentFlagMt400') == 'A' ? details?.get('senderIdentifierCodeMt400') : ''"/>
+        <entry value="53B" key="details?.get('sendersCorrespondentFlagMt400') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).appendSwiftStartingPrefix(details?.get('senderLocationMt400')) : ''"/>
+        <entry value="53D" key="details?.get('sendersCorrespondentFlagMt400') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('senderNameAndAddressMt400')) : ''"/>
+        <entry value="54A" key="details?.get('receiversCorrespondentFlagMt400') == 'A' ? details?.get('receiverIdentifierCodeMt400') : ''"/>
+        <entry value="54B" key="details?.get('receiversCorrespondentFlagMt400') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiver400PartyIdentifierMt400'),details?.get('receiverLocationMt400')) : ''"/>
+        <entry value="54D" key="details?.get('receiversCorrespondentFlagMt400') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('receiverNameAndAddressMt400')) : ''"/>
+        <entry value="57A" key="details?.get('accountWithBankFlagMt400') == 'A' ? details?.get('accountIdentifierCodeMt400') : ''"/>
+        <entry value="57D" key="details?.get('accountWithBankFlagMt400') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('accountNameAndAddressMt400')) : ''"/>
+        <entry value="58A" key="details?.get('beneficiaryBankFlagMt400') == 'A' ? details?.get('beneficiaryIdentifierCodeMt400') : ''"/>
+        <entry value="58B" key="details?.get('beneficiaryBankFlagMt400') == 'B' ? T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',details?.get('beneficiaryBankLocationMt400')) : ''"/>
+        <entry value="58D" key="details?.get('beneficiaryBankFlagMt400') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('beneficiaryNameAndAddressMt400')) : ''"/>
+        <entry value="71B" key="T(com.ucpb.tfs.util.SwiftUtil).formatDetailsOfAmount(
+        details?.get('detailsOfChargesDescriptionMt400'),
+        details?.get('detailsOfChargesCurrencyMt400'),
+        details?.get('detailsOfChargesTextFieldMt400'),
+        details?.get('detailsOfChargesTextAreaMt400')
+        )"/>
+        <entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiverMt400'),details?.get('senderToReceiverInformationMt400'))"/>
+        <entry value="73" key="T(com.ucpb.tfs.util.SwiftUtil).formatDetailsOfAmount(
+        details?.get('detailsOfAmountDescriptionMt400'),
+        details?.get('detailsOfAmountCurrencyMt400'),
+        details?.get('detailsOfAmountTextFieldMt400'),
+        details?.get('detailsOfAmountTextAreaMt400')
+        )"/>
+    </util:map>
+</beans>

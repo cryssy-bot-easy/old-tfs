@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+   PROLOGUE:
+   (revision)
+   SCR/ER Number:  
+   SCR/ER Description:
+   [Revised by:] Cedrick Nungay
+   [Date Revised:] 12/13/2017
+   Program [Revision] Details: Removed + 1 on 26E
+   PROJECT: tfs-core
+   MEMBER TYPE  : xml
+   Project Name: mt767.xml
+ -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt767Mapper">
+        <entry value="27" key="'1/1'"/>
+        <entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+        <entry value="21" key="details?.get('receiversReference') ?: 'NONREF'"/>
+        <entry value="23" key="details?.get('furtherIdentification')"/>
+        <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details?.get('amendmentDate'))"/>
+        <entry value="26E" key="(T(java.lang.Integer).parseInt(details.get('numberOfAmendments') ?: 0)).toString()"/>
+        <entry value="31C" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate(details.get('issueDate'))"/>
+        <entry value="77C" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65,(details?.get('narrative') ?: details?.get('detailsOfGuaranteeDisplay')))"/>
+        <entry value="72" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details.get('senderToReceiverTo'),details.get('senderToReceiverInformationTo'))"/>
+    </util:map>
+</beans>

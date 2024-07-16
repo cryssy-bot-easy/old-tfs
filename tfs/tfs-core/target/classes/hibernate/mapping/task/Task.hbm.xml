@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.task.Task" table="Task">
+
+        <composite-id name="taskReferenceNumber" access="field">
+            <key-property name="taskReferenceNumber" column="taskReferenceNumber" type="string" length="50"/>
+        </composite-id>
+
+        <property name="taskReferenceType" column="taskReferenceType" length="10">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.task.enumTypes.TaskReferenceType</param>
+            </type>
+        </property>
+
+        <property name="taskStatus" column="taskStatus" length="15">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.task.enumTypes.TaskStatus</param>
+            </type>
+        </property>
+
+        <component name="userActiveDirectoryId" class="com.ipc.rbac.domain.UserActiveDirectoryId">
+            <property name="userActiveDirectoryId" column="taskowner" length="20"/>
+        </component>
+
+        <property name="unitCode" type="string" length="3"/>
+
+        <property name="createdDate" type="java.util.Date" />
+
+        <property name="modifiedDate" type="java.util.Date" />
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  ER# 20161129-122
+	SCR/ER Description: Routed to tempo ID
+	[Revised by:] Jesse James Joson
+	[Date Deployed:] 12/20/2016
+	Program [Revision] Details: Disregard suspended IDs in the routing dropdown
+	PROJECT: CORE
+	MEMBER TYPE  : xml
+	Project Name: IRoutingInformationFinder
+ -->
+
+
+<mapper namespace="com.ucpb.tfs.application.query.routing.IRoutingInformationFinder">
+
+    <!--<select id="findRoutesByRoutingInformationId" resultType="hashMap">-->
+        <!--select * from Routes routes-->
+        <!--where routes.routingInformationId = #{routingInformationId}-->
+    <!--</select>-->
+
+    <select id="findRoutesByRoutingInformationId" resultType="hashMap">
+    select
+        info.routinginformationid,
+        routes.id,
+        routes.senderactivedirectoryid,
+        routes.receiveractivedirectoryid,
+        routes.datesent,
+        routes.status,
+        (select
+            -- se.firstname || ' ' || se.lastname
+            (case
+             when (se.firstname is null or length(se.firstname) = 0)
+             then se.lastname
+             else se.lastname || ' ' || se.firstname
+             end
+            )
+         from sec_employee se where se.id=routes.receiveractivedirectoryid
+        ) as receivername,
+        (select
+            -- se.firstname || ' ' || se.lastname
+            (case
+             when (se.firstname is null or length(se.firstname) = 0)
+             then se.lastname
+             else se.lastname || ' ' || se.firstname
+             end
+            )
+         from sec_employee se where se.id=routes.senderactivedirectoryid
+        ) as sendername
+    from RoutingInformation info
+    inner join Routes routes
+    on routes.routingInformationId = info.routingInformationId
+    where info.routingInformationId = #{routingInformationId}
+    and routes.status not in ('PENDING','MARV')
+    order by routes.datesent
+    </select>
+	
+    <!--<select id="findNextRouteTarget" resultType="hashMap">-->
+        <!--select e.id, e.lastname || ', ' || e.firstname as ename, e.limit, e.level from sec_employee e, sec_user_roles ur-->
+        <!--where e.id = ur.userid-->
+        <!--and roleid = #{roleId}-->
+        <!--and unitcode = #{unitCode}-->
+        <!--<if test="unitCode == '909'">-->
+        	<!--order by level asc-->
+        <!--</if>-->
+    <!--</select>-->
+
+    <select id="findNextRouteTarget" resultType="hashMap">
+        select
+            distinct e.id,
+            (case
+             when (e.firstname is null or length(e.firstname) = 0)
+             then e.lastname
+             else e.lastname || ', ' || e.firstname
+             end
+            ) as ename,
+            e.limit,
+            e.level
+        from sec_employee e, sec_user_roles ur, sec_role r
+        where e.id = ur.userid and ur.roleid = r.id
+        and (r.id = #{roleId} or r.parent = #{roleId})
+        and unitcode = #{unitCode}
+        and e.suspended = '0'               <!-- Fix for ER# 20161129-122 -->
+        <if test="unitCode == '909'">
+            order by level asc
+        </if>
+    </select>
+
+    <select id="findProductServiceRoute" resultType="hashMap">
+        select p.productid, r.servicetype, r.route from refproduct p, refroutes r
+          where p.documentclass = 'LC'
+          and p.documenttype = 'FOREIGN'
+          and p.documentsubtype1 = 'CASH'
+          and p.documentsubtype2 = 'SIGHT'
+          and p.PRODUCTID = r.productid
+          and r.grp = 'BRANCH'
+          and r.servicetype = 'OPENING'
+    </select>
+
+    <select id="findRoutableTo" resultType="hashMap">
+        select p.productid, r.servicetype, r.route from refproduct p, refroutes r
+          where p.documentclass = 'LC'
+          and p.documenttype = 'FOREIGN'
+          and p.documentsubtype1 = 'CASH'
+          and p.documentsubtype2 = 'SIGHT'
+          and p.PRODUCTID = r.productid
+          and r.grp = 'BRANCH'
+          and r.servicetype = 'OPENING'
+    </select>
+
+    <select id="getProductServiceAttributes" resultType="hashMap">
+          select p.productid, ps.servicetype, ps.financial, ps.reqbranchapproval, ps.postapprovalrequirement from refproductservice ps, refproduct p
+          where p.documentclass = #{documentClass}
+          <if test="documentType != ''">
+            and p.documenttype = #{documentType}
+          </if>
+          <if test="documentType == ''">
+              and p.documenttype is null
+          </if>
+          <if test="documentSubType1 != ''">
+            and p.documentsubtype1 = #{documentSubType1}
+          </if>
+          <if test="documentSubType1 == ''">
+            and p.documentsubtype1 is null
+          </if>
+          <if test="documentSubType2 != ''">
+            and p.documentsubtype2 = #{documentSubType2}
+          </if>
+          <if test="documentSubType2 == ''">
+            and p.documentsubtype2 is null
+          </if>
+          and p.PRODUCTID = ps.productid
+          and ps.servicetype = #{serviceType}
+    </select>
+
+    <select id="getUser" resultType="hashMap">
+        select * from sec_employee where lcase(id) = lcase(#{username})
+          and unitcode = #{unitCode}
+    </select>
+
+    <!--<select id="getAllTsdMakers" resultType="hashMap">-->
+        <!--SELECT-->
+          <!--EMPS.ID,-->
+          <!--EMPS.LASTNAME,-->
+          <!--EMPS.FIRSTNAME,-->
+          <!--ROLES.ROLEID-->
+         <!--FROM SEC_EMPLOYEE EMPS-->
+          <!--INNER JOIN-->
+            <!--SEC_USER_ROLES ROLES ON EMPS.ID = ROLES.USERID WHERE ROLES.ROLEID = 'TSDM'-->
+    <!--</select>-->
+
+    <select id="getAllTsdMakers" resultType="hashMap">
+        SELECT
+            EMPS.ID,
+            EMPS.LASTNAME,
+            EMPS.FIRSTNAME,
+            UR.ROLEID
+          FROM SEC_EMPLOYEE EMPS
+            INNER JOIN
+            SEC_USER_ROLES UR ON EMPS.ID = UR.USERID
+            INNER JOIN
+            SEC_ROLE R ON UR.ROLEID = R.ID
+            WHERE R.ID = 'TSDM' OR R.PARENT = 'TSDM'
+    </select>
+
+	<select id="getHigherUserHierarchySize" resultType="hashMap">
+		SELECT
+			EMPS.LEVEL
+		FROM SEC_EMPLOYEE EMPS
+		WHERE
+			EMPS.LEVEL > #{level}
+	</select>
+	
+	<select id="findNextBranchRouteTarget" resultType="hashMap">
+		<![CDATA[
+	        SELECT
+				DISTINCT E.ID,
+				(CASE WHEN (E.FIRSTNAME IS NULL OR LENGTH(E.FIRSTNAME) = 0) THEN E.LASTNAME ELSE E.LASTNAME || ', ' || E.FIRSTNAME END ) AS ENAME,
+				MIN(L.ROLE) ROLE,
+				MIN(L.LEVEL) LEVEL,
+				RO.GROUPNAME,
+				(CASE 
+				WHEN RO.UNITDESIGNATION = CURRENT_USER.UNITDESIGNATION THEN 1
+				ELSE 2
+				END) PRIORITY
+			FROM SEC_EMPLOYEE E,
+			SEC_USER_ROLES UR,
+			SEC_ROLE R,
+			SEC_ROUTING RO,
+			SEC_ROUTING_BRANCH_ROLE L,
+			(SELECT *
+			   FROM SEC_ROUTING_BRANCH_ROLE ROLE
+			   INNER JOIN SEC_ROUTING ROUTE ON ROLE.ROLE = ROUTE.ROLE
+			   WHERE UPPER(ROUTE.USERID) = UPPER(#{username})
+			) CURRENT_USER
+			WHERE E.ID = UR.USERID
+			AND UR.ROLEID = R.ID
+			AND UPPER(E.ID) = UPPER(RO.USERID)
+			AND RO.ROLE = L.ROLE
+			AND RO.GROUPNAME = CURRENT_USER.GROUPNAME
+			AND ((CURRENT_USER.LEVEL < 3 AND L.LEVEL > CURRENT_USER.LEVEL) OR (CURRENT_USER.LEVEL >= 3 AND L.LEVEL >= CURRENT_USER.LEVEL))
+			AND ((RO.UNITDESIGNATION = CURRENT_USER.UNITDESIGNATION AND L.LEVEL < 3) OR L.LEVEL >= 3)
+			GROUP BY E.ID, E.FIRSTNAME, E.LASTNAME, RO.GROUPNAME, RO.UNITDESIGNATION, CURRENT_USER.UNITDESIGNATION
+			ORDER BY PRIORITY, LEVEL ASC
+        ]]>
+    </select>
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:int-file="http://www.springframework.org/schema/integration/file"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/integration/file
+		http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <import resource="gateway-config.xml"/>
+
+    <bean id="CustomerInformationFileService" class="com.ucpb.tfs.interfaces.services.impl.CustomerInformationFileServiceImpl">
+		<property name="customerInformationFileRepository" ref="customerInformationFileRepository"/>
+	</bean>
+	
+	<bean id="RatesService" class="com.ucpb.tfs.interfaces.services.impl.RatesServiceImpl">
+		<property name="ratesRepository" ref="ratesRepository"/>
+	</bean>
+	
+	<bean id="FacilityService" class="com.ucpb.tfs.interfaces.services.impl.FacilityServiceImpl">
+		<property name="facilityRepository" ref="facilityRepository"/>
+        <property name="ratesRepository" ref="ratesRepository"/>
+	</bean>
+	
+	<bean id="LoanService" class="com.ucpb.tfs.interfaces.services.impl.LoanServiceImpl">
+		<property name="loanRepository" ref="loanRepository"/>
+	</bean>
+	
+    <bean id="CasaService" class="com.ucpb.tfs.interfaces.services.impl.CasaServiceImpl">
+        <constructor-arg name="casaGateway" ref="casaGateway"/>
+    </bean>
+
+
+    <int:channel id="swiftChannel"/>
+
+    <int-file:outbound-channel-adapter id="swiftMessageDirectory" directory="src/test/resources/swift/processed" delete-source-files="false" channel="swiftChannel"/>
+
+
+    <bean id="interfaceDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${interface.jdbc.driverClassName}" />
+        <property name="url" value="${interface.jdbc.url}" />
+        <property name="username" value="${interface.jdbc.username}" />
+        <property name="password" value="${interface.jdbc.password}" />
+    </bean>
+
+    <bean id="interfaceSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="interfaceDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+        <property name="databaseIdProvider" ref="databaseIdProvider"/>
+    </bean>
+
+    <bean id="customerInformationFileRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.CustomerInformationFileRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="facilityRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.FacilityRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="ratesRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.RatesRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="loanRepository" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.interfaces.repositories.LoanRepository" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+    
+     <bean class="com.ucpb.tfs.interfaces.util.DefaultDatabaseIdProvider" id="databaseIdProvider">
+    	<property name="properties">
+    		<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    			<property name="properties">
+    			<props>
+	    			<prop key="DB2">db2</prop>
+	    			<prop key="Apache Derby">derby</prop>
+	    			<prop key="DERBY">derby</prop>
+    			</props>
+    			</property>
+    		</bean>
+    	</property>
+    </bean>
+
+
+</beans>

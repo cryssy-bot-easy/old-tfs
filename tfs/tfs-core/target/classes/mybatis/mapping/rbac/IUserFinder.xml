@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ipc.rbac.application.query.user.IUserFinder">
+
+    <select id="findUser" resultType="hashMap" parameterType="int">
+      select * from RBAC_User where userActiveDirectoryId = #{userActiveDirectoryId}
+    </select>
+    
+	<select id="findAllUsersByActiveDirectoryUid" resultType="hashMap">
+      select * from RBAC_User where userActiveDirectoryId like #{userActiveDirectoryId}
+    </select>     
+    
+	<select id="findAllUsersByLastName" resultType="hashMap">
+      select * from RBAC_User where lastName like #{userLastName}
+    </select> 
+    
+    <select id="findAllUsers" resultType="hashMap">
+      select * from RBAC_User
+    </select>
+    
+</mapper>

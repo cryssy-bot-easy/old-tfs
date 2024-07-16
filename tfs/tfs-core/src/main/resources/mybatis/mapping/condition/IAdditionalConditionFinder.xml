@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--  Description:   Added findAllOriginalConditions and findAllConditions for MT707 -->
+<!--  Modified by:   Cedrick C. Nungay -->
+<!--  Date Modified: 09/03/2018 -->
+
+<mapper namespace="com.ucpb.tfs.application.query.condition.IAdditionalConditionFinder">
+    
+    <resultMap id="findAllAdditionalConditionsResultMap" type="hashmap">
+        <result property="CONDITION" column="condition" javaType="string" jdbcType="CLOB"/>
+    </resultMap>
+
+    <select id="findAllAdditionalConditions" resultMap="findAllAdditionalConditionsResultMap">
+        SELECT
+        CONDITION
+        FROM ADDITIONALCONDITION where tradeServiceId = #{tradeServiceId} 
+        ORDER BY SEQUENCENUMBER ASC
+    </select>
+
+    <select id="findAllAdditionalCondition" resultType="hashMap">
+        select id,
+          conditionCode,
+          conditionType,
+          cast(condition as varchar(10000)) as condition
+        from RefAdditionalCondition order by id
+    </select>
+
+    <select id="findAllSavedAdditionalCondition" resultType="hashMap">
+      select conditionCode, cast(condition as varchar(3000)) as condition from AdditionalCondition where tradeServiceId = #{tradeServiceId} and conditionType =
+      'DEFAULT' order by sequenceNumber asc
+    </select>
+
+    <select id="findAllDefaultAdditionalCondition" resultType="hashMap">
+        select
+                  ac.conditionCode,
+                  cast(ac.condition as varchar(7000)) as condition
+                from
+                  AdditionalCondition ac
+                where
+                  tradeServiceId = #{tradeServiceId}
+                and
+                  conditionType = 'DEFAULT'
+
+                union
+
+                select
+                  rac.conditionCode,
+                  cast(rac.condition as varchar(7000)) as condition
+                from
+                  RefAdditionalCondition rac
+                where
+                  rac.conditionCode not in(select
+                                            conditionCode
+                                          from
+                                            AdditionalCondition
+                                          where
+                                            tradeServiceId = #{tradeServiceId}
+                                          and
+                                            conditionType = 'DEFAULT')
+    </select>
+
+    <select id="findAllNewAdditionalCondition" resultType="hashMap">
+        select
+          id,
+          cast(condition as varchar(10000)) as condition
+        from
+          AdditionalCondition
+        where
+          tradeServiceId = #{tradeServiceId}
+        and
+          conditionType = 'NEW'
+          order by sequenceNumber asc
+    </select>
+
+    <select id="findAllOriginalConditions" resultType="hashMap">
+        select id,
+          conditionCode,
+          conditionType,
+          cast(condition as varchar(10000)) as condition
+        from LcAdditionalCondition
+        where documentNumber = #{documentNumber}
+        order by conditionCode
+    </select>
+
+    <select id="findAllConditions" resultType="hashMap">
+    	SELECT CONDITIONCODE, DESCRIPTION, AMENDCODE, CASE WHEN AMENDCODE = 'DELETE' AND ISFORMODIFY = 'Y' THEN 'Y' ELSE ISCHECKED END AS ISCHECKED, ISLCSAVED, ISNEW, ISFORMODIFY FROM (
+            SELECT A.CONDITIONCODE, CAST(COALESCE(B.CONDITION, A.CONDITION) AS VARCHAR(6500)) DESCRIPTION, 
+                CASE WHEN b.id is null then 'DELETE' else B.AMENDCODE end as AMENDCODE, 
+                CASE WHEN b.id is null or b.amendcode = 'DELETE' then 'N' else 'Y' end as isChecked,
+                'Y' isLcSaved, 'N' isNew, CASE WHEN (SELECT COUNT(*) FROM ADDITIONALCONDITION WHERE CONDITIONCODE = A.CONDITIONCODE AND TRADESERVICEID = #{tradeServiceId}) > 1 THEN 'Y' ELSE 'N' END AS isForModify
+            FROM (SELECT COALESCE(CONDITIONCODE, 'ACN-' || ROWNUM) CONDITIONCODE, CONDITION, CONDITIONTYPE, DOCUMENTNUMBER FROM LCADDITIONALCONDITION
+                WHERE DOCUMENTNUMBER = #{documentNumber} ORDER BY CONDITIONCODE, CAST(CONDITION AS VARCHAR(1000))) A
+            LEFT JOIN ADDITIONALCONDITION B ON (A.CONDITIONCODE = B.CONDITIONCODE or UCASE(A.CONDITION) = UCASE(B.CONDITION)) AND B.TRADESERVICEID = #{tradeServiceId}
+            UNION 
+            SELECT C.conditionCode,
+                cast(coalesce(D.condition, C.condition) as varchar(6500)) as description,
+                D.amendCode,
+                case when D.id is null then 'N' else 'Y' end as isChecked,
+                'N', 'N', CASE WHEN (SELECT COUNT(*) FROM ADDITIONALCONDITION WHERE CONDITIONCODE = C.CONDITIONCODE AND TRADESERVICEID = #{tradeServiceId}) > 1 THEN 'Y' ELSE 'N' END
+            FROM REFADDITIONALCONDITION C
+            LEFT JOIN ADDITIONALCONDITION D ON C.CONDITIONCODE = D.CONDITIONCODE AND D.TRADESERVICEID = #{tradeServiceId}
+            WHERE C.CONDITIONCODE NOT IN (SELECT CONDITIONCODE FROM LCADDITIONALCONDITION WHERE DOCUMENTNUMBER = #{documentNumber} AND CONDITIONCODE IS NOT NULL)
+            UNION
+            select
+                CONDITIONCODE, 
+                cast(condition as varchar(6500)) as description,
+                amendCode,
+                'Y',
+                'N', 'Y', 'N'
+            from ADDITIONALCONDITION E
+            where TRADESERVICEID = #{tradeServiceId} and CONDITIONCODE IS NULL
+            and UCASE(condition) not in (SELECT UCASE(CONDITION) FROM LCADDITIONALCONDITION WHERE DOCUMENTNUMBER = #{documentNumber}))
+        order by CONDITIONCODE, AMENDCODE
+    </select>
+
+    <select id="findDefaultConditions" resultType="hashMap">
+        SELECT * FROM (
+        SELECT COALESCE(CONDITIONCODE, 'RDN-' || ROWNUM) CONDITIONCODE, CAST(CONDITION AS VARCHAR(6500)) DESCRIPTION
+        FROM LCADDITIONALCONDITION
+        WHERE DOCUMENTNUMBER = #{documentNumber}
+        ORDER BY CONDITIONCODE, CAST(CONDITION AS VARCHAR(750)))
+        UNION ALL
+        SELECT CONDITIONCODE, CAST(CONDITION AS VARCHAR(6500)) DESCRIPTION
+        FROM REFADDITIONALCONDITION
+        WHERE CONDITIONCODE NOT IN (SELECT COALESCE(CONDITIONCODE, 'RDN-' || ROWNUM) CONDITIONCODE FROM LCADDITIONALCONDITION
+            WHERE DOCUMENTNUMBER = #{documentNumber} ORDER BY CONDITIONCODE, CAST(CONDITION AS VARCHAR(750)))
+        ORDER BY CONDITIONCODE
+    </select>
+
+</mapper>

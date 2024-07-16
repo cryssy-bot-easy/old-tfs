@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.reimbursing.IInstructionToBankFinder">
+
+    <select id="findAllDefaultInstructionToBank" resultType="hashMap">
+        select
+          itb.instructionToBankCode,
+          cast(itb.instruction as varchar(6500)) as instruction
+        from
+          InstructionToBank itb
+        where
+          itb.tradeServiceId = #{tradeServiceId}
+
+        union
+
+        select
+          ritb.instructionToBankCode,
+          cast(ritb.instruction as varchar(6500)) as instruction
+        from
+          RefInstructionToBank ritb
+        where
+          ritb.instructionToBankCode not in (select
+                                                instructionToBankCode
+                                             from
+                                                InstructionToBank
+                                             where
+                                                tradeServiceId = #{tradeServiceId})
+    </select>
+
+    <select id="findAllSavedInstructionToBank" resultType="hashMap">
+        select instructionToBankCode from InstructionToBank where tradeServiceId = #{tradeServiceId}
+    </select>
+
+    <select id="findAllSavedLcInstructionToBank" resultType="hashMap">
+        select instructionToBankCode from LcInstructionToBank where documentNumber = #{documentNumber}
+    </select>
+
+</mapper>

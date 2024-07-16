@@ -1,0 +1,30 @@
+CREATE TABLE "REF_TFCUSTMR"
+(
+   ID bigint PRIMARY KEY NOT NULL,
+   CB_CD varchar(10),
+   CL_SH_NAME varchar(20),
+   CL_ADDR_1 varchar(25),
+   CL_ADDR_2 varchar(25),
+   CL_ADDR_3 varchar(25),
+   CL_ADDR_4 varchar(25),
+   ACCT_TYP bigint,
+   ACCT_OFF_CD bigint,
+   MTD_EXP_AMT bigint,
+   YTD_EXP_AMT bigint,
+   EXPADV_BAL bigint,
+   REDCLS_ADV_BAL bigint,
+   EVAT_FLAG varchar(1),
+   RES_CLASS varchar(1),
+   CL_LO_NAME varchar(60),
+   CL_TYP bigint,
+   CL_BDAY timestamp,
+   CL_NO bigint,
+   CL_TAN varchar(15),
+   CBS_CIF_NO varchar(7),
+   UCPB_CIF_NO varchar(10),
+   CIF_SH_NAME varchar(20),
+   CIF_LO_NAME varchar(40),
+   CIF_LO_NAMEA varchar(40),
+   CIF_LO_NAMEB varchar(40)
+);
+

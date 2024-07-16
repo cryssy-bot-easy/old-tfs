@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.accounting.ChargeAccountingCode" table="RefChrgAccCode">
+
+        <id column="id" name="id" type="long">
+            <generator class="org.hibernate.id.IncrementGenerator"/>
+        </id>
+
+        <component name="productId" class="com.ucpb.tfs.domain.reference.ProductId" access="field">
+            <property name="productId" column="productId" type="string" length="50"/>
+        </component>
+
+        <component name="chargeId" class="com.ucpb.tfs.domain.reference.ChargeId" access="field">
+            <property name="chargeId" column="chargeId" type="string" length="30"/>
+        </component>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="accountingCode" column="accountingCode" type="string" length="50"/>
+    </class>
+
+</hibernate-mapping>

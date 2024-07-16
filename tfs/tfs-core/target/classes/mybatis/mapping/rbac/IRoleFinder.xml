@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ipc.rbac.application.query.role.IRoleFinder">
+
+	<select id="findRole" resultType="hashMap" parameterType="int">
+      select * from RBAC_AuthorityType where Type = 'ROLE' and id = #{roleId}
+    </select>
+
+	<select id="findAllPermissionsByRole" resultType="hashMap" parameterType="int">
+      select * from RBAC_AuthorityType where Type = 'PERMISSION' and roleId = #{roleId}
+    </select>
+    
+	<select id="findAllRolesByName" resultType="hashMap">
+      select * from RBAC_AuthorityType where Type = 'ROLE' and name like #{roleName}
+    </select>    
+    
+	<select id="findAllRoles" resultType="hashMap">
+      select * from RBAC_AuthorityType where Type = 'ROLE'
+    </select>
+
+</mapper>

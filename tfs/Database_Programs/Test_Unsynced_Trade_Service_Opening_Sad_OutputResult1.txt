@@ -1,0 +1,3 @@
+ REC_NO TRADESERVICEID                       DOCUMENTNUMBER        AFFECTEDTABLE OLDSTATUS SYNCHDATE             REMARKS                                                        LOGTYPE 
+ ------ ------------------------------------ --------------------- ------------- --------- --------------------- -------------------------------------------------------------- ------- 
+      1 dd7c3415-0357-4d81-b1c0-944f3ae004b9 909-04-220-16-00648-6 NULL          NULL      2020-02-19 00:00:00.0 Unable to synchronize tables. Modified date exceeds threshold. E      

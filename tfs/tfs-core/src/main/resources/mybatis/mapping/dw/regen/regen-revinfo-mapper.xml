@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.report.dw.regen.dao.RevInfoDao">
+
+    <resultMap id="revInfoResultMap" type="com.ucpb.tfs.report.dw.regen.RevInfo">
+        <id column="REV" property="rev" jdbcType="INTEGER" />
+        <result column="REVTSTMP" property="revtstmp" jdbcType="BIGINT" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        REV, REVTSTMP
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpb.tfs.report.dw.regen.RevInfo" >
+        insert into REVINFO (REVTSTMP)
+        values (#{revtstmp,jdbcType=BIGINT})
+    </insert>
+
+    <select id="selectMaxRev" resultType="java.lang.Integer">
+        select
+            MAX(REV)
+        from REVINFO
+    </select>
+
+</mapper>

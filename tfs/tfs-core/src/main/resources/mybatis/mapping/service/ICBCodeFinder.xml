@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.application.query.service.ICBCodeFinder">
+
+    <select id="findCbCodeFromCif" resultType="hashMap">
+    	SELECT
+    		CIF.CB_CD AS CBCODE
+    	FROM REF_TFCIFNOS CIF
+    	WHERE CIF.CIF_NO = #{cifNumber} 
+	</select>
+    
+</mapper>

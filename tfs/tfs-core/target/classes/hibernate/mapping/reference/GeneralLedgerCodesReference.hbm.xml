@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.GeneralLedgerCodesReference" table="GL_CODES">
+        <id column="id" name="id">
+            <generator class="increment"/>
+        </id>
+
+        <property name="productId" column="productId"/>
+
+        <property name="serviceType" column="serviceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.ServiceType</param>
+            </type>
+        </property>
+
+        <property name="documentType" column="documentType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentType</param>
+            </type>
+        </property>
+
+        <property name="documentClass" column="documentClass">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentClass</param>
+            </type>
+        </property>
+
+        <property name="documentSubType1" column="documentSubType1">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType1</param>
+            </type>
+        </property>
+
+        <property name="documentSubType2" column="documentSubType2">
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.service.enumTypes.DocumentSubType2</param>
+            </type>
+        </property>
+
+        <property name="productCode" column="product_code"/>
+        <property name="bookCode" column="book_code"/>
+        <property name="creditCode" column="credit_code"/>
+        <property name="debitCode" column="debit_code"/>
+    </class>
+
+</hibernate-mapping>

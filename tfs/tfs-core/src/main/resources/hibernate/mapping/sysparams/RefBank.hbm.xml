@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.sysparams.RefBank" table="REF_BANK">
+
+        <composite-id>
+            <key-property name="bic" column="BIC_CODE" type="string" length="10"/>
+            <key-property name="branchCode" column="BRANCH_CODE" type="string" length="3"/>
+        </composite-id>
+
+        <property name="institutionName" column="INSTITUTION_NAME" type="string" length="255"/>
+        <property name="branchInfo" column="BRANCH_INFO" type="string" length="255"/>
+        <property name="city" column="CITY" type="string" length="50"/>
+        <property name="address1" column="ADDRESS_1" type="string" length="100"/>
+        <property name="address2" column="ADDRESS_2" type="string" length="100"/>
+        <property name="address3" column="ADDRESS_3" type="string" length="100"/>
+        <property name="address4" column="ADDRESS_4" type="string" length="100"/>
+        <property name="location" column="LOCATION" type="string" length="100"/>
+
+        <property name="rmaFlag" column="RMA_FLAG" type="string" length="1"/>
+        <property name="depositoryFlag" column="DEPOSITORY_FLAG" type="string" length="1"/>
+
+        <property name="glBankCode" column="GL_BANK_CD" type="string" length="20"/>
+        <property name="rbuAccount" column="RBU_ACCOUNT" type="string" length="35"/>
+        <property name="fcduAccount" column="FCDU_ACCOUNT" type="string" length="35"/>
+        <property name="reimbursingCurrency" column="REIMBURSING_CURR" type="java.util.Currency" length="3"/>
+
+        <property name="updateDate" column="UPDATEDATE" type="java.util.Date"/>
+        <property name="updatedBy" column="UPDATEDBY" type="string" length="20"/>
+
+        <property name="glCodeRbu" column="GL_CODE_RBU" type="string" length="12"/>
+        <property name="glCodeFcdu" column="GL_CODE_FCDU" type="string" length="12"/>
+
+        <property name="cbCreditorCode" column="CB_CREDITOR_CODE" type="java.lang.Long" length="12"/>
+        <property name="deleteFlag" column="DELETEFLAG" type="string" length="1"/>
+    </class>
+</hibernate-mapping>

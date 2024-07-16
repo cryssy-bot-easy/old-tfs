@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reference.CorrespondentBank" table="REF_CORRESPONDENT_BANK">
+        <id column="id" name="id">
+            <generator class="increment"/>
+        </id>
+
+        <property name="bankCode" column="bankCode" length="13" type="java.lang.String"/>
+        <property name="currency" column="currency" length="3" type="java.util.Currency"/>
+        <property name="bankName" column="bankName" length="50" type="java.lang.String"/>
+        <property name="cbCreditorCode" column="cbCreditorCode" length="12" type="java.lang.String"/>
+        <property name="glBankCode" column="glBankCode" length="8" type="java.lang.String"/>
+        <property name="depositoryFlag" column="depositoryFlag" type="java.lang.String" length="1"/>
+        <property name="swiftFlag" column="swiftFlag" type="java.lang.String" length="1"/>
+        <property name="swiftBankCode" column="swiftBankCode" type="java.lang.String" length="13"/>
+        <property name="bankGroupCode" column="bankGroupCode" length="3" type="java.lang.String"/>
+        <property name="swiftBranchCode" column="swiftBranchCode" length="4" type="java.lang.String"/>
+        <property name="rbuAccount" column="rbuAccount" length="35" type="java.lang.String"/>
+        <property name="accountType" column="accountType" type="java.lang.Integer" length="2"/>
+        <property name="countryCode" column="countryCode" type="java.lang.Integer" length="3"/>
+        <property name="riskIndicator" column="riskIndicator" type="java.lang.Integer" length="1"/>
+        <property name="counterpartyType" column="counterpartyType" type="java.lang.Integer" length="2"/>
+        <property name="resEligibility" column="resEligibility" type="java.lang.Integer" length="1"/>
+        <property name="creditorCode" column="creditorCode" type="java.lang.Integer" length="12"/>
+    </class>
+
+</hibernate-mapping>

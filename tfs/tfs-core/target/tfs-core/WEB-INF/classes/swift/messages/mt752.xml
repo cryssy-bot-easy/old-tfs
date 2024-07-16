@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified by: Rafael Ski Poblete
+     Date: 9/11/18
+     Description: Removed field 39B,
+                  Changed field 71B to 71D,
+                  Changed field 72 to 72Z,
+                  Changed utility function used on field 53B,
+                  Added field 79Z -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt752Mapper">
+    	<entry value="20" key="details?.get('lcNumber') != null ? details?.get('lcNumber').replaceAll('-','') : documentNumber?.toString()?.replaceAll('-','')"/>
+     	<entry value="21" key="details?.get('negotiatingBanksReferenceNumberMt752') ?: details?.get('negotiatingBanksReferenceNumber') "/>
+     	<entry value="23" key="details?.get('furtherIdentificationMt752')"/>
+     	<entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatToSwiftDate((details?.get('valueDateMt752') ?: details?.get('processDate')))"/>
+     	<entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('negotiationCurrency'),(details?.get('negoAmountMt752') ?: details?.get('negotiationAmount')))"/>
+    	<entry value="71D" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmountWithNarrative(details?.get('negotiationCurrency'),(details?.get('discrepancyAmountMt752') ?: details?.get('discrepancyAmount')),details?.get('chargesDeductedNarrative'))"/>
+<!--    	<entry value="33A" key="details?.get('documentSubType2') == 'USANCE' ? (T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('netAmountDateMt752'),details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : ''"/>
+    	<entry value="33B" key="details?.get('documentSubType2') == 'SIGHT' ? (T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : ''"/>
+-->
+    	<entry value="33A" key="details?.get('serviceType') == 'Negotiation' ? (details?.get('netAmountOption') == 'OptionA' ? (T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('netAmountDateMt752'),details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : '') : 
+    							(details?.get('documentSubType2') == 'USANCE' ? (T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('netAmountDateMt752'),details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : '')"/>
+    	
+    	<entry value="33B" key="details?.get('serviceType') == 'Negotiation' ? (details?.get('netAmountOption') == 'OptionB' ? (T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : '') : 
+								(details?.get('documentSubType2') == 'SIGHT' ? (T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details?.get('negotiationCurrency'),(details?.get('netAmountMt752') ?: details?.get('netAmount')))) : '')"/>
+    	
+    	
+    	<entry value="53A" key="details?.get('sendersCorrespondentMt752') == 'A' ? details?.get('senderIdentifierCodeMt752') : '' "/>
+    	<entry value="53B" key="details?.get('sendersCorrespondentMt752') == 'B' ? (T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('senderPartyIdentifierMt752'),details?.get('senderLocationMt752'))) : '' "/>
+    	<entry value="53D" key="details?.get('sendersCorrespondentMt752') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('senderNameAndAddressMt752')) : '' "/>
+    	<entry value="54A" key="details?.get('receiversCorrespondentMt752') == 'A' ? details?.get('receiverIdentifierCodeMt752') : '' "/>
+    	<entry value="54B" key="details?.get('receiversCorrespondentMt752') == 'B' ? (T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation(details?.get('receiverPartyIdentifierMt752'),details?.get('receiverLocationMt752'))) : '' "/>
+    	<entry value="54D" key="details?.get('receiversCorrespondentMt752') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('receiverNameAndAddressMt752')) : '' "/>    	
+    	<entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    	<entry value="79Z" key="T(com.ucpb.tfs.util.SwiftUtil).limitInputString(50, details?.get('narrative'))"/>
+            	
+    </util:map>
+</beans>

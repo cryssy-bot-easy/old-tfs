@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified by: Rafael Ski Poblete
+     Date: 9/03/18
+     Description: Removed field 39B,
+                  Changed field 71B to 71D,
+                  Changed field 72 to 72Z, -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt740Mapper">
+    	<entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+    	<entry value="25" key="details.get('reimbursingBankAccountNumber')"/>
+    	<entry value="40F" key="details.get('out740flag') == 'Y' ? details.get('applicableRules') : 'URR LATEST VERSION'"/>
+    	<entry value="31D" key="details.get('out740flag') == 'Y' ? (details.get('expiryDate') != '' AND details.get('expiryDate') != '' ? T(com.ucpb.tfs.utils.SwiftFormatter).formatExpiryDatePlace(details.get('expiryDate'), details.get('expiryCountryLabel') ?: details.get('otherPlaceOfExpiry')) : '') : T(com.ucpb.tfs.utils.SwiftFormatter).formatExpiryDatePlace(details.get('expiryDate'), details.get('expiryCountryLabel'))"/>
+    	<entry value="58A" key="details.get('out740flag') == 'Y' ? details.get('negotiatingBank') : ''"/>
+<!-- ISSUE 3091 -->
+<!-- Begin -->
+<!-- Before -->
+<!--     	<entry value="59" key="T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('exporterName'),details?.get('exporterAddress'))"/> -->
+<!-- After -->
+    	<entry value="59" key="T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',details?.get('exporterName'),details?.get('exporterAddress'))"/>
+<!-- End -->    	
+    	<entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(details.get('currency'), details.get('amount'))"/>
+    	<entry value="39A" key="T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(details.get('positiveToleranceLimit'), details.get('negativeToleranceLimit'))"/>    	
+        <entry value="39C" key="details.get('additionalAmountsCovered')"/>
+        <entry value="41A" key="details.get('availableWithFlag') == 'A' ? T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('availableWith'),T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel(details?.get('availableBy')))  : ''"/>
+        <entry value="41D" key="details.get('availableWithFlag') == 'D' ?  T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(details?.get('nameAndAddress'),T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel(details?.get('availableBy'))) : ''"/>
+    	<entry value="42C" key="details.get('out740flag') == 'Y' ? details.get('tenorOfDraftNarrative') : ''"/>
+<!-- ISSUE 2772 -->
+<!-- Begin -->
+<!-- Before -->
+<!--         <entry value="42C" key="T(com.ucpb.tfs.util.SwiftUtil).formatTenorOfDraft(details?.get('usancePeriod'),details?.get('tenorOfDraftNarrative'))"/> -->
+<!-- After -->
+<entry value="42C" key="details.get('out740flag') == 'Y' ? '' : (details.get('tenor') == 'SIGHT' ? details?.get('tenor') : T(com.ucpb.tfs.util.SwiftUtil).formatTenorOfDraft(details?.get('usancePeriod'),details?.get('tenorOfDraftNarrative')))"/>
+<!-- End -->
+        <entry value="42A" key="details.get('out740flag') == 'Y' ? details.get('drawee') : (details.get('availableWithFlag') == 'A' or details.get('drawee') == 'TLBPPHMMXXX' ? (details.get('drawee') == 'TLBPPHMMXXX' ? 'TLBPPHMMXXX' : T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('availableWith')))  :  '' ) "/>
+        <entry value="42D" key="details.get('out740flag') == 'Y' ? '' : (details.get('availableWithFlag') == 'D' and details.get('drawee') != 'TLBPPHMMXXX' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('nameAndAddress'))   :  '' ) "/>
+        <entry value="42M" key="details.get('mixedPaymentDetails')"/>
+        <entry value="42P" key="details.get('deferredPaymentDetails')"/>
+        <entry value="71A" key="details.get('out740flag') == 'Y' ? details.get('reimbursingBankCharges') : (details.get('swiftNarrativeRadio') == 'NARRATIVE' ? (details.get('narrativeCharges').contains('APPLICANT') ? 'OUR' : 'CLM') : '')"/>
+        <entry value="71D" key="details.get('out740flag') == 'Y' ? details.get('otherCharges') : ''"/>
+        <entry value="71D" key="details.get('out740flag') == 'Y' ? '' : (details.get('swiftNarrativeRadio') == 'SWIFT' ? (swiftCharge != null ? T(com.ucpb.tfs.utils.SwiftFormatter).formatSwiftCharges(swiftCharge) : '') : '')"/>
+		<entry value="71D" key="details.get('out740flag') == 'Y' ? '' : (details.get('swiftNarrativeRadio') == 'NARRATIVE' ? (T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details?.get('narrative') ?: details?.get('additionalNarrative'))) : '')"/>
+        <entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    </util:map>
+</beans>

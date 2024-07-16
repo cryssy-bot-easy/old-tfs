@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.cdt.EmailNotif" table="EMAIL_NOTIF">
+    
+        <id name="id" column="ID" length="10" type="long">
+             <generator class="identity"/>
+        </id>
+        
+        <property name="iedieirdNumber" column="IEDIEIRDNO" type="string"/>
+
+        <property name="emailAddress" column="EMAIL_ADDRESS" type="string"/>
+
+        <property name="emailStatus" column="EMAIL_STATUS" type="string"/>
+
+        <property name="sentTime" column="SENT_TIME" type="java.util.Date" />
+        
+    </class>
+    
+
+</hibernate-mapping>

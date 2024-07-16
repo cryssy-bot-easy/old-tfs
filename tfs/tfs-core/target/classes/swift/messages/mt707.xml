@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Description:   Modified fields for new MT707 -->
+<!-- Modified by:   Cedrick C. Nungay -->
+<!-- Date Modified: 08/10/18 -->
+
+<!-- Modified by: Rafael Ski Poblete
+     Date: 9/19/18
+     Description: Added conditions to handle normal MT707 and Outgoing MT707 -->
+                  
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- TODO: field 52A-->
+    <util:map id="mt707Mapper">
+        <entry value="27" key="details.get('sequenceOrder')"/>
+        <entry value="20" key="documentNumber?.toString().replaceAll('-','')"/>
+        <entry value="21" key="details.get('receiversReference') ?: ''"/>
+        <entry value="23" key="details.get('out707flag') == '707O' ? details.get('issuingBankReference') : documentNumber?.toString().replaceAll('-','') "/>
+        <entry value="52A" key="'TLBPPHMM'"/> 
+        <entry value="31C" key="details.get('out707flag') == '707O' ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('dateOfIssue')) : T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('issueDate'))"/>
+        <entry value="26E" key="details.get('numberOfAmendments') ?: '0'"/>
+        <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('processDate'))"/>
+        <entry value="22A" key="details.get('purposeOfMessageSwitch') == 'off' ? details.get('purposeOfMessage') : details.get('purposeOfMessageSwitch') == 'on' ? details.get('purposeOfMessageTo') : (details.get('purposeOfMessageFrom') ?: '')"/>
+        <entry value="23S" key="details.get('cancellationRequest') ?: ''"/>
+        <entry value="40A" key="details.get('formOfDocumentaryCreditSwitch') == 'on' ? 
+            T(com.ucpb.tfs.swift.message.constants.FormOfDocumentaryCredit).getLabel(details.get('formOfDocumentaryCreditTo')) : ''"/>
+        <entry value="40E" key="details.get('applicableRulesSwitch') == 'on' ? 
+            T(com.ucpb.tfs.swift.message.constants.ApplicableRules).getLabel(details.get('applicableRulesTo')) : ''"/>
+        <entry value="31D" key="details.get('out707flag') == '707O' ? '' : details.get('expiryDateSwitch') == 'on' or details.get('expiryCountryCodeSwitch') or details.get('otherPlaceOfExpirySwitch') ? 
+            T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('expiryDateTo') ?: details.get('expiryDateFrom'))
+            + ' IN ' + (details.get('otherPlaceOfExpiryFrom') != '' or details.get('otherPlaceOfExpiryTo') != ''
+                ? (details.get('otherPlaceOfExpiryTo') ?: details.get('otherPlaceOfExpiryFrom'))
+                : (details.get('expiryCountryLabelTo') ?: details.get('expiryCountryName')))
+            : ''"/>
+        <entry value="50" key="(details.get('importerNameSwitch') == 'on') or (details.get('importerAddressSwitch') == 'on') ? 
+            T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',
+                (details.get('importerNameSwitch') == 'on' ? details.get('importerNameTo') : details.get('importerNameFrom')),
+                (details.get('importerAddressSwitch') == 'on' ? details.get('importerAddressTo') : details.get('importerAddressFrom')))
+            : ''"/>
+        <entry value="59" key="(details.get('exporterNameSwitch') == 'on') or (details.get('exporterAddressSwitch') == 'on') ? 
+            T(com.ucpb.tfs.util.SwiftUtil).formatSwiftLocation('',
+                (details.get('exporterNameSwitch') == 'on' ? details.get('exporterNameTo') : details.get('exporterNameFrom')),
+                (details.get('exporterAddressSwitch') == 'on' ? details.get('exporterAddressTo') : details.get('exporterAddressFrom')))
+            : ''"/>
+        <entry value="32B" key="details.get('amountSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountIncrease(details.get('currency'),(details.get('amountFrom') != '0' or details.get('amountFrom') != null ? details.get('amountFrom') : details.get('outstandingBalance')),details.get('amountTo')) : ''"/>
+        <entry value="33B" key="details.get('amountSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).getAmountDecrease(details.get('currency'),(details.get('amountFrom') != '0' or details.get('amountFrom') != null ? details.get('amountFrom') : details.get('outstandingBalance')),details.get('amountTo')) : ''"/>
+        <entry value="39A" key="details.get('positiveToleranceLimitSwitch') == 'on' or details.get('negativeToleranceLimitSwitch') == 'on' ?
+            T(com.ucpb.tfs.util.SwiftUtil).getAmountTolerance(details.get('positiveToleranceLimitTo') ?: details.get('positiveToleranceLimitFrom'), details.get('negativeToleranceLimitTo') ?: details.get('negativeToleranceLimitFrom')) : ''"/>
+        <entry value="39C" key="details.get('additionalAmountsCoveredSwitch') == 'on' ? details.get('additionalAmountsCoveredTo') : ''"/>
+        
+        <entry value="41A" key="(details.get('availableWithSwitch') == 'on' and details.get('availableWithFlagMt') == 'A') 
+            or (details.get('availableBySwitch') == 'on' and details.get('availableWithFlag') == 'A' and details.get('availableWithFlagMt') != 'D') ?
+            T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine((details.get('availableWithSwitch') == 'on' ?
+                details.get('availableWithTo') : details.get('availableWithFrom')),
+                T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel((details.get('availableBySwitch') == 'on' ?
+                    details.get('availableByTo') : details.get('availableBy'))))
+            : ''"/>
+        <entry value="41D" key="(details.get('availableWithSwitch') == 'on' and details.get('availableWithFlagMt') == 'D') 
+            or (details.get('availableBySwitch') == 'on' and details.get('availableWithFlag') == 'D' and details.get('availableWithFlagMt') != 'A') ?
+            T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine((details.get('availableWithSwitch') == 'on' ?
+                details.get('nameAndAddressTo') : details.get('nameAndAddressFrom')),
+                T(com.ucpb.tfs.swift.message.constants.AvailableBy).getLabel((details.get('availableBySwitch') == 'on' ?
+                    details.get('availableByTo') : details.get('availableBy'))))
+            : ''"/>
+        <entry value="42C" key="details.get('tenorSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, ((details.get('tenorTo') ?: details.get('tenorTo2')) + ' ' + details.get('usancePeriodTo') + ' ' + details.get('tenorOfDraftNarrativeTo'))) : ''"/>
+        <entry value="42A" key="details.get('draweeSwitch') == 'on' ? details.get('draweeTo') : ''"/>
+        <entry value="42M" key="details.get('mixedPaymentDetailsSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, details.get('mixedPaymentDetailsTo')) : ''"/>
+        <entry value="42P" key="details.get('deferredPaymentDetailsSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, details.get('deferredPaymentDetailsTo')) : ''"/>
+        <entry value="43P" key="details.get('partialShipmentSwitch') == 'on' ? details.get('partialShipmentTo') : ''"/>
+        <entry value="43T" key="details.get('transShipmentSwitch') == 'on' ? details.get('transShipmentTo') : ''"/>
+        <entry value="44A" key="details.get('placeOfTakingDispatchOrReceiptSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('placeOfTakingDispatchOrReceiptTo')) : ''"/>
+        <entry value="44E" key="details.get('portOfLoadingOrDepartureSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('portOfLoadingOrDepartureTo')) : ''"/>
+        <entry value="44F" key="details.get('portOfDischargeOrDestinationSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('portOfDischargeOrDestinationTo')) : ''"/>
+        <entry value="44B" key="details.get('placeOfFinalDestinationSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('placeOfFinalDestinationTo')) : ''"/>
+        <entry value="44C" key="details.get('latestShipmentDateSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('latestShipmentDateTo')) : ''"/>
+        <entry value="44D" key="details.get('shipmentPeriodSwitch') == 'on' ? details.get('shipmentPeriodTo') : ''"/>
+        <entry value="45B" key="details.get('generalDescriptionOfGoodsSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('generalDescriptionOfGoodsTo')) : ''"/>
+        <entry value="46B" key="details.get('mtDocumentsSwitch') == 'on' ? details.get('mtRequiredDocuments') : ''"/>
+        <entry value="47B" key="details.get('mtConditionsSwitch') == 'on' ? details.get('mtAdditionalConditions') : ''"/>
+        <entry value="49M" key="details.get('specialPaymentConditionsForBeneficiarySwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('specialPaymentConditionsForBeneficiaryTo')) : ''"/>
+        <entry value="49N" key="details.get('specialPaymentConditionsForReceivingBankSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('specialPaymentConditionsForReceivingBankTo')) : ''"/>
+        <entry value="71D" key="details.get('chargesNarrativeSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, details.get('additionalNarrative')) : ''"/>
+        <entry value="48" key="details.get('periodForPresentation1Switch') == 'on' ? details.get('periodForPresentation1NumberTo') + '/' + T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35, details.get('periodForPresentation1To')) : ''"/>
+        <entry value="49" key="details.get('confirmationInstructionsFlagSwitch') == 'on' ?
+            (details.get('confirmationInstructionsFlagTo') == 'YES' ? 'CONFIRM' :
+            (details.get('confirmationInstructionsFlagTo') == 'NO' ? 'WITHOUT' :
+            details.get('confirmationInstructionsFlagTo'))) : ''"/>
+        <entry value="58A" key="details.get('requestedConfirmationPartySwitch') == 'on' ? details.get('requestedConfirmationPartyTo') : ''"/>
+        <entry value="53A" key="details.get('reimbursingBankSwitch') == 'on' and details.get('reimbursingBankFlagTo') == 'A' ? details.get('reimbursingBankIdentifierCodeTo') : ''"/>
+        <entry value="53D" key="details.get('reimbursingBankSwitch') == 'on' and details.get('reimbursingBankFlagTo') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('reimbursingBankNameAndAddressTo')): ''"/>
+        <entry value="78" key="(T(com.ucpb.tfs.utils.SwiftFormatter).formatInstructionsToBank(instructionToBank) == '') ? T(com.ucpb.tfs.util.SwiftUtil).limitInputStringForField78(65, details.get('narrative')) : 
+            T(com.ucpb.tfs.utils.SwiftFormatter).formatInstructionsToBankForField78(instructionToBank)"/>
+        <entry value="57A" key="details.get('adviseThroughBankSwitch') == 'on' and details.get('adviseThroughBankFlagTo') == 'A' ? details.get('adviseThroughBankIdentifierCodeTo') : ''"/>
+        <entry value="57B" key="details.get('adviseThroughBankSwitch') == 'on' and details.get('adviseThroughBankFlagTo') == 'B' ? details.get('adviseThroughBankLocationTo') : ''"/>
+        <entry value="57D" key="details.get('adviseThroughBankSwitch') == 'on' and details.get('adviseThroughBankFlagTo') == 'D' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(35,details.get('adviseThroughBankNameAndAddressTo')) : ''"/>
+        <entry value="72Z" key="details.get('senderToReceiverSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details.get('senderToReceiverTo'), details.get('senderToReceiverInformationTo')) : ''"/>
+        
+    </util:map>
+</beans>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ucpb.tfs.interfaces.repositories.HolidayRepository">
+
+    <resultMap id="holidayResultMap" type="com.ucpb.tfs.interfaces.domain.CalendarDay">
+        <result property="date" column="CALENDARDATE"/>
+        <result property="holidayFlag" column="HOLIDAY"/>
+        <result property="businessDayFlag" column="BUSINESSDAY"/>
+        <result property="unitCode" column="UNITCODE"/>
+    </resultMap>
+
+
+    <select id="getCalendarDay" resultMap="holidayResultMap" resultType="com.ucpb.tfs.interfaces.domain.CalendarDay">
+        select
+          CDATE AS CALENDARDATE,
+          HOLDAY AS HOLIDAY,
+          BUSDAY AS BUSINESSDAY,
+          CBRNBR AS UNITCODE
+        from
+       	  TFSDB2S.JHCLDR HOLIDAY
+       	where "CDATE" = #{date} AND CBRNBR = #{branchCode}
+    </select>
+
+    <update id="generateHolidays">
+        CALL TFSDB2S.GENERATE_HOLIDAYS(#{date})
+    </update>
+</mapper>

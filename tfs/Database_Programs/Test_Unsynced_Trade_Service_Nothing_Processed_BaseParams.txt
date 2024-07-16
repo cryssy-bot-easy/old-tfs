@@ -1,0 +1,6 @@
+ Name      Type   Data Type Value (OUT)                    
+ --------- ------ --------- ------------------------------ 
+
+  P_RETVAL OUTPUT   INTEGER                              0
+ P_MESSAGE OUTPUT   VARCHAR SUCCESSFUL. 0 row(s) affected.
+

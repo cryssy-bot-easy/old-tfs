@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.reimbursing.InstructionToBank" table="InstructionToBank" abstract="true">
+
+        <id name="id" column="id" length="36">
+            <generator class="org.hibernate.id.UUIDHexGenerator"/>
+        </id>
+
+        <component name="instructionToBankCode" class="com.ucpb.tfs.domain.reimbursing.InstructionToBankCode" access="field">
+            <property name="instructionToBankCode" column="instructionToBankCode" type="string" length="10"/>
+        </component>
+
+        <property name="instruction" column="instruction" type="org.hibernate.type.MaterializedClobType" length="6500"/>
+
+    </class>
+
+</hibernate-mapping>

@@ -1,0 +1,200 @@
+diff --git a/tfs-batch/src/main/resources/mappers/sibs-local-mapper.xml b/tfs-batch/src/main/resources/mappers/sibs-local-mapper.xml
+--- a/tfs-batch/src/main/resources/mappers/sibs-local-mapper.xml
++++ b/tfs-batch/src/main/resources/mappers/sibs-local-mapper.xml
+@@ -1093,15 +1093,15 @@
+     </update>
+     
+     <insert id="reinsertFacilityAvailment">
+-    INSERT INTO TFSDB2S.LNCLST (SYSCOD, CIFNO, ACCTNO, NAME, CIFID,
+-    CIFCOD, ORGLMT, TOSBAL, PRODUCT, PRODSC, DATE, TIME, LORGAM, TLOSBAL,
+-    CURTYP, ALFLG, ADBBAL, STADSC, AFCPNO, ORGSBL, LOCSBL) VALUES
+-    (#{earmarking.SYSCOD}, #{earmarking.CIFNO}, #{earmarking.ACCTNO}, #{earmarking.NAME},
+-    #{earmarking.CIFID}, #{earmarking.CIFCOD}, #{earmarking.ORGLMT},
+-    #{earmarking.TOSBAL}, #{earmarking.PRODUCT}, #{earmarking.PRODSC},
+-    #{earmarking.DATE}, #{earmarking.TIME}, #{earmarking.LORGAM},
+-    #{earmarking.TLOSBAL}, #{earmarking.CURTYP}, #{earmarking.ALFLG},
+-    #{earmarking.ADBBAL}, #{earmarking.STADSC}, #{earmarking.AFCPNO},
+-    #{earmarking.ORGSBL}, #{earmarking.LOCSBL})
++        INSERT INTO TFSDB2S.LNCLST (SYSCOD, CIFNO, ACCTNO, NAME, CIFID,
++        CIFCOD, ORGLMT, TOSBAL, PRODUCT, PRODSC, DATE, TIME, LORGAM, TLOSBAL,
++        CURTYP, ALFLG, ADBBAL, STADSC, AFCPNO, ORGSBL, LOCSBL) VALUES
++        (#{earmarking.SYSCOD}, #{earmarking.CIFNO}, #{earmarking.ACCTNO}, #{earmarking.NAME},
++        #{earmarking.CIFID}, #{earmarking.CIFCOD}, #{earmarking.ORGLMT},
++        #{earmarking.TOSBAL}, #{earmarking.PRODUCT}, #{earmarking.PRODSC},
++        #{earmarking.DATE}, #{earmarking.TIME}, #{earmarking.LORGAM},
++        #{earmarking.TLOSBAL}, #{earmarking.CURTYP}, #{earmarking.ALFLG},
++        #{earmarking.ADBBAL}, #{earmarking.STADSC}, #{earmarking.AFCPNO},
++        #{earmarking.ORGSBL}, #{earmarking.LOCSBL})
+     </insert>
+ </mapper>
+diff --git a/tfs-core/src/main/resources/New Text Document.txt b/tfs-core/src/main/resources/New Text Document.txt
+new file mode 100644
+diff --git a/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml b/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
+--- a/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
++++ b/tfs-interfaces/src/main/resources/mappers/facility-mapper.xml
+@@ -38,5 +38,5 @@
+ 	<select id="getFacilitiesByCifNumber" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++			facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+ 		FROM TFSDB2S.LNAPPF facility 
+@@ -42,3 +42,3 @@
+ 		FROM TFSDB2S.LNAPPF facility 
+-			WHERE facility."AFCIF#" = #{cifNumber}
++			<!-- WHERE facility."AFCIF#" = #{cifNumber} -->
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+@@ -44,5 +44,5 @@
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+-			AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
++			<!-- AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00') -->
+ 			<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+             ORDER BY facility.AFSEQ DESC
+ 	</select>
+@@ -50,5 +50,5 @@
+ 	<select id="getFacilitiesByCifNumberAndType" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++			facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+ 		FROM TFSDB2S.LNAPPF facility 
+@@ -54,3 +54,3 @@
+ 		FROM TFSDB2S.LNAPPF facility 
+-			WHERE facility."AFCIF#" = #{cifNumber}
++			<!-- WHERE facility."AFCIF#" = #{cifNumber} -->
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+@@ -56,6 +56,6 @@
+ <!-- 			AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+-			AND facility."AFFCDE" = #{facilityType}
+-			AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00')
++			<!-- AND facility."AFFCDE" = #{facilityType} -->
++			<!-- AND to_date(digits(facility.AFEXP6),'mmddyy') > TIMESTAMP('2011-01-01-00.00.00') -->
+ 			<!--ORDER BY to_date(digits(facility.AFEXP6),'mmddyy') DESC-->
+             ORDER BY facility.AFSEQ DESC
+ 	</select>
+@@ -63,7 +63,7 @@
+     <select id="getFacilitiesForLoan" resultType="hashMap">
+         SELECT
+         facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-        facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++        facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF facility
+         WHERE facility."AFCIF#" = #{cifNumber}
+ <!--         	AND to_date(digits(facility.AFEXP6),'mmddyy') > CURRENT_TIMESTAMP -->
+@@ -77,6 +77,6 @@
+     <select id="getFacilitiesByType" resultType="hashMap">
+         SELECT
+             A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID, A.AFEXP6 AS EXPIRY_DATE,
+-            A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++            A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+@@ -81,5 +81,5 @@
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+-    	AND A."AFCIF#" = #{cifNumber}
+-        AND A.AFAPNO = #{mainCifNumber}
++    	<!-- AND A."AFCIF#" = #{cifNumber}
++        AND A.AFAPNO = #{mainCifNumber} -->
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+@@ -85,3 +85,3 @@
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+-        <if test="seqNo != ''">
++        <!-- <if test="seqNo != ''">
+             AND A.AFSEQ = #{seqNo}
+@@ -87,8 +87,8 @@
+             AND A.AFSEQ = #{seqNo}
+-        </if>
++        </if> -->
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeSearch" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+@@ -89,9 +89,10 @@
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeSearch" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+-        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++        <!-- A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER -->
++		A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+@@ -96,5 +97,5 @@
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+-    	AND A."AFCIF#" = #{cifNumber}
+-        AND A.AFAPNO = #{mainCifNumber}
++    	<!-- AND A."AFCIF#" = #{cifNumber}
++        AND A.AFAPNO = #{mainCifNumber} -->
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+@@ -100,3 +101,3 @@
+         AND B.MIGRATION_INDICATOR = 'LBPFACILITY'
+-        <if test="seqNo != ''">
++        <!-- <if test="seqNo != ''">
+             AND (#{seqNo} = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(#{seqNo}) || '%' OR A.AFCUR LIKE '%' || UCASE(#{seqNo}) || '%')
+@@ -102,8 +103,8 @@
+             AND (#{seqNo} = TO_CHAR(A.AFSEQ) OR A.AFFCDE LIKE '%' || UCASE(#{seqNo}) || '%' OR A.AFCUR LIKE '%' || UCASE(#{seqNo}) || '%')
+-        </if>
++        </if> -->
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeAndCurrency" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+@@ -104,10 +105,10 @@
+         ORDER BY A.AFSEQ DESC
+     </select>
+ 
+     <select id="getFacilitiesByTypeAndCurrency" resultType="hashMap">
+         SELECT
+         A."AFCIF#" AS CLIENT_CIF_NUMBER,A.AFFCDE AS FACILITY_TYPE,A.AFSEQ AS FACILITY_ID,A.AFEXP6 AS EXPIRY_DATE,
+-        A.AFCUR AS FACILITY_CURRENCY,A.AFFAMT, A.AFCPNO AS FACILITY_REF_NUMBER
++        A.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", A.AFCPNO AS FACILITY_REF_NUMBER
+         FROM TFSDB2S.LNAPPF A, TFSDB2S.LNPARK B
+         WHERE A.AFFCDE = B.LKFCOD
+     	AND A."AFCIF#" = #{cifNumber}
+@@ -200,7 +201,7 @@
+ 	<select id="getFacilitiesByChildAndMainCifNumber" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#",facility.AFFCDE,facility.AFSEQ,facility.AFEXP6,facility.AFCUR,
+-			facility.AFFAMT
++			'1,000.00' AS "AFFAMT"
+ 		FROM TFSDB2S.LNAPPF facility 
+ 			WHERE facility."AFCIF#" = #{cifNumber}
+ <!--			AND to_date(digits(facility.AFEXP6), 'mmddyy') > CURRENT_DATE    -->
+@@ -216,7 +217,6 @@
+ 		)
+ 	</insert>
+ 
+-
+     <select id="getFacilityBalance" resultType="hashMap">
+ 		SELECT
+ 	      AANO AS CIF_NUMBER,
+@@ -228,9 +228,9 @@
+ 		  TRERR AS ERROR_MESSAGE,
+           TOCUR AS CURRENCY
+ 		FROM TFSDB2S.LNTFCON FACILITY_BALANCE
+-			WHERE FACILITY_BALANCE.TRSEQ = #{transactionSequenceNo}
++			WHERE FACILITY_BALANCE.TRSEQ = '38'
+ 	</select>
+ 	
+ 	<select id="getFacilitiesByCifAndFacility" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+@@ -232,9 +232,9 @@
+ 	</select>
+ 	
+ 	<select id="getFacilitiesByCifAndFacility" resultType="hashMap">
+ 		SELECT 
+ 			facility."AFCIF#" AS CLIENT_CIF_NUMBER,facility.AFFCDE AS FACILITY_TYPE,facility.AFSEQ AS FACILITY_ID,facility.AFEXP6 AS EXPIRY_DATE,
+-			facility.AFCUR AS FACILITY_CURRENCY,facility.AFFAMT, facility.AFCPNO AS FACILITY_REF_NUMBER
++			facility.AFCUR AS FACILITY_CURRENCY,'1,000.00' AS "AFFAMT", facility.AFCPNO AS FACILITY_REF_NUMBER
+ 		FROM TFSDB2S.LNAPPF facility 
+ 			WHERE facility."AFCIF#" = #{cifNumber}
+ 			AND facility."AFCPNO" = #{facilityRefNo}

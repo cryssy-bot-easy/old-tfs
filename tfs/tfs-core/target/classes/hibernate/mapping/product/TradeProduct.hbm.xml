@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+        //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.product.TradeProduct" table="TradeProduct">
+
+        <composite-id name="documentNumber" access="field">
+            <key-property name="documentNumber" column="documentNumber" type="string" length="21"/>
+        </composite-id>
+
+        <discriminator column="productType" type="string" length="20"/>
+
+        <property name="cifNumber" column="cifNumber" type="string" length="10"/>
+        <property name="cifName" column="cifName" type="string" length="100"/>
+        <property name="mainCifNumber" column="mainCifNumber" type="string" length="10"/>
+        <property name="mainCifName" column="mainCifName" type="string" length="100"/>
+        <property name="accountOfficer" column="accountOfficer" type="string" length="100"/>
+        <property name="ccbdBranchUnitCode" column="ccbdBranchUnitCode" type="string" length="10"/>
+        <property name="facilityId" column="facilityId" type="string" length="11"/>
+        <property name="facilityType" column="facilityType" type="string" length="4"/>
+        <property name="facilityReferenceNumber" column="facilityReferenceNumber" type="string" length="20"/>
+        <property name="allocationUnitCode" column="allocationUnitCode" type="string" length="10"/>
+
+        <property name="status">
+            <column name="status" length="12"/>
+            <type name="org.hibernate.type.EnumType">
+                <param name="type">12</param>
+                <param name="enumClass">com.ucpb.tfs.domain.product.enums.TradeProductStatus</param>
+            </type>
+        </property>
+        
+        <property name="longName" column="longName" type="string" length="150"/>
+        <property name="address1" column="address1" type="string" length="150"/>
+        <property name="address2" column="address2" type="string" length="150"/>
+
+        <property name="passOnRateThirdToUsd" column="passOnRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="passOnRateThirdToPhp" column="passOnRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="passOnRateUsdToPhp" column="passOnRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateThirdToUsd" column="specialRateThirdToUsd" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateThirdToPhp" column="specialRateThirdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="specialRateUsdToPhp" column="specialRateUsdToPhp" type="java.math.BigDecimal" scale="8"/>
+        <property name="urr" column="urr" type="java.math.BigDecimal" scale="8"/>
+
+        <property name="amount" column="amount" type="java.math.BigDecimal" />
+
+        <property name="currency" column="currency" type="java.util.Currency" length="3" />
+
+        <property name="firstName" column="firstName" type="string" length="100"/>
+        <property name="middleName" column="middleName" type="string" length="40"/>
+        <property name="lastName" column="lastName" type="string" length="100"/>
+        <property name="tinNumber" column="tinNumber" type="string" length="20"/>
+        
+        <property name="officerCode" column="officerCode" type="string" length="3"/>
+        <property name="exceptionCode" column="exceptionCode" type="string" length="2"/>
+
+        <property name="processingUnitCode" column="processingUnitCode" type="string" length="10"/>
+        <property name="commodityCode" column="commodityCode" type="string" length="10"/>
+        <property name="participantCode" column="participantCode" type="string" length="10"/>
+    </class>
+
+</hibernate-mapping>

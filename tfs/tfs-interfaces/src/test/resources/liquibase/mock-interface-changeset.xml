@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="initialize-silverlake-database" author="robbie">
+        <sqlFile path="src/test/resources/mockddl/functions/create-digits-function.sql"/>
+        <sqlFile path="src/test/resources/mockddl/functions/create-to-date-function.sql"/>
+        <sqlFile path="src/test/resources/mockddl/functions/create-getCurrentDate-function.sql"/>
+
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/create-ucdatpbwc-schema.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/create-ucdatubwc1-schema.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/create-cifmast-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/create-cif-addr-table.sql"/>
+        <!--         UCDATPLNS (FACILITIES) -->
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-ucdatplns-schema.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-ucdatulns1-schema.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-facility-accounts-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-facility-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-facility-availment-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-facility-balance-inquiry-table-lntfcon.sql"/>
+        <!--         UCPARPCMN (RATES) -->
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-ucparucmn1-schema.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-daily-rates-table-jhfxdt.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-rates-definition-table-jhfxpr.sql"/>
+        <!--<sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-rates-definition-data.sql"/>-->
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-mock-rates-data.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-holiday-table.sql"/>
+
+        <!--         UCDATPLNS (LOANS) -->
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-loan-table-lntfint.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatplns/create-loan-exception-table.sql"/>
+
+        <!--  UCPARPCMN (OFFICERS) -->
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-officers-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-officers-data.sql"/>
+
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-jhparl-table.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/create-officers-lnpan4-table.sql"/>
+
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-ccbd-data.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-ccbd-unit-data.sql"/>
+
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-data.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data2.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data3.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data4.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data5.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-facility-data6.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-addr.sql"/>
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/create-cfacct-table.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts2.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts3.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts4.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts5.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts6.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts7.sql"/>-->
+        <!--<sqlFile path="src/test/resources/mockddl/ucdatpbwc/insert-cif-accounts8.sql"/>-->
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-jhparl-ucpb-groups-data.sql"/>
+        <sqlFile path="src/test/resources/mockddl/ucparpcmn/insert-lnpan4-loan-officers-data.sql"/>
+    </changeSet>
+
+</databaseChangeLog>

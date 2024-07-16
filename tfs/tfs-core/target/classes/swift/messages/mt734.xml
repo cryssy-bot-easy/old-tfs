@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+<!-- 
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  
+	SCR/ER Description: Negotiation Discrepancy
+	[Revised by:] John Patrick C. Bautista
+	[Date Revised:] 09/21/2017
+	Program [Revision] Details: Commented out field 72Z so field 72 will be used. Added argument 'mt734' in field 72.
+	PROJECT: tfs-core
+	MEMBER TYPE  : xml
+	Project Name: mt734.xml
+ -->
+ <!-- 
+	PROLOGUE:
+  	(revision)
+	SCR/ER Number:  
+	SCR/ER Description: Negotiation Discrepancy
+	[Revised by:] Cedrick C. Nungay
+	[Date Revised:] 08/02/2018
+	Program [Revision] Details: Changed field 72 to field 72Z.
+ -->
+
+    <util:map id="mt734Mapper">
+ 		<entry value="20" key="documentNumber?.toString()?.replaceAll('-','')"/>
+    	<entry value="21" key="details?.get('negotiatingBanksReferenceNumber')"/>
+    	<entry value="32A" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateAmount(details?.get('icDate'),details?.get('negotiationCurrency'),details?.get('negotiationAmount'))"/>
+    	<entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver730and742(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/>
+    	<entry value="77J" key="T(com.ucpb.tfs.util.SwiftUtil).formatDiscrepancies(
+    		details.get('expiredLcSwitch'), 
+    		details.get('overdrawnForAmountSwitch'),
+    		details.get('overdrawnForAmount'),
+    		details.get('descriptionOfGoodsNotPerLcSwitch'),
+    		details.get('documentsNotPresentedSwitch'),
+    		details.get('othersSwitch'),
+    		details.get('others'),
+    		details.get('descriptionOfGoodsNotAsPerLc'),
+    		details.get('documentsNotPresented')
+    		)"/>
+<!--     	<entry value="72Z" key="T(com.ucpb.tfs.util.SwiftUtil).formatSenderToReceiver(details?.get('senderToReceiver'),details?.get('senderToReceiverInformation'))"/> -->
+		<entry value="77B" key="T(com.ucpb.tfs.util.SwiftUtil).formatDisposalOfDocuments(details?.get('disposalOfDocuments'),details?.get('disposalOfDocumentsText'))"/>
+    </util:map>
+<!--     <xs:element name="field20" type="swift:field20" minOccurs="1" /> -->
+<!--     				<xs:element name="field21" type="swift:field21" minOccurs="1" /> -->
+<!--     				<xs:element name="field32A" type="swift:field32A" minOccurs="1" /> -->
+<!--     				<xs:element name="field73" type="swift:field73" minOccurs="0" /> -->
+<!--     				<xs:choice minOccurs="0"> -->
+<!--                 		<xs:element name="field33A" type="swift:field33A"/> -->
+<!--                 		<xs:element name="field33B" type="swift:field33B"/> -->
+<!--                 	</xs:choice> -->
+<!--                 	<xs:choice minOccurs="0"> -->
+<!--                 		<xs:element name="field57A" type="swift:field57A"/> -->
+<!--                 		<xs:element name="field57B" type="swift:field57B"/> -->
+<!--                 		<xs:element name="field57D" type="swift:field57D"/> -->
+<!--                 	</xs:choice> -->
+<!--     				<xs:element name="field72" type="swift:field72" minOccurs="0" /> -->
+<!--     				<xs:element name="field77J" type="swift:field77J" minOccurs="1" /> -->
+<!--     				<xs:element name="field77B" type="swift:field77B" minOccurs="1" /> -->
+</beans>

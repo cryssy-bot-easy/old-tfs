@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt740Mapper">
+        <entry value="20" key="#this.get('documentNumber')"/>
+        <entry value="25" key="#this.get('field25')"/>
+        <entry value="40F" key="#this.get('applicableRules')"/>
+        <entry value="31D" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',#this.get('expiryDate')) + ' IN ' + #this.get('expiryCountryCode') ?: ''"/>
+        <entry value="58A" key="#this.get('reimbursingBankFlag') == 'A' ? #this.get('reimbursingBankIdentifierCode') : ''"/>
+        <entry value="58D" key="#this.get('reimbursingBankFlag') == 'D' ? #this.get('reimbursingBankNameAndAddress') : ''"/>
+        <entry value="59" key="(#this.get('exporterName') ?: '') + ' ' + (#this.get('exporterAddress') ?: '')"/>
+        <entry value="32B" key="T(com.ucpb.tfs.util.SwiftUtil).formatAmount(#this.get('currency'),#this.get('amount'))"/>
+        <entry value="39A" key="(#this.get('positiveToleranceLimit') ?: '' ) + '/' + (#this.get('negativeToleranceLimit') ?: '' )"/>
+        <entry value="39B" key="#this.get('maximumCreditAmount')"/>
+        <entry value="39C" key="#this.get('additionalAmountsCovered')"/>
+        <entry value="41A" key="#this.get('availableWithSwitchDisplay') == 'on'
+                                or
+                                #this.get('availableBySwitchDisplay') == 'on' ?
+                                T(com.ucpb.tfs.util.SwiftUtil).concatWithNewLine(#this.get('identifierCode'),T(com.ucpb.tfs.swift.enums.AvailableBy).getLabel(#this.get('availableBy')))  : ''
+
+                                "/>
+        <entry value="42C" key="#this.get('tenorOfDraftNarrative')"/>
+        <entry value="42A" key="#this.get('draweeTo') ?: #this.get('drawee')"/>
+        <entry value="42M" key="#this.get('mixedPaymentDetailsTo') ?: #this.get('mixedPaymentDetails')"/>
+        <entry value="42P" key="#this.get('deferredPaymentDetailsTo') ?: #this.get('deferredPaymentDetails')"/>
+        <!-- BLANK -->
+        <entry value="71A" key="#this.get('71A')"/>
+        <entry value="71B" key="#this.get('71B')"/>
+        <entry value="72" key="#this.get('senderToReceiverInformation')"/>
+    </util:map>
+
+</beans>

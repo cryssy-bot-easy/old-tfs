@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-file="http://www.springframework.org/schema/integration/file"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+       http://www.springframework.org/schema/integration/file   http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+
+
+    <int:channel id="swiftChannel"/>
+    <int:channel id="messageTypeChannel"/>
+    <!--<int:channel id="swiftFileWriterChannel"/>-->
+    <int:publish-subscribe-channel id="swiftFileWriterChannel"/>
+
+    <int:channel id="swiftIncomingChannel"/>
+    <int:channel id="invalidMessagesOutputChannel"/>
+    <int:channel id="parsedMessagesOutputChannel"/>
+
+    <bean id="swiftMessageService" class="com.ucpb.tfs.interfaces.services.impl.SwiftMessageServiceImpl">
+        <constructor-arg name="messageChannel" ref="swiftChannel"/>
+        <constructor-arg name="jdbcTemplate" ref="tfsJdbcTemplate"/>
+        <property name="validate" value="${swift.output.validate}"/>
+        <property name="validators" ref="swiftValidators"/>
+    </bean>
+
+    <util:list id="swiftValidators">
+        <bean class="com.ucpb.tfs.swift.validator.xml.SwiftXmlValidator">
+            <constructor-arg name="sourceSchema" value="${swift.validation.source}"/>
+            <constructor-arg name="transformationSchema" value="${swift.transformation.source}"/>
+        </bean>
+        <bean class="com.ucpb.tfs.swift.validator.xml.SchematronXmlValidator">
+            <constructor-arg name="templateLocation" value="${swift.schematron.source}"/>
+            <constructor-arg name="swiftFormatXslLocation" value="${swift.transformation.source}"/>
+        </bean>
+    </util:list>
+
+    <bean id="mtMessageService" class="com.ucpb.tfs.domain.mtmessage.MtMessageServiceImpl">
+    </bean>
+
+    <bean id="swiftMessageParserService" class="com.ucpb.tfs.domain.mtmessage.SwiftMessageParserService">
+        <constructor-arg name="invalidMessagesOutputChannel" ref="invalidMessagesOutputChannel"/>
+        <constructor-arg name="parsedMessagesOutputChannel" ref="parsedMessagesOutputChannel"/>
+        <constructor-arg name="parser">
+            <ref local="messageParser"/>
+        </constructor-arg>
+        <constructor-arg name="mtMessageService" ref="mtMessageService"/>
+        <constructor-arg name="regex" value="${swift.regex.directory}"/>
+    </bean>
+    
+    <bean id="messageParser" class="com.ucpb.tfs.swift.message.parser.SwiftFormattedMessageParser"/>
+
+    <int:transformer id="messageToStringTransformer"
+                     input-channel="messageTypeChannel"
+                     output-channel="swiftFileWriterChannel"
+                     ref="swiftMessageTransformer"
+                     method="write"/>
+
+    <bean id="swiftMessageTransformer" class="com.ucpb.tfs.swift.message.writer.DefaultSwiftMessageWriter"/>
+
+    <int-file:inbound-channel-adapter id="messageReader"
+                                  directory="${swift.input.directory}"  channel="swiftIncomingChannel" auto-startup="true" auto-create-directory="true">
+        <int:poller id="poller" fixed-delay="${swift.input.poll.frequency}"/>
+        <!--<int-file:nio-locker/>-->
+    </int-file:inbound-channel-adapter>
+
+    <int:service-activator id="incomingMtMessageSaver" input-channel="swiftIncomingChannel"
+                           ref="swiftMessageParserService" method="parse" />
+
+	<int:header-enricher input-channel="swiftChannel" output-channel="messageTypeChannel">
+		<int:header name="messageTypeHeader" expression="payload.getMessageType()"/>
+	</int:header-enricher>
+
+    <int-file:outbound-channel-adapter id="swiftOutputDirectory"
+                                       directory="${swift.output.directory}"
+                                       channel="swiftFileWriterChannel"
+                                       filename-generator-expression="headers.get('filename')"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="swiftOutputDirectoryBackup"
+                                       directory="${swift.output.directory.backup}"
+                                       channel="swiftFileWriterChannel"
+                                       filename-generator-expression="headers.get('filename')"
+                                       delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="invalidMessagesOutputDirectory"
+                                       directory="${swift.input.directory.invalid}"
+                                       channel="invalidMessagesOutputChannel" delete-source-files="true"/>
+
+    <int-file:outbound-channel-adapter id="parsedMessagesOutputDirectory"
+                                       directory="${swift.input.directory.valid}"
+                                       channel="parsedMessagesOutputChannel" delete-source-files="true"/>
+
+
+</beans>

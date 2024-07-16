@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	 <jdbc:embedded-database id="interfaceDataSource" type="DERBY">
+        <jdbc:script location="ddl/functions/create-days-function.sql"/>
+        <jdbc:script location="classpath:ddl/create-trade-schema.sql"/>
+        <jdbc:script location="classpath:ddl/create-gl-codes-table.sql"/>
+        
+ 		<jdbc:script location="classpath:ddl/create-lc-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lc-nego-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-tradeservice-table.sql"/>
+        <jdbc:script location="classpath:ddl/tfs/create-service-instruction-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-gl-entry-types-table.sql"/>
+        <jdbc:script location="classpath*:ddl/create-dw-param-table.sql"/>
+
+         <jdbc:script location="classpath:ddl/insert-lc-data.sql"/>
+        <jdbc:script location="classpath:ddl/insert-tradeservice-data.sql"/>
+        <jdbc:script location="classpath:ddl/insert-gl-codes-data.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-daily-balances-table.sql"/>
+
+         <!-- mock daily balances -->
+         <jdbc:script location="classpath*:ddl/testdata/insert-mock-daily-balances.sql"/>
+
+         <!-- accounting entries -->
+         <jdbc:script location="classpath*:create-accounting-entry-table.sql"/>
+         <jdbc:script location="classpath*:ddl/insert-mock-accounting-entries.sql"/>
+         <jdbc:script location="classpath*:ddl/insert-gl-entry-types.sql"/>
+         <jdbc:script location="classpath*:ddl/insert-dw-params.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-routes-table.sql"/>
+         <jdbc:script location="classpath*:ddl/tfs/create-trade-product-table.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-da-table.sql"/>
+         <jdbc:script location="classpath*:ddl/tfs/insert-da-data.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-dp-table.sql"/>
+         <jdbc:script location="classpath*:ddl/tfs/insert-dp-data.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-dr-table.sql"/>
+         <jdbc:script location="classpath*:ddl/tfs/insert-dr-data.sql"/>
+
+         <jdbc:script location="classpath*:ddl/tfs/create-oa-table.sql"/>
+         <jdbc:script location="classpath*:ddl/tfs/insert-oa-data.sql"/>
+         <jdbc:script location="classpath*:ddl/create-ref-client-table.sql"/>
+         <jdbc:script location="classpath*:ddl/create-ref-product-table.sql"/>
+         <jdbc:script location="classpath*:ddl/insert-ref-product-data.sql"/>
+     </jdbc:embedded-database>
+    
+    <jdbc:embedded-database id="sibsDataSource" type="DERBY">
+        <jdbc:script location="classpath:ddl/create-ucdatulns1-schema.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-ucparucmn-schema.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-jhparl-table.sql"/>
+        <jdbc:script location="classpath*:ddl/ucparucmn/create-lnpan4-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lnmast-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lncbcd-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lnclst-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-lncolx-table.sql"/>
+        <jdbc:script location="classpath:ddl/create-cfcold-table.sql"/>
+        <jdbc:script location="classpath:ddl/insert-lnmast-data.sql"/>
+     </jdbc:embedded-database> 
+    
+    
+<!--     <bean id="interfaceDataSource" class="org.apache.commons.dbcp.BasicDataSource" > -->
+<!--         <property name="driverClassName" value="org.apache.derby.jdbc.ClientDriver" /> -->
+<!--         <property name="url" value="jdbc:derby://localhost:1527/tfsdb;" /> -->
+<!--         <property name="username" value="tfs" /> -->
+<!--         <property name="password" value="tfs" /> -->
+<!-- 	</bean> -->
+
+	<bean id="interfaceSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="interfaceDataSource" />
+	    <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+	</bean>
+
+    <bean id="tfsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="interfaceDataSource" />
+        <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+    </bean>
+	
+	<bean id="sibsSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="sibsDataSource" />
+	    <property name="mapperLocations" value="classpath*:/mappers/*.xml"/>
+	</bean>
+	
+  	<bean id="silverlakeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.SilverlakeDao" />
+        <property name="sqlSessionFactory" ref="sibsSqlSessionFactory" />
+    </bean>
+    
+   	<bean id="tradeProductDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.TradeProductDao" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="allocationDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.report.dw.dao.AllocationDao" />
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="batchProcessDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.ucpb.tfs.batch.dao.BatchProcessDao"/>
+        <property name="sqlSessionFactory" ref="interfaceSqlSessionFactory" />
+    </bean>
+
+    <bean id="masterfileService" class="com.ucpb.tfs.batch.report.dw.service.MasterFileServiceImpl">
+    	<property name="silverlakeDao" ref="silverlakeDao"/>
+    	<property name="tradeProductDao" ref="tradeProductDao"/>
+    </bean>
+    
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="interfaceDataSource"/>
+    </bean>
+
+    <bean id="sqlRunner" class="com.ucpb.tfs.batch.util.SqlRunner">
+        <constructor-arg name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+    
+    <bean id="sibsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg name="dataSource" ref="sibsDataSource"/>
+    </bean>
+</beans>
+    
+    

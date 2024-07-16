@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+   <!-- PROLOGUE:
+ 		(revision)
+		SCR/ER Number: 
+		SCR/ER Description: (Redmine 4126 and 4130) EBP and EBC Negotiation - Nego Advice Addressee and 
+			Collecting bank fields needed in the report
+		[Revised by:] Robin C. Rafael
+		[Date Deployed:]
+		Program [Revision:] Changed the reference finder for Collecting Bank dropdown on RMA banks to get more details 
+			(like address etc) instead of getting the code and name only.
+		PROJECT: CORE
+		MEMBER TYPE  : XML
+		Project Name: mt742.xml
+	-->
+	
+	<!-- PROLOGUE:
+        (revision)
+        Reference Number: ITDJCH-2018-03-001
+        Reference Description: Add new fields on screen of different modules to comply with the requirements of ITRS.
+        [Revised by:] Jaivee Hipolito
+        Program [Revision:] add findCommodityCode, findParticulars and findParticipantCode methods to get list of commodity, particulars and participant.
+        PROJECT: CORE
+        MEMBER TYPE  : XML
+        Project Name: ITRS Implementation
+    -->
+
+<mapper namespace="com.ucpb.tfs.application.query2.ReferenceFinder">
+
+    <select id="getAllCountries" resultType="hashMap">
+          select cntry_cd, cntry_name from ref_tfcntry
+        <if test="keyword != null">
+            where cntry_cd like '%' || #{keyword} || '%'
+            or cntry_name like '%' || #{keyword} || '%'
+        </if>
+    </select>
+	 
+	 <select id="getAllISOCountries" resultType="hashMap">
+          select cntry_cd, cntry_name, cntry_iso from ref_tfcntry
+          where cntry_name != ''
+        <if test="keyword != null">
+            and (cntry_cd like '%' || #{keyword} || '%'
+            or cntry_iso like '%' || #{keyword} || '%'
+            or cntry_name like '%' || #{keyword} || '%')
+        </if>
+    </select>
+
+    <select id="findBanksByKeyword" resultType="hashMap">
+        select bic_code, branch_code, institution_name, branch_info, city,
+        (TRIM(address_1) || ' ' || TRIM(address_2) || ' ' || TRIM(address_3) || ' ' || TRIM(address_4)) as address, CB_CREDITOR_CODE, reimbursing_curr, GL_BANK_CD, gl_code_rbu, gl_code_fcdu, rbu_account, fcdu_account from ref_bank b
+        <if test="keyword != null">
+            where bic_code || branch_code like '%' || #{keyword} || '%'
+            or INSTITUTION_NAME like '%' || #{keyword} || '%'
+        </if>
+        fetch first 10 rows only
+    </select>
+
+    <select id="findBankBySwiftAddress" resultType="hashMap">
+        select
+          bic_code,
+          branch_code,
+          institution_name,
+          branch_info,
+          city,
+          address_1,
+          address_2,
+          address_3,
+          address_4
+        from ref_bank
+        WHERE bic_code = #{bic} and branch_code = #{branchCode}
+        fetch first 1 rows only
+    </select>
+
+    <select id="findRmaBanksByKeyword" resultType="hashMap">
+        select bic_code, branch_code, institution_name, branch_info, city,
+        (TRIM(address_1) || ' ' || TRIM(address_2) || ' ' || TRIM(address_3) || ' ' || TRIM(address_4)) as address, CB_CREDITOR_CODE, reimbursing_curr, GL_BANK_CD, gl_code_rbu, gl_code_fcdu, rbu_account, fcdu_account from ref_bank b
+        where RMA_FLAG = 'Y'
+        <if test="keyword != null">
+            and bic_code || branch_code like '%' || #{keyword} || '%'
+            or INSTITUTION_NAME like '%' || #{keyword} || '%'
+        </if>
+        fetch first 10 rows only
+    </select>
+
+    <select id="findDepositoryBanksByKeyword" resultType="hashMap">
+        select b.bic_code || branch_code bic_code, b.institution_name, b.branch_info, b.city,gl_bank_cd, rbu_account, fcdu_account, reimbursing_curr, gl_code_rbu, gl_code_fcdu
+        from ref_bank b
+        where DEPOSITORY_FLAG = 'Y'
+        <if test="keyword != null">
+            and (b.bic_code || branch_code like '%' || #{keyword} || '%'
+            or INSTITUTION_NAME like '%' || #{keyword} || '%')
+        </if>
+        fetch first 10 rows only
+    </select>
+
+    <select id="findDepositoryBanksByKeywordAndCurrency" resultType="hashMap">
+        select b.bic_code || branch_code bic_code, b.institution_name, b.branch_info, b.city,gl_bank_cd, rbu_account, fcdu_account, reimbursing_curr, gl_code_rbu, gl_code_fcdu, cb_creditor_code
+        from ref_bank b
+        where DEPOSITORY_FLAG = 'Y'
+        <if test="keyword != null">
+            and (b.bic_code || branch_code like '%' || #{keyword} || '%'
+            or INSTITUTION_NAME like '%' || #{keyword} || '%')
+        </if>
+        <if test="currency !=''">
+            and REIMBURSING_CURR = #{currency}
+        </if>
+        fetch first 20 rows only
+    </select>
+
+    <select id="findImporterByKeyword" resultType="hashMap">
+        select id, cb_cd, 
+		case when cl_lo_name is null then cl_sh_name else cl_lo_name end as cl_sh_name,
+		case when cl_addr_1 is null then '' else cl_addr_1 end as cl_addr_1,
+		case when cl_addr_2 is null then '' else cl_addr_2 end as cl_addr_2,
+		case when cl_addr_3 is null then '' else cl_addr_3 end as cl_addr_3,
+		case when cl_addr_4 is null then '' else cl_addr_4 end as cl_addr_4,
+		
+		case when ucpb_cif_no is null then '' else ucpb_cif_no end as ucpb_cif_no
+		
+		from ref_tfcustmr
+        where cb_cd is not null
+        <if test="keyword != null">
+            and (cb_cd like '%' || #{keyword} || '%'
+            or cl_sh_name like '%' || #{keyword} || '%'
+            or cif_lo_nameb like '%' || #{keyword} || '%')
+        </if>
+        fetch first 50 rows only
+    </select>
+    
+	<select id="findFirmLibByKeyword" resultType="hashMap">
+		select firmCode, firmDescription
+		from refFirmLib
+		where firmCode is not null
+		<if test="keyword != null">
+			and (firmCode like '%' || #{keyword} || '%'
+			or firmDescription like '%' || #{keyword} || '%')
+		</if>
+		fetch first 50 rows only
+	</select>
+    
+    <select id="findAllImporterByKeyword" resultType="hashMap">
+        select id, cb_cd, 
+		case when cl_sh_name is null then cif_lo_nameb else cl_sh_name end as cl_sh_name,
+		case when cl_addr_1 is null then '' else cl_addr_1 end as cl_addr_1,
+		case when cl_addr_2 is null then '' else cl_addr_2 end as cl_addr_2,
+		case when cl_addr_3 is null then '' else cl_addr_3 end as cl_addr_3,
+		case when cl_addr_4 is null then '' else cl_addr_4 end as cl_addr_4,
+		
+		case when ucpb_cif_no is null then '' else ucpb_cif_no end as ucpb_cif_no
+		
+		from ref_tfcustmr
+        <if test="keyword != null">
+            where cb_cd like '%' || #{keyword} || '%'
+            or cl_sh_name like '%' || #{keyword} || '%'
+            or cif_lo_nameb like '%' || #{keyword} || '%'
+        </if>
+        fetch first 50 rows only
+    </select>
+    
+    <select id="findAllDigitalSignatories" resultType="hashMap">
+        select fullname, position
+		
+		from sec_employee
+		where level > 1
+        <if test="keyword != null">
+            and upper(fullname) like '%' || #{keyword} || '%'
+        </if>
+    </select>
+
+    <select id="findLocalBanksByKeyword" resultType="hashMap">
+        select bic_code, branch_code, institution_name, branch_info, city,
+        (TRIM(address_1) || ' ' || TRIM(address_2) || ' ' || TRIM(address_3) || ' ' || TRIM(address_4)) as address from ref_bank b
+        where substr(bic_code, 5, 2) = 'PH'
+        <if test="keyword != null">
+            and (bic_code || branch_code like '%' || #{keyword} || '%'
+            or INSTITUTION_NAME like '%' || #{keyword} || '%')
+        </if>
+        fetch first 10 rows only
+    </select>
+
+    <select id="findAllReferenceProductService" resultType="hashMap">
+        select ID, PRODUCTID, SERVICETYPE
+        from REFPRODUCTSERVICE b
+    </select>
+
+    <select id="findAllReferenceProductServiceById" resultType="hashMap">
+        select ID, PRODUCTID, SERVICETYPE
+        from REFPRODUCTSERVICE b
+        <if test="id != null">
+            where id = #{id}
+        </if>
+    </select>
+
+    <select id="findAllReferenceCharge" resultType="hashMap">
+        select CHARGEID,DISPLAYNAME
+        from CHARGE
+    </select>
+
+    <select id="findCommodityCode" resultType="hashMap">
+        select CODE, DESCRIPTION from REFCOMMODITYCODE     
+        <choose>
+          	<when test="keyword != null and keyword != '' ">
+        		where CODE like '%' || #{keyword} || '%'
+            	or UCASE(DESCRIPTION) like '%' || #{keyword} || '%'
+        	</when>      
+		    <otherwise>
+		      	where UCASE(DESCRIPTION) = ''
+		    </otherwise>
+        </choose>
+        
+    </select>
+
+    <select id="findParticulars" resultType="hashMap">
+        select CODE, DESCRIPTION from REFPARTICULARS 
+        <choose>
+          	<when test="keyword != null and keyword != '' ">
+        		where CODE like '%' || #{keyword} || '%'
+            	or UCASE(DESCRIPTION) like '%' || #{keyword} || '%'
+        	</when>      
+		    <otherwise>
+		      	where UCASE(DESCRIPTION) = ''
+		    </otherwise>
+        </choose>        
+    </select>
+
+    <select id="findParticipantCode" resultType="hashMap">
+        select CODE, NAME from REFPARTICIPANTCODE 
+        <if test="keyword != null and keyword != '' ">
+            where CODE like '%' || #{keyword} || '%'
+            or UCASE(NAME) like '%' || #{keyword} || '%'
+            or UCASE(CIFNUMBER) like '%' || #{keyword} || '%'
+        </if>
+    </select>
+
+</mapper>

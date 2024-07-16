@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:map id="mt708Mapper">
+        <entry value="27" key="details.get('sequenceOrder')"/>
+        <entry value="20" key="documentNumber?.toString().replaceAll('-','')"/>
+        <entry value="23" key="details.get('out707flag') == '707O' ? details.get('issuingBankReference') : documentNumber?.toString().replaceAll('-','') "/>
+        <entry value="26E" key="details.get('numberOfAmendments') ?: '0'"/>
+        <entry value="30" key="T(com.ucpb.tfs.util.SwiftUtil).formatDateString('yyMMdd','MM/dd/yyyy',details.get('processDate'))"/>
+        <entry value="45B" key="details.get('generalDescriptionOfGoodsSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('generalDescriptionOfGoodsTo')) : ''"/>
+        <entry value="46B" key="details.get('mtDocumentsSwitch') == 'on' ? details.get('mtRequiredDocuments') : ''"/>
+        <entry value="47B" key="details.get('mtConditionsSwitch') == 'on' ? details.get('mtAdditionalConditions') : ''"/>
+        <entry value="49M" key="details.get('specialPaymentConditionsForBeneficiarySwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('specialPaymentConditionsForBeneficiaryTo')) : ''"/>
+        <entry value="49N" key="details.get('specialPaymentConditionsForReceivingBankSwitch') == 'on' ? T(com.ucpb.tfs.util.SwiftUtil).limitInputString(65, details.get('specialPaymentConditionsForReceivingBankTo')) : ''"/>        
+    </util:map>
+</beans>

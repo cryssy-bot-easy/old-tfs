@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-
+       //Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping auto-import="false" default-access="field">
+
+    <class name="com.ucpb.tfs.domain.sysparams.RefCustomer" table="REF_TFCUSTMR">
+
+        <id name="customerId" column="ID" type="long">   <!--customer number-->
+            <generator class="increment"/>
+        </id>
+
+        <property name="customerType" column="CUST_TYPE" type="string" length="3"/>
+
+        <property name="centralBankCode" column="CB_CD" type="string" length="10"/>
+
+        <property name="clientShortName" column="CL_SH_NAME" type="string" length="20"/>
+        <property name="clientAddress1" column="CL_ADDR_1" type="string" length="25"/>
+        <property name="clientAddress2" column="CL_ADDR_2" type="string" length="25"/>
+        <property name="clientAddress3" column="CL_ADDR_3" type="string" length="25"/>
+        <property name="clientAddress4" column="CL_ADDR_4" type="string" length="25"/>
+        <property name="clientZipCode" column="CL_ZIP_CD" type="string" length="10"/>
+
+        <property name="homeAddress1" column="HM_ADDR_1" type="string" length="25"/>
+        <property name="homeAddress2" column="HM_ADDR_2" type="string" length="25"/>
+        <property name="homeAddress3" column="HM_ADDR_3" type="string" length="25"/>
+        <property name="homeAddress4" column="HM_ADDR_4" type="string" length="25"/>
+        <property name="homeZipCode" column="HM_ZIP_CD" type="string" length="10"/>
+
+        <property name="residencePhoneNumber" column="RES_NO" type="string" length="15"/>
+        <property name="officePhoneNumber" column="OFC_NO" type="string" length="15"/>
+        <property name="mobileNumber" column="MOBILE_NO" type="string" length="15"/>
+
+        <property name="occupation" column="OCCUPATION" type="string" length="50"/>
+        <property name="natureOfBusiness" column="NTR_BUSINESS" type="string" length="50"/>
+        <property name="natureOfWork" column="NTR_WORK" type="string" length="10"/>
+        <property name="natureOfSelfEmployment" column="NTR_SLF_EMPLYMNT" type="string" length="10"/>
+
+        <property name="sourceOfFunds" column="FUND_SRC" type="string" length="100"/>
+        <property name="annualIncome" column="ANNUAL_INCOME" type="java.math.BigDecimal" precision="15" scale="2"/>
+        <property name="monthlyIncome" column="MONTHLY_INCOME" type="java.math.BigDecimal" precision="15" scale="2"/>
+        <property name="financialStatus" column="FIN_STATUS" type="java.math.BigDecimal" precision="15" scale="2"/>
+
+        <property name="accountType" column="ACCT_TYP" type="java.math.BigInteger" precision="1" scale="0"/>
+        <property name="accountOfficerCode" column="ACCT_OFF_CD" type="java.math.BigInteger" precision="10" scale="0"/>
+
+        <property name="monthToDateExportAmount" column="MTD_EXP_AMT" type="java.math.BigDecimal" precision="15" scale="2"/>
+        <property name="yearToDateExportAmount" column="YTD_EXP_AMT" type="java.math.BigDecimal" precision="15" scale="2"/>
+
+        <property name="exportAdvanceBalance" column="EXPADV_BAL" type="java.math.BigDecimal" precision="15" scale="2"/>
+        <property name="redClauseAdvanceBalance" column="REDCLS_ADV_BAL" type="java.math.BigDecimal" precision="15" scale="2"/>
+
+        <property name="evatFlag" column="EVAT_FLAG" type="string" length="1"/>
+
+        <property name="residentClassification" column="RES_CLASS" type="string" length="1"/>
+
+        <property name="clientLongName" column="CL_LO_NAME" type="string" length="60"/>
+        <property name="clientType" column="CL_TYP" type="java.math.BigInteger" precision="1" scale="0"/>
+        <property name="clientBirthday" column="CL_BDAY" type="java.util.Date"/>
+        <property name="clientNumber" column="CL_NO" type="java.math.BigInteger" precision="10" scale="0"/>
+
+        <property name="clientTaxAccountNumber" column="CL_TAN" type="string" length="15"/>
+        <property name="clientCifNumber" column="CBS_CIF_NO" type="string" length="7"/>
+        <property name="ucpbCifNumber" column="UCPB_CIF_NO" type="string" length="10"/>
+
+        <property name="cifShortName" column="CIF_SH_NAME" type="string" length="20"/>
+        <property name="cifLongName" column="CIF_LO_NAME" type="string" length="40"/>
+        <property name="cifLongNameA" column="CIF_LO_NAMEA" type="string" length="40"/>
+        <property name="cifLongNameB" column="CIF_LO_NAMEB" type="string" length="40"/>
+
+        <property name="gender" column="GENDER" type="string" length="1"/>
+        <property name="placeOfBirth" column="PLACE_OF_BIRTH" type="string" length="50"/>
+        <property name="maritalStatus" column="MARITAL_STATUS" type="string" length="1"/>
+        <property name="nationality" column="NATIONALITY" type="string" length="4"/>
+        <property name="nationOfBirth" column="NATION_OF_BIRTH" type="string" length="3"/>
+
+        <property name="dateCreated" column="DATE_CREATED" type="java.util.Date"/>
+
+    </class>
+
+</hibernate-mapping>
