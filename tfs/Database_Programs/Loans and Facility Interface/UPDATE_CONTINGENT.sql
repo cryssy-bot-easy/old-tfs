@@ -1,7 +1,6 @@
 
 
 --<ScriptOptions statementTerminator="@">
-
 CREATE OR REPLACE PROCEDURE TFSDB2S.UPDATE_CONTINGENT(IN P_CIFNUMBER VARCHAR(7)
                                                     , IN P_ORIGINALAMOUNT DECIMAL(19, 2)
                                                     , IN P_OUTSTANDINGBALANCE DECIMAL(19, 2)
@@ -49,4 +48,4 @@ P1: BEGIN
 		WHERE ACCTNO = REPLACE(P_DOCUMENTNUMBER, '-', '');
 		
 	END IF;
-END P1 
+END P1 @

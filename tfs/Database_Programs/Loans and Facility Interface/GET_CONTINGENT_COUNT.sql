@@ -8,7 +8,7 @@ DYNAMIC RESULT SETS 1
 LANGUAGE SQL
 --######################################################################################################
 --# Description:    Retrieves Contingent COunt
---# Created by:     
+--# Created by:   CCP  
 --# Date created:
 --#
 --######################################################################################################
@@ -23,4 +23,4 @@ P1: BEGIN
 		WHERE ACCTNO = REPLACE(P_DOCUMENTNUMBER, '-', '');
 	
     OPEN C_CHECKIFEXIST;
-END P1@
+END P1 @
